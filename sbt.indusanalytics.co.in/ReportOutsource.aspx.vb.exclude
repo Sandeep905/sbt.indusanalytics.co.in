@@ -1,0 +1,63 @@
+﻿
+Imports System.Data
+Imports System.Data.SqlClient
+Imports Connection
+Imports Microsoft.Reporting.WebForms
+
+Partial Class ReportOutsource
+    Inherits System.Web.UI.Page
+    Dim db As New DBConnection
+    Dim GBLCompanyID, TransID As String
+
+    Private Sub Form_Load(sender As Object, e As EventArgs) Handles Form.Load
+        If Not IsPostBack Then
+            TransID = Convert.ToString(HttpContext.Current.Request.QueryString("UID"))
+            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyId"))
+            Dim DTMain As New DataTable
+            DTMain = GetData("SELECT DISTINCT  OCM.VoucherNo, OCM.VoucherDate, OCM.LedgerID, OCM.Remark, LM.LedgerName, UM.UserName,(Select FieldValue From LedgerMasterDetails Where LedgerID=LM.LedgerID And CompanyID=LM.CompanyID And FieldName='MailingAddress') As Address,(Select FieldValue From LedgerMasterDetails Where LedgerID=LM.LedgerID And CompanyID=LM.CompanyID And FieldName='MobileNo') As ContactNo, JBC.JobName, JBC.JobBookingNo, JBC.JobBookingDate " &
+                             " FROM OutsourceProductionMain AS OCM INNER JOIN LedgerMaster AS LM ON LM.LedgerID = OCM.LedgerID AND LM.CompanyID = OCM.CompanyID INNER JOIN UserMaster AS UM ON OCM.UserID = UM.UserID AND OCM.CompanyID = UM.CompanyID INNER JOIN JobBookingJobCard AS JBC ON OCM.JobBookingID = JBC.JobBookingID AND OCM.CompanyID = JBC.CompanyID And JBC.IsDeletedTransaction=0" &
+                             " WHERE (ISNULL(OCM.IsDeletedTransaction, 0) = 0) AND (OCM.CompanyID = " & GBLCompanyID & ") AND OCM.OutsourceID = " & TransID)
+
+            ReportViewer1.Reset()
+            ReportViewer1.LocalReport.ReportPath = Server.MapPath("~/PrintOutsource.rdlc")
+            Dim DsMain As ReportDataSource = New ReportDataSource("DataSetMain", DTMain)
+            ReportViewer1.LocalReport.DataSources.Add(DsMain)
+
+            Dim DTProcessDetails As New DataTable
+            DTProcessDetails = GetData("SELECT DISTINCT  OPD.OutsourceFormID As OutsourceID,PM.ProcessName, OPD.SequenceNo, OPD.JobCardContentNo, OPD.JobCardFormNo, OPD.QuantitySent, OPD.PlanContName AS ContentName, OPD.ProcessID, OPD.RateFactor, OPD.QuantitySent AS ReadyQuantity " &
+                                        " FROM OutsourceProductionMain AS OPM INNER JOIN OutsourceProductionDetails AS OPD ON OPM.OutsourceID = OPD.OutsourceID AND OPM.CompanyID = OPD.CompanyID INNER JOIN ProcessMaster AS PM ON PM.ProcessID = OPD.ProcessID AND PM.CompanyID = OPD.CompanyID  " &
+                                        " WHERE (ISNULL(OPM.IsDeletedTransaction, 0) = 0) AND (OPM.OutsourceID = " & TransID & ") AND (OPM.CompanyID = " & GBLCompanyID & ")")
+
+            Dim DsProcessDetails As ReportDataSource = New ReportDataSource("DataSetProcess", DTProcessDetails)
+            ReportViewer1.LocalReport.DataSources.Add(DsProcessDetails)
+
+            Dim DTDetails As New DataTable
+            DTDetails = GetData("SELECT DISTINCT  OPD.OutsourceFormID As OutsourceID,PM.ProcessName,  ICD.ItemID, ICD.TransID, OPD.JobCardContentNo, OPD.JobCardFormNo,ICD.IssueQuantity AS RequiredQty, ICD.ItemRate,OPD.PlanContName As ContentName, Case When Isnull(ICD.StockUnit,'')<>'' then ICD.StockUnit Else IM.StockUnit End As Unit, IM.ItemCode, OPD.ProcessID,OPD.RateFactor,OPD.QuantitySent As ReadyQuantity, IM.ItemName, IGM.HSNCode, IGM.ProductHSNName " &
+                                " FROM OutsourceProductionMain AS OPM INNER JOIN OutsourceProductionDetails AS OPD ON OPM.OutsourceID = OPD.OutsourceID AND OPM.CompanyID = OPD.CompanyID  INNER JOIN ItemConsumptionMain AS ICM ON OPM.OutsourceID = ICM.OutsourceProductionID AND OPM.CompanyID = ICM.CompanyID And ICM.VoucherID=-50 INNER JOIN ItemConsumptionDetail As ICD On OPD.ProcessID=ICD.ProcessID And ICD.ConsumptionTransactionID=ICM.ConsumptionTransactionID  And ICD.CompanyID=ICM.CompanyID LEFT Join ItemMaster AS IM ON ICD.ItemID = IM.ItemID AND ICD.CompanyID = IM.CompanyID LEFT JOIN ProductHSNMaster AS IGM ON IM.ProductHSNID = IGM.ProductHSNID AND IM.CompanyID = IGM.CompanyID Inner Join ProcessMaster As PM On PM.ProcessID= OPD.ProcessID And PM.CompanyID=OPD.CompanyID" &
+                                " WHERE (ISNULL(OPM.IsDeletedTransaction, 0) = 0) AND (OPM.OutsourceID = " & TransID & ") AND (OPM.CompanyID = " & GBLCompanyID & ")")
+
+            Dim DsDetails As ReportDataSource = New ReportDataSource("DataSetDetails", DTDetails)
+            ReportViewer1.LocalReport.DataSources.Add(DsDetails)
+
+            ReportViewer1.LocalReport.Refresh()
+        End If
+    End Sub
+
+    Private Function GetData(query As String) As DataTable
+        Dim dt As New DataTable()
+        Dim dss As New DataSet()
+        Try
+            Dim con As New SqlConnection
+            con = db.OpenDataBase()
+
+            Dim cmd As SqlCommand = New SqlCommand(query, con)
+            Dim adapter As New SqlDataAdapter(cmd)
+
+            adapter.Fill(dt)
+            con.Close()
+            Return dt
+        Catch ex As Exception
+            Return dt
+        End Try
+    End Function
+End Class

@@ -1,0 +1,5 @@
+﻿
+Partial Class PickListStatus
+    Inherits System.Web.UI.Page
+
+End Class

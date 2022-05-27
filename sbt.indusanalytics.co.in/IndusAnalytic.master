@@ -1,0 +1,727 @@
+﻿<%@ Master Language="VB" CodeFile="IndusAnalytic.master.vb" Inherits="IndusAnalytic" %>
+
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta http-equiv="pragma" content="no-cache" />
+    <meta http-equiv="cache-control" content="no-cache, must-revalidate, post-check=0, pre-check=0" />
+    <meta http-equiv="cache-control" content="max-age=0" />
+    <meta http-equiv="Expires" content="0">
+
+    <title>Welcome To | Indus Analytics</title>
+    <!-- Favicon-->
+    <link rel="icon" href="images/Indus logo.ico" type="image/x-icon">
+
+    <%--<script type="text/javascript" src="js/2.2.3 jquery.min.js"></script>--%>
+
+    <!-- Google Fonts -->
+    <%--<link href="https://fonts.googleapis.com/css?family=Roboto:400,700&subset=latin,cyrillic-ext" rel="stylesheet" type="text/css">--%>
+    <%--<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" type="text/css">--%>
+    <link href="CustomCSS/font-awesome.min.css" rel="stylesheet" />
+    <!-- Bootstrap Core Css -->
+    <link href="plugins/bootstrap/css/bootstrap.css" rel="stylesheet">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="dist/css/adminlte.min.css">
+
+    <!-- Waves Effect Css -->
+    <%--<link href="plugins/node-waves/waves.css" rel="stylesheet" />--%>
+
+    <!-- Animation Css -->
+    <link href="plugins/animate-css/animate.css" rel="stylesheet" />
+
+    <!-- Morris Chart Css-->
+    <%--<link href="plugins/morrisjs/morris.css" rel="stylesheet" />--%>
+
+    <!-- Sweetalert Css -->
+    <link href="../../plugins/sweetalert/sweetalert.css" rel="stylesheet" />
+
+    <!-- Custom Css -->
+    <link href="css/style.css" rel="stylesheet">
+
+    <!-- Themes. You can choose a theme from css/themes instead of get all themes -->
+    <link href="css/themes/all-themes.css" rel="stylesheet" />
+
+    <link href="CustomCSS/Dynamic.css" rel="stylesheet" />
+
+    <asp:ContentPlaceHolder ID="head" runat="server">
+    </asp:ContentPlaceHolder>
+
+
+    <%-- Created By Pradeep --%>
+    <link href="CustomCSS/SideBar.css" rel="stylesheet" />
+    <script src="CustomJS/SideBar.js"></script>
+    <link href="CustomCSS/AdditinalDesign.css" rel="stylesheet" />
+    <%--<link href="css/ios7.default.custom.css" rel="stylesheet" />--%>
+
+
+    <style>
+        .advancedOptions {
+            display: none;
+        }
+
+        /* width */
+        ::-webkit-scrollbar {
+            width: 7px;
+            height: 5px;
+        }
+
+            ::-webkit-scrollbar:hover {
+                width: 20px;
+                height: 12px;
+                cursor: pointer;
+            }
+        /* Track */
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+            background-color: #F5F5F5;
+            /*border-radius: 10px;*/
+        }
+
+        /* Handle */
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+            background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0.44, rgb(122,153,217)), color-stop(0.72, rgb(73,125,189)), color-stop(0.86, rgb(28,58,148)));
+        }
+
+            /* Handle on hover */
+            ::-webkit-scrollbar-thumb:hover {
+                background: #42909A;
+            }
+
+        .cut-text {
+            width: auto;
+        }
+
+        @media screen and (max-width: 600px) {
+            .cut-text {
+                text-overflow: ellipsis;
+                overflow: hidden;
+                width: 100px;
+                white-space: nowrap;
+            }
+        }
+
+        .MasterDisplayName {
+            float: right;
+            margin-right: 5px;
+            color: #42909A;
+        }
+
+        @media screen and (max-width: 600px) {
+            .MasterDisplayName {
+                text-overflow: ellipsis;
+                overflow: hidden;
+                width: 60px;
+                white-space: nowrap;
+            }
+        }
+    </style>
+    <!-- Add IntroJs styles -->
+    <%--<link href="hintcss/introjs.css" rel="stylesheet" />--%>
+</head>
+
+<body class="theme-red">
+    <!-- Page Loader -->
+    <div class="page-loader-wrapper">
+        <div class="loader">
+            <div class="preloader">
+                <div class="spinner-layer pl-red">
+                    <div class="circle-clipper left">
+                        <div class="circle"></div>
+                    </div>
+                    <div class="circle-clipper right">
+                        <div class="circle"></div>
+                    </div>
+                </div>
+            </div>
+            <p>Please wait...</p>
+        </div>
+    </div>
+    <!-- #END# Page Loader -->
+    <!-- Overlay For Sidebars -->
+    <div class="overlay"></div>
+    <!-- #END# Overlay For Sidebars -->
+    <!-- Search Bar -->
+    <div class="search-bar">
+        <div class="search-icon">
+            <i class="material-icons">search</i>
+        </div>
+        <input type="text" placeholder="START TYPING...">
+        <div class="close-search">
+            <i class="material-icons">close</i>
+        </div>
+    </div>
+    <!-- #END# Search Bar -->
+    <!-- Top Bar -->
+
+    <form id="form1" runat="server" style="margin-top: -1.5em;">
+        <div class="topnavCustom" id="myTopnav" style="float: left">
+            <a id="Customleftsidebar1" href="javascript:void(0);" class="iconLeft" onclick="menubar(this);">
+                <i id="Customleftsidebar1_Span" class="fa fa-bars" style="font-size: 14px;"></i>
+                <%--<span id="Customleftsidebar1_Span" style="writing-mode: vertical-lr; transform: rotate(180deg); font-weight: 900; margin-left: -10px;">|||</span>--%>
+            </a>
+            <a href="#" id="CompanyName" runat="server" class="cut-text">Indus Analytics</a>
+            <a class="iconCustom dropdown-toggle" title="Sign Out" id="Btn_Logout" style="cursor: pointer"><i class="fa fa-sign-out fa-2x fa-fw" style="font-size: 14px;"></i></a>
+            <a title="Contents list" id="BottobTabReplaceBtn" href="javascript:void(0);" class="iconCustom dropdown-toggle hidden" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                <i class="fa fa-list-ul" style="margin-right: 8px; margin-left: 8px"></i>
+            </a>
+            <a title="Reload from server" id="BtnRefresh" href="javascript:void(0);" class="iconCustom dropdown-toggle">
+                <i class="fa fa-refresh fa-2x fa-fw" style="font-size: 14px;"></i>
+            </a>
+
+            <ul class="dropdown-menu pull-right" id="bottomTabContainer" style="background-color: none; overflow-y: auto; margin-bottom: 10px; max-height: 40em; right: 16px">
+            </ul>
+        </div>
+
+
+        <!-- End Top Bar -->
+
+        <!-- Create Bar -->
+        <section>
+
+
+            <!-- left Sidebar -->
+            <aside id="Customleftsidebar2" class="CUSTOMsidebar" style="width: 30px; border-right: 2px groove #eee; margin-left: 0px;">
+                <ul class="MYLEFTnav MYLEFTnav-tabs tab-col-red" role="tablist" style="width: 28px;">
+                    <li role="presentation" id="TabquotationDetails_LI">
+                        <a id="Quotation_Finalize" href="#home_md_col_1" data-toggle="tab" onclick="menubar(this);" style="cursor: pointer">QUOTATION FINALIZE</a>
+                    </li>
+                    <%--<li role="presentation">
+                    <a id="TabProfile" href="#profile_md_col_1" data-toggle="tab" onclick="menubar(this);">PROFILE</a>
+                </li>
+                <li role="presentation">
+                    <a id="TabMessage" href="#messages_md_col_1" data-toggle="tab" onclick="menubar(this);">MESSAGES</a>
+                </li>
+                <li role="presentation">
+                    <a id="TabSetting" href="#settings_md_col_1" data-toggle="tab" onclick="menubar(this);">SETTINGS</a>
+                </li>--%>
+                </ul>
+            </aside>
+            <!-- End left Sidebar -->
+
+            <aside id="Customrightsidebar" class="RIGHTsidebar" style="width: 30px; border-left: 1px groove #eee; padding: 0px; display: none;">
+                <ul class="MYRIGHTnav MYRIGHTnav-tabs tab-col-red" role="tablist" style="width: 30px; margin-left: 0px">
+                    <li role="presentation" id="RightSETTINGS_LI">
+                        <a id="Settings" href="#profile_md_col_1" data-toggle="tab" onclick="Righttabbar(this);" style="cursor: pointer">SETTINGS</a>
+                    </li>
+                    <%-- <li role="presentation">
+                    <a id="RightTabProfile" href="#profile_md_col_1" data-toggle="tab" onclick="Righttabbar(this);">PROFILE</a>
+                </li>
+                <li role="presentation">
+                    <a id="RightTabMessage" href="#messages_md_col_1" data-toggle="tab" onclick="Righttabbar(this);">MESSAGES</a>
+                </li>
+                <li role="presentation">
+                    <a id="RightTabSetting" href="#settings_md_col_1" data-toggle="tab" onclick="Righttabbar(this);">SETTINGS</a>
+                </li>--%>
+                </ul>
+            </aside>
+
+            <%-- <div id="footerDiv" class="fot_Div" style="border-top: 2px groove #eee; max-height: 5em; overflow-y: auto">
+            <footer class="style-1" style="margin-bottom: 0em; height: auto;">
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="margin-top: -1em">
+                    <div style="min-height: 3em">
+                        <ul id="bottomTabContainer" class="nav nav-tabs tab-col-red" role="tablist" style="margin-left: 2.5em; color: green;">
+                        </ul>
+                    </div>
+                </div>
+            </footer>
+        </div>--%>
+            <!--Close Create Bar -->
+
+            <div id="MYbackgroundOverlay"></div>
+
+            <div id="mySidenav" class="Bookingsidenav">
+                <div class="row clearfix" style="height: auto; padding-bottom: 0em; margin-right: -15px">
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="margin-top: 0em">
+                        <%--<div style="width: 80%; float: left; text-align: center; height: 2.5em; border-bottom: 1px solid #fff; height: auto;">
+                        <strong id="displayStatus" style="color: black;"></strong>
+                    </div>
+                    <div style="width: 20%; float: left; height: 1.5em;">
+                        <a href="javascript:void(0)" class="MYclosebtn" onclick="closeNavLeft()" style="margin-top: 0px; margin-right: 12px">&times;</a>
+                    </div>--%>
+
+                        <div class="DialogBoxCustom" style="float: left;">
+                            <strong id="displayStatus"></strong>
+                            <a href="javascript:void(0);" class="iconRightDbox btn-danger" onclick="closeNavLeft()">
+                                <span onclick="closeNavLeft()" style="font-weight: 900; margin-right: 8px">X</span>
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="rowcontents clearfix">
+
+                    <div id="Main_div" style="float: left; height: calc(100vh - 80px); width: 100%; overflow-y: auto;">
+                        <div class="clearfix">
+                            <div class="row clearfix" style="margin: 5px 0px 0px 0px">
+                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                    <div style="width: auto;">
+                                        <b class="font-12">Quote No & Date</b><br />
+                                        <input type="number" id="QuotationNo" class="font-bold" style="width: 30%; height: 2.3em; margin-right: 1em; text-align: center;" readonly="" />
+                                        <div id="dxDateQuotation" style="float: right; width: 55%; height: auto;"></div>
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                    <div style="height: 3em;">
+                                        <b class="font-12">Job Name<span class="text-danger">*</span></b><br />
+                                        <input type="text" class="forTextBox" id="JobName" style="float: left; width: 100%; height: auto; margin-right: 1em;" />
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                    <div style="height: 3em;">
+                                        <b class="font-12">Client Name<span class="text-danger">* </span><i class="fa fa-plus btn btn-link font-12 padding-0 reloadclient btnnewmaster"></i></b>
+                                        <br />
+                                        <div id="SbClientName" style="float: left; width: 100%; height: auto;"></div>
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 hidden">
+                                    <div style="height: 3em;">
+                                        <b class="font-12">Consignee</b><br />
+                                        <div id="SbConsigneeName" style="float: left; width: 100%; height: auto;" class="hidden"></div>
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                    <div style="height: 3em;">
+                                        <b class="font-12">Product Code<span class="text-danger">*</span></b><br />
+                                        <input type="text" class="forTextBox" id="ArtWorkCode" style="float: left; width: 100%; height: auto;" />
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                    <div style="height: 3em;">
+                                        <b class="font-12">Expected Completion Days</b><br />
+                                        <input type="number" class="forTextBox" name="expectedDays" id="expectedDays" value="" style="float: left; width: 100%; height: auto;" />
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                    <div style="height: 3em;">
+                                        <b class="font-12">Category<span class="text-danger">* </span><i class="fa fa-plus btn btn-link font-12 padding-0 reloadcategory btnnewmaster"></i></b>
+                                        <br />
+                                        <div id="SbCategory" style="float: left; width: 100%; height: auto;"></div>
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                    <div style="height: 3em;">
+                                        <b class="font-12">HSN Group</b><br />
+                                        <div id="SbHSNGroups" style="float: left; width: 100%; height: auto;"></div>
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 hidden">
+                                    <div style="float: left; width: 100%;">
+                                        <b class="font-12">Quote Remark</b><br />
+                                        <textarea id="TaQuoteDetails" cols="3" rows="2" class="forTextBox" style="float: left; width: 100%; height: auto;"></textarea>
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                    <div style="float: left; width: 100%">
+                                        <b class="font-12">Remark</b><br />
+                                        <textarea id="TaRemark" cols="3" rows="2" class="forTextBox" style="float: left; width: 100%; height: auto;"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="LoadIndicator"></div>
+                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                            <button type="button" id="BtnSaveQuotation" class="btn btn-success btn-block waves-effect">Save</button>
+                            <button type="button" id="BtnExitQuote" class="btn btn-danger btn-block waves-effect">Exit</button>
+                        </div>
+                    </div>
+
+                    <div id="ExistMenuBar" style="float: left; height: calc(100vh - 80px); width: 100%; overflow-y: auto;">
+                        <div id="Master_Div" style="float: left; height: auto; width: 100%;">
+                            <nav class="mt-2" style="height: calc(100vh - 80px); overflow-y: auto;">
+                                <input type="text" id="myInput" class="searchInputText" onkeyup="searchInputMenu()" placeholder="Search for menu.." title="Type menu name">
+
+                                <ul id="DynamicMenuDiv" class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false"></ul>
+                            </nav>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div id="RightTabBar" class="MYRightsidenav">
+                <div class="row clearfix" style="height: auto; margin-right: -15px">
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                        <div class="DialogBoxCustom" style="float: left;">
+                            <strong id="displayStatusRight"></strong>
+                            <a href="javascript:void(0);" class="iconRightDbox btn-danger" onclick="closeRightTabBar()">
+                                <span onclick="closeRightTabBar()" style="font-weight: 900; margin-right: 8px">X</span>
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Jquery Core Js -->
+        <script src="../../plugins/jquery/jquery.min.js"></script>
+
+        <%-- Merge Menu Bar --%>
+        <%--<link href="Merge_Menubar/css/component.css" rel="stylesheet" />
+        <script src="Merge_Menubar/js/modernizr-custom.js"></script>
+
+        <script src="Merge_Menubar/js/classie.js"></script>
+        <script src="CustomJS/DynamicMenu.js"></script>
+        <script src="CustomJS/BlankMenuShow.js"></script>
+        <script src="Merge_Menubar/js/main.js"></script>--%>
+        <%-- Merge Menu Bar --%>
+        <!--Menu From Admin LTE -->
+        <script src="dist/js/adminlte.js"></script>
+        <script src="CustomJS/DrawMenu.js"></script>
+
+        <%-- DevExpress Control Grid --%>
+        <link type="text/css" href="CustomCSS/dx.common.css" rel="stylesheet" />
+        <link type="text/css" href="CustomCSS/dx.light.css" rel="stylesheet" />
+        <%--<link rel="stylesheet" type="text/css" href="https://cdn3.devexpress.com/jslib/18.2.3/css/dx.common.css" />
+        <link rel="stylesheet" type="text/css" href="https://cdn3.devexpress.com/jslib/18.2.3/css/dx.light.css" />--%>
+        <%--<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.2/jszip.min.js"></script>--%>
+        <%--Use for Export data --%>
+        <script src="js/jszip.js"></script>
+        <%--<script src="https://cdn3.devexpress.com/jslib/19.2.3/js/dx.all.js"></script>--%>
+        <script src="js/dx.all.19.2.3.js"></script>
+        <%-- DevExpress Control Grid --%>
+
+        <section class="content" style="margin-right: 0px; padding-left: 0px">
+            <div class="container-fluid" style="padding-right: 0px; padding-left: 0px">
+
+                <div class="card" style="margin-top: -55px; min-height: 0px; padding-left: 0px">
+                    <div class="body" style="padding-bottom: 3px; padding-left: 0px; padding-right: 1px;">
+                        <%--<form id="form1" runat="server" style="margin-top: -1.5em;">--%>
+                        <asp:ContentPlaceHolder ID="ContentPlaceHolder1" runat="server">
+                        </asp:ContentPlaceHolder>
+                        <%-- </form>--%>
+                    </div>
+                </div>
+
+                <!-- #END# CPU Usage -->
+
+            </div>
+        </section>
+
+        <%-- Model Logout --%>
+        <div class="modal fade" id="SessionExpirModel" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-lg" role="document" style="padding-top: 30px; width: 40%; display: block; float: right;">
+                <div class="modal-content">
+                    <div class="row clearfix">
+                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="margin-top: -.5em;">
+                            <a href="#" id="Btn_AlertSession" style="cursor: pointer; display: none">AlertSession</a>
+
+                            <div class="DialogBoxCustom" style="float: left; border-top-left-radius: 4px; border-top-right-radius: 4px;">
+                                <strong id="ploout" style="display: block;">Log Out..!</strong>
+                                <strong id="psessionOut" style="display: none;">Session Expiring..!</strong>
+                                <a href="javascript:void(0);" class="iconRightDbox btn-danger" data-dismiss="modal">
+                                    <span data-dismiss="modal" style="font-weight: 900; margin-right: 8px">X</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-body" style="">
+                        <div class="row clearfix">
+                            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="margin-top: .5em;">
+                                <div style="width: 90%; float: left; height: auto; padding-left: 1em; padding-right: 1em; text-align: center;">
+                                    <div id="logotTag">
+                                        Hii..!&nbsp;<label id="UName" runat="server" style="color: #F6CF12">Admin</label><br>
+                                        <b id="logoutB">Do you want to LOGOUT..?
+                                            <br>
+                                            <span id="secondsIdle">Your Session will expire in&nbsp;<span>13409 </span>&nbsp;seconds.</span></b>
+                                        <b id="sessionB" style="display: none;">Your Session will expire in&nbsp;<span id="seconds">13409</span>&nbsp;seconds.<br>
+                                            Do you want to reset?</b>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="btnDiv" class="modal-footer" style="border-top: 1px solid #42909A;">
+                        <div id="btnLogoutDiv" style="height: auto; width: 100%; float: left; display: block;">
+                            <div style="width: 45%; margin-left: 5%; float: left">
+                                <asp:LinkButton ID="Button1" runat="server" class="square_btn" Style="float: left; text-decoration: none; cursor: pointer">YES</asp:LinkButton>
+                            </div>
+                            <div style="width: 45%; margin-right: 5%; float: left">
+                                <a class="square_btn" onclick="ResetSession();" data-dismiss="modal" style="float: right; text-decoration: none; cursor: pointer">NO</a>
+                            </div>
+                        </div>
+
+                        <div id="btnsessionDiv" style="height: auto; width: 100%; float: left; padding-bottom: 10px; display: none;">
+                            <div style="width: 45%; margin-left: 5%; float: left">
+                                <button type="button" class="square_btn" data-dismiss="modal" style="float: left; text-decoration: none; cursor: pointer">Close</button>
+                            </div>
+                            <div style="width: 45%; margin-right: 5%; float: left">
+                                <button type="button" onclick="ResetSession();" class="square_btn" style="float: right; text-decoration: none; cursor: pointer">Ok</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <%-- Model PopUp Comment Modal--%>
+        <div class="modal fade in" id="CommentModal" tabindex="-1" role="dialog" style="padding-top: 50px;">
+            <div class="col-xs-12 col-sm-6 col-md-5 col-lg-4" role="document" style="float: right;">
+                <div class="modal-content" style="height: calc(100vh - 80px); overflow-y: auto;">
+                    <div class="DialogBoxCustom" style="float: left; border-top-left-radius: 4px; border-top-right-radius: 4px;">
+                        <strong>Comments :- </strong>
+                        <a href="javascript:void(0);" class="iconRightDbox btn-danger" data-dismiss="modal">
+                            <span data-dismiss="modal" style="font-weight: 900; margin-right: 8px">X</span>
+                        </a>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row clearfix">
+                            <div class="commentbody" id="commentbody" style="height: calc(100vh - 290px); overflow-y: auto;">
+                                <div style="width: 100%">
+                                    <b style="text-align: left; color: red; float: left; margin-top: 5px; width: 100%"></b>
+                                    <p style="text-align: left; margin-top: 2px; float: left; margin-left: 20px"></p>
+                                    <span style="float: right">Comment By : </span>
+                                </div>
+                            </div>
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 commentInput" style="padding: 0px; display: block;">
+                                <div class="col-lg-7 col-md-7 col-sm-7 col-xs-12">
+                                    <b class="font-12">Comment Title:</b>
+                                    <input type="text" id="TxtCommentTitle" class="forTextBox">
+                                </div>
+                                <div class="col-lg-5 col-md-5 col-sm-5 col-xs-12">
+                                    <b class="font-12">Comment Type:</b>
+                                    <div id="selCommentType"></div>
+                                </div>
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                    <b class="font-12">Comment Detail :</b>
+                                    <textarea id="TxtCommentDetail" class="forTextBox m-t-0" style="height: 5em;"></textarea>
+                                </div>
+                            </div>
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 commentInput" style="display: block;">
+                                <input type="button" id="BtnSaveComment" class="btn btn-success" value="Save Comment">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </form>
+    <!-- Bootstrap Core Js -->
+    <script src="plugins/bootstrap/js/bootstrap.js"></script>
+
+    <!-- Select Plugin Js -->
+    <script src="plugins/bootstrap-select/js/bootstrap-select.js"></script>
+
+    <!-- Slimscroll Plugin Js -->
+    <script src="plugins/jquery-slimscroll/jquery.slimscroll.js"></script>
+
+    <!-- Waves Effect Plugin Js -->
+    <script src="plugins/node-waves/waves.js"></script>
+
+
+    <!-- Jquery CountTo Plugin Js -->
+    <script src="plugins/jquery-countto/jquery.countTo.js"></script>
+
+    <!-- Morris Plugin Js -->
+    <%--<script src="plugins/raphael/raphael.min.js"></script>--%>
+    <%--<script src="plugins/morrisjs/morris.js"></script>--%>
+
+    <!-- ChartJs -->
+    <%--<script src="plugins/chartjs/Chart.bundle.js"></script>--%>
+
+    <!-- Custom Js -->
+    <script src="js/admin.js"></script>
+
+    <!-- SweetAlert Plugin Js -->
+    <script src="../../plugins/sweetalert/sweetalert.min.js"></script>
+
+    <script src="../../js/pages/ui/dialogs.js"></script>
+
+    <script type="text/javascript">
+        var interval;
+        ResetSession();
+
+        function SessionExpireAlert(timeout) {
+            clearInterval(interval);
+            seconds = timeout / 1000;
+            $("#secondsIdle").html("Your Session will expire in&nbsp;<span>" + seconds + " </span>&nbsp;seconds.</b>");
+            $("#seconds").html(seconds);
+            interval = setInterval(function () {
+                seconds--;
+                $("#secondsIdle").html("Your Session will expire in&nbsp;<span>" + seconds + " </span>&nbsp;seconds.</b>");
+                $("#seconds").html(seconds);
+                if (seconds <= 0) {
+                    $("#secondsIdle").html("Your session is expired.");
+                    window.location = "Login.aspx";
+                }
+                else if (seconds === 2400) {
+                    $("#Btn_AlertSession").click();
+                }
+            }, 1000);
+        };
+
+
+        function ResetSession() {
+            try {
+                $.ajax({
+                    type: "POST",
+                    url: "WebService_LedgerMaster.asmx/SessionTimeOut",
+                    data: '{}',
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "text",
+                    success: function (results) {
+                        var res = results.replace(/\\/g, '');
+                        res = res.replace(/"d":/g, '');
+                        res = res.substr(1);
+                        res = res.slice(0, -1);
+                        SessionExpireAlert(res);
+                    }
+                });
+            } catch (e) {
+                alert(e.message);
+            }
+        };
+
+    </script>
+
+    <script>
+
+        $("#Quotation_Finalize").click();
+
+        window.onbeforeunload = function () {
+            if (document.getElementById("ContentOrientation").innerHTML !== "")
+                return "Do you really want to leave our brilliant application?";
+            //if we return nothing here (just calling return;) then there will be no pop-up question at all
+            //return;
+        };
+
+    </script>
+
+    <%--<script type="text/javascript" src="hintcss/intro.js"></script>--%>
+    <script type="text/javascript">
+        //var RunFirstTime = localStorage.getItem('RunFirstTime');
+        //if (RunFirstTime === null || RunFirstTime === "null") {
+        //    startIntro();
+        //    localStorage.setItem('RunFirstTime', false);
+        //}
+
+        //function startIntro() {
+        //    var intro = introJs();
+        //    intro.setOptions({
+        //        steps: [
+        //            {
+        //                intro: "Hello...!</br>Welcome to Indus Analytics..!</br> You <b>don't need</b> to hesitate to run application, this tooltip will help you."
+        //            },
+        //            {
+        //                element: document.querySelector('#Add_Quantity_Button'),
+        //                intro: "Add multiple quantities..? click me"
+        //            },
+        //            {
+        //                element: '#Add_Content_Button',
+        //                intro: "After adding quantity, add multiple contents from here",
+        //                position: 'right'
+        //            },
+        //            {
+        //                element: '#BookPlanButton',
+        //                intro: 'More features, more fun. book planning is here',
+        //                position: 'bottom'
+        //            },
+        //            {
+        //                element: '#ChkUseFirstPlanAsMaster',
+        //                intro: "You can use first plan as a master plan from check this field",
+        //                position: 'bottom'
+        //            },
+        //            {
+        //                element: '#BtnSaveQuotation',
+        //                intro: "Quotation Finalize is here. To save your quote click here",
+        //                position: 'left'
+        //            },
+        //            {
+        //                element: '#BottobTabReplaceBtn',
+        //                intro: 'Get it, use it. List of selected contents with quantity',
+        //                position: 'right'
+        //            }
+        //        ]
+        //    });
+
+        //    intro.start();
+        //}
+        $("#BtnRefresh").click(function () {
+            window.location.href = window.location.href.split("?")[0].split("#")[0]; // = "location.protocol + '//' + location.host + location.pathname";
+            window.location.href.reload(true);
+        })
+        $("#BtnExitQuote").click(function () {
+            swal({
+                title: "Existing...",
+                text: "Are you sure to exit this window..?",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                closeOnConfirm: true
+            }, function () {
+                window.location.href = "BookingPanel.aspx"
+                window.location.href.reload(true);
+            });
+        })
+
+        $("#Btn_Logout").click(function () {
+            document.getElementById("Btn_Logout").setAttribute("data-toggle", "modal");
+            document.getElementById("Btn_Logout").setAttribute("data-target", "#SessionExpirModel");
+
+            document.getElementById("ploout").style.display = "block";
+            document.getElementById("psessionOut").style.display = "none";
+            document.getElementById("logoutB").style.display = "block";
+            document.getElementById("sessionB").style.display = "none";
+            document.getElementById("btnLogoutDiv").style.display = "block";
+            document.getElementById("btnsessionDiv").style.display = "none";
+        });
+
+        $("#Btn_AlertSession").click(function () {
+            document.getElementById("Btn_AlertSession").setAttribute("data-toggle", "modal");
+            document.getElementById("Btn_AlertSession").setAttribute("data-target", "#SessionExpirModel");
+
+            document.getElementById("ploout").style.display = "none";
+            document.getElementById("psessionOut").style.display = "block";
+            document.getElementById("logoutB").style.display = "none";
+            document.getElementById("sessionB").style.display = "block";
+            document.getElementById("btnLogoutDiv").style.display = "none";
+            document.getElementById("btnsessionDiv").style.display = "block";
+        });
+
+        var commentType = ["High", "Low", "Medium"];
+        $("#selCommentType").dxSelectBox({
+            items: commentType,
+            value: commentType[0],
+            placeholder: "Select --",
+            searchEnabled: false,
+            showClearButton: false,
+        });
+
+        $(".forTextBox").keyup(function (e) {
+            if (e.target.value.includes('"') || e.target.value.includes("'")) {
+                e.target.value = e.target.value.replace(/"/g, '');
+                e.target.value = e.target.value.replace(/'/g, "");
+            }
+        });
+
+        function RoundUp(value, decimals) {
+            return Math.Ceiling(value * (10 ^ decimals)) / (10 ^ decimals)
+        }
+    </script>
+
+    <%--    <script type="text/javascript">
+        document.onmousedown = disableclick;
+        status = "Right Click Disabled";
+        function disableclick(event) {
+            if (event.button == 2) {
+                alert(status);
+                return false;
+            }
+        }
+    </script>--%>
+</body>
+
+</html>

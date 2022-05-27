@@ -1,0 +1,132 @@
+﻿<%@ Page Title="" Language="VB" MasterPageFile="~/MasterPage_Main.master" AutoEventWireup="false" CodeFile="MachineMaintenance.aspx.vb" Inherits="MachineMaintenance" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="Server">
+</asp:Content>
+<asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="Server">
+    <div class="row clearfix padding-0 margin-0 margin-right: -15px">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-0 margin-0">
+            <div class="dialogboxContainerMainMAster">
+                <div class="DialogBoxCustom" style="float: left; background-color: #fff; padding-left: 0px; padding-bottom: 2px">
+                    <div id="ButtonDiv" style="height: auto;">
+                        <a id="CreateButton" href='#' class="iconButton" style="margin-top: 1px; margin-left: 2px;">
+                            <img src="images/NewClient.png" style="height: 20px; width: 25px; float: left; margin-top: 0px;" />
+                            &nbsp Create
+                        </a>
+                        <a id="EditButton" href='#' class="iconButton" style="margin-top: 1px; margin-left: 2px;">
+                            <img src="images/Edit.png" style="height: 20px; width: 25px; float: left; margin-top: 0px" />
+                            &nbsp Edit
+                        </a>
+                        <a id="DeleteButton" href='#' class="iconButton" style="margin-top: 1px; margin-left: 2px;">
+                            <img src="images/MasterDelete.png" style="height: 20px; width: 25px; float: left; margin-top: 0px" />
+                            &nbsp Delete
+                        </a>
+                    </div>
+                    <b id="PRID" style="display: none"></b><b id="PRDisName" style="display: none"></b>
+                    <strong id="PRMasterDisplayName" class="MasterDisplayName" style="float: right; color: #42909A">Machine Maintenance</strong>
+                </div>
+                <div class="ContainerBoxCustom" style="float: left; height: auto;">
+                    <div id="ButtonGridDiv" style="height: auto; display: block; margin-top: 5px">
+                        <div id="ShowListGrid" style="width: 100%; height: calc(100vh - 88px); float: left; display: block"></div>
+                        <input type="text" id="ShowListID" style="display: none" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal fade" id="largeModal" tabindex="-1" role="dialog" style="margin-left: -7px">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="DialogBoxCustom" style="float: left; border-top-left-radius: 4px; border-top-right-radius: 4px;">
+                    <strong>Machine Maintenance</strong>
+                    <a href="javascript:void(0);" class="iconRightDbox btn-danger" data-dismiss="modal">
+                        <span data-dismiss="modal" style="font-weight: 900; margin-right: 8px">X</span>
+                    </a>
+                </div>
+                <div class="modal-body">
+                    <div id="FieldCntainerRowPickList" style="display: block;">
+                        <div class="row clearfix">
+                            <div class="tab-content">
+                                <div role="tabpanel" class="tab-pane animated fadeInRight active" id="ReqGridProductHSN">
+                                    <div class="col-xs-12 col-sm-3 col-md-2 col-lg-2">
+                                        <b class="font-11">Voucher No. :</b>
+                                        <input class="forTextBox" type="text" name="Return To Stock" id="TxtRTSVoucherNo" style="width: 100%;" readonly="readonly" value="" />
+                                        <input class="forTextBox" type="hidden" name="TxtMaxVoucherNo" id="TxtMaxVoucherNo" value="" />
+                                    </div>
+                                    <div class="col-xs-12 col-sm-3 col-md-2 col-lg-2">
+                                        <b class="font-11">Voucher Date :</b>
+                                        <div id="RTSDate"></div>
+                                    </div>
+                                    <div class="col-xs-12 col-sm-4 col-md-3 col-lg-3">
+                                            <b class="font-11">Machine Name</b>
+                                            <div id="SelMachineName"></div>
+                                        </div>
+                                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="margin: 0px; padding: 0px">
+                                       <div class="col-xs-12 col-sm-4 col-md-3 col-lg-3">
+                                            <b class="font-11">Maintenance Type</b>
+                                            <input type="text" id="MaintenanceType" class="forTextBox" />
+                                        </div>
+                                        <div class="col-xs-12 col-sm-8 col-md-9 col-lg-9">
+                                            <b class="font-11">Description</b>
+                                            <input type="text" id="Description" class="forTextBox" />
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                        <b class="font-11">Spare Parts Issued</b>
+                                        <div id="WholeItemGrid"></div>
+                                    </div>
+                                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                        <div style="float: left; width: 100%; height: auto; margin-top: 5px; padding: 0px">
+                                            <div class="col-lg-1 col-md-1 col-sm-1 col-xs-12" style="margin: 0px; padding: 0px; float: right">
+                                                <div class="DialogBoxCustom" style="float: right; background-color: #fff; padding-left: 0px; padding-bottom: 0px; width: auto; padding-right: 0px; margin-top: 0px; margin-right: 0px; border-radius: 4px; text-align: left">
+                                                    <a id="BtnAddItemPop" href='#' class="iconButton" style="margin-top: 0px; margin-right: 0px; float: left" title="add new row">
+                                                        <i class="fa fa-edit fa-2x fa-fw" style="font-size: 14px;"></i>&nbsp Add
+                                                    </a>
+                                                </div>
+                                            </div>
+                                            <div id="DivPicQty" class="col-lg-3 col-md-3 col-sm-3 col-xs-12" style="margin: 0px; padding: 0px; float: right;">
+                                                <label style="float: left; margin-top: 5px; width: 7em">Quantity</label>&nbsp;&nbsp;&nbsp;&nbsp;
+                                                <input type="number" id="TxtReceiptQty" class="forTextBox" style="width: 15em" min="0" />
+                                            </div>
+                                            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12" style="margin: 0px; padding: 0px; float: right;">
+                                                <label style="float: left; margin-top: 5px; width: 7em">Batch Stock</label>&nbsp;&nbsp;&nbsp;&nbsp;
+                                                <input type="text" id="TxtQuantity" class="forTextBox" style="width: 15em" disabled="disabled" readonly="" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                        <div id="AllotedItemGrid"></div>
+                                    </div>
+                                    <div class="col-xs-12 col-sm-4 col-md-3 col-lg-3">
+                                        <b class="font-11">Engineer</b>
+                                        <input type="text" id="Engineer" class="forTextBox" />
+                                    </div>
+                                    <div class="col-xs-12 col-sm-4 col-md-3 col-lg-3">
+                                        <b class="font-11">Company Name</b>
+                                        <input type="text" id="TxtCompanyName" class="forTextBox" />
+                                    </div>
+                                    <div class="col-xs-12 col-sm-4 col-md-6 col-lg-6">
+                                        <b class="font-11">Remark</b>
+                                        <textarea class="forTextBox m-t-0" id="TxtNarration" name="TxtNarration" placeholder="Remark" style="height: 30px;"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="btnDivPickList" class="modal-footer" style="border-top: 1px solid #42909A;">
+                    <button type="button" id="BtnNew" class="btn btn-link waves-effect">New</button>
+                    <button type="button" id="WOCSPrintButton" class="btn btn-link waves-effect" style="display: none" disabled="disabled">Print</button>
+                    <button type="button" id="BtnDeletePopUp" class="btn btn-link waves-effect">Delete</button>
+                    <button type="button" id="BtnSave" class="btn btn-link waves-effect">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="CustomJS/MachineMaintenance.js"></script>
+
+
+</asp:Content>
+

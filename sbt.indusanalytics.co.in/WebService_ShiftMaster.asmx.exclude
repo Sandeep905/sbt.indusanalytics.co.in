@@ -1,0 +1,1 @@
+﻿<%@ WebService Language="VB" CodeBehind="~/App_Code/WebService_ShiftMaster.vb" Class="WebService_ShiftMaster" %>

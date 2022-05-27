@@ -1,0 +1,67 @@
+﻿<%@ Page Title="" Language="VB" MasterPageFile="~/MasterPage_Main.master" AutoEventWireup="false" CodeFile="PortMaster.aspx.vb" Inherits="PortMaster" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="Server">
+</asp:Content>
+<asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="Server">
+    <div class="row clearfix" style="padding: 0px; margin: 0px; margin-right: -15px">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding: 0px; margin: 0px;">
+            <div class="dialogboxContainerMainMAster">
+                <div class="DialogBoxCustom" style="float: left; background-color: #fff; padding-left: 0px; padding-bottom: 2px">
+                    <div id="ButtonDiv" style="height: auto;">
+                        <input type="button" id="BtnCreate" name="BtnCreate" value="Create" class="btn btn-primary" />
+                        <input type="button" id="BtnEdit" name="BtnEdit" value="Edit" class="btn btn-info" />
+                        <input type="button" id="BtnDelete" name="BtnDelete" value="Delete" class="btn btn-danger" />
+                    </div>
+                </div>
+
+                <div class="ContainerBoxCustom" style="float: left;">
+                    <div id="GridShowList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <%-- Model PopUp (Edit update delete) --%>
+    <div class="modal fade" id="largeModal" tabindex="-1" role="dialog" style="margin-left: -7px">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="DialogBoxCustom" style="float: left; border-top-left-radius: 4px; border-top-right-radius: 4px;">
+                    <strong id="poptag">Port Master Creation/Updation</strong>
+                    <a href="javascript:void(0);" class="iconRightDbox btn-danger" data-dismiss="modal">
+                        <span data-dismiss="modal" style="font-weight: 900; margin-right: 8px">X</span>
+                    </a>
+                </div>
+
+                <div class="modal-body">
+                    <div style="display: block; padding-top: 0px; padding-right: 0px;">
+                        <div class="tab-content" style="margin-bottom: 0em">
+                            <div id="FieldCntainerRow" role="tabpanel" class="rowcontents clearfix tab-pane animated fadeInRight active">
+                                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+                                    <label class="font-11">Port Code</label>
+                                    <input id="TxtPortCode" type="text" class="forTextBox" />
+                                    <strong id="ValOfPortCode" style="color: red; font-size: 12px; display: none"></strong>
+                                </div>
+                                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+                                    <label class="font-11">Port Name</label>
+                                    <input id="TxtPortName" type="text" class="forTextBox" />
+                                    <strong id="ValOfPortName" style="color: red; font-size: 12px; display: none"></strong>
+                                </div>
+                                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+                                    <label class="font-11">State Code</label>
+                                    <div id="SelStateCode"></div>
+                                    <strong id="ValStrSelStateCode" style="color: red; font-size: 12px; display: none"></strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid #42909A;">
+                    <button type="button" id="BtnDeletePopUp" class="btn btn-danger waves-effect" disabled="disabled">Delete</button>
+                    <button type="button" id="BtnSave" class="btn btn-success waves-effect">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="CustomJS/PortMaster.js"></script>
+</asp:Content>
+

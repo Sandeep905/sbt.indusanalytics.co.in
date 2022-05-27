@@ -1,0 +1,15 @@
+﻿<%@ Page Title="Job Cost Report" Language="VB" MasterPageFile="~/MasterPageMIS.master" AutoEventWireup="false" CodeFile="JobCostReport.aspx.vb" Inherits="JobCostReport" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="Server">
+</asp:Content>
+<asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="Server">
+    <div class="row padding-0 margin-0">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-0 margin-0">            
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-0 margin-0">
+                <div id="GridReport"></div>
+            </div>
+        </div>
+    </div>
+    <script src="CustomJS/JobCostReport.js"></script>
+</asp:Content>
+

@@ -1,0 +1,189 @@
+﻿<%@ Page Title="" Language="VB" MasterPageFile="~/MasterPage_Main.master" AutoEventWireup="false" CodeFile="PickList.aspx.vb" Inherits="PickList" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="Server">
+</asp:Content>
+<asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="Server">
+
+    <div class="row clearfix" style="padding: 0px; margin: 0px; margin-right: -15px">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding: 0px; margin: 0px;">
+            <div class="dialogboxContainerMainMAster">
+                <div class="DialogBoxCustom" style="float: left; background-color: #fff; padding-left: 0px; padding-bottom: 2px">
+                    <div class="col-lg-10 col-md-10 col-sm-10 col-xs-10">
+                        <div id="ButtonDiv" style="height: auto; padding-bottom: 2px">
+                            <input type="button" name="CreateButton" id="CreateButton" value="Create" class="btn btn-info" />
+                            <input type="button" name="EditButton" id="EditButton" value="Edit" class="btn btn-warning" />
+                            <input type="button" name="DeleteButton" id="DeleteButton" value="Delete" class="btn btn-danger" />
+                            <input type="button" name="ShowListButton" id="ShowListButton" value="Show List" class="btn btn-primary" />
+                        </div>
+                    </div>
+
+                    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
+                        <b id="PRID" style="display: none"></b><b id="PRDisName" style="display: none"></b>
+                        <strong id="POMasterDisplayName" class="MasterDisplayName" style="float: right; color: #42909A">Pick List</strong>
+                    </div>
+                </div>
+            </div>
+            <div class="ContainerBoxCustom">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    <div id="PickShowlistGrid"></div>
+                    <input type="text" id="TxtPickID" style="display: none" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <%--largeModalPickList Model PopUp (PickList) --%>
+    <div class="modal fade" id="largeModal" tabindex="-1" role="dialog" style="margin-left: -7px">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="DialogBoxCustom" style="float: left; border-top-left-radius: 4px; border-top-right-radius: 4px;">
+                    <strong>Create Pick List</strong>
+                    <a href="javascript:void(0);" class="iconRightDbox btn-danger" data-dismiss="modal">
+                        <span data-dismiss="modal" style="font-weight: 900; margin-right: 8px">X</span>
+                    </a>
+                </div>
+                <div class="modal-body">
+                    <div id="popContenerContentPickList" style="display: block;">
+                        <div id="FieldCntainerRowPickList" class="rowcontents clearfix">
+                            <div role="tabpanel" class="tab-pane animated fadeInRight active" id="ReqGridPickList">
+
+                                <div class="col-xs-12 col-sm-3 col-md-2 col-lg-2">
+                                    <b class="font-11">Voucher No.</b>
+                                    <input class="forTextBox" type="text" name="TxtVoucherNo" id="TxtVoucherNo" readonly="readonly" value="" />
+                                    <input class="forTextBox" type="hidden" name="TxtMaxVoucherNo" id="TxtMaxVoucherNo" value="" />
+                                </div>
+
+                                <div class="col-xs-12 col-sm-3 col-md-2 col-lg-2">
+                                    <b class="font-11">Voucher Date</b>
+                                    <div id="VoucherDate"></div>
+                                </div>
+
+                                <div class="col-lg-2 col-md-3 col-sm-3 col-xs-12">
+                                    <div id="RadioButtonPicklist"></div>
+                                </div>
+
+                                <div id="StockCategory" class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
+                                    <div id="RadioButtonStockType"></div>
+                                </div>
+
+                                <div class="col-lg-1 col-md-1 col-sm-1 col-xs-1 hidden">
+                                    <div id="RadioButtonAvailable"></div>
+                                </div>
+
+                                <%--<div class="col-lg-1 col-md-1 col-sm-1 col-xs-12 hidden">
+                                        <div class="DialogBoxCustom" style="float: left; background-color: #fff; padding-left: 0px; padding-bottom: 0px; width: auto; padding-right: 0px; margin-top: 0px; border-radius: 4px; text-align: left">
+                                            <a id="RefreshPOButton" href='#' class="iconButton" style="margin-top: 0px; margin-right: 0px; display: none" title="reload page">
+                                                <i class="fa fa-refresh fa-2x fa-fw" style="font-size: 14px;"></i>&nbsp Refresh
+                                            </a>
+                                        </div>
+                                    </div>--%>
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-0 margin-0">
+                                    <div id="JobCardDiv" class="col-xs-12 col-sm-2 col-md-2 col-lg-3">
+                                        <b class="font-11">Job Card No.</b>
+                                        <input type="text" id="TxtJCN" onkeydown="keydownFunction()" onkeyup="keyupFunction()" class="forTextBox" placeholder="Job Card No." />
+                                        <input type="text" id="TxtJobBookingJobCardContentsID" onkeydown="keydownFunction()" onkeyup="keyupFunction()" class="forTextBox" style="width: 15em; display: none" placeholder="Job Card No." />
+                                        <input type="text" id="TxtJobBookingID" onkeydown="keydownFunction()" onkeyup="keyupFunction()" class="forTextBox" style="width: 15em; display: none" placeholder="Job Card No." />
+                                        <input type="text" id="TxtBookingNo" onkeydown="keydownFunction()" onkeyup="keyupFunction()" class="forTextBox" style="width: 15em; display: none" placeholder="Job Card No." />
+                                        <input type="text" id="TxtRequiredSheets" onkeydown="keydownFunction()" onkeyup="keyupFunction()" class="forTextBox" style="width: 15em; display: none" placeholder="Required Sheets" />
+                                        <input type="text" id="TxtAllocatedSheets" onkeydown="keydownFunction()" onkeyup="keyupFunction()" class="forTextBox" style="width: 15em; display: none" placeholder="Allocated Sheets" />
+                                    </div>
+                                    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+                                        <b class="font-11">Process Name</b>
+                                        <div id="SelProcess"></div>
+                                    </div>
+                                    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+                                        <b class="font-11">Department</b>
+                                        <div id="SelDepartment"></div>
+                                    </div>
+                                    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+                                        <b class="font-11">Machine</b>
+                                        <div id="SelMachine"></div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                    <div id="PickListGrid"></div>
+                                </div>
+
+                                <%--<div style="float: left; width: 100%; height: auto; margin-top: 5px">
+                                            <b >Stock Batch Wise</b>
+                                        </div>
+                                        <div id="StockBatchWiseGrid" style="float: left; width: 100%; height: 10em; margin-top: 0px"></div>--%>
+
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="float: right">
+                                    <div id="DivPicQty" class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+                                        <b class="font-11">Pick Quantity</b>
+                                        <input type="number" id="TxtPickQuantity" class="forTextBox" style="width: 15em" readonly="" min="0" />
+                                    </div>
+                                    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+                                        <b class="font-11">Quantity</b>
+                                        <input type="text" id="TxtQuantity" class="forTextBox" style="width: 15em" placeholder="Quantity" />
+                                        <input type="text" id="TxtUnitDecimalPlace" class="forTextBox" style="width: 15em; display: none" placeholder="Unit Decimal Place" />
+                                    </div>
+                                    <div class="col-lg-1 col-md-1 col-sm-1 col-xs-12">
+                                        <div class="DialogBoxCustom" style="float: right; background-color: #fff; padding-left: 0px; padding-bottom: 0px; width: auto; padding-right: 0px; margin-top: 0px; margin-right: 0px; border-radius: 4px; text-align: left">
+                                            <a id="BtnAddItemPop" href='#' class="iconButton" style="margin-top: 0px; margin-right: 0px; float: left" title="add new row">
+                                                <i class="fa fa-edit fa-2x fa-fw" style="font-size: 14px;"></i>&nbsp Add
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                    <div id="AllotedItemGrid" style="float: left; width: 100%; height: 11em; margin-top: 2px; margin-bottom: 5px"></div>
+                                </div>
+                                <div class="col-xs-12 col-sm-1 col-md-1 col-lg-1">
+                                    <b class="font-11">Remark</b>
+                                </div>
+                                <div class="col-xs-12 col-sm-11 col-md-11 col-lg-11">
+                                    <%--<input class="forTextBox" type="text" id="TxtNarration" name="TxtNarration" placeholder="Remark" value="" />--%>
+                                    <textarea class="forTextBox" id="TxtNarration" name="TxtNarration" placeholder="Remark"></textarea>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="btnDivPickList" class="modal-footer" style="border-top: 1px solid #42909A;">
+                    <button type="button" id="BtnNew" class="btn btn-link waves-effect" style="margin-top: -1em; color: none">New</button>
+                    <button type="button" id="BtnDeletePopUp" class="btn btn-link waves-effect" style="margin-top: -1em">Delete</button>
+                    <button type="button" id="BtnSave" class="btn btn-link waves-effect" style="margin-top: -1em">Save</button>
+                    <button type="button" id="BtnSaveAS" class="btn btn-link waves-effect" style="margin-top: -1em; display: none" disabled="disabled">Save As</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <%--largeModalFiltrJobcard Model PopUp (FiltrJobcard) --%>
+    <div class="modal fade" id="largeModalFiltrJobcard" tabindex="-1" role="dialog" style="margin-left: -7px">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="DialogBoxCustom" style="float: left; border-top-left-radius: 4px; border-top-right-radius: 4px;">
+                    <strong>Exist Job Card</strong>
+                    <a href="javascript:void(0);" class="iconRightDbox btn-danger" data-dismiss="modal">
+                        <span data-dismiss="modal" style="font-weight: 900; margin-right: 8px">X</span>
+                        <input type="button" id="OpenPopup" style="display: none" />
+                    </a>
+                </div>
+
+                <div class="modal-body">
+                    <div id="popContenerContentFiltrJobcard" style="display: block;">
+                        <div id="FieldCntainerFiltrJobcard" class="rowcontents clearfix">
+                            <div class="tab-content" style="margin-bottom: 0em">
+                                <div role="tabpanel" class="tab-pane animated fadeInRight active" id="FiltrJobcard">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                        <div id="FiltrJobcardGrid"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="btnDivFiltrJobcard" class="modal-footer" style="border-top: 1px solid #42909A;">
+                    <button type="button" class="btn btn-link waves-effect" data-dismiss="modal" style="margin-top: -1em">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="CustomJS/PickList.js?<%=System.Configuration.ConfigurationManager.AppSettings("Version")%>"></script>
+</asp:Content>
+

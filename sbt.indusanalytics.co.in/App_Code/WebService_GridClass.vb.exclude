@@ -1,0 +1,343 @@
+﻿Imports System.Web
+Imports System.Web.Services
+Imports System.Web.Services.Protocols
+Imports System.Data
+Imports System.Data.SqlClient
+Imports System.Web.Script.Services
+Imports System.Web.Script.Serialization
+Imports Connection
+Imports System.Collections.Generic
+Imports System.Web.UI.WebControls
+
+' To allow this Web Service to be called from script, using ASP.NET AJAX, uncomment the following line.
+<System.Web.Script.Services.ScriptService()>
+<WebService(Namespace:="http://tempuri.org/")>
+<WebServiceBinding(ConformsTo:=WsiProfiles.BasicProfile1_1)>
+<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
+Public Class WebService_GridClass
+    Inherits System.Web.Services.WebService
+    Dim db As New DBConnection
+    Dim Index_Form_Name As String
+    Dim k As String
+    Dim ss As String
+    Dim F_Year As String
+    Dim CompanyID As Integer
+    Dim str_date As String
+    Dim js As New JavaScriptSerializer()
+    Dim data As New HelloWorldData()
+    Dim dataTable As New DataTable()
+    Dim str, User_Id As String
+    <System.Web.Services.WebMethod(EnableSession:=True)>
+    <ScriptMethod(UseHttpGet:=True, ResponseFormat:=ResponseFormat.Json)>
+    Public Sub HelloWorld()
+
+        k = Convert.ToString(HttpContext.Current.Request.QueryString("name"))
+        str_date = Convert.ToString(HttpContext.Current.Request.QueryString("date"))
+        F_Year = Convert.ToString(HttpContext.Current.Session("F_Year"))
+        CompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+        Context.Response.Clear()
+        Context.Response.ContentType = "application/json"
+        data.Message = ConvertDataTableTojSonString(GetDataTable)
+        Context.Response.Write(js.Serialize(data.Message))
+    End Sub
+
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function GetDataTable() As DataTable
+        If k = "PaperStock" Then
+            str = "SELECT PM.Paper_Code as Ppr_Code, PM.GSM,Replace(Convert(nvarchar(30),Modify_Date,106),'','-') as Modify_Date, PM.Unit_Per_Packing as Unt_Pr_Pck ," &
+                      "  PM.Packing, case when (Isnull(Sum(PE.Receipt_Quantity),0)-Isnull(Sum(PE.Issue_Quantity),0))>0  then " &
+                      "  (Isnull(Sum(PE.Receipt_Quantity),0)-Isnull(Sum(PE.Issue_Quantity),0)) else 0 end  As Sheets," &
+                      "  Ltrim(case when Isnull(Sum(PE.Receipt_Quantity),0)-Isnull(Sum(PE.Issue_Quantity),0)>0 " &
+                      "  then str(round((Isnull(Sum(PE.Receipt_Quantity),0)-Isnull(Sum(PE.Issue_Quantity),0))/ PM.Unit_Per_Packing ,0)  )+ ' ' +PM.Packing +'('+ ltrim(PM.Unit_Per_Packing) +'), ' + Case " &
+                      "  when round((Isnull(Sum(PE.Receipt_Quantity),0)-Isnull(Sum(PE.Issue_Quantity),0)) / PM.Unit_Per_Packing,0)< " &
+                      "  round((Isnull(Sum(PE.Receipt_Quantity),0)-Isnull(Sum(PE.Issue_Quantity),0))/PM.Unit_Per_Packing,2) then  " &
+                      "  ltrim(str(round(Isnull(Sum(PE.Receipt_Quantity),0)-Isnull(Sum(PE.Issue_Quantity),0),0)-" &
+                      "  (round((Isnull(Sum(PE.Receipt_Quantity),0)-Isnull(Sum(PE.Issue_Quantity),0))/ PM.Unit_Per_Packing,0) * " &
+                      "  PM.Unit_Per_Packing))) +' Sheets' Else '0 Sheet' end else '0 ' + PM.Packing + '(' + ltrim(str(PM.unit_Per_Packing)) " &
+                      "  +') 0 Sheet' end) As Stock,PM.Quality,PM.Material_Size,GM.Godown_Name " &
+                      "  FROM  Paper_Master As PM Left JOIN Paper_Entry AS PE On PE.Paper_ID=PM.Paper_ID   " &
+                      "  JOIN Godown_Master As GM ON GM.Godown_ID=PE.Godown_ID " &
+                      "  Group By PM.Paper_Code,PM.Quality,PE.Batch_No,PM.Paper_ID,PM.Material_Size, " &
+                      "  PM.Mill, PM.Finish,PM.Unit_Per_Packing,PM.Packing,GM.Godown_Name,PM.GSM, PM.SIZE_W,PM.SIZE_L,Modify_Date  Order By PE.Modify_Date desc "
+        End If
+        db.FillDataTable(dataTable, str)
+        Return dataTable
+    End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function ConvertDataTableTojSonString(ByVal dataTable As DataTable) As String
+        'Dim serializer As New System.Web.Script.Serialization.JavaScriptSerializer()
+        js.MaxJsonLength = Int32.MaxValue
+        Dim tableRows As New List(Of Dictionary(Of [String], [Object]))()
+        Dim row As Dictionary(Of [String], [Object])
+        For Each dr As DataRow In dataTable.Rows
+            row = New Dictionary(Of [String], [Object])()
+            For Each col As DataColumn In dataTable.Columns
+                row.Add(col.ColumnName, dr(col))
+                System.Console.WriteLine(dr(col))
+            Next
+            tableRows.Add(row)
+        Next
+        Return js.Serialize(tableRows)
+    End Function
+
+
+    '' //////////////**********************************************    Grid_Search_Panel    **************************************/////////////////
+
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function PD_Search_Panel(ByVal check As String) As String
+        'str = "SELECT Top 1500  CM.Catagory_Name, JE.Client_Name, JE.Job_Name, JE.Quotation_No, Replace(Convert(Varchar(20),JE.Job_Date,106),' ','-') as Job_Date, JE.Order_Quantity, UM.User_Name, ISNULL( JE.Final_Cost,0)as Final_Cost, ISNULL(JE.Type_Of_Cost,'') as Type_Of_Cost, ISNULL(JE.Enquiry_ID,0), ISNULL(JE.Is_Approved, 0)  AS [Job Approved],JE.LedgerID, ISNULL((SELECT TOP (1) Approval_No  FROM Job_Approved_Price WHERE (BookingID = JE.BookingID)),0) AS [Approval No], ISNULL(JE.Is_For_Approval, 0) AS [Send For Approval], ISNULL(JE.Is_Internal_Approved, 0) AS Is_Internal_Approved, ISNULL(JE.Internal_Approved_User_ID,0), ISNULL(JE.Is_Rework, 0) AS Is_Rework, ISNULL(JE.Is_Mail_Sent, 0) AS Is_Mail_Sent, ISNULL(JE.Is_Send_For_Internal_Approval,0), ISNULL(JE.Reasons_of_Quote,'x'), JE.Product_Code,JE.BookingId FROM  Job_Estimation AS JE INNER JOIN User_Master AS UM ON JE.User_ID = UM.User_ID INNER JOIN Catagory_Master AS CM ON JE.Catagory_ID = CM.Catagory_ID Where JE.Type_Of_Cost<>'' AND JE.Product_Code<>''  ORDER BY JE.BookingID DESC"
+        CompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+        If (check = "Detailed") Then
+            str = "SELECT Distinct  Replace(Nullif(JE.Client_Name,''),'""','') as Client_Name,Replace(Nullif(CM.Catagory_Name,''),'""','') as Catagory_Name, Replace(Nullif(JE.Job_Name,''),'""','') as Job_Name, Nullif(JE.Quotation_No,'')as Quotation_No, Replace(Convert(Varchar(20),JE.CreatedDate,106),' ','-') as Job_Date, JE.Order_Quantity, JE.BookingID, JE.MAX_Quotation_No, JE.LedgerID, Replace(Nullif(UM.User_Name,''),'""','') as User_Name, Nullif(JE.Final_Cost,'')as Final_Cost, ISNULL(JE.Type_Of_Cost,'')as  Type_Of_Cost, Nullif(JE.Enquiry_ID,'')as Enquiry_ID,Replace(Nullif(JEC.Content_Name,''),'""','') as Content_Name, Nullif(JEC.Job_Length,'')  " &
+                   " as Job_Length,Nullif(JEC.Job_Width,'')as Job_Width, Nullif(JEC.Job_Height,'')as Job_Height, Nullif(JEC.Pages,'')as Pages,ISNULL(JE.Is_Approved,0) As Job_Approved,Replace((Select top 1 Nullif(Approval_No,'')as Approval_No  From Job_Approved_Price Where Job_Approved_Price.BookingID= JE.BookingID),'""','')  AS Approval_No,ISNULL(JE.Is_For_Approval,0)  As Send_For_Approval,ISNULL(JE.Is_Internal_Approved,0) AS Is_Internal_Approved,    Nullif(JE.Internal_Approved_User_ID,'')as Internal_Approved_User_ID,ISNULL(JE.Is_Rework,0) As Is_Rework ,ISNULL(JE.Is_Mail_Sent,0) As Is_Mail_Sent,Replace(Nullif((Case When  " &
+                   " Isnull(JE.Rework_Remark ,'') ='' then JE.Remark Else  ISNULL(JE.Rework_Remark,'') End),''),'""','')  As Rework_Remark,Nullif(JE.Is_Send_For_Internal_Approval,'')as Is_Send_For_Internal_Approval,Replace(Nullif(JE.Reasons_of_Quote,''),'""','')  as Reasons_of_Quote,Replace(Nullif(JE.Product_Code,''),'""','') as Product_Code,Replace(Nullif(JE.Quotation_Detail,''),'""','')  as Quotation_Detail,Replace(Nullif(JE.Remark,''),'""','') as Remark  FROM Job_Estimation as JE, Catagory_Master as  CM, Job_Estimation_Contents JEC, User_Master As UM Where UM.User_ID = JE.User_ID And JE.Catagory_ID =  CM.Catagory_ID And   " &
+                   " JE.BookingID = JEC.BookingID And JE.CompanyID = " & CompanyID & " Group By JE.Client_Name, CM.Catagory_Name, JE.Job_Name, JE.Quotation_No,JE.CreatedDate, JE.Order_Quantity,  JE.BookingID, JE.MAX_Quotation_No, JE.LedgerID, UM.User_Name, JE.Final_Cost, JE.Type_Of_Cost, JE.Enquiry_ID, JEC.Content_Name,JEC.Job_Length, JEC.Job_Width, JEC.Job_Height, JEC.Pages, JE.Is_Approved, JE.Is_For_Approval, JEC.Content_ID, JE.Internal_Approved_User_ID,  JE.Is_Internal_Approved, JE.Is_Rework, JE.Is_Mail_Sent, JE.Rework_Remark, JE.Remark, Is_Send_For_Internal_Approval, paper_by, Reasons_of_Quote, JE.Product_Code, JE.Quotation_Detail, JE.Remark  Order By JE.BookingID Desc "
+        Else
+            str = "Select Distinct  Replace(Nullif(JE.Client_Name,''),'""','') as Client_Name,Nullif(CM.Catagory_Name,'')as Catagory_Name,Replace(Nullif(JE.Job_Name,''),'""','') as Job_Name, Nullif(JE.Quotation_No,'')as Quotation_No, Replace(Convert(Varchar(20),JE.CreatedDate,106),' ','-') as Job_Date, JE.Order_Quantity, JE.BookingID, JE.MAX_Quotation_No, JE.LedgerID, Replace(Nullif(UM.User_Name,''),'""','') as User_Name, Nullif(JE.Final_Cost,'')as Final_Cost, ISNULL(JE.Type_Of_Cost,'')as   Type_Of_Cost, Nullif(JE.Enquiry_ID,'')as Enquiry_ID,ISNULL(JE.Is_Approved,0) As Job_Approved, " &
+                   " Replace((Select top 1 Nullif(Approval_No,'')as Approval_No  From Job_Approved_Price Where Job_Approved_Price.BookingID= JE.BookingID),'""','')  AS Approval_No,ISNULL(JE.Is_For_Approval,0) As Send_For_Approval,ISNULL(JE.Is_Internal_Approved,0) AS Is_Internal_Approved,    Nullif(JE.Internal_Approved_User_ID,'')as Internal_Approved_User_ID,ISNULL(JE.Is_Rework,0) As Is_Rework ,ISNULL(JE.Is_Mail_Sent,0) As Is_Mail_Sent,Replace(Nullif((Case When Isnull(JE.Rework_Remark ,'') ='' then JE.Remark Else  ISNULL(JE.Rework_Remark,'') End),''),'""','')  As Rework_Remark,Nullif(JE.Is_Send_For_Internal_Approval,'')as Is_Send_For_Internal_Approval,  " &
+                   " Replace(Nullif(JE.Reasons_of_Quote,''),'""','')  as Reasons_of_Quote,Replace(Nullif(JE.Product_Code,''),'""','')  as Product_Code,Replace(Nullif(JE.Quotation_Detail,''),'""','') as Quotation_Detail,Replace(Nullif(JE.Remark,''),'""','')  as Remark  FROM Job_Estimation as JE, Catagory_Master as  CM, Job_Estimation_Contents JEC, User_Master As UM Where UM.User_ID = JE.User_ID And JE.Catagory_ID = CM.Catagory_ID And  JE.BookingID = JEC.BookingID And JE.CompanyID = " & CompanyID & "  Group By JE.Client_Name, CM.Catagory_Name, JE.Job_Name, JE.Quotation_No, JE.CreatedDate, JE.Order_Quantity,  " &
+                   " JE.BookingID, JE.MAX_Quotation_No, JE.LedgerID, UM.User_Name, JE.Final_Cost, JE.Type_Of_Cost, JE.Enquiry_ID, JEC.Content_Name, JEC.Job_Length, JEC.Job_Width, JEC.Job_Height, JEC.Pages, JE.Is_Approved, JE.Is_For_Approval, JEC.Content_ID, JE.Internal_Approved_User_ID, JE.Is_Internal_Approved, JE.Is_Rework, JE.Is_Mail_Sent, JE.Rework_Remark, JE.Remark, Is_Send_For_Internal_Approval, paper_by, Reasons_of_Quote, JE.Product_Code, JE.Quotation_Detail, JE.Remark  Order By JE.BookingID Desc  "
+        End If
+        db.FillDataTable(dataTable, str)
+        data.Message = ConvertDataTableTojSonString(dataTable)
+        Return js.Serialize(data.Message)
+    End Function
+    ''@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ Quotation Print Preview @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function QuotationDetails(ByVal BookingID As Integer) As String
+        Try
+            CompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+            'str = "Select Replace(Convert(Nvarchar(30), JE.CreatedDate, 106),' ','-') as Job_Date,LM.LedgerName,(LedgerName +',, '+ Address1 +', '+ Address2  +',, '+  City +', ' + State +',, '+ Country +', '+ Pincode ) as Address,JE.JobName  " &
+            '       " From JobBooking As JE Inner JOin LedgerMaster as LM On LM.LedgerID=JE.LedgerID Where JE.BookingID = '" & BookingID & "' And JE.CompanyId = " & CompanyID & "  "
+            str = "Select Replace(Convert(Nvarchar(30), JE.CreatedDate, 106),' ','-') as Job_Date,LM.LedgerName As LedgerName, " &
+                    "(STUFF(( SELECT DISTINCT ','+A.FieldValue FROM dbo.LedgerMasterDetails A Where A.CompanyID=LM.CompanyID And A.LedgerID=LM.LedgerID And FieldName In ('Address1','Address2','City','State','Pincode') And Isnull(A.IsDeletedTransaction,0)<>1 FOR XML PATH(''), TYPE).value('.', 'nvarchar(max)'), 1, 1, '')) As Address, " &
+                    "JE.JobName  ,CCM.CompanyName,nullif(JE.Remark,'') as Remark,nullif(JE.HeaderText,'') as HeaderText,nullif(JE.FooterText,'') as FooterText " &
+                     "From JobBooking As JE Inner Join LedgerMaster as LM On LM.LedgerID=JE.LedgerID " &
+                     "inner join CompanyMaster As CCM On JE.CompanyId=CCM.CompanyID " &
+                      "Where JE.BookingID = '" & BookingID & "' And JE.CompanyId = " & CompanyID & " "
+
+            db.FillDataTable(dataTable, str)
+            data.Message = ConvertDataTableTojSonString(dataTable)
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+
+        End Try
+
+    End Function
+
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function GetDetailContents(ByVal BookingID As String) As String
+        CompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+        Try
+
+            str = "Select Distinct Convert(nvarchar(max),JEC.PlanContName) as Content_Name,  Stuff((Select ', '+ ProcessName From ProcessMaster Where ProcessID In  " &
+                    "(Select ProcessID From JobBookingProcess  Where BookingID=JEO.BookingID And ContentsID=JEO.ContentsID And PlanContQty = JEO.PlanContQty) For XML PATH('')),1,2,'') AS Operatios ,  Case When Isnull(VCS.JobPrePlan,'')<>'' Then Replace(Replace(Replace(VCS.JobPrePlan,'O:','OF:'),'P:','PF:'),'B:','BF:') Else 'H:'+VCS.SizeHeight+', L:'+VCS.SizeLength+', W:' +VCS.SizeWidth+', OF:'+VCS.SizeOpenflap+', PF:'+VCS.SizePastingflap+', BF:'+ VCS.SizeBottomflap+', Pages:'+VCS.JobNoOfPages End As Job_Size, 'F:'+VCS.PlanFColor + ' / ' +'B:'+VCS.PlanBColor As Printing,'Quality:'+VCS.ItemPlanQuality+', GSM:'+ VCS.ItemPlanGsm +', Mill:'+ VCS.ItemPlanMill +', Finish:'+VCS.ItemPlanFinish As Paper " &
+                    ",Nullif(JB.ProductCode,'') As ProductCode,JB.BookingNo ,JEC.PlanContQty,JCO.UnitCost,JCO.UnitCost1000,JB.TypeOfCost,Cast(JCO.QuotedCost AS Nvarchar(50))+' '+Isnull(JCO.CurrencySymbol,'INR') As QuotedCost,JB.JobName,Replace(Convert(Nvarchar(30), JB.CreatedDate, 106),' ','-') as Job_Date From JobBooking As JB Inner Join JobBookingContents As JEC On JB.BookingID = JEC.BookingID And JB.CompanyID=JEC.CompanyID    " &
+                    "Inner Join ViewJobBookingContents As VCS On VCS.JobContentsID=JEC.JobContentsID Inner Join JobBookingCostings As JCO On JCO.BookingID = JEC.BookingID And JCO.PlanContQty = JEC.PlanContQty and JCO.CompanyID=JEC.CompanyID    " &
+                    "Left Join JobBookingProcess As JEO On JEO.ContentsID = JEC.JobContentsID And JEC.PlanContQty = JEO.PlanContQty And JEO.CompanyID=JEC.CompanyID    " &
+                    "And VCS.BookingID=JEC.BookingID and VCS.CompanyID=JEC.CompanyID  Where JEC.BookingID In(" & BookingID & ") And    JEC.CompanyId = " & CompanyID & ""
+
+            db.FillDataTable(dataTable, str)
+            data.Message = ConvertDataTableTojSonString(dataTable)
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+        
+    End Function
+
+    '<WebMethod(EnableSession:=True)>
+    '<ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    'Public Function Get_Detail_Price(ByVal BookingID As String) As String
+    '    CompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+    '    Try
+    '        'str = "SELECT   Convert(varchar(30),Quote.Quantity)as Quantity,'Rs. ' + Convert(varchar(30), Round(IsNull(Quote.[1000 Unit],0),2)) As Price_1000_Unit, 'Rs. ' + Convert(varchar(30),Round(IsNull(Quote.[Unit],0),2)) As Price_Unit " &
+    '        '       " FROM(SELECT JEC.Final_Cost , JE.Type_of_Cost, JEC.Quantity " &
+    '        '       " From Job_Estimation As JE Inner Join Job_Estimation_Costings As JEC On JE.BookingId=JEC.BookingId " &
+    '        '       " Where JE.BookingID = '" & BookingId & "' And JE.CompanyID = " & CompanyID & ") t PIVOT (SUM(Final_Cost) For Type_of_Cost In ([1000 Unit], [Unit])) Quote   "
+
+    '        'str = "SELECT   Convert(varchar(30),Quote.PlanContQty)as Quantity,'Rs. ' + Convert(varchar(30), Round(IsNull(Quote.[1000 Unit],0),2)) As Price_1000_Unit, " &
+    '        '         " 'Rs. ' + Convert(varchar(30),Round(IsNull(Quote.[Unit],0),2)) As Price_Unit,nullif(Quote.ProductCode,'') as ProductCode,nullif(Quote.BookingNo,'') as BookingNo " &
+    '        '         "FROM(SELECT JEC.FinalCost , JE.TypeofCost, JEC.PlanContQty,JE.ProductCode,JE.BookingNo " &
+    '        '         "From JobBooking As JE Inner Join JobBookingCostings As JEC On JE.BookingID=JEC.BookingID  " &
+    '        '         "Where JE.BookingID =  '" & BookingID & "' And JE.CompanyId = " & CompanyID & ") t PIVOT (SUM(FinalCost) For TypeofCost In ([1000 Unit], [Unit])) Quote  "
+
+    '        str = "SELECT   Convert(varchar(30),Quote.PlanContQty)as Quantity,'Rs. ' + Convert(varchar(30), Round(IsNull(Quote.[UnitCost1000],0),2)) As Price_1000_Unit, " &
+    '                 " 'Rs. ' + Convert(varchar(30),Round(IsNull(Quote.[UnitCost],0),2)) As Price_Unit,nullif(Quote.ProductCode,'') as ProductCode,nullif(Quote.BookingNo,'') as BookingNo " &
+    '                 "FROM(SELECT JEC.FinalCost , JE.TypeofCost, JEC.PlanContQty,JE.ProductCode,JE.BookingNo " &
+    '                 "From JobBooking As JE Inner Join JobBookingCostings As JEC On JE.BookingID=JEC.BookingID  " &
+    '                 "Where JE.BookingID =  '" & BookingID & "' And JE.CompanyId = " & CompanyID & ") t PIVOT (SUM(FinalCost) For TypeofCost In ([UnitCost1000], [UnitCost])) Quote  "
+
+
+    '        db.FillDataTable(dataTable, str)
+    '        data.Message = ConvertDataTableTojSonString(dataTable)
+    '        Return js.Serialize(data.Message)
+    '    Catch ex As Exception
+    '        Return ex.Message
+    '    End Try
+    'End Function
+
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function User_Master_Data() As String
+        User_Id = Convert.ToString(HttpContext.Current.Session("User_ID"))
+        CompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+        str = "Select Top(1) Header_Text,Footer_Text,(User_Name + ';;' + Designation + ';;' + Contact_No) as Person From User_Master Where User_Id = '" & User_Id & "' And CompanyID = " & CompanyID & " "
+        db.FillDataTable(dataTable, str)
+        data.Message = ConvertDataTableTojSonString(dataTable)
+        Return js.Serialize(data.Message)
+    End Function
+
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function Get_Company_Name() As String
+        CompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+        str = "Select CompanyName From Company_Profile "
+        db.FillDataTable(dataTable, str)
+        data.Message = ConvertDataTableTojSonString(dataTable)
+        Return js.Serialize(data.Message)
+    End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function Get_Picture_Quotation() As String
+        CompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+        str = "Select Picture_Quote From Company_Profile Where CompanyID = " & CompanyID & " "
+        db.FillDataTable(dataTable, str)
+        data.Message = ConvertDataTableTojSonString(dataTable)
+        Return js.Serialize(data.Message)
+    End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function Get_Sign_Image() As String
+        CompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+        User_Id = Convert.ToString(HttpContext.Current.Session("User_ID"))
+        str = "Select Sign_Image From User_Master Where User_Id = '" & User_Id & "' And CompanyID = " & CompanyID & " "
+        db.FillDataTable(dataTable, str)
+        data.Message = ConvertDataTableTojSonString(dataTable)
+        Return js.Serialize(data.Message)
+    End Function
+
+    ''-------------------------------  End Print View --------------------------
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function Check(ByVal Est_Id As String) As String
+        CompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+        str = "Select Quantity From Job_Estimation_Costings Where BookingId='" & Est_Id & "'  And CompanyID = " & CompanyID & " "
+        db.FillDataTable(dataTable, str)
+        data.Message = ConvertDataTableTojSonString(dataTable)
+        Return js.Serialize(data.Message)
+    End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function Check_Contents(ByVal Est_Id As String) As String
+        CompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+        str = "Select Distinct Content_Name,Orientation From Job_Estimation_Contents  Where BookingId='" & Est_Id & "' And CompanyID = " & CompanyID & " "
+        db.FillDataTable(dataTable, str)
+        data.Message = ConvertDataTableTojSonString(dataTable)
+        Return js.Serialize(data.Message)
+    End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function Generate_Max_Content_Id() As String
+        CompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+        str = "Select Max(Content_Id) as Content_Id From Job_Estimation_Contents Where  CompanyID = " & CompanyID & " "
+        db.FillDataTable(dataTable, str)
+        data.Message = ConvertDataTableTojSonString(dataTable)
+        Return js.Serialize(data.Message)
+    End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function Generate_Max_Quotation_No() As String
+        CompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+        str = "Select (Max(Max_Quotation_No) + 1) as Max_Quotation_No From Job_Estimation Where CompanyID = " & CompanyID & " " '' Company will be changed
+        db.FillDataTable(dataTable, str)
+        data.Message = ConvertDataTableTojSonString(dataTable)
+        Return js.Serialize(data.Message)
+    End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function Get_Max_Revision_No(ByVal M_Quot_No As String) As String
+        CompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+        str = "Select (Max(Revision_No) + 1) as Revision_No From Job_Estimation where Max_Quotation_No =  " & M_Quot_No & " And CompanyID = " & CompanyID & "  " '' Company will be changed
+        db.FillDataTable(dataTable, str)
+        data.Message = ConvertDataTableTojSonString(dataTable)
+        Return js.Serialize(data.Message)
+    End Function
+
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function Print_Job_Details(ByVal J_C_No As String) As String
+        CompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+        str = "SELECT JEC.BookingID, JEC.Content_ID, nullif(JEC.Content_Name,'') as Content_Name, nullif(JEC.Pages,'') as Pages, nullif(JEC.Job_Length,'') as Job_Length, nullif(JEC.Job_Width,'') as Job_Width, nullif(JEC.Job_Height,'') as Job_Height, nullif(JEC.Job_Trimming,'') as Job_Trimming, nullif(JEC.Color_Strip,'') as Color_Strip, nullif(JEC.Gripper,'') as Gripper, nullif(JEC.Front_Color,'') as Front_Color, nullif(JEC.Back_Color,'') as Back_Color, nullif(JEC.Grain_Direction_Main,'') as Grain_Direction_Main, nullif(JEC.Work_and_Turn,'') as Work_and_Turn, JEC.Paper, nullif(JEC.Paper_By,'') as Paper_By, nullif(JEC.Orientation,'') as Orientation, nullif(JEC.Quantity,'') as Quantity, nullif(JEC.Job_Close_Size,'') As Job_Close_Size, nullif(JEC.F_B_Sets_Rate,'') as F_B_Sets_Rate, nullif(JEC.W_T_Sets_Rate,'') as W_T_Sets_Rate , nullif(JEC.W_T_Multiple_Sets_Rate,'') as W_T_Multiple_Sets_Rate, nullif(JEC.Printing_Margin,'') as Printing_Margin, nullif(JEC.Machine_Name,'') as Machine_Name, nullif(JEC.Gripper,'')  AS Expr1, nullif(JEC.GripperSide,'') as GripperSide, nullif(JEC.Machine_Colors,'') as Machine_Colors, nullif(JEC.Paper_Size,'') as Paper_Size, nullif(JEC.Printing_Sheet_Size,'') as Printing_Sheet_Size, nullif(JEC.Cut_L,'') as Cut_L,  nullif(JEC.Cut_W,'') as Cut_W, nullif(JEC.Ups_L,'') as Ups_L, nullif(JEC.Ups_W,'') as Ups_W, nullif(JEC.Ups_Total,'') as Ups_Total, nullif(JEC.Balance_Piece,'') as Balance_Piece, nullif(JEC.Waste_In_Percentage,'') as Waste_In_Percentage, nullif(JEC.Paper_Wastage_In_Kg,'') as Paper_Wastage_In_Kg, nullif(JEC.Grain_Direction,'') as Grain_Direction, nullif(JEC.Plate_Quantity,'') as Plate_Quantity, nullif(JEC.Plate_Rate,'') as Plate_Rate, nullif(JEC.Plate_Amount,'') as Plate_Amount, nullif(JEC.Make_Ready_Sheets_Total,'') as Make_Ready_Sheets_Total, nullif(JEC.Actual_Sheets,'') as Make_Ready_Sheets_Total, nullif(JEC.Wastage_Sheets,'') as Wastage_Sheets, nullif(JEC.Total_Paper_In_Kg,'') as Total_Paper_In_Kg, nullif(JEC.Full_Sheets,'') as Full_Sheets, nullif(JEC.Paper_Rate,'') as Paper_Rate, nullif(JEC.Paper_Amount,'') as Paper_Amount, nullif(JEC.Printing_Impressions,'') as Printing_Impressions, nullif(JEC.Impression_To_Be_Charged,'') as Impression_To_Be_Charged, nullif(JEC.Printing_Rate,'') as Printing_Rate, nullif(JEC.Printing_Amount,'') as Printing_Amount, nullif(JEC.Make_Readies,'') as Make_Readies, nullif(JEC.Make_Ready_Rate,'') as Make_Ready_Rate, nullif(JEC.Make_Ready_Amount,'') as Make_Ready_Amount, nullif(JEC.Final_Quantity,'') as Final_Quantity, nullif(JEC.Total_Amount,'') as Total_Amount, nullif(JEC.Total_Cost,'') as Total_Cost, nullif(JEC.Overlap_Flap,'') as Overlap_Flap, nullif(JEC.Bottom_Flap,'') as Bottom_Flap, nullif(JEC.Open_Flap,'') as Open_Flap, nullif(JEC.No_Of_Sets_Of_Front_Back,'') as No_Of_Sets_Of_Front_Back, nullif(JEC.Impression_For_Front_Back_Sets,'') as Impression_For_Front_Back_Sets, nullif(JEC.Impression_For_Front_Back_Sets_Charged,'') as Impression_For_Front_Back_Sets_Charged ,nullif(JEC.Printing_Charges_For_Front_Back_Sets,'') as Printing_Charges_For_Front_Back_Sets, nullif(JEC.Printing_Amount_For_Front_Back_Sets,'') as Printing_Amount_For_Front_Back_Sets, nullif(JEC.Proper_W_And_T_Sets,'') as Proper_W_And_T_Sets, nullif(JEC.Impression_For_W_and_T,'') as Impression_For_W_and_T , nullif(JEC.Impression_For_W_and_T_Charged,'') as Impression_For_W_and_T_Charged, nullif(JEC.Printing_Charges_For_W_and_T,'') as Printing_Charges_For_W_and_T, nullif(JEC.Printing_Amount_For_W_and_T,'')  as Printing_Amount_For_W_and_T, nullif(JEC.Final_W_And_T_Multiple_Up_Sets,'') as Final_W_And_T_Multiple_Up_Sets, nullif(JEC.Impression_For_W_and_T_Multiple_Ups,'') as Impression_For_W_and_T_Multiple_Ups, nullif(JEC.Impression_For_W_and_T_Multiple_Ups_Charged,'') as Impression_For_W_and_T_Multiple_Ups_Charged, nullif(JEC.Printing_Charges_For_W_and_T_Multiple_Ups,'') as Printing_Charges_For_W_and_T_Multiple_Ups, nullif(JEC.Printing_Amount_For_W_and_T_Multiple_Ups,'') as Printing_Amount_For_W_and_T_Multiple_Ups, nullif(JEC.Front_Color_Names,'') as Front_Color_Names, nullif(JEC.Back_Color_Names,'') as Back_Color_Names, nullif(JEC.Remark,'') as Remark, nullif(JEC.Die_No,'') as Die_No, nullif(JEC.Plate_No,'') as Plate_No, nullif(JEC.Artwork_No,'') as Artwork_No, nullif(JEC.Main_Paper_Name,'') as Main_Paper_Name, nullif(JEC.Expected_Execution_Time,'') as Expected_Execution_Time, nullif(JEC.Plate_Type,'') as Plate_Type, nullif(JEC.Old_Plate_No,'') as Old_Plate_No, nullif(JEC.Apply_Perfection,'') as Apply_Perfection, nullif(Job_Estimation.Job_Name,'') as Job_Name ,nullif(Paper_Master.Rate_Type,'') as Rate_Type, nullif(Paper_Master.Paper_Name,'') as Paper_Name, nullif(Paper_Master.Paper_Code,'') as Paper_Code, nullif(Job_Estimation.Quotation_No,'') as Quotation_No, nullif(Reel_Master.Reel_Name,'') as Reel_Name, nullif(Reel_Master.Reel_Width,'') as Reel_Width, Reel_Master.Reel_ID, nullif(JEC.Special_Front_Color,'') as Special_Front_Color, nullif(JEC.Special_Back_Color,'') as Special_Back_Color, nullif(JEC.Stripping_Margin,'') as Stripping_Margin, nullif(Job_Estimation.Client_Name,'') as Client_Name FROM  Job_Estimation INNER JOIN Job_Estimation_Contents AS JEC ON Job_Estimation.BookingID = JEC.BookingID LEFT OUTER JOIN Paper_Master ON JEC.Paper_ID = Paper_Master.Paper_ID LEFT OUTER JOIN Reel_Master ON JEC.Paper_ID = Reel_Master.Reel_ID WHERE JEC.BookingID = '" & J_C_No & "' And JEC.CompanyID = " & CompanyID & " " '' Company will be changed
+        db.FillDataTable(dataTable, str)
+        data.Message = ConvertDataTableTojSonString(dataTable)
+        Return js.Serialize(data.Message)
+    End Function
+
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function Grid_Operation(ByVal J_C_No As String) As String                 'grid Operation
+        CompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+        str = "SELECT Operation_Master.Operation_Name, Job_Estimation_Operations.Size_L,Job_Estimation_Operations.Size_W,nullif(Job_Estimation_Operations.Remark,'') as Remark FROM         Job_Estimation_Operations INNER JOIN Operation_Master ON Job_Estimation_Operations.Operation_ID = Operation_Master.Operation_ID  where Job_Estimation_Operations.BookingID='" & J_C_No & "' And Job_Estimation_Operations.CompanyID = " & CompanyID & "  " '' Company will be changed
+        db.FillDataTable(dataTable, str)
+        data.Message = ConvertDataTableTojSonString(dataTable)
+        Return js.Serialize(data.Message)
+    End Function
+    '======================================================================Print_Detail_Costing_Sheets==========================================================
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function Print_Detail_Costing_Sheets(ByVal J_C_No As Integer) As String
+        Try
+
+            CompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+            str = "SELECT  Distinct JE.BookingID, JE.BookingNo, Nullif(JE.ProductCode,'') as ProductCode, Nullif(JE.JobName,'') as JobName, JE.ClientName, Nullif(LM.Phone,'')  as ContactNo, Replace(Convert(varchar(13),JE.CreatedDate,106),'','-')as JobDate, nullif(CM.CategoryName,'') as CategoryName, JEC.ProfitPercentage,JE.OrderQuantity,Cast(JE.QuotedCost AS Nvarchar(50))+' '+Isnull(JE.CurrencySymbol,'INR') As QuotedCost, JE.FinalCost, JE.TypeOfCost, Nullif(JE.Remark,'') as Remark, JE.ExpectedCompletionDays, Nullif(JE.BookingRemark,'') as QuotationDetail, Nullif(LM.Address,'') as Address, UM.User_Name FROM  JobBooking as JE INNER JOIN LedgerMaster as LM on JE.LedgerID = LM.LedgerID Inner Join CategoryMaster as CM ON JE.CategoryID = CM.CategoryID INNER JOIN User_Authentication as UM ON JE.CreatedBy = UM.User_ID Inner Join JobBookingCostings As JEC On JEC.BookingID=JE.BookingID where JE.BookingID = " & J_C_No & " and JE.Companyid =" & CompanyID
+            db.FillDataTable(dataTable, str)
+            data.Message = ConvertDataTableTojSonString(dataTable)
+            Return js.Serialize(data.Message)
+
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function Print_Detail_Costing_Sheets1(ByVal J_C_No As String) As String
+        CompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+        'str = "SELECT  JEO.BookingID, JEO.Content_ID, nullif(JEO.Content_Name,'') as Content_Name, nullif(JEO.Pages,'') as Pages, nullif(JEO.Job_Length,'') as Job_Length, nullif(JEO.Job_Width,'') as Job_Width, nullif(JEO.Job_Height,'') as Job_Height, nullif(JEO.Job_Trimming,'') as Job_Trimming, nullif(JEO.Color_Strip,'') as Color_Strip, nullif(JEO.Gripper,'') as Gripper, nullif(JEO.Front_Color,'') as Front_Color, nullif(JEO.Back_Color,'') as Back_Color, nullif(JEO.Grain_Direction_Main,'') as Grain_Direction_Main, nullif(JEO.Work_and_Turn,'') as Work_and_Turn, JEO.Paper, nullif(JEO.Paper_By,'') as Paper_By, nullif(JEO.Orientation,'') as Orientation, nullif(JEO.Quantity,'') as Quantity, nullif(JEO.Job_Close_Size,'') as Job_Close_Size, nullif(JEO.F_B_Sets_Rate,'') as F_B_Sets_Rate, nullif(JEO.W_T_Sets_Rate,'') as W_T_Sets_Rate, nullif(JEO.W_T_Multiple_Sets_Rate,'') as W_T_Multiple_Sets_Rate, nullif(JEO.Printing_Margin,'') as Printing_Margin, nullif(JEO.Machine_Name,'') as Machine_Name, Nullif(JEO.Gripper,'') AS Expr1, nullif(JEO.GripperSide,'') as GripperSide, nullif(JEO.Machine_Colors,'') as Machine_Colors, nullif(JEO.Paper_Size,'') as Paper_Size, nullif(JEO.Printing_Sheet_Size,'') as Printing_Sheet_Size, nullif(JEO.Cut_L,'') as Cut_L, nullif(JEO.Cut_W,'') as Cut_W, nullif(JEO.Ups_L,'') as Ups_L, nullif(JEO.Ups_W,'') as Ups_W, nullif(JEO.Ups_Total,'') as Ups_Total, nullif(JEO.Balance_Piece,'') as Balance_Piece, nullif(JEO.Waste_In_Percentage,'') as Waste_In_Percentage, nullif(JEO.Paper_Wastage_In_Kg,'') as Paper_Wastage_In_Kg, nullif(JEO.Grain_Direction,'') as Grain_Direction, nullif(JEO.Plate_Quantity,'') as Plate_Quantity, nullif(JEO.Plate_Rate,'') as Plate_Rate, nullif(JEO.Plate_Amount,'') as Plate_Amount, nullif(JEO.Make_Ready_Sheets_Total,'') as Make_Ready_Sheets_Total, nullif(JEO.Actual_Sheets,'') as Actual_Sheets, nullif(JEO.Wastage_Sheets,'') as Wastage_Sheets, nullif(JEO.Total_Paper_In_Kg,'') as Total_Paper_In_Kg, nullif(JEO.Full_Sheets,'') as Full_Sheets, nullif(JEO.Paper_Rate,'') as Paper_Rate, nullif(JEO.Paper_Amount,'') as Paper_Amount, nullif(JEO.Printing_Impressions,'') as Printing_Impressions, nullif(JEO.Impression_To_Be_Charged,'') as Impression_To_Be_Charged, nullif(JEO.Printing_Rate,'') as Printing_Rate, nullif(JEO.Printing_Amount,'') as Printing_Amount, nullif(JEO.Make_Readies,'') as Make_Readies, nullif(JEO.Make_Ready_Rate,'') as Make_Ready_Rate, nullif(JEO.Make_Ready_Amount,'') as Make_Ready_Amount, nullif(JEO.Final_Quantity,'') as Final_Quantity, nullif(JEO.Total_Amount,'') as Total_Amount, nullif(JEO.Total_Cost,'') as Total_Cost, nullif(JEO.Overlap_Flap,'') as Overlap_Flap, nullif(JEO.Bottom_Flap,'') as Bottom_Flap, nullif(JEO.Open_Flap,'') as Open_Flap, nullif(JEO.No_Of_Sets_Of_Front_Back,'') as No_Of_Sets_Of_Front_Back, nullif(JEO.Impression_For_Front_Back_Sets,'') as Impression_For_Front_Back_Sets, nullif(JEO.Impression_For_Front_Back_Sets_Charged,'') as Impression_For_Front_Back_Sets_Charged, nullif(JEO.Printing_Charges_For_Front_Back_Sets,'') as Printing_Charges_For_Front_Back_Sets, nullif(JEO.Printing_Amount_For_Front_Back_Sets,'') as Printing_Amount_For_Front_Back_Sets, nullif(JEO.Proper_W_And_T_Sets,'') as Proper_W_And_T_Sets, nullif(JEO.Impression_For_W_and_T,'') as Impression_For_W_and_T, nullif(JEO.Impression_For_W_and_T_Charged,'') as Impression_For_W_and_T_Charged, nullif(JEO.Printing_Charges_For_W_and_T,'') as Printing_Charges_For_W_and_T, nullif(JEO.Printing_Amount_For_W_and_T,'') as Printing_Amount_For_W_and_T, nullif(JEO.Final_W_And_T_Multiple_Up_Sets,'') as Final_W_And_T_Multiple_Up_Sets, nullif(JEO.Impression_For_W_and_T_Multiple_Ups,'') as Impression_For_W_and_T_Multiple_Ups, nullif(JEO.Impression_For_W_and_T_Multiple_Ups_Charged,'') as Impression_For_W_and_T_Multiple_Ups_Charged, nullif(JEO.Printing_Charges_For_W_and_T_Multiple_Ups,'') as Printing_Charges_For_W_and_T_Multiple_Ups, nullif(JEO.Printing_Amount_For_W_and_T_Multiple_Ups,'') as Printing_Amount_For_W_and_T_Multiple_Ups, nullif(JEO.Front_Color_Names,'') as Front_Color_Names, nullif(JEO.Back_Color_Names,'') as Back_Color_Names, nullif(JEO.Remark,'') as Remark, nullif(JEO.Die_No,'') as Die_No, nullif(JEO.Plate_No,'') as Plate_No, nullif(JEO.Artwork_No,'') as Artwork_No, nullif(JEO.Main_Paper_Name,'') as Main_Paper_Name, nullif(JEO.Expected_Execution_Time,'') as Expected_Execution_Time, nullif(JEO.Plate_Type,'') as Plate_Type, nullif(JEO.Old_Plate_No,'') as Old_Plate_No, nullif(JEO.Apply_Perfection,'') as Apply_Perfection, nullif(JE.Job_Name,'') as Job_Name, nullif(PM.Rate_Type,'') as Rate_Type, nullif(PM.Paper_Name,'') as Paper_Name, nullif(PM.Paper_Code,'') as Paper_Code, JEO.Picture_Cutting, JEO.Picture_Printing, nullif(JE.Quotation_No,'') as Quotation_No, nullif(RM.Reel_Name,'') as Reel_Name, nullif(RM.Reel_Width,'') as Reel_Width, RM.Reel_ID, nullif(JEO.Special_Front_Color,'') as Special_Front_Color, nullif(JEO.Special_Back_Color,'') as Special_Back_Color, nullif(JEO.Stripping_Margin,'') as Stripping_Margin, nullif(JEO.Printing_Style,'') as Printing_Style,nullif(Coating_Amount,'') as Coating_Amount,nullif(Coating_Charges,'') as Coating_Charges,nullif(Special_Color_Front_Charges,'') as Special_Color_Front_Charges,nullif(Special_Color_Front_Amount,'') as Special_Color_Front_Amount,nullif(Special_Color_Back_Charges,'') as Special_Color_Back_Charges,nullif(Special_Color_Back_Amount,'') as Special_Color_Back_Amount  ,'(' + online_coating + ')' as  online_coating,JEO.Main_Paper_Name+' '+'Paper Size- '+JEO.Paper_Size+' '+'Cut Size -'+' '+JEO.Printing_Sheet_Size as SP_Paper_Name FROM            Job_Estimation AS JE INNER JOIN Job_Estimation_Contents AS JEO ON JE.BookingID = JEO.BookingID LEFT OUTER JOIN Paper_Master AS PM ON JEO.Paper_ID = PM.Paper_ID LEFT OUTER JOIN Reel_Master AS RM ON JEO.Paper_ID = RM.Reel_ID where JEO.BookingID='" & J_C_No & "'  And JEO.BookingID= " & CompanyID & " order by Content_Id,Quantity" '' Company will be changed
+        '        Select Case JEO.BookingID, JEO.JobContentsID, nullif(JEO.PlanContName,'') as Content_Name, nullif(JES.Pages,'') as Pages, nullif(JES.JobL,'') as Job_Length, nullif(JES.JobW,'') as Job_Width, nullif(JES.JobH,'') as Job_Height, nullif(JES.JobTrimming,'') as Job_Trimming, nullif(JES.ColorStrip,'') as Color_Strip, nullif(JES.Gripper,'') as Gripper, nullif(JES.FColor,'') as Front_Color, nullif(JES.BColor,'') as Back_Color, nullif(JES.PlanGrainDirection,'') As Grain_Direction_Main, nullif(JEO.GrainDirection,'')  As Work_and_Turn, JES.Paper, nullif(JES.PaperBy,'') as Paper_By, nullif(JEO.PlanContType,'') as Orientation, nullif(JEO.PlanConQty,'') as Quantity, nullif(JEO.Job_Close_Size,'') As Job_Close_Size, 0 As F_B_Sets_Rate, 0 As W_T_Sets_Rate, 0 as W_T_Multiple_Sets_Rate, nullif(JES.PrintingMargin,'') As Printing_Margin, nullif(JEO.MachineName,'') As Machine_Name, Nullif(JEO.Gripper,'') AS Gripper, nullif(JEO.GripperSide,'') as GripperSide, nullif(JEO.MachineColors,'') as Machine_Colors, nullif(JEO.PaperSize,'') as Paper_Size, nullif(JEO.PrintingSheetSize,'') as Printing_Sheet_Size, nullif(JEO.CutL,'') as Cut_L, nullif(JEO.CutW,'') as Cut_W, nullif(JEO.UpsL,'') as Ups_L, nullif(JEO.UpsW,'') as Ups_W, nullif(JEO.TotalUps,'') as Ups_Total, nullif(JEO.BalPiece,'') as Balance_Piece, nullif(JEO.WastePer,'') as Waste_In_Percentage, nullif(JEO.WastageKg,'') as Paper_Wastage_In_Kg, nullif(JEO.GrainDirection,'') as Grain_Direction, nullif(JEO.PlateQty,'') as Plate_Quantity, nullif(JEO.PlateRate,'') as Plate_Rate, nullif(JEO.PlateAmount,'') as Plate_Amount, nullif(JEO.MakeReadySheetsTotal,'') as Make_Ready_Sheets_Total, nullif(JEO.ActualSheets,'') as Actual_Sheets, nullif(JEO.WastageSheets,'') as Wastage_Sheets, nullif(JEO.TotalPaperWeightInKg,'') as Total_Paper_In_Kg, nullif(JEO.FullSheets,'') as Full_Sheets, nullif(JEO.PaperRate,'') as Paper_Rate, nullif(JEO.PaperAmount,'') as Paper_Amount, nullif(JEO.PrintingImpressions,'') as Printing_Impressions, nullif(JEO.ImpressionsToBeCharged,'') as Impression_To_Be_Charged, nullif(JEO.PrintingRate,'') as Printing_Rate, nullif(JEO.PrintingAmount,'') as Printing_Amount, nullif(JEO.MakeReadies,'') as Make_Readies, nullif(JEO.MakeReadyRate,'') as Make_Ready_Rate, nullif(JEO.MakeReadyAmount,'') as Make_Ready_Amount, nullif(JEO.FinalQuantity,'') as Final_Quantity, nullif(JEO.TotalAmount,'') as Total_Amount, nullif(JEO.TotalCost,'') as Total_Cost, nullif(JEO.OverlapFlap,'') as Overlap_Flap, nullif(JEO.BottomFlap,'') as Bottom_Flap, nullif(JEO.OpenFlap,'') as Open_Flap, nullif(JEO.NoOfSets,'') as No_Of_Sets_Of_Front_Back, '' as Impression_For_Front_Back_Sets, '' as Impression_For_Front_Back_Sets_Charged, '' as Printing_Charges_For_Front_Back_Sets, '' as Printing_Amount_For_Front_Back_Sets, '' as Proper_W_And_T_Sets, '' as Impression_For_W_and_T, 0 as Impression_For_W_and_T_Charged, 0 as Printing_Charges_For_W_and_T, 0 Printing_Amount_For_W_and_T, 0 as Final_W_And_T_Multiple_Up_Sets, 0 as Impression_For_W_and_T_Multiple_Ups, 0 as Impression_For_W_and_T_Multiple_Ups_Charged, 0 as Printing_Charges_For_W_and_T_Multiple_Ups, 0 as Printing_Amount_For_W_and_T_Multiple_Ups, '' As Front_Color_Names, 0 as Back_Color_Names, nullif(JE.Remark,'') As Remark, nullif(JEO.Die_No,'') as Die_No, nullif(JEO.PlateNo,'') as Plate_No, nullif(JEO.ArtworkNo,'') as Artwork_No, nullif(JEO.ExpectedExecutionTime,'') as Expected_Execution_Time, nullif(JEO.PlateType,'') as Plate_Type, nullif(JEO.Old_Plate_No,'') as Old_Plate_No, '' as Apply_Perfection, nullif(JE.JobName,'') as Job_Name, nullif(PM.Rate_Type,'') as Rate_Type, nullif(PM.Paper_Name,'') as Paper_Name, nullif(PM.Paper_Code,'') as Paper_Code, JEO.PictureCutting, JEO.PicturePrinting, nullif(JE.BookingNo,'') as Quotation_No, nullif(RM.Reel_Name,'') as Reel_Name, nullif(RM.Reel_Width,'') as Reel_Width, RM.Reel_ID, 0 as Special_Front_Color, 0 as Special_Back_Color, 0 as Stripping_Margin, nullif(JEO.PrintingStyle,'') as Printing_Style,nullif(CoatingAmount,'') as Coating_Amount,nullif(CoatingCharges,'') as Coating_Charges,nullif(SpeColorFCharges,'') as Special_Color_Front_Charges,nullif(SpeColorFAmt,'') as Special_Color_Front_Amount,nullif(SpeColorBCharges,'') as Special_Color_Back_Charges,nullif(SpeColorBAmt,'') as Special_Color_Back_Amount  ,JEO.Main_Paper_Name+' '+'Paper Size- '+JEO.PaperSize+' '+'Cut Size -'+' '+JEO.CutSize As SP_Paper_Name 
+        'From JobBooking As JE INNER Join JobBookingContents As JEO On JE.BookingID = JEO.BookingID LEFT OUTER Join Paper_Master As PM On JEO.PaperID = PM.Paper_ID LEFT OUTER Join Reel_Master As RM On JEO.PaperID = RM.Reel_ID Where JEO.BookingID = 6 And JEO.BookingID = 2 Order By ContentId, Quantity
+
+        db.FillDataTable(dataTable, str)
+        data.Message = ConvertDataTableTojSonString(dataTable)
+        Return js.Serialize(data.Message)
+    End Function
+
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function Quotation_Send_For_Approval(ByVal BookingId As Integer, ByVal flag_send As String) As String
+        CompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+        Dim Ret_var As String = ""
+        If flag_send = "send" Then
+            str = "Update Job_Estimation Set Is_For_Approval = 1 Where BookingId = '" & BookingId & "' And Is_Approved = 0 And CompanyID = " & CompanyID & "  " '' Company will be changed
+            Ret_var = "Approved"
+        Else
+            str = "Update Job_Estimation Set Is_For_Approval = 0 Where BookingId = '" & BookingId & "' And Is_Approved = 0 And CompanyID = " & CompanyID & "  " '' Company will be changed
+            Ret_var = "DisApproved"
+        End If
+        db.FillDataTable(dataTable, str)
+        data.Message = ConvertDataTableTojSonString(dataTable)
+        Return Ret_var
+    End Function
+
+
+    Public Class HelloWorldData
+        Public Message As [String]
+    End Class
+End Class
+

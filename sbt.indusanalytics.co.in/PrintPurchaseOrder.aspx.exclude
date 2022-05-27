@@ -1,0 +1,483 @@
+﻿<%@ Page Language="VB" AutoEventWireup="false" CodeFile="PrintPurchaseOrder.aspx.vb" Inherits="PrintPurchaseOrder" %>
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <title>Welcome To | Indus Analytics</title>
+    <!-- Favicon-->
+    <link rel="icon" href="images/Indus%20logo.ico" type="image/x-icon">
+    <style>
+        .ContentDetails {
+            font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+            border-collapse: collapse;
+            width: 97.5%;
+        }
+
+            .ContentDetails td, .ContentDetails th {
+                border: 1px solid #ddd;
+                padding: 8px;
+                padding-top: 4px;
+                padding-Bottom: 4px;
+                font-size: 12px;
+                font: bold;
+                word-wrap: break-word;
+            }
+
+            /*.Content_Details tr:nth-child(even) {
+                background-color: #f2f2f2;
+                font-size: 12px;
+            }*/
+
+            .ContentDetails tr:hover {
+                background-color: #ddd;
+            }
+
+            .ContentDetails th {
+                padding-top: 5px;
+                padding-bottom: 5px;
+                text-align: left;
+                background-color: #fff;
+                color: #000;
+            }
+
+        .forTextBox {
+            padding: 5px 5px;
+            display: inline-block;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 12px;
+            font-family: DXIcons,Helvetica, sans-serif;
+            width: 100%;
+            height: 30px;
+            -webkit-transition: all 0.30s ease-in-out;
+            -moz-transition: all 0.30s ease-in-out;
+            -ms-transition: all 0.30s ease-in-out;
+            -o-transition: all 0.30s ease-in-out;
+            border: 1px solid #DDDDDD;
+            outline: none;
+        }
+    </style>
+
+</head>
+<body>
+    <form id="form1" runat="server">
+        <div>
+            <div style="width: 100%; height: 99%; float: left; border: 2px solid; font-family: Arial;">
+                <script src="js/2.2.3%20jquery.min.js"></script>
+
+                <link href="css/DxCommon.css" rel="stylesheet" type="text/css" />
+                <link href="css/DxLight.css" rel="stylesheet" type="text/css" />
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.2/jszip.min.js"></script>
+                <%--Use for Export data --%>
+                <script src="https://cdn3.devexpress.com/jslib/16.2.4/js/dx.all.js"></script>
+                <%-- DevExpress Control Grid --%>
+
+
+                <span id="lblData"></span><span id="dd"></span>
+                <script type="text/javascript">
+
+                    var TBLQtyCol = "", TBLQtyColCharges = "", DistinctProductDiv = "", DistinctChargesDiv = "";
+                    var TxtPOID = "";
+                    var BasicAmtPrint = 0;
+                    var queryString = new Array();
+                    $(function () {
+                        if (queryString.length === 0) {
+                            if (window.location.search.split('?').length > 1) {
+                                var params = window.location.search.split('?')[1].split('&');
+                                for (var i = 0; i < params.length; i++) {
+                                    var key = params[i].split('=')[0];
+                                    var value = decodeURIComponent(params[i].split('=')[1]);
+                                    queryString[key] = value;
+                                }
+                            }
+                        }
+                        //   alert(queryString["BN"]);
+                        if (queryString["TI"] != null) {
+                            TxtPOID = ""
+                            TxtPOID = queryString["TI"];
+
+                            if (TxtPOID != "") {
+                                document.getElementById("DivProductDetails").innerHTML = "";
+                                document.getElementById("DivChargesDetails").innerHTML = "";
+                                document.getElementById("DivTaxDetails").innerHTML = "";
+                                
+
+                                $.ajax({
+                                    type: "POST",
+                                    url: 'WebService_PurchaseOrder.asmx/PrintPO',
+                                    data: '{transactionID:' + JSON.stringify(TxtPOID) + '}',
+                                    contentType: 'application/json; charset=utf-8',
+                                    dataType: 'text',
+                                    success: function (results) {
+                                        var res = results.replace(/\\/g, '');
+                                        res = res.replace(/""/g, '');
+                                        res = res.replace(/"d":/g, '');
+                                        res = res.substr(1);
+                                        res = res.slice(0, -1);
+                                        var HeaderRES1 = JSON.parse(res.toString());
+
+                                        $.ajax({
+                                            type: "POST",
+                                            url: 'WebService_PurchaseOrder.asmx/RetrivePoCreateGrid_ForPrint',
+                                            data: '{transactionID:' + JSON.stringify(TxtPOID) + '}',
+                                            contentType: 'application/json; charset=utf-8',
+                                            dataType: 'text',
+                                            success: function (results) {
+                                                var res = results.replace(/\\/g, '');
+                                                res = res.replace(/""/g, '');
+                                                res = res.replace(/"d":/g, '');
+                                                res = res.substr(1);
+                                                res = res.slice(0, -1);
+                                                RES1 = JSON.parse(res.toString());
+                                                
+                                                $.ajax({
+                                                    type: "POST",
+                                                    url: 'WebService_PurchaseOrder.asmx/RetrivePoOverHead',
+                                                    data: '{transactionID:' + JSON.stringify(TxtPOID) + '}',
+                                                    contentType: 'application/json; charset=utf-8',
+                                                    dataType: 'text',
+                                                    success: function (results) {
+                                                        var res = results.replace(/\\/g, '');
+                                                        res = res.replace(/""/g, '');
+                                                        res = res.replace(/"d":/g, '');
+                                                        res = res.substr(1);
+                                                        res = res.slice(0, -1);
+                                                        var ChargesRES1 = JSON.parse(res.toString());
+
+                                                        //TaxDetails
+                                                        $.ajax({
+                                                            type: "POST",
+                                                            url: 'WebService_PurchaseOrder.asmx/RetrivePoCreateTaxChares',
+                                                            data: '{transactionID:' + JSON.stringify(TxtPOID) + '}',
+                                                            contentType: 'application/json; charset=utf-8',
+                                                            dataType: 'text',
+                                                            success: function (results) {
+                                                                var res = results.replace(/\\/g, '');
+                                                                res = res.replace(/""/g, '');
+                                                                res = res.replace(/"d":/g, '');
+                                                                res = res.substr(1);
+                                                                res = res.slice(0, -1);
+                                                                var TaxRES1 = JSON.parse(res.toString());
+                                                               
+                                                               
+                                                        var ChargesTblTr = "";
+                                                        var TblTr = "";
+                                                        if (RES1.length > 0) {
+                                                            TblTr = "";
+                                                            TBLQtyCol = "";
+                                                            BasicAmtPrint = 0;
+                                                            for (var i = 0; i < RES1.length; i++) {
+                                                                var SNO = i + 1;
+                                                                BasicAmtPrint = Number(BasicAmtPrint) + Number(RES1[i].BasicAmount);
+                                                                TBLQtyCol = "<td>" + SNO + "</td><td>" + RES1[i].ItemDescription + "</td><td>" + RES1[i].HSNCode + "</td><td>" + RES1[i].PurchaseUnit + "</td><td>" + RES1[i].PurchaseQuantity + "</td><td>" + RES1[i].PurchaseRate + "</td><td>" + RES1[i].BasicAmount + "</td><td>" + RES1[i].Disc + "</td><td>" + RES1[i].TaxableAmount + "</td><td>" + RES1[i].ExpectedDeliveryDate + "</td><td>" + RES1[i].CGSTTaxPercentage + "</td><td>" + RES1[i].CGSTAmt + "</td><td>" + RES1[i].SGSTTaxPercentage + "</td><td>" + RES1[i].SGSTAmt + "</td><td>" + RES1[i].IGSTTaxPercentage + "</td><td>" + RES1[i].IGSTAmt + "</td><td>" + RES1[i].TotalAmount + "</td>";
+                                                                TblTr += "<tr>" + TBLQtyCol + "</tr>";
+                                                            }
+
+                                                            DistinctProductDiv = "";
+                                                            DistinctProductDiv += "<div style='float: left; width: 100%; height: auto;margin-bottom:0em;padding-right:1em'><strong style='font-size: 15px'>PO Details :-</strong>" +
+                                                                          "<table class='ContentDetails'><thead style='height: 0em; border: 2px solid #eee;'>" +
+                                                                          "<tr><th style='width: 80px'>S.N.</th><th style='width: 100px'>Desciption</th><th style='width: 150px'>HSN Code</th><th style='width: 150px'>Unit</th><th style='width: 150px'>Quantity</th><th style='width: 150px'>Rate</th><th style='width: 150px'>Total Value</th ><th style='width: 150px'>Dis.Amt</th><th style='width: 150px'>Taxable Value</th><th style='width: 150px'>Expect Deli. Date</th><th style='width: 150px'>CGST Rate%</th><th style='width: 150px'>CGST Amt</th><th style='width: 150px'>SGST Rate%</th><th>SGST Amt</th><th style='width: 150px'>IGST Rate%</th><th style='width: 150px'>IGST Amt</th><th style='width: 150px'>Net Amt</th>     </tr></thead>" +
+                                                                          "<tbody>" + TblTr + "</tbody></table></div>";
+
+                                                            $('#DivProductDetails').append(DistinctProductDiv);
+
+                                                        }
+                                                        else {
+                                                            TblTr = "";
+                                                            TBLQtyCol = "";
+                                                            TBLQtyCol = "<td style='border-top:none;border-right:none;width:80px'>No Data</td><td style='border-left:none;border-top:none;border-right:none'></td><td style='border-left:none;border-top:none;border-right:none'></td><td style='border-left:none;border-top:none;border-right:none'></td><td style='border-top:none;border-left:none;border-right:none'></td><td style='border-top:none;border-left:none;border-right:none'></td><td style='border-top:none;border-left:none;border-right:none'></td><td style='border-top:none;border-left:none;border-right:none'></td><td style='border-top:none;border-left:none;border-right:none'></td><td style='border-top:none;border-left:none;border-right:none'></td><td style='border-top:none;border-left:none;border-right:none'></td><td style='border-top:none;border-left:none;border-right:none'></td><td style='border-top:none;border-left:none;border-right:none'></td><td style='border-top:none;border-left:none;border-right:none'></td><td style='border-top:none;border-left:none;border-right:none'></td><td style='border-top:none;border-left:none;border-right:none'></td><td style='border-top:none;border-left:none;'></td>";
+                                                            TblTr += "<tr>" + TBLQtyCol + "</tr>";
+
+                                                            DistinctProductDiv = "";
+                                                            DistinctProductDiv += "<div style='float: left; width: 100%; height: auto;margin-bottom:0em'><strong style='font-size: 15px'>PO Details :-</strong>" +
+                                                                          "<table class='ContentDetails'><thead style='height: 0em; border: 2px solid #eee;'>" +
+                                                                          "<tr><th style='width: 80px'>S.N.</th><th style='width: 150px'>Desciption</th><th style='width: 150px'>HSN Code</th><th style='width: 150px'>Unit</th><th style='width: 150px'>Quantity</th><th style='width: 150px'>Rate</th><th style='width: 150px'>Total Value</th ><th style='width: 150px'>Dis.Amt</th><th style='width: 150px'>Taxable Value</th><th style='width: 150px'>Expect Deli. Date</th><th style='width: 150px'>CGST Rate%</th><th style='width: 150px'>CGST Amt</th><th style='width: 150px'>SGST Rate%</th><th>SGST Amt</th><th style='width: 150px'>IGST Rate%</th><th style='width: 150px'>IGST Amt</th><th style='width: 150px'>Net Amt</th>     </tr></thead>" +
+                                                                          "<tbody>" + TblTr + "</tbody></table></div>";
+
+                                                            $('#DivProductDetails').append(DistinctProductDiv);
+                                                        }
+
+                                                        if (ChargesRES1.length > 0) {
+                                                            ChargesTblTr = "";
+                                                            TBLQtyColCharges = "";
+
+                                                            for (var i = 0; i < ChargesRES1.length; i++) {
+                                                                var SNO = i + 1;
+                                                                TBLQtyColCharges = "<td>" + SNO + "</td><td>" + ChargesRES1[i].Head + "</td><td>" + ChargesRES1[i].Rate + "</td><td>" + ChargesRES1[i].RateType + "</td><td>" + ChargesRES1[i].HeadAmount + "</td>";
+                                                                ChargesTblTr += "<tr>" + TBLQtyColCharges + "</tr>";
+                                                            }
+
+                                                            DistinctProductDiv = "";
+                                                            DistinctProductDiv += "<div style='float: left; width: 100%; height: auto;margin-bottom:0em'><b>Other Heads</b>" +
+                                                                          "<table class='ContentDetails'><thead style='height: 0em; border: 2px solid #eee;'>" +
+                                                                          "<tr><th style='width: 80px'>S.N.</th><th style='width: 150px'>Head Name</th><th style='width: 150px'>Rate</th><th style='width: 150px'>Rate Type</th><th style='width: 150px'>Head Amount</th>      </tr></thead>" +
+                                                                          "<tbody>" + ChargesTblTr + "</tbody></table></div>";
+
+                                                            $('#DivChargesDetails').append(DistinctProductDiv);
+                                                        }
+                                                        else {
+                                                            //ChargesTblTr = "";
+                                                            //TBLQtyColCharges = "";
+                                                            //TBLQtyColCharges = "<td style='border-top:none;border-right:none;width:80px'>No Data</td><td style='border-top:none;border-left:none;border-right:none'></td><td style='border-top:none;border-left:none;border-right:none'></td><td style='border-top:none;border-left:none;border-right:none'></td><td style='border-top:none;border-left:none;'></td>";
+                                                            //ChargesTblTr += "<tr>" + TBLQtyColCharges + "</tr>";
+
+                                                            //DistinctChargesDiv = "";
+                                                            //DistinctChargesDiv += "<div style='float: left; width: 100%; height: auto;margin-bottom:0em'>" +
+                                                            //              "<table class='ContentDetails'><thead style='height: 0em; border: 2px solid #eee;'>" +
+                                                            //              "<tr><th style='width: 80px'>S.N.</th><th style='width: 150px'>Head Name</th><th style='width: 150px'>Rate</th><th style='width: 150px'>Rate Type</th><th style='width: 150px'>Head Amount</th>    </tr></thead>" +
+                                                            //              "<tbody>" + ChargesTblTr + "</tbody></table></div>";
+
+                                                            //$('#DivChargesDetails').append(DistinctChargesDiv);
+
+                                                        }
+
+                                                       var TaxTblTr = "";
+                                                       var TBLQtyColTax = "";
+                                                        if (TaxRES1.length > 0) {
+                                                            TaxTblTr = "";
+                                                            TBLQtyColTax = "";
+                                                         
+                                                            for (var n = 0; n < TaxRES1.length; n++) {
+                                                                var SNO = n + 1;
+                                                                
+                                                                TBLQtyColTax = "<td>" + SNO + "</td><td>" + TaxRES1[n].LedgerName + "</td><td>" + TaxRES1[n].TaxRatePer + "</td><td>" + TaxRES1[n].ChargesAmount + "</td>";
+                                                                TaxTblTr += "<tr>" + TBLQtyColTax + "</tr>";
+                                                            }
+
+                                                            DistinctProductDiv = "";
+                                                            DistinctProductDiv += "<div style='float: left; width: 100%; height: auto;margin-bottom:0em'><b>Taxes</>" +
+                                                                          "<table class='ContentDetails'><thead style='height: 0em; border: 2px solid #eee;'>" +
+                                                                          "<tr><th style='width: 80px'>S.N.</th><th style='width: 150px'>Tax Ledger</th><th style='width: 150px'>Rate</th><th style='width: 150px'>Tax Amount</th>      </tr></thead>" +
+                                                                          "<tbody>" + TaxTblTr + "</tbody></table></div>";
+
+                                                            $('#DivTaxDetails').append(DistinctProductDiv);
+                                                        }
+
+                                                        if (HeaderRES1.length > 0) {
+                                                            
+                                                            var TxtNetAmt = Number(HeaderRES1[0].NetAmount) + Number(HeaderRES1[0].TotalOverHeadAmount) ;
+                                                            if (TxtNetAmt == "" || TxtNetAmt == undefined || TxtNetAmt == null) {
+                                                                TxtNetAmt = 0;
+                                                            }
+                                                            $.ajax({
+                                                                type: "POST",
+                                                                url: 'WebService_PurchaseOrder.asmx/InWords',
+                                                                data: '{TxtNetAmt:' + JSON.stringify(TxtNetAmt) + '}',
+                                                                contentType: 'application/json; charset=utf-8',
+                                                                dataType: 'text',
+                                                                success: function (results) {
+                                                                    var res = JSON.stringify(results);
+                                                                    res = res.replace(/\\/g, '');
+                                                                    res = res.replace(/"d\":/g, '');
+                                                                    res = res.replace(/{/g, '');
+                                                                    res = res.replace(/}/g, '');
+                                                                    res = res.substr(1);
+                                                                    res = res.slice(0, -1);
+
+                                                                    if (res != "fail") {
+                                                                        document.getElementById("spAmtInWord").innerHTML = res;
+                                                                    }
+
+                                                                }
+                                                            });
+
+                                                            document.getElementById("spPONO").innerHTML = HeaderRES1[0].VoucherNo;
+                                                            document.getElementById("spPODate").innerHTML = HeaderRES1[0].VoucherDate;
+                                                            document.getElementById("spSGSTIN").innerHTML = HeaderRES1[0].GSTNo;
+                                                            document.getElementById("spSAddress").innerHTML = HeaderRES1[0].SuppAddress;
+                                                            document.getElementById("spName").innerHTML = HeaderRES1[0].CompanyName;
+                                                            document.getElementById("spRGSTIN").innerHTML = HeaderRES1[0].GSTIN;
+                                                            document.getElementById("spRState").innerHTML = HeaderRES1[0].CompanyState;
+                                                            document.getElementById("spRAddress").innerHTML = HeaderRES1[0].CompanyAddress;
+                                                            document.getElementById("spDAddress").innerHTML = HeaderRES1[0].DeliveryAddress;
+                                                            document.getElementById("ModeOfTransport").value = HeaderRES1[0].ModeOfTransport;
+                                                            document.getElementById("Remark").value = HeaderRES1[0].Narration;
+                                                            document.getElementById("Terms").value = "";
+                                                            document.getElementById("PaymentDelivery").value = HeaderRES1[0].TermsOfPayment;
+                                                            document.getElementById("spPreparedBy").innerHTML = HeaderRES1[0].CreatedBy;
+                                                            document.getElementById("spCheckedBy").value = HeaderRES1[0].CreatedBy;
+                                                            document.getElementById("spApprovedBy").value = HeaderRES1[0].ApprovedBy;
+                                                            document.getElementById("CompanyName").innerHTML = HeaderRES1[0].CompanyName;
+                                                            document.getElementById("TotalAmt").innerHTML = parseFloat(BasicAmtPrint).toFixed(2);//parseFloat(HeaderRES1[0].NetAmount).toFixed(2);
+                                                            document.getElementById("GrandTotalAmt").innerHTML = parseFloat(Number(HeaderRES1[0].NetAmount) + Number(HeaderRES1[0].TotalOverHeadAmount)).toFixed(2);
+                                                        }
+
+
+                                                            }
+                                                        });
+                                                    }
+                                                });
+                                            },
+                                        });
+                                    }
+                                });
+                            }
+                        }
+                    });
+
+
+                </script>
+                <%--<img src=" &  & " height="130" width="1000" style="margin-left: 1em; margin-right: 1em" />--%>
+                <div id="ImgQ">
+                    <%--<img src="s" id="ImgQuote"  height="130" width="1000" style="margin-left: 1em; margin-right: 1em" />--%>
+                </div>
+                <div style="float: left; width: 100%;">
+                    <div style="float: left; width: 100%; text-align: center; margin-top: 1em"><b>PURCHASE ORDER</b></div>
+
+                    <table class='ContentDetails' style="margin: 15px">
+                        <tbody>
+                            <tr>
+                                <td style="width: 200px">
+                                    <label style="font: bold; font-size: 16px">Supplier Details :- </label>
+                                </td>
+                                <td style="width: 200px">
+                                    <label style="font: bold; font-size: 16px">Receiver Details :-</label></td>
+                                <td style="width: 200px">
+                                    <label style="font: bold; font-size: 16px">Delivery Details :-</label></td>
+                            </tr>
+                            <tr>
+                                <td style="width: 200px">
+                                    <div style="float: left; width: 100%">
+                                        <div style="float: left; width: 100px">PO NO :</div>
+                                        <div style="float: left;"><span id="spPONO"></span></div>
+                                    </div>
+                                    <div style="float: left; width: 100%">
+                                        <div style="float: left; width: 100px">PO Date :</div>
+                                        <div style="float: left;"><span id="spPODate"></span></div>
+                                    </div>
+                                    <div style="float: left; width: 100%">
+                                        <div style="float: left; width: 100px">GSTIN :</div>
+                                        <div style="float: left;"><span id="spSGSTIN"></span></div>
+                                    </div>
+                                    <div style="float: left; width: 100%">
+                                        <div style="float: left; width: 100px">Address :</div>
+                                        <div style="float: left;"><span id="spSAddress"></span></div>
+                                    </div>
+                                </td>
+                                <td style="width: 200px">
+                                    <div style="float: left; width: 100%">
+                                        <div style="float: left; width: 100px">Name :</div>
+                                        <div style="float: left;"><span id="spName"></span></div>
+                                    </div>
+                                    <div style="float: left; width: 100%">
+                                        <div style="float: left; width: 100px">GSTIN :</div>
+                                        <div style="float: left;"><span id="spRGSTIN"></span></div>
+                                    </div>
+                                    <div style="float: left; width: 100%">
+                                        <div style="float: left; width: 100px">State :</div>
+                                        <div style="float: left;"><span id="spRState"></span></div>
+                                    </div>
+                                    <div style="float: left; width: 100%">
+                                        <div style="float: left; width: 100px">Address :</div>
+                                        <div style="float: left;"><span id="spRAddress"></span></div>
+                                    </div>
+                                </td>
+                                <td style="width: 200px">
+                                    <div style="float: left; width: 100%">
+                                        <div style="float: left; width: 100px">Address :</div>
+                                        <div style="float: left;"><span id="spDAddress"></span></div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div id="DivProductDetails" style="float: left; width: 100%; height: auto; padding-left: 1em">
+                    </div>
+
+                    <div style="float: left; margin-top: .5em; width: 100%">
+                        <table class='ContentDetails' style="margin: 15px; margin-top: 0px; margin-bottom: 0px;">
+                            <tbody>
+                                <tr>
+                                    <td style="width: 300px"><span style="float: right;">Total </span></td>
+                                    <td style="width: 20px"><span style="float: right;" id="TotalAmt"></span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div id="DivTaxDetails" style="float: left; margin-top: .2em; width: 100%; height: auto; padding-left: 1em">
+                    </div>
+
+                    <div id="DivChargesDetails" style="float: left; margin-top: .2em; width: 100%; height: auto; padding-left: 1em">
+                    </div>
+                </div>
+
+                <div style="float: left; margin-top: 0em; width: 100%; padding-left: 2px; padding-right: 2px">
+                    <table class='ContentDetails' style="margin: 15px; margin-top: 0px; margin-bottom: 0px;">
+                        <tbody>
+                            <tr>
+                                <td style="width: 300px"><span style="float: left;">Amount (Inwords) :</span><span style="float: left;" id="spAmtInWord"></span></td>
+                                <td style="width: 200px"><span style="float: right;">Total </span></td>
+                                <td style="width: 50px"><span style="float: right;" id="GrandTotalAmt"></span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div style="float: left; margin-top: .5em; width: 100%">
+                    <table class='ContentDetails' style="margin: 15px; margin-top: 0px; margin-bottom: 0px;">
+                        <tbody>
+                            <tr>
+                                <td style="width: 150px">Mode Of Transport :- </td>
+                                <td>
+                                    <input type="text" id="ModeOfTransport" class="forTextBox" /></td>
+                                <td style="width: 100px">Remark :- </td>
+                                <td>
+                                    <input type="text" id="Remark" class="forTextBox" /></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="Footer" style="float: left; margin-bottom: 0em; width: 100%">
+                    <table class='ContentDetails' style="margin: 15px; margin-top: 0px; margin-bottom: 0px">
+                        <tbody>
+                            <tr>
+                                <td style="width: 150px">Note :- </td>
+                                <td>
+                                    <textarea id="Terms" class="forTextBox" style="border: none; height: 40px"></textarea></td>
+                                <td style="width: 150px">Payment & Delivery :- </td>
+                                <td>
+                                    <textarea id="PaymentDelivery" class="forTextBox" style="border: none; height: 40px"></textarea></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <table class='ContentDetails' style="margin: 15px; margin-top: 0px; margin-bottom: 0px">
+                        <tbody>
+                            <tr>
+                                <td style="width: 100px">Accepted :- </td>
+                                <td style="width: 200px">
+                                    <input type="text" class="forTextBox" style="border: none; height: 30px" placeholder="Sign & Seal" /></td>
+                                <td style="width: 100px">Prepared By :- </td>
+                                <td><span id="spPreparedBy"></span></td>
+                                <td style="width: 100px">Checked By :- </td>
+                                <td><span id="spCheckedBy"></span></td>
+                                <td style="width: 100px">Approved By :- </td>
+                                <td><span id="spApprovedBy"></span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div style="float: left; margin-top: 1em; width: 100%; height: auto; padding-left: 1em">
+                    <strong style="font-size: 15px">Thank You</strong><br />
+                    <strong style="font-size: 15px">For : </strong>
+                    <span id="CompanyName"></span>
+                </div>
+
+                <div id="SignImg" style="float: left; margin-left: 1em; margin-right: 1em; width: 100%">
+                    <%--<img src="images/sig.jpg" height="90" width="300" style="float: left; margin-left: 1em; margin-right: 1em; margin-top: 0.5em" />--%>
+                </div>
+                <br />
+                <div id="Person" style="float: left; margin-left: 1em; margin-top: 1em"></div>
+                <br />
+                <br />
+            </div>
+        </div>
+    </form>
+</body>
+</html>

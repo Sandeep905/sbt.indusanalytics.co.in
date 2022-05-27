@@ -1,0 +1,45 @@
+﻿<%@ Page Title="" Language="VB" MasterPageFile="~/MasterPageMIS.master" AutoEventWireup="false" CodeFile="JobFloorStatus.aspx.vb" Inherits="JobFloorStatus" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="head" Runat="Server">
+</asp:Content>
+<asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+    <div class="row padding-0 margin-0">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-0 margin-0">
+            
+            <div class="col-lg-3 col-md-4 col-sm-5 col-xs-12">
+                <b class="font-11">Client</b>
+                <div id="SelClient"></div>
+                <textarea id="ClientsID" class="hidden"></textarea>
+            </div>
+            <div class="col-lg-3 col-md-4 col-sm-5 col-xs-12">
+                <b class="font-11">Department</b>
+                <div id="SelDepartment"></div>
+                <textarea id="DepartmentsID" class="hidden"></textarea>
+            </div>
+
+            <div class="col-lg-1 col-md-1 col-sm-2 col-xs-4" style="text-align: right;">
+                <br class="hidden-xs" />
+                <input type="checkbox" id="IsActiveDate" class="filled-in chk-col-red" />
+                <label for="IsActiveDate">Job Date</label>
+            </div>
+            <div class="col-lg-2 col-md-3 col-sm-3 col-xs-8">
+                <b>From Time</b>
+                <div id="FromDate"></div>
+            </div>
+            <div class="col-lg-2 col-md-3 col-sm-3 col-xs-8">
+                <b>To Time</b>
+                <div id="ToDate"></div>
+            </div>
+            
+            <div class="col-lg-1 col-md-2 col-sm-3 col-xs-4">
+                <br class="hidden-xs" />
+                <input type="button" name="BtnRefresh" onclick="BtnRefreshclick()" id="BtnRefresh" class="btn btn-primary" value="Refresh" />
+            </div>
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <div id="GridReport"></div>
+            </div>
+        </div>
+    </div>
+    <script src="CustomJS/JobFloorStatus.js"></script>
+</asp:Content>
+

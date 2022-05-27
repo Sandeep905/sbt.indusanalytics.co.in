@@ -1,0 +1,37 @@
+﻿
+Imports System.Data
+Imports Connection
+Imports Microsoft.Reporting.WebForms
+
+Partial Class PrintOutsourcePayment
+    Inherits System.Web.UI.Page
+
+    Dim GBLCompanyID, QueryStr, TransactionID As String
+    Dim db As New DBConnection
+
+    Protected Sub Page_Load(sender As Object, e As EventArgs) Handles Me.Load
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyId"))
+        TransactionID = Convert.ToString(HttpContext.Current.Request.QueryString("TransID"))
+
+        If Not IsPostBack Then
+
+            ReportViewer1.Reset()
+            ReportViewer1.LocalReport.ReportPath = Server.MapPath("~/PrintOutsourcePayment.rdlc")
+
+            QueryStr = "SELECT Distinct PE.FromTime,PE.ToTime,OPM.OutsourcePaymentID,OPD.PaymentDetailsID, OPM.VoucherID, OPM.VoucherNo, OPM.VoucherDate , PE.JobBookingJobCardContentsID, OPM.VendorID, OPM.TotalProductionQty, OPM.TotalPaymentQty, OPM.TotalRejectedQty, OPM.TotalAmount, OPD.PaymentDetailsID, OPD.ProductionID, OPD.MachineID, OPD.EmployeeID, OPD.TransID, OPD.ProductionQty, OPD.PaymentQty As Quantity, OPD.RejectedQty, OPD.Rate, OPD.RateType, OPD.Amount, EM.LedgerName As OperatorName,LM.LedgerName, MM.MachineName, UM.UserName As CreatedBy,PM.ProcessName,PE.RateFactor, JBJC.JobCardContentNo, JSR.JobName, JSR.JobCardFormNO,JBJC.PlanContName,OPD.ConversionFactor " &
+                  " FROM OutsourcePaymentMain AS OPM INNER JOIN " &
+                  " OutsourcePaymentDetails AS OPD ON OPM.OutsourcePaymentID = OPD.OutsourcePaymentID AND OPM.CompanyID = OPD.CompanyID And OPM.IsDeletedTransaction=0 And OPD.IsDeletedTransaction=0 INNER JOIN LedgerMaster AS LM ON OPM.VendorID = LM.LedgerID AND LM.CompanyID = OPM.CompanyID INNER JOIN UserMaster AS UM ON UM.UserID = OPM.CreatedBy AND UM.CompanyID = OPM.CompanyID INNER JOIN " &
+                  " MachineMaster AS MM ON OPD.MachineID = MM.MachineId AND OPD.CompanyID = MM.CompanyID INNER JOIN ProductionEntry AS PE ON MM.MachineId = PE.MachineID AND OPD.ProductionID = PE.ProductionID AND OPD.JobBookingJobCardContentsID = PE.JobBookingJobCardContentsID AND OPD.EmployeeID = PE.EmployeeID INNER JOIN LedgerMaster AS EM ON OPD.EmployeeID = EM.LedgerID AND EM.CompanyID = OPM.CompanyID INNER JOIN" &
+                  " ProcessMaster AS PM ON PE.ProcessID = PM.ProcessID AND PE.CompanyID = PM.CompanyID INNER JOIN JobBookingJobCardContents AS JBJC ON PE.JobBookingJobCardContentsID = JBJC.JobBookingJobCardContentsID AND PE.JobBookingID = JBJC.JobBookingID AND PE.CompanyID = JBJC.CompanyID INNER JOIN JobScheduleRelease AS JSR ON JBJC.JobBookingJobCardContentsID = JSR.JobBookingJobCardContentsID AND JBJC.CompanyID = JSR.CompanyID And JSR.ProcessID=PE.ProcessID And JSR.RateFactor=PE.RateFactor And JSR.JobCardFormNO=PE.JobCardFormNo And JSR.IsDeletedTransaction=0 " &
+                  " Where OPM.OutsourcePaymentID=" & TransactionID & " And OPM.CompanyID=" & GBLCompanyID
+
+            Dim DataSetMain As New DataTable
+
+            db.FillDataTable(DataSetMain, QueryStr)
+            Dim DsDPR As ReportDataSource = New ReportDataSource("DataSetMain", DataSetMain)
+            ReportViewer1.LocalReport.DataSources.Add(DsDPR)
+
+        End If
+    End Sub
+
+End Class

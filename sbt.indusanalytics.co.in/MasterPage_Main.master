@@ -1,0 +1,537 @@
+﻿<%@ Master Language="VB" CodeFile="MasterPage_Main.master.vb" Inherits="MasterPage_Main" %>
+
+<!DOCTYPE html>
+
+
+<html>
+
+<head runat="server">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta http-equiv="pragma" content="no-cache" />
+    <meta http-equiv="cache-control" content="no-cache, must-revalidate, post-check=0, pre-check=0" />
+    <meta http-equiv="cache-control" content="max-age=0" />
+
+    <title>Welcome To | Indus Analytics</title>
+    <!-- Favicon-->
+    <link rel="icon" href="images/Indus%20logo.ico" type="image/x-icon">
+
+    <%--<script type="text/javascript" src="js/2.2.3 jquery.min.js"></script>--%>
+
+
+    <!-- Google Fonts -->
+    <%--<link href="https://fonts.googleapis.com/css?family=Roboto:400,700&subset=latin,cyrillic-ext" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" type="text/css">--%>
+    <link href="CustomCSS/font-awesome.min.css" rel="stylesheet" />
+
+    <!-- Bootstrap Core Css -->
+    <link href="plugins/bootstrap/css/bootstrap.css" rel="stylesheet">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="dist/css/adminlte.min.css">
+
+    <!-- Waves Effect Css -->
+    <%--<link href="plugins/node-waves/waves.css" rel="stylesheet" />--%>
+
+    <!-- Animation Css -->
+    <link href="plugins/animate-css/animate.css" rel="stylesheet" />
+
+    <!-- Morris Chart Css-->
+    <%--<link href="plugins/morrisjs/morris.css" rel="stylesheet" />--%>
+
+    <!-- Sweetalert Css -->
+    <link href="../../plugins/sweetalert/sweetalert.css" rel="stylesheet" />
+
+    <!-- Custom Css -->
+    <link href="css/style.css" rel="stylesheet">
+
+    <!-- AdminBSB Themes. You can choose a theme from css/themes instead of get all themes -->
+    <link href="css/themes/all-themes.css" rel="stylesheet" />
+
+
+    <asp:ContentPlaceHolder ID="head" runat="server">
+    </asp:ContentPlaceHolder>
+
+
+    <%-- Created By Pradeep --%>
+    <link href="CustomCSS/SideBar.css" rel="stylesheet" />
+    <script src="CustomJS/MainMaster.js"></script>
+    <link href="CustomCSS/AdditinalDesign.css" rel="stylesheet" />
+
+    <style>
+        .LinkBtn {
+            display: inline-block;
+            position: relative;
+            /*border-bottom: 1px dotted #666;*/
+            text-align: left;
+            font-weight: 900;
+            height: 2em;
+            width: 2em;
+            border-radius: 100%;
+            margin-top: 0px;
+            padding-top: 3.5px;
+            text-align: center;
+            -webkit-animation: mymove 5s infinite; /* Safari 4.0 - 8.0 */
+            animation: mymove 5s infinite;
+        }
+
+            .LinkBtn:hover {
+                cursor: pointer;
+            }
+
+        .cut-text {
+            width: auto;
+        }
+
+        @media screen and (max-width: 600px) {
+            .cut-text {
+                text-overflow: ellipsis;
+                overflow: hidden;
+                width: 100px;
+                white-space: nowrap;
+            }
+        }
+
+        .MasterDisplayName {
+            float: right;
+            margin-right: 5px;
+            color: #42909A;
+        }
+
+        @media screen and (max-width: 600px) {
+            .MasterDisplayName {
+                text-overflow: ellipsis;
+                overflow: hidden;
+                width: 100px;
+                white-space: nowrap;
+            }
+        }
+    </style>
+
+</head>
+
+<body class="theme-red">
+    <!-- Page Loader -->
+    <div class="page-loader-wrapper" id="LOADER">
+        <div class="loader">
+            <div class="preloader">
+                <div class="spinner-layer pl-red">
+                    <div class="circle-clipper left">
+                        <div class="circle"></div>
+                    </div>
+                    <div class="circle-clipper right">
+                        <div class="circle"></div>
+                    </div>
+                </div>
+            </div>
+            <p>Please wait...</p>
+        </div>
+    </div>
+    <!-- #END# Page Loader -->
+    <!-- Overlay For Sidebars -->
+    <div class="overlay"></div>
+    <!-- #END# Overlay For Sidebars -->
+    <!-- Search Bar -->
+    <div class="search-bar">
+        <div class="search-icon">
+            <i class="material-icons">search</i>
+        </div>
+        <input type="text" placeholder="START TYPING...">
+        <div class="close-search">
+            <i class="material-icons">close</i>
+        </div>
+    </div>
+
+    <div id="LoadIndicator"></div>
+    <!-- #END# Search Bar -->
+    <form id="form1" runat="server" style="margin-top: -1.5em;">
+        <!-- Top Bar -->
+        <%--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">--%>
+        <asp:ScriptManager ID="scriptmanager1" runat="server" EnablePageMethods="true"></asp:ScriptManager>
+        <div class="topnavCustom" id="myTopnav" style="float: left">
+            <a id="Customleftsidebar1" href="javascript:void(0);" class="iconLeft" onclick="menubar(this)" style="z-index: 12" title="menu">
+                <i id="Customleftsidebar1_Span" class="fa fa-bars" style="font-size: 14px;"></i>
+                <%--<span id="Customleftsidebar1_Span" style="writing-mode: vertical-lr; transform: rotate(180deg); font-weight: 900; margin-left: -10px;">|||</span>--%>
+            </a>
+            <a href="Home.aspx" runat="server" id="CompanyName" class="cut-text">Indus Analytics</a>
+            <a href="#" class="iconCustom" id="Btn_Logut" style="cursor: pointer" title="Log Out"><i class="fa fa-sign-out fa-2x fa-fw" style="font-size: 14px;"></i></a>
+            <ul class="header-dropdown m-r--5" style="margin-top: -1.2em;">
+<%--                <li id="LI_ChooseMaster" class="dropdown" style="position: initial;">
+                    <a id="hiddenBtn_ChooseMaster" href="javascript:void(0);" class="dropdown-toggle iconCustom" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="" title="Choose exist master">Choose Master
+                    </a>
+                    <ul class="dropdown-menu pull-right" id="MasterUL" style="background-color: none; overflow-y: auto; margin-bottom: 10px; max-height: 40em;">
+                    </ul>
+                </li>--%>
+                <li id="LI_ChooseFYear" class="col-lg-2 col-md-2 col-sm-3 col-xs-5 m-t-10">
+                    <div id="SelFYearList"></div>
+                </li>
+            </ul>
+            <a onclick="location.reload(true);" title="Reload from server" id="BtnRefresh" href="javascript:void(0);" class="iconCustom dropdown-toggle">
+                <i class="fa fa-refresh fa-2x fa-fw" style="font-size: 14px;"></i>
+            </a>
+
+            <%--<asp:LinkButton ID="ButtonHome" ToolTip="Set As My Home Page" runat="server" class="iconCustom"  OnClientClick="BtnSetAsHomePageClick();"><i class="fa fa-smile-o fa-2x fa-fw" style="font-size: 14px;"></i></asp:LinkButton>--%>
+        </div>
+        <!-- End Top Bar -->
+
+        <!-- Create Bar -->
+        <section>
+            <!-- left Sidebar -->
+            <%-- <a id="Customleftsidebar1" href='javascript:void(0);' class="CUSTOMsidebar" style="width: 30px; border-right: 2px groove #eee; height: 100%" onclick="menubar(this)">
+            <img id="menuimg" class="leftimg" src="https://www.clker.com/cliparts/r/c/z/k/x/c/greater-than-hi.png" alt="" />
+        </a>--%>
+
+            <div id="MYbackgroundOverlay"></div>
+            <div id="mySidenav" class="MYsidenav" style="margin-left: -60px;">
+                <div class="row clearfix" style="height: auto; padding-bottom: 0em; margin-right: -15px">
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="margin-top: 0em">
+                        <div class="DialogBoxCustom" style="float: left;">
+                            <strong id="displayStatus"></strong>
+                            <a href="javascript:void(0);" class="iconRightDbox btn-danger" onclick="closeNavLeft()">
+                                <span onclick="closeNavLeft()" style="font-weight: 900; margin-right: 8px">X</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rowcontents clearfix">
+                    <div id="Master_Div">
+                        <nav class="mt-2" style="height: calc(100vh - 80px); overflow-y: auto;">
+                            <input type="search" id="myInput" class="searchInputText" onkeyup="searchInputMenu()" placeholder="Search for menu.." title="Type menu name">
+                            <ul id="DynamicMenuDiv" class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false"></ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+
+            <aside id="Customrightsidebar" class="RIGHTsidebar" style="width: 30px; border-left: 1px groove #eee; padding: 0px; display: none;">
+                <ul class="MYRIGHTnav MYRIGHTnav-tabs tab-col-red" role="tablist" style="width: 30px; margin-left: 0px">
+                    <li role="presentation" id="RightSETTINGS_LI">
+                        <a id="Settings" href="#RightTabBar" data-toggle="tab" onclick="Righttabbar(this);" style="cursor: pointer">SETTINGS</a>
+                    </li>
+                </ul>
+            </aside>
+
+            <div id="RightTabBar" class="MYRightsidenav">
+                <div class="row clearfix" style="height: auto; margin-right: -15px">
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                        <div class="DialogBoxCustom" style="float: left;">
+                            <strong id="displayStatusRight"></strong>
+                            <a href="javascript:void(0);" class="iconRightDbox btn-danger" onclick="closeRightTabBar()">
+                                <span onclick="closeRightTabBar()" style="font-weight: 900; margin-right: 8px">X</span>
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Jquery Core Js -->
+        <script src="../../plugins/jquery/jquery.min.js"></script>
+
+        <!-- Menu from Admin LTE -->
+        <script src="dist/js/adminlte.js"></script>
+        <script src="CustomJS/DrawMenu.js"></script>
+
+        <%-- DevExpress Control Grid --%>
+        <link type="text/css" href="CustomCSS/dx.common.css" rel="stylesheet" />
+        <link type="text/css" href="CustomCSS/dx.light.css" rel="stylesheet" />
+        <%--Use for Export data --%>
+        <script src="js/jszip.js"></script>
+        <%--<script src="https://cdn3.devexpress.com/jslib/19.2.3/js/dx.all.js"></script>--%>
+        <script src="js/dx.all.19.2.3.js"></script>
+        <%-- DevExpress Control Grid --%>
+
+
+        <section class="content" style="margin-left: 0px; padding-left: 0px; width: 100%">
+            <div class="container-fluid" style="padding-right: 0px; padding-left: 0px">
+                <div class="card" style="margin-top: -55px; min-height: 0px; padding-left: 0px">
+                    <div class="body" style="padding-bottom: 3px; padding-left: 0px">
+                        <%--<form id="form1" runat="server" style="margin-top: -1.5em;">--%>
+                        <asp:ContentPlaceHolder ID="ContentPlaceHolder1" runat="server">
+                        </asp:ContentPlaceHolder>
+                        <%-- </form>--%>
+                    </div>
+                </div>
+            </div>
+
+            <%-- Model Logout --%>
+            <div class="modal fade" id="SessionExpirModel" tabindex="-1" role="dialog">
+                <div class="modal-dialog modal-lg" role="document" style="padding-top: 30px; width: 40%; display: block; float: right;">
+                    <div class="modal-content">
+                        <div class="row clearfix">
+                            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="margin-top: -.5em;">
+                                <a href="#" id="Btn_AlertSession" style="cursor: pointer; display: none">AlertSession</a>
+
+                                <div class="DialogBoxCustom" style="float: left; border-top-left-radius: 4px; border-top-right-radius: 4px;">
+                                    <strong id="ploout" style="display: block;">Log Out..!</strong>
+                                    <strong id="psessionOut" style="display: none;">Session Expiring..!</strong>
+                                    <a href="javascript:void(0);" class="iconRightDbox btn-danger" data-dismiss="modal">
+                                        <span data-dismiss="modal" style="font-weight: 900; margin-right: 8px">X</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="">
+                            <div class="row clearfix">
+                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="margin-top: .5em;">
+                                    <div style="width: 90%; float: left; height: auto; padding-left: 1em; padding-right: 1em; text-align: center;">
+                                        <div id="logotTag">
+                                            Hii..!&nbsp;<label id="UName" runat="server" style="color: #F6CF12">Admin</label><br>
+                                            <b id="logoutB">Do you want to LOGOUT..?
+                                            <br>
+                                                <span id="secondsIdle">Your Session will expire in&nbsp;<span>13409 </span>&nbsp;seconds.</span></b>
+                                            <b id="sessionB" style="display: none;">Your Session will expire in&nbsp;<span id="seconds">13409</span>&nbsp;seconds.<br>
+                                                Do you want to reset?</b>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="btnDiv" class="modal-footer" style="border-top: 1px solid #42909A;">
+                            <div id="btnLogoutDiv" style="height: auto; width: 100%; float: left; display: block;">
+                                <div style="width: 45%; margin-left: 5%; float: left">
+                                    <asp:LinkButton ID="Button1" runat="server" class="square_btn" Style="float: left; text-decoration: none; cursor: pointer">YES</asp:LinkButton>
+                                </div>
+                                <div style="width: 45%; margin-right: 5%; float: left">
+                                    <a class="square_btn" onclick="ResetSession();" data-dismiss="modal" style="float: right; text-decoration: none; cursor: pointer">NO</a>
+                                </div>
+                            </div>
+
+                            <div id="btnsessionDiv" style="height: auto; width: 100%; float: left; padding-bottom: 10px; display: none;">
+                                <div style="width: 45%; margin-left: 5%; float: left">
+                                    <button type="button" class="square_btn" data-dismiss="modal" style="float: left; text-decoration: none; cursor: pointer">Close</button>
+                                </div>
+                                <div style="width: 45%; margin-right: 5%; float: left">
+                                    <button type="button" onclick="ResetSession();" class="square_btn" style="float: right; text-decoration: none; cursor: pointer">Ok</button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <%-- Model PopUp Comment Modal--%>
+            <div class="modal fade in" id="CommentModal" tabindex="-1" role="dialog" style="padding-top: 50px;">
+                <div class="col-xs-12 col-sm-6 col-md-5 col-lg-4" role="document" style="float: right;">
+                    <div class="modal-content">
+                        <div class="DialogBoxCustom" style="float: left; border-top-left-radius: 4px; border-top-right-radius: 4px;">
+                            <strong>Comments :- </strong>
+                            <a href="javascript:void(0);" class="iconRightDbox btn-danger" data-dismiss="modal">
+                                <span data-dismiss="modal" style="font-weight: 900; margin-right: 8px">X</span>
+                            </a>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row clearfix">
+                                <div class="commentbody" id="commentbody" style="height: calc(100vh - 290px); overflow-y: auto;">
+                                    <div style="width: 100%">
+                                        <b style="text-align: left; color: red; float: left; margin-top: 5px; width: 100%"></b>
+                                        <p style="text-align: left; margin-top: 2px; float: left; margin-left: 20px"></p>
+                                        <span style="float: right">Comment By : </span>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 commentInput" style="padding: 0px; display: block;">
+                                    <div class="col-lg-7 col-md-7 col-sm-7 col-xs-12">
+                                        <b class="font-11">Comment Title:</b>
+                                        <input type="text" id="TxtCommentTitle" class="forTextBox">
+                                    </div>
+                                    <div class="col-lg-5 col-md-5 col-sm-5 col-xs-12">
+                                        <b class="font-11">Comment Type:</b>
+                                        <div id="selCommentType"></div>
+                                    </div>
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                        <b class="font-11">Comment Detail :</b>
+                                        <textarea id="TxtCommentDetail" class="forTextBox m-t-0" style="height: 5em;"></textarea>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 commentInput" style="display: block;">
+                                    <input type="button" id="BtnSaveComment" class="btn btn-success" value="Save Comment">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <%--<input id="SessionBtn" value="chk" style="display: none" />--%>
+        </section>
+
+    </form>
+    <!-- Bootstrap Core Js -->
+    <script src="plugins/bootstrap/js/bootstrap.js"></script>
+
+    <!-- Select Plugin Js -->
+    <script src="plugins/bootstrap-select/js/bootstrap-select.js"></script>
+
+    <!-- Slimscroll Plugin Js -->
+    <%--<script src="plugins/jquery-slimscroll/jquery.slimscroll.js"></script>--%>
+
+    <!-- Waves Effect Plugin Js -->
+    <script src="plugins/node-waves/waves.js"></script>
+
+
+    <!-- Jquery CountTo Plugin Js -->
+    <%--<script src="plugins/jquery-countto/jquery.countTo.js"></script>--%>
+
+    <!-- Morris Plugin Js -->
+    <%-- <script src="plugins/raphael/raphael.min.js"></script>
+    <script src="plugins/morrisjs/morris.js"></script>--%>
+
+    <!-- ChartJs -->
+    <%--<script src="plugins/chartjs/Chart.bundle.js"></script>--%>
+
+
+    <!-- Flot Charts Plugin Js -->
+    <%-- <script src="plugins/flot-charts/jquery.flot.js"></script>
+    <script src="plugins/flot-charts/jquery.flot.resize.js"></script>
+    <script src="plugins/flot-charts/jquery.flot.pie.js"></script>
+    <script src="plugins/flot-charts/jquery.flot.categories.js"></script>
+    <script src="plugins/flot-charts/jquery.flot.time.js"></script>--%>
+
+    <!-- Sparkline Chart Plugin Js -->
+    <%--<script src="plugins/jquery-sparkline/jquery.sparkline.js"></script>--%>
+
+    <!-- Custom Js -->
+    <script src="js/admin.js"></script>
+
+    <!-- SweetAlert Plugin Js -->
+    <script src="../../plugins/sweetalert/sweetalert.min.js"></script>
+
+    <script src="../../js/pages/ui/dialogs.js"></script>
+
+    <script type="text/javascript">
+        var interval;
+        ResetSession();
+
+        function SessionExpireAlert(timeout) {
+            clearInterval(interval);
+            seconds = timeout / 1000;
+            $("#secondsIdle").html("Your Session will expire in&nbsp;<span>" + seconds + " </span>&nbsp;seconds.</b>");
+            $("#seconds").html(seconds);
+            interval = setInterval(function () {
+                seconds--;
+                $("#secondsIdle").html("Your Session will expire in&nbsp;<span>" + seconds + " </span>&nbsp;seconds.</b>");
+                $("#seconds").html(seconds);
+                if (seconds <= 0) {
+                    $("#secondsIdle").html("Your session is expired.");
+                    window.location = "Login.aspx";
+                }
+                else if (seconds === 2400) {
+                    $("#Btn_AlertSession").click();
+                }
+            }, 1000);
+        };
+
+
+        function ResetSession() {
+            try {
+                $.ajax({
+                    type: "POST",
+                    url: "WebService_LedgerMaster.asmx/SessionTimeOut",
+                    data: '{}',
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "text",
+                    success: function (results) {
+                        var res = results.replace(/\\/g, '');
+                        res = res.replace(/"d":/g, '');
+                        res = res.substr(1);
+                        res = res.slice(0, -1);
+                        SessionExpireAlert(res);
+                    }
+                });
+            } catch (e) {
+                alert(e.message);
+            }
+        };
+    </script>
+
+    <script>
+        $("#LoadIndicator").dxLoadPanel({
+            shadingColor: "rgba(0,0,0,0.4)",
+            indicatorSrc: "images/Indus logo.png",
+            message: 'Please Wait...',
+            width: 310,
+            showPane: true,
+            shading: true,
+            closeOnOutsideClick: false,
+            visible: false
+        });
+
+        $("#Btn_Logut").click(function () {
+
+            document.getElementById("Btn_Logut").setAttribute("data-toggle", "modal");
+            document.getElementById("Btn_Logut").setAttribute("data-target", "#SessionExpirModel");
+
+            document.getElementById("ploout").style.display = "block";
+            document.getElementById("psessionOut").style.display = "none";
+            document.getElementById("logoutB").style.display = "block";
+            document.getElementById("sessionB").style.display = "none";
+            document.getElementById("btnLogoutDiv").style.display = "block";
+            document.getElementById("btnsessionDiv").style.display = "none";
+
+        });
+
+        $("#Btn_AlertSession").click(function () {
+            document.getElementById("Btn_AlertSession").setAttribute("data-toggle", "modal");
+            document.getElementById("Btn_AlertSession").setAttribute("data-target", "#SessionExpirModel");
+
+            document.getElementById("ploout").style.display = "none";
+            document.getElementById("psessionOut").style.display = "block";
+            document.getElementById("logoutB").style.display = "none";
+            document.getElementById("sessionB").style.display = "block";
+            document.getElementById("btnLogoutDiv").style.display = "none";
+            document.getElementById("btnsessionDiv").style.display = "block";
+        });
+        
+        var activeTab = window.location.pathname.split('/').slice(-1);
+        if (activeTab == "Masters.aspx" || activeTab == "LedgerMaster.aspx") {
+            $("#LI_ChooseFYear").addClass("hidden");
+        }
+        else {
+            $("#LI_ChooseFYear").removeClass("hidden");
+        }
+
+        var commentType = ["High", "Low", "Medium"];
+        $("#selCommentType").dxSelectBox({
+            items: commentType,
+            value: commentType[0],
+            placeholder: "Select --",
+            searchEnabled: false,
+            showClearButton: false,
+        });
+
+        var $window = $(window).on('resize', function () {
+            $(".modal-body").height(window.innerHeight / 1.2);
+            $(".modal-body").css('overflowY', 'auto');
+        }).trigger('resize'); //on page load
+
+        $(".forTextBox").keyup(function (e) {
+            if (e.target.value.includes('"') || e.target.value.includes("'")) {
+                e.target.value = e.target.value.replace(/"/g, '');
+                e.target.value = e.target.value.replace(/'/g, "");
+            }
+        });
+
+        function RoundUp(value, decimals) {
+            return Math.Ceiling(value * (10 ^ decimals)) / (10 ^ decimals)
+        }
+    </script>
+
+    <script type="text/javascript">
+        if (!$("#LI_ChooseFYear").hasClass("hidden")) {
+            $("#SelFYearList").dxSelectBox({
+                items: ["2020-2021", "2021-2022"],
+                //value: "2021-2022",
+                onValueChanged: function (e) {
+                    var ReportFYear = e.value;
+                    if (ReportFYear !== "")
+                        $.ajax({ type: "POST", url: "WebService_LoginInformation.asmx/SetFYear", data: '{FYear:' + JSON.stringify(ReportFYear) + '}', contentType: "application/json; charset=utf-8", dataType: "json", success: function (results) { var res = results.d; } });
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

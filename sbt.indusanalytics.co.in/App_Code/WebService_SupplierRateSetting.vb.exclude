@@ -1,0 +1,246 @@
+﻿Imports System.Web
+Imports System.Web.Services
+Imports System.Web.Services.Protocols
+Imports System.Data
+Imports System.Data.SqlClient
+Imports System.Web.Script.Services
+Imports System.Web.Script.Serialization
+Imports Connection
+
+' To allow this Web Service to be called from script, using ASP.NET AJAX, uncomment the following line.
+<System.Web.Script.Services.ScriptService()>
+<WebService(Namespace:="http://tempuri.org/")>
+<WebServiceBinding(ConformsTo:=WsiProfiles.BasicProfile1_1)>
+<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
+Public Class WebService_SupplierRateSetting
+    Inherits System.Web.Services.WebService
+
+
+    Dim db As New DBConnection
+    Dim js As New JavaScriptSerializer()
+    Dim data As New HelloWorldData()
+    Dim dataTable As New DataTable()
+    Dim str As String
+    Dim GBLUserID As String
+    Dim GBLUserName As String
+    Dim GBLBranchID As String
+    Dim GBLCompanyID As String
+    Dim GBLFYear As String
+
+    <WebMethod()>
+    <ScriptMethod()>
+    Public Function ConvertDataTableTojSonString(ByVal dataTable As DataTable) As String
+        Dim serializer As New System.Web.Script.Serialization.JavaScriptSerializer()
+        serializer.MaxJsonLength = 2147483647
+        Dim tableRows As New List(Of Dictionary(Of [String], [Object]))()
+        Dim row As Dictionary(Of [String], [Object])
+        For Each dr As DataRow In dataTable.Rows
+            row = New Dictionary(Of [String], [Object])()
+            For Each col As DataColumn In dataTable.Columns
+                row.Add(col.ColumnName, dr(col))
+                System.Console.WriteLine(dr(col))
+            Next
+            tableRows.Add(row)
+        Next
+        Return serializer.Serialize(tableRows)
+    End Function
+
+    '---------------Open Master code---------------------------------
+    '-----------------------------------Get SupplierName Master------------------------------------------
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function SupplierName() As String
+
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+
+        str = "select nullif(LedgerID,'') as LedgerID,nullif(LedgerName,'') as LedgerName from LedgerMaster  Where LedgerGroupID IN(Select Distinct LedgerGroupID From LedgerGroupMaster Where LedgerGroupNameID=23) AND CompanyID='" & GBLCompanyID & "' and isnull(IsDeletedTransaction,0)<>1"
+
+        db.FillDataTable(dataTable, str)
+        data.Message = ConvertDataTableTojSonString(dataTable)
+        Return js.Serialize(data.Message)
+    End Function
+
+    '-----------------------------------Get Master------------------------------------------
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function MasterListSupplierRate(ByVal LedID As Integer) As String
+
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+
+        str = "SELECT  Isnull(IG.ItemGroupID,0) as ItemGroupID,nullif(IG.ItemGroupName,'') As ItemGroupName FROM ItemGroupMaster As IG Inner Join SupplierItemGroupAllocation As SGA On IG.ItemGroupID=SGA.ItemGroupID And IG.CompanyID=SGA.CompanyID Where SGA.LedgerID = '" & LedID & "' And IG.CompanyID = '" & GBLCompanyID & "' And Isnull(SGA.IsDeletedTransaction,0)=0 Order By IG.ItemGroupID "
+        db.FillDataTable(dataTable, str)
+        data.Message = ConvertDataTableTojSonString(dataTable)
+        Return js.Serialize(data.Message)
+    End Function
+
+    '-----------------------------------Get Exist Rate Settiing------------------------------------------
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function ExistRate(ByVal Ledgerid As String, ByVal GroupID As String) As String
+        Context.Response.Clear()
+        Context.Response.ContentType = "application/json"
+
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+
+        str = "SupplierRateGetData '' " & "," & GBLCompanyID & "," & GroupID & "," & Ledgerid
+        '' str = "SELECT  nullif(SupplierWisePurchaseSettingID,'') as SupplierWisePurchaseSettingID,nullif(ItemID,'') as ItemID,nullif(ItemName,'') as ItemName,nullif(PurchaseUnit,'') as PurchaseUnit,isnull(PurchaseRate,0) as PurchaseRate,isnull(QuantityTolerance,0) as QuantityTolerance FROM SupplierWisePurchaseSetting Where CompanyID = '" & GBLCompanyID & "' and LedgerID='" & Ledgerid & "' and ItemGroupID='" & GroupID & "' and isnull(IsDeletedTransaction,0)<>1"
+        db.FillDataTable(dataTable, str)
+        data.Message = ConvertDataTableTojSonString(dataTable)
+        Return js.Serialize(data.Message)
+    End Function
+
+    '-----------------------------------Get Grid Column Name------------------------------------------
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function MasterGridColumn(ByVal masterID As String) As String
+
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
+
+        str = "Select nullif(GridColumnName,'') As GridColumnName,nullif(GridColumnHide,'') As GridColumnHide  From ItemGroupMaster Where CompanyID='" & GBLCompanyID & "' and ItemGroupID='" & masterID & "' And Isnull(IsDeletedTransaction,0)=0 "
+        db.FillDataTable(dataTable, str)
+        data.Message = ConvertDataTableTojSonString(dataTable)
+
+        Return js.Serialize(data.Message)
+
+    End Function
+    '-----------------------------------Get Master------------------------------------------
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function SupplierRateSettingGrid(ByVal masterID As String) As String
+        Context.Response.Clear()
+        Context.Response.ContentType = "application/json"
+
+        Dim dt As New DataTable
+        js.MaxJsonLength = 2147483647
+
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+
+        str = "GetData '' " & "," & GBLCompanyID & "," & masterID
+        db.FillDataTable(dataTable, str)
+        data.Message = ConvertDataTableTojSonString(dataTable)
+        Return js.Serialize(data.Message)
+
+    End Function
+
+    ''----------------------------Open SupplierRateSetting  Save Data  ------------------------------------------
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function SaveRatesettingData(ByVal jsonObjectsRateRecord As Object, ByVal ExistObjectsRateRecord As Object, ByVal ExistID As Integer, ByVal SupplierName As String, ByVal ItemGroup As String) As String
+
+        Dim EID As String = ""
+        Dim MaxID As String
+        Dim KeyField As String
+        Dim AddColName, AddColValue, TableName As String
+        AddColName = ""
+        AddColValue = ""
+
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
+        GBLUserName = Convert.ToString(HttpContext.Current.Session("UserName"))
+        GBLFYear = Convert.ToString(HttpContext.Current.Session("FYear"))
+
+        Try
+            If (db.CheckAuthories("SRS.aspx", GBLUserID, GBLCompanyID, "CanSave") = False) Then Return "You are not authorized to save..!, Can't Save"
+
+            MaxID = db.GenerateMaxVoucherNo("SupplierWisePurchaseSetting", "SupplierWisePurchaseSettingID", "Where CompanyID='" & GBLCompanyID & "' And Isnull(IsDeletedTransaction,0)=0")
+
+            EID = db.GetColumnValue("ItemID", "SupplierWisePurchaseSetting", " CompanyID='" & GBLCompanyID & "' And ItemGroupID='" & ItemGroup & "' and LedgerID='" & SupplierName & "' And Isnull(IsDeletedTransaction,0)=0")
+
+            Using UpTrans As New Transactions.TransactionScope
+
+                If EID = "" Then
+                    TableName = "SupplierWisePurchaseSetting"
+                    AddColName = "ModifiedDate,CreatedDate,UserID,CompanyID,FYear,CreatedBy,ModifiedBy,SupplierWisePurchaseSettingID"
+                    AddColValue = "'" & DateTime.Now & "','" & DateTime.Now & "','" & GBLUserID & "','" & GBLCompanyID & "','" & GBLFYear & "','" & GBLUserID & "','" & GBLUserID & "','" & MaxID & "'"
+                    str = db.InsertDatatableToDatabase(jsonObjectsRateRecord, TableName, AddColName, AddColValue)
+                    If IsNumeric(str) = False Then
+                        UpTrans.Dispose()
+                        Return "Error: " & str
+                    End If
+                Else
+                    If ExistObjectsRateRecord.length > 0 Then
+                        TableName = "SupplierWisePurchaseSettingHistory"
+                        AddColName = "ModifiedDate,CreatedDate,UserID,CompanyID,FYear,CreatedBy,ModifiedBy"
+                        AddColValue = "'" & DateTime.Now & "','" & DateTime.Now & "','" & GBLUserID & "','" & GBLCompanyID & "','" & GBLFYear & "','" & GBLUserID & "','" & GBLUserID & "'"
+                        str = db.InsertDatatableToDatabase(ExistObjectsRateRecord, TableName, AddColName, AddColValue)
+                        If IsNumeric(str) = False Then
+                            UpTrans.Dispose()
+                            Return "Error: " & str
+                        End If
+                    End If
+
+                    db.ExecuteNonSQLQuery("Delete from SupplierWisePurchaseSetting WHERE CompanyID='" & GBLCompanyID & "' and SupplierWisePurchaseSettingID='" & ExistID & "' ")
+
+                    TableName = "SupplierWisePurchaseSetting"
+                    AddColName = "ModifiedDate,CreatedDate,UserID,CompanyID,FYear,CreatedBy,ModifiedBy,SupplierWisePurchaseSettingID"
+                    AddColValue = "'" & DateTime.Now & "','" & DateTime.Now & "','" & GBLUserID & "','" & GBLCompanyID & "','" & GBLFYear & "','" & GBLUserID & "','" & GBLUserID & "','" & MaxID & "'"
+                    str = db.InsertDatatableToDatabase(jsonObjectsRateRecord, TableName, AddColName, AddColValue)
+                    If IsNumeric(str) = False Then
+                        UpTrans.Dispose()
+                        Return "Error: " & str
+                    End If
+                End If
+
+                UpTrans.Complete()
+                KeyField = "Success"
+            End Using
+
+        Catch ex As Exception
+            KeyField = "Error: " & ex.Message
+        End Try
+        Return KeyField
+
+    End Function
+    '' -----------------------------------Spare Rate Setting Starts -------------------------''
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function SpareSupplierRateSettingGrid(ByVal GroupName As String) As String
+        Context.Response.Clear()
+        Context.Response.ContentType = "application/json"
+
+        Dim dt As New DataTable
+        js.MaxJsonLength = 2147483647
+
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+
+        str = "SELECT SparePartID, SparePartCode, SparePartName, SparePartGroup, HSNGroup, Unit, Rate, SparePartType, SupplierReference, MinimumStockQty, PurchaseOrderQuantity, StockRefCode, SupplierIDString, IsCritical, IsActive,Narration FROM SparePartMaster Where IsDeletedTransaction=0 And SparePartGroup ='" & GroupName & "' And CompanyID=" & GBLCompanyID
+        db.FillDataTable(dataTable, str)
+        data.Message = ConvertDataTableTojSonString(dataTable)
+        Return js.Serialize(data.Message)
+
+    End Function
+
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function SparesGroupMasterList(ByVal LedID As Integer) As String
+
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+
+        str = "SELECT Distinct IG.SparePartGroup FROM SparePartMaster As IG Inner Join SupplierSpareGroupAllocation As SGA On IG.SparePartGroup=SGA.SparePartGroup And IG.CompanyID=SGA.CompanyID Where SGA.LedgerID = " & LedID & " And IG.CompanyID = " & GBLCompanyID & " And SGA.IsDeletedTransaction =0 Order By SparePartGroup"
+        db.FillDataTable(dataTable, str)
+        data.Message = ConvertDataTableTojSonString(dataTable)
+        Return js.Serialize(data.Message)
+    End Function
+
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function SparesExistRate(ByVal Ledgerid As String, ByVal GroupID As String) As String
+        Context.Response.Clear()
+        Context.Response.ContentType = "application/json"
+
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+
+        str = "SpareSupplierRateGetData " & GBLCompanyID & ",'" & GroupID & "'," & Ledgerid
+        db.FillDataTable(dataTable, str)
+        data.Message = ConvertDataTableTojSonString(dataTable)
+        Return js.Serialize(data.Message)
+    End Function
+
+    '---------------Close Master code---------------------------------
+
+    Public Class HelloWorldData
+        Public Message As [String]
+    End Class
+
+End Class

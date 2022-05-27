@@ -1,0 +1,511 @@
+﻿.fot_Div {
+    position: fixed;
+    bottom: 0px;
+    width: 100%;
+    height: auto;
+    background: #fdfdfd;
+    overflow: hidden;
+    display: inline-block;
+    -webkit-box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    -moz-box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    -ms-box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 11 !important;
+}
+
+
+.Bookingsidenav {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 9;
+    top: 0;
+    background-color: #fff;
+    overflow-x: hidden;
+    transition: 0.5s;
+    padding-top: 45px;
+    left: 30px;
+    color: black;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+    .Bookingsidenav .MYclosebtn {
+        position: absolute;
+        top: -13px;
+        right: 15px;
+        font-size: 36px;
+        margin-left: 50px;
+    }
+     .Bookingsidenav a {
+        text-decoration: none;
+        font-size: 14px;
+        color: #42909A;
+        display: block;
+    }
+
+        .Bookingsidenav a:hover {
+            color: #000;
+        }
+
+        .Bookingsidenav a:focus {
+            outline: none !important;
+            color: #f1f1f1;
+            box-shadow: 0 0 2px #f1f1f1;
+        }
+
+.MYsidenav {
+    /*height: 100%;*/
+    width: 0;
+    position: fixed;
+    z-index: 9;
+    top: 0;
+    left: 0;
+    background-color: #fff;
+    overflow-x: hidden;
+    transition: 0.5s;
+    padding-top: 46px;
+    left: 60px;
+    color: white;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+    .MYsidenav .MYclosebtn {
+        position: absolute;
+        top: -13px;
+        right: 15px;
+        font-size: 36px;
+        margin-left: 50px;
+    }
+
+    .MYsidenav a {
+        /*padding: 8px 8px 0px 32px;*/
+        text-decoration: none;
+        font-size: 14px;
+        /*color: #818181;*/
+        color: #42909A;
+        display: block;
+        /*transition: 0.3s;*/
+    }
+
+        .MYsidenav a:hover {
+            color: #fff;
+        }
+
+        .MYsidenav a:focus {
+            outline: none !important;
+            color: #f1f1f1;
+            box-shadow: 0 0 2px #f1f1f1;
+        }
+
+.MYlabel {
+    width: 100%;
+    height: 100%;
+    background: #42909A;
+    position: absolute;
+    /*right: -25px;*/
+    top: 0;
+    box-shadow: 3px 0 5px rgba(0, 0, 0, .5);
+    transition: opacity .2s linear;
+}
+
+    .MYlabel:hover {
+        cursor: pointer;
+    }
+
+.leftimg {
+    width: 50%;
+    left: 25%;
+    /* Magic vertical align css */
+    position: relative; /* not sure if necessary */
+    top: 50%;
+    transform: translateY(-50%); /* not sure if necessary */
+}
+
+#MYbackgroundOverlay {
+    position: fixed;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none;
+    z-index: 8;
+}
+
+
+/* Open Right Bar*/
+
+.MYRightsidenav {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 10;
+    top: 0;
+    right: 0;
+    background-color: #fff;
+    overflow-x: hidden;
+    transition: 0.5s;
+    padding-top: 46px;
+    right: 30px;
+}
+
+    .MYRightsidenav .MYRightclosebtn {
+        position: absolute;
+        top: -13px;
+        left: -4px;
+        font-size: 36px;
+        /*margin-left: 50px;*/
+    }
+
+    .MYRightsidenav a {
+        padding: 8px 8px 0px 32px;
+        text-decoration: none;
+        font-size: 25px;
+        color: #818181;
+        display: block;
+        transition: 0.3s;
+    }
+
+/*Close Right Bar*/
+
+/* Open Bottom Bar*/
+.MYBottomsidenav {
+    height: 0;
+    /*margin-top:5em;*/
+    /*width: 100%;*/
+    right: 2px;
+    position: fixed;
+    z-index: 8;
+    left: 30px;
+    bottom: 0;
+    background-color: #fff;
+    overflow-x: hidden;
+    transition: 0.5s;
+    /*bottom: 29px;*/
+}
+
+    .MYBottomsidenav .closeBottomTabBar {
+        position: absolute;
+        /*top: 0px;*/
+        right: 8px;
+        font-size: 36px;
+        /*height:10px;*/
+        /*margin-left: 50px;*/
+    }
+
+    .MYBottomsidenav a {
+        /*margin-right: 50px;*/
+        font-size: 25px;
+        color: #818181;
+        display: block;
+        transition: 0.3s;
+        text-decoration: none;
+        /*padding: 0px 25px 0px 0px;
+        text-decoration: none;
+        font-size: 25px;
+        color: #818181;
+        display: block;
+        transition: 0.3s;*/
+    }
+
+
+
+/*Close Bottom Bar*/
+
+
+/*Open Left Nav*/
+
+.MYLEFTnav {
+    padding-left: 0;
+    margin-bottom: 0;
+    list-style: none;
+}
+
+    .MYLEFTnav > li {
+        position: relative;
+        display: block;
+    }
+
+        .MYLEFTnav > li > a {
+            position: relative;
+            display: block;
+            padding: 10px 3px;
+        }
+
+            .MYLEFTnav > li > a:hover,
+            .MYLEFTnav > li > a:focus {
+                text-decoration: none;
+                background-color: #eee;
+            }
+
+        .MYLEFTnav > li.disabled > a {
+            color: #777;
+        }
+
+            .MYLEFTnav > li.disabled > a:hover,
+            .MYLEFTnav > li.disabled > a:focus {
+                color: #777;
+                text-decoration: none;
+                cursor: not-allowed;
+                background-color: transparent;
+            }
+
+    .MYLEFTnav .open > a,
+    .MYLEFTnav .open > a:hover,
+    .MYLEFTnav .open > a:focus {
+        background-color: #eee;
+        border-color: #337ab7;
+    }
+
+    .MYLEFTnav .nav-divider {
+        height: 1px;
+        margin: 9px 0;
+        overflow: hidden;
+        background-color: #e5e5e5;
+    }
+
+    .MYLEFTnav > li > a > img {
+        max-width: none;
+    }
+
+.MYLEFTnav-tabs {
+    /*border-bottom: 1px solid #ddd;*/
+    /*border-right: 1px solid #ddd;*/
+}
+
+    .MYLEFTnav-tabs > li {
+        /*float: left;*/
+        margin-bottom: -1px;
+        writing-mode: vertical-rl;
+    }
+
+        .MYLEFTnav-tabs > li > a {
+            margin-right: 2px;
+            line-height: 1.42857143;
+            /*border: 1px solid transparent;*/
+            /*border-radius: 4px 4px 0 0;*/
+        }
+
+            .MYLEFTnav-tabs > li > a:hover {
+                border-color: #eee #eee #ddd;
+            }
+
+        .MYLEFTnav-tabs > li.active > a,
+        .MYLEFTnav-tabs > li.active > a:hover,
+        .MYLEFTnav-tabs > li.active > a:focus {
+            color: #555;
+            cursor: default;
+            background-color: #fff;
+            border-right: 2px solid red;
+            /*border-bottom-color: transparent;*/
+        }
+
+    .MYLEFTnav-tabs.nav-justified {
+        width: 100%;
+        border-bottom: 0;
+    }
+
+        .MYLEFTnav-tabs.nav-justified > li {
+            float: none;
+        }
+
+            .MYLEFTnav-tabs.nav-justified > li > a {
+                margin-bottom: 5px;
+                text-align: center;
+            }
+
+        .MYLEFTnav-tabs.nav-justified > .dropdown .dropdown-menu {
+            top: auto;
+            left: auto;
+        }
+
+@media (min-width: 768px) {
+    .MYLEFTnav-tabs.nav-justified > li {
+        display: table-cell;
+        width: 1%;
+    }
+
+        .MYLEFTnav-tabs.nav-justified > li > a {
+            margin-bottom: 0;
+        }
+}
+
+.MYLEFTnav-tabs.nav-justified > li > a {
+    margin-right: 0;
+    border-radius: 4px;
+}
+
+.MYLEFTnav-tabs.nav-justified > .active > a,
+.MYLEFTnav-tabs.nav-justified > .active > a:hover,
+.MYLEFTnav-tabs.nav-justified > .active > a:focus {
+    border: 1px solid #ddd;
+}
+
+@media (min-width: 768px) {
+    .MYLEFTnav-tabs.nav-justified > li > a {
+        border-bottom: 1px solid #ddd;
+        border-radius: 4px 4px 0 0;
+    }
+
+    .MYLEFTnav-tabs.nav-justified > .active > a,
+    .MYLEFTnav-tabs.nav-justified > .active > a:hover,
+    .MYLEFTnav-tabs.nav-justified > .active > a:focus {
+        border-bottom-color: #fff;
+    }
+}
+
+/*Close Left Nav*/
+
+/*Open Right Nav*/
+
+.MYRIGHTnav {
+    padding-left: 0;
+    margin-bottom: 0;
+    list-style: none;
+}
+
+    .MYRIGHTnav > li {
+        position: relative;
+        display: block;
+    }
+
+        .MYRIGHTnav > li > a {
+            position: relative;
+            display: block;
+            padding: 10px 3px;
+        }
+
+            .MYRIGHTnav > li > a:hover,
+            .MYRIGHTnav > li > a:focus {
+                text-decoration: none;
+                background-color: #eee;
+            }
+
+        .MYRIGHTnav > li.disabled > a {
+            color: #777;
+        }
+
+            .MYRIGHTnav > li.disabled > a:hover,
+            .MYRIGHTnav > li.disabled > a:focus {
+                color: #777;
+                text-decoration: none;
+                cursor: not-allowed;
+                background-color: transparent;
+            }
+
+    .MYRIGHTnav .open > a,
+    .MYRIGHTnav .open > a:hover,
+    .MYRIGHTnav .open > a:focus {
+        background-color: #eee;
+        border-color: #337ab7;
+    }
+
+    .MYRIGHTnav .nav-divider {
+        height: 1px;
+        margin: 9px 0;
+        overflow: hidden;
+        background-color: #e5e5e5;
+    }
+
+    .MYRIGHTnav > li > a > img {
+        max-width: none;
+    }
+
+.MYRIGHTnav-tabs {
+    /*border-bottom: 1px solid #ddd;*/
+    border-right: 1px solid #ddd;
+}
+
+    .MYRIGHTnav-tabs > li {
+        /*float: left;*/
+        margin-bottom: -1px;
+        writing-mode: vertical-rl;
+    }
+
+        .MYRIGHTnav-tabs > li > a {
+            margin-right: 2px;
+            line-height: 1.42857143;
+            /*border: 1px solid transparent;*/
+            /*border-radius: 4px 4px 0 0;*/
+        }
+
+            .MYRIGHTnav-tabs > li > a:hover {
+                border-color: #eee #eee #ddd;
+            }
+
+        .MYRIGHTnav-tabs > li.active > a,
+        .MYRIGHTnav-tabs > li.active > a:hover,
+        .MYRIGHTnav-tabs > li.active > a:focus {
+            color: #555;
+            cursor: default;
+            background-color: #fff;
+            border-left: 2px solid red;
+            /*border-bottom-color: transparent;*/
+        }
+
+    .MYRIGHTnav-tabs.nav-justified {
+        width: 100%;
+        border-bottom: 0;
+    }
+
+        .MYRIGHTnav-tabs.nav-justified > li {
+            float: none;
+        }
+
+            .MYRIGHTnav-tabs.nav-justified > li > a {
+                margin-bottom: 5px;
+                text-align: center;
+            }
+
+        .MYRIGHTnav-tabs.nav-justified > .dropdown .dropdown-menu {
+            top: auto;
+            left: auto;
+        }
+
+@media (min-width: 768px) {
+    .MYRIGHTnav-tabs.nav-justified > li {
+        display: table-cell;
+        width: 1%;
+    }
+
+        .MYRIGHTnav-tabs.nav-justified > li > a {
+            margin-bottom: 0;
+        }
+}
+
+.MYRIGHTnav-tabs.nav-justified > li > a {
+    margin-right: 0;
+    border-radius: 4px;
+}
+
+.MYRIGHTnav-tabs.nav-justified > .active > a,
+.MYRIGHTnav-tabs.nav-justified > .active > a:hover,
+.MYRIGHTnav-tabs.nav-justified > .active > a:focus {
+    border: 1px solid #ddd;
+}
+
+@media (min-width: 768px) {
+    .MYRIGHTnav-tabs.nav-justified > li > a {
+        border-bottom: 1px solid #ddd;
+        border-radius: 4px 4px 0 0;
+    }
+
+    .MYRIGHTnav-tabs.nav-justified > .active > a,
+    .MYRIGHTnav-tabs.nav-justified > .active > a:hover,
+    .MYRIGHTnav-tabs.nav-justified > .active > a:focus {
+        border-bottom-color: #fff;
+    }
+}
+
+/*Close Right Nav*/
+
+
+.searchInputText {
+    background-position: 10px 12px;
+    background-repeat: no-repeat;
+    width: 100%;
+    padding: 5px 5px 5px 20px;
+    border: 1px solid #42909a;
+    color: #000;
+}

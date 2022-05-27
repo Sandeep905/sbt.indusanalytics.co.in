@@ -1,0 +1,27 @@
+﻿<%@ Page Title="Stock Bin Report" Language="VB" MasterPageFile="~/MasterPageMIS.master" AutoEventWireup="false" CodeFile="StockBinWiseReport.aspx.vb" Inherits="StockBinWiseReport" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="Server">
+</asp:Content>
+<asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="Server">
+    <div class="row padding-0 margin-0">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-0 margin-0">
+            <div class="col-lg-1 col-md-1 col-sm-1 col-xs-3" style="text-align: right;">
+                <input type="checkbox" id="IsActiveDate" class="filled-in chk-col-red" />
+                <label for="IsActiveDate">Date</label>
+            </div>
+            <div class="col-lg-2 col-md-3 col-sm-4 col-xs-12">
+                <div id="DtFromTime"></div>
+            </div>
+            
+            <div class="col-lg-2 col-md-2 col-sm-3 col-xs-12">
+                <input type="button" name="BtnRefresh" onclick="BtnRefreshclick()" id="BtnRefresh" class="btn btn-primary" value="Refresh" />
+                <input type="button" name="BtnPrint" onclick="BtnPrintclick()" id="BtnPrint" class="btn btn-warning hidden" value="Print" />
+            </div>
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-0 margin-0">
+                <div id="GridReport"></div>
+            </div>
+        </div>
+    </div>
+    <script src="CustomJS/StockBinWiseReport.js"></script>
+</asp:Content>
+

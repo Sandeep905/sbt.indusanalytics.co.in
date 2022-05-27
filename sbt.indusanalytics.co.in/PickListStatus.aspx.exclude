@@ -1,0 +1,44 @@
+﻿<%@ Page Title="" Language="VB" MasterPageFile="~/MasterPage_Main.master" AutoEventWireup="false" CodeFile="PickListStatus.aspx.vb" Inherits="PickListStatus" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="Server">
+</asp:Content>
+<asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="Server">
+
+    <div class="row clearfix" style="padding: 0px; margin: 0px; margin-right: -15px">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-0 margin-0">
+            <div class="dialogboxContainerMainMAster">
+                <div class="DialogBoxCustom" style="float: left; background-color: #fff; padding-left: 0px; padding-bottom: 2px">
+                    <div class="col-lg-9 col-md-9 col-sm-9 col-xs-9 padding-0 margin-0">
+                        <div class="col-lg-8 col-md-8 col-sm-8 col-xs-12 padding-0 margin-0">
+                            <div id="RadioButtonPicklistStatus" style="float: left; margin-left: 1em; margin-top: .4em"></div>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-3 padding-0 margin-0">
+                        <b id="PRID" style="display: none"></b><b id="PRDisName" style="display: none"></b>
+                        <strong id="POMasterDisplayName" class="MasterDisplayName" style="float: right; color: #42909A">Pick List Status</strong>
+                    </div>
+                </div>
+                <div class="ContainerBoxCustom" style="float: left;">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-0 margin-0">
+                        <div id="PickListStatusGrid"></div>
+                        <input type="text" id="TxtPickStatusID" style="display: none" />
+                    </div>
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-0 margin-0">
+                        <div id="btnDivPickListStatus" class="modal-footer" style="border-top: 1px solid #42909A;">
+                            <button type="button" id="BtnComplete" class="btn btn-success waves-effect hidden">Complete</button>
+                            <button type="button" id="BtnInComplete" class="btn btn-info waves-effect hidden" style="">InComplete</button>
+                            <button type="button" id="BtnUnCancel" class="btn btn-info waves-effect hidden" style="">UnCancel</button>
+                            <button type="button" id="BtnCancel" class="btn btn-danger waves-effect hidden" style="">Cancel</button>
+                            <button type="button" id="BtnReleased" class="btn btn-success waves-effect hidden" style="">Release</button>
+                            <button type="button" id="BtnUnReleased" class="btn btn-info waves-effect hidden" style="">UnRelease</button>
+                            <button type="button" id="PLSPrintButton" class="btn btn-warning hidden" disabled="disabled">Print</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="CustomJS/PickListStatus.js?<%=System.Configuration.ConfigurationManager.AppSettings("Version")%>"></script>
+</asp:Content>
+

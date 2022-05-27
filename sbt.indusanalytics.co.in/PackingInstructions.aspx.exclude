@@ -1,0 +1,248 @@
+﻿<%@ Page Title="" Language="VB" MasterPageFile="~/MasterPage_Main.master" AutoEventWireup="false" CodeFile="PackingInstructions.aspx.vb" Inherits="PackingInstructions" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="Server">
+</asp:Content>
+<asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="Server">
+    <div class="row clearfix padding-0 margin-0 margin-right: -15px">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-0 margin-0">
+            <div class="dialogboxContainerMainMAster">
+                <div class="DialogBoxCustom" style="float: left; background-color: #fff; padding-left: 0px; padding-bottom: 2px">
+                    <div id="ButtonDiv" style="height: auto;">
+                        <a id="CreateButton" href='#' class="iconButton" style="margin-top: 1px; margin-left: 2px;">
+                            <img src="images/NewClient.png" style="height: 20px; width: 25px; float: left; margin-top: 0px;" />
+                            &nbsp Create
+                        </a>
+                        <a id="EditButton" href='#' class="iconButton" style="margin-top: 1px; margin-left: 2px;">
+                            <img src="images/Edit.png" style="height: 20px; width: 25px; float: left; margin-top: 0px" />
+                            &nbsp Edit
+                        </a>
+                        <a id="DeleteButton" href='#' class="iconButton" style="margin-top: 1px; margin-left: 2px;">
+                            <img src="images/MasterDelete.png" style="height: 20px; width: 25px; float: left; margin-top: 0px" />
+                            &nbsp Delete
+                        </a>
+                    </div>
+                    <b id="PRID" style="display: none"></b><b id="PRDisName" style="display: none"></b>
+                    <strong id="PRMasterDisplayName" class="MasterDisplayName" style="float: right; color: #42909A">Packing Instructions</strong>
+                </div>
+                <div class="ContainerBoxCustom" style="float: left; height: auto;">
+                    <div id="ButtonGridDiv" style="height: auto; display: block; margin-top: 5px">
+                        <div id="ShowListGrid" style="width: 100%; height: calc(100vh - 88px); float: left; display: block"></div>
+                        <input type="text" id="ShowListID" style="display: none" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="largeModal" tabindex="-1" role="dialog" style="margin-left: -7px">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="DialogBoxCustom" style="float: left; border-top-left-radius: 4px; border-top-right-radius: 4px;">
+                    <strong>Packing Instructions</strong>
+                    <a href="javascript:void(0);" class="iconRightDbox btn-danger" data-dismiss="modal">
+                        <span data-dismiss="modal" style="font-weight: 900; margin-right: 8px">X</span>
+                    </a>
+                </div>
+                <div class="modal-body">
+                    <div id="FieldCntainerRowPickList" style="display: block;">
+                        <div class="row clearfix">
+                            <div class="tab-content">
+                                <div role="tabpanel" class="tab-pane animated fadeInRight active" id="ReqGridProductHSN">
+                                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="margin: 0px; padding: 0px">
+                                        <div class="col-xs-12 col-sm-3 col-md-2 col-lg-2">
+                                            <b class="font-11">PI No. :</b>
+                                            <input class="forTextBox" type="text" name="Return To Stock" id="TxtRTSVoucherNo" style="width: 100%;" readonly="readonly" value="" />
+                                            <input class="forTextBox" type="hidden" name="TxtMaxVoucherNo" id="TxtMaxVoucherNo" value="" />
+                                        </div>
+                                        <div class="col-xs-12 col-sm-3 col-md-2 col-lg-2">
+                                            <b class="font-11">PI Date :</b>
+                                            <div id="RTSDate"></div>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-2 col-md-2 col-lg-2">
+                                            <b class="font-11">Job Card No.</b>
+                                            <input type="text" id="BtnOpenProductJobCard" class="forTextBox btn-link" style="cursor: pointer;" placeholder="Job Reference" readonly="" />
+                                        </div>
+                                        <div class="col-xs-12 col-sm-4 col-md-3 col-lg-3">
+                                            <b class="font-11">Client Name</b>
+                                            <input type="text" id="TxtClientName" class="forTextBox" />
+                                            <input type="text" id="TxtClientID" class="forTextBox" style="display:none"/>
+                                            <input type="text" id="TxtJobBookingID" class="forTextBox" style="display:none"/>
+                                            <input type="text" id="TxtJobBookingJobCardContentsID" class="forTextBox" style="display:none"/>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-4 col-md-3 col-lg-3">
+                                            <b class="font-11">Job Name</b>
+                                            <input type="text" id="TxtJonName" class="forTextBox" />
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="margin: 0px; padding: 0px">
+                                        <div class="col-xs-12 col-sm-4 col-md-3 col-lg-3">
+                                            <b class="font-11">Content Name</b>
+                                            <input type="text" id="TxtContentName" class="forTextBox" />
+                                        </div>
+                                        <div class="col-xs-12 col-sm-1 col-md-1 col-lg-1">
+                                            <b class="font-11">Quantity</b>
+                                            <input type="number" id="TxtQuantity" min="0" class="forTextBox" onchange="cal()" />
+                                        </div>
+                                        <div class="col-xs-12 col-sm-2 col-md-2 col-lg-2">
+                                            <b class="font-11">Combined/Each</b>
+                                            <div id="TxtCombinedEach" class="forTextBox"></div>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-2 col-md-2 col-lg-2">
+                                            <b class="font-11">No Of Designs</b>
+                                            <input type="number" id="TxtNoOfDesigns" min="0" class="forTextBox" onchange="cal()"/>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-1 col-md-1 col-lg-1">
+                                            <b class="font-11">Total Qty</b>
+                                            <input type="number" id="TxtTotalQty" min="0" class="forTextBox btn-link" placeholder="Total Qty" readonly="" />
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-12 col-sm-8 col-md-8 col-lg-8" style="padding: 0px; margin: 0px">
+                                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="margin: 0px; padding: 0px">
+                                            <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3">
+                                                <b class="font-11">No Of unit Per Inner Box</b>
+                                                <input type="number" id="TxtNoOfUnitPerInnerBox" min="0" class="forTextBox" onchange="BoxQtyinner();" />
+                                            </div>
+                                            <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3">
+                                                <b class="font-11">Box Qty Inner</b>
+                                                <input type="number" id="TxtBoxQtyInner" min="0" class="forTextBox btn-link" placeholder="Box Qty Inner" readonly="" />
+                                            </div>
+                                            <div class="col-xs-12 col-sm-2 col-md-2 col-lg-2">
+                                                <b class="font-11">Addnl. Waste</b>
+                                                <input type="number" id="TxtAdditionalWaste" min="0" class="forTextBox" onchange="TotalInnerBox()" />
+                                            </div>
+                                            <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3">
+                                                <b class="font-11">Total Inner Box</b>
+                                                <input type="number" id="TxtTotalInnerBox" min="0" class="forTextBox btn-link" placeholder="Total Inner Box" readonly="" />
+                                            </div>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="margin: 0px; padding: 0px">
+                                            <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3">
+                                                <b class="font-11">No Of unit Per outer  Box</b>
+                                                <input type="number" id="TxtNoOfunitPerouterBox" min="0" class="forTextBox" onchange="BoxQtyOuter();" />
+                                            </div>
+                                            <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3">
+                                                <b class="font-11">Box Qty Outer</b>
+                                                <input type="number" id="TxtBoxQtyOuter"  min="0" class="forTextBox btn-link" placeholder="Box Qty Outer" readonly="" />
+                                            </div>
+                                            <div class="col-xs-12 col-sm-2 col-md-2 col-lg-2">
+                                                <b class="font-11">Addnl. Waste</b>
+                                                <input type="number" id="TxtAddnlWaste"  min="0" class="forTextBox" onchange="TotalOuterBox()" />
+                                            </div>
+                                            <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3">
+                                                <b class="font-11">Total Outer Box</b>
+                                                <input type="number" id="TxtTotalOuterBox"  min="0" class="forTextBox btn-link" placeholder="Total Outer Box" readonly="" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-12 col-sm-4 col-md-4 col-lg-4" style="margin: 0px; padding: 0px; padding-top: 10px">
+                                        <div class="col-xs-12 col-sm-4 col-md-4 col-lg-4">
+                                            <b class="font-11">Operation</b>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-8 col-md-8 col-lg-8">
+                                            <input type="text" id="TxtOperation" class="forTextBox" />
+                                            <input type="text" id="TxtOptID" class="forTextBox" style="display:none"/>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-4 col-md-4 col-lg-4">
+                                            <b class="font-11">Job Coordinator</b>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-8 col-md-8 col-lg-8">
+                                            <input type="text" id="TxtJobCoordinator" class="forTextBox" />
+                                            <input type="text" id="TxtJobCoordinatorID" class="forTextBox" style="display:none"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                        <b class="font-11"></b>
+                                        <div id="PackingInstructionGrid"></div>
+                                    </div>
+                                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                        <div class="col-xs-12 col-sm-10 col-md-10 col-lg-10" style="text-align: right">
+                                            <b class="font-11">Total Amount Per Box</b>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-2 col-md-2 col-lg-2">
+                                            <input type="number" min="0" id="TextTotalAmountPerBox" class="forTextBox" readonly=""/>
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                        <div class="col-xs-12 col-sm-10 col-md-10 col-lg-10" style="text-align: right;">
+                                            <b class="font-11">Approved Amount Per Box</b>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-2 col-md-2 col-lg-2">
+                                            <input type="number" id="TxtApprovedAmountPerBox" class="forTextBox" min="0"/>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div id="btnDivPickList" class="modal-footer" style="border-top: 1px solid #42909A;">
+                    <button type="button" id="BtnNew" class="btn btn-link waves-effect">New</button>
+                    <button type="button" id="BtnDeletePopUp" class="btn btn-link waves-effect">Delete</button>
+                    <button type="button" id="BtnSave" class="btn btn-link waves-effect">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <%--Choose JobCard Model PopUp --%>
+    <div class="modal fade" id="largeModalJobCard" tabindex="-1" role="dialog" style="margin-left: -7px">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="DialogBoxCustom" style="float: left; border-top-left-radius: 4px; border-top-right-radius: 4px;">
+                    <strong>Job Card</strong>
+                    <input type="button" name="RefreshJobCard" class="btn btn-info" id="RefreshJobCard" value="Refresh" />
+                    <a href="javascript:void(0);" class="iconRightDbox btn-danger" data-dismiss="modal">
+                        <span data-dismiss="modal" style="font-weight: 900; margin-right: 8px">X</span>
+                    </a>
+                </div>
+
+                <div class="modal-body">
+                    <div id="FieldCntainerRowJobCard" class="row clearfix">
+                        <div role="tabpanel" class="tab-pane active">
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                <div id="ProductJobCard"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="btnDivJobCard" class="modal-footer" style="border-top: 1px solid #42909A;">
+                    <button type="button" id="BtnJobCard" class="btn btn-link waves-effect">Apply Job Card</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+      <%--Choose Process Model PopUp --%>
+    <div class="modal fade" id="largeModalOperationMaster" tabindex="-1" role="dialog" style="margin-left: -7px">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="DialogBoxCustom" style="float: left; border-top-left-radius: 4px; border-top-right-radius: 4px;">
+                    <strong>Process Master</strong>
+                    <input type="button" name="RefreshJobCard" class="btn btn-info" id="RefreshOperationMaster" value="Refresh" />
+                    <a href="javascript:void(0);" class="iconRightDbox btn-danger" data-dismiss="modal">
+                        <span data-dismiss="modal" style="font-weight: 900; margin-right: 8px">X</span>
+                    </a>
+                </div>
+
+                <div class="modal-body">
+                    <div id="FieldCntainerRowOperationMaster" class="row clearfix">
+                        <div role="tabpanel" class="tab-pane active">
+                            <button type="button" id="BtnOpenPopUp" class="btn btn-link waves-effect"></button>
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                <div id="OperationMasterGrid"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="btnDivOperationMaster" class="modal-footer" style="border-top: 1px solid #42909A;">
+                    <button type="button" id="BtnOperationMaster" class="btn btn-link waves-effect">Apply Process</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="CustomJS/PackingInstructions.js"></script>
+</asp:Content>
+

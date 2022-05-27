@@ -1,0 +1,64 @@
+﻿Imports System.Data
+Imports System.Configuration
+Imports System.Data.SqlClient
+Imports Microsoft.Reporting.WebForms
+Imports Connection
+
+Partial Class ReportPickList
+    Inherits System.Web.UI.Page
+    Dim db As New DBConnection
+    Dim GBLCompanyID, ItemIDStr, TransactionID As String
+
+    Protected Sub Page_Load(sender As Object, e As EventArgs) Handles Me.Load
+        If Not IsPostBack Then
+            TransactionID = Convert.ToString(HttpContext.Current.Request.QueryString("TransactionID"))
+            ItemIDStr = Convert.ToString(HttpContext.Current.Request.QueryString("ItemIDStr"))
+
+            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyId"))
+            Dim UserName = Convert.ToString(HttpContext.Current.Session("UserName"))
+
+            Dim dsCustomers As DataTable = GetData("SELECT ITM.TransactionID, ITM.VoucherNo, ITM.VoucherDate, IM.ItemCode, IM.ItemID, IM.ItemName,DM.DepartmentName, IM.StockUnit, ITM.Narration,(PTD.ReleaseQuantity)-Isnull(Sum(Isnull(ISTD.IssueQuantity,0)),0) AS PendingToIssueQty, JEJC.JobCardContentNo AS JobCardNo, JEJ.JobName,  JEJC.PlanContName AS ContentName, IM.PhysicalStock ,Getdate() As TimeStamp ,'" & UserName & "' As UserName " &
+                        " FROM ItemMaster AS IM INNER JOIN ItemTransactionDetail AS ITD ON ITD.ItemID = IM.ItemID AND ITD.CompanyID = IM.CompanyID AND ISNULL(IM.IsBlocked, 0) = 0 INNER JOIN ItemTransactionMain AS ITM ON ITM.TransactionID = ITD.TransactionID AND ITD.CompanyID = ITM.CompanyID AND ITM.VoucherID = - 17 And ITD.IsDeletedTransaction=0 LEFT OUTER JOIN JobBookingJobCardContents AS JEJC ON JEJC.JobBookingJobCardContentsID = ITD.JobBookingJobCardContentsID AND JEJC.CompanyID = ITD.CompanyID LEFT OUTER JOIN JobBookingJobCard AS JEJ ON JEJ.JobBookingID = JEJC.JobBookingID And JEJ.CompanyID=JEJC.CompanyID And JEJ.IsDeletedTransaction=0 Left Join DepartmentMaster As DM On DM.DepartmentID=ITM.DepartmentID And DM.CompanyID=ITM.CompanyID " &
+                        " INNER JOIN ItemPicklistReleaseDetail AS PTD ON PTD.PicklistTransactionID = ITD.TransactionID AND PTD.PicklistTransactionDetailID = ITD.TransactionDetailID AND ITD.CompanyID = PTD.CompanyID  AND ITD.ItemID = PTD.ItemID AND PTD.IsDeletedTransaction=0 LEFT JOIN ItemTransactionDetail AS ISTD ON ISTD.PicklistReleaseTransactionID = PTD.PicklistReleaseTransactionID And PTD.ItemID=ISTD.ItemID AND ISTD.CompanyID = PTD.CompanyID AND ISTD.IsDeletedTransaction=0 " &
+                        " Where ITD.IsReleased=1 And ITM.TransactionID = '" & TransactionID & "' And ITD.TransactionDetailID In (" & ItemIDStr & ") AND ITM.CompanyID=" & GBLCompanyID &
+                        " Group BY ITM.TransactionID, ITM.VoucherNo, ITM.VoucherDate, IM.ItemCode, IM.ItemID, IM.ItemName,DM.DepartmentName, IM.StockUnit, ITM.Narration,PTD.ReleaseQuantity,JEJC.JobCardContentNo , JEJ.JobName,  JEJC.PlanContName ,IM.PhysicalStock")
+            ReportViewer1.Reset()
+            'path
+            '  ReportViewer1.LocalReport.ReportPath = Server.MapPath("~/ReportPurchaseOrder.rdlc")
+            ReportViewer1.LocalReport.ReportPath = Server.MapPath("~/PickList.rdlc")
+
+            'dataSource
+            Dim ds1 As ReportDataSource = New ReportDataSource("DataSet1", dsCustomers)
+            ReportViewer1.LocalReport.DataSources.Add(ds1)
+            ReportViewer1.Height = 1000
+
+            Dim FDetail As New DataTable
+            FDetail = GetData("SELECT SUM(ISNULL(B.ReceiptQuantity, 0)) - SUM(ISNULL(B.IssueQuantity, 0)) AS StockQty, B.WarehouseID, A.WarehouseBinName As Warehouse, B.ItemID,IM.ItemCode, IM.ItemName FROM ItemTransactionDetail AS B INNER JOIN WarehouseMaster AS A ON A.WarehouseID = B.WarehouseID AND A.CompanyID = B.CompanyID AND ISNULL(B.IsDeletedTransaction, 0) = 0 Inner Join ItemMaster As IM On IM.ItemID=B.ItemID And IM.CompanyID=B.CompanyID And IM.IsDeletedTransaction=0 Where B.ItemID IN (Select Distinct ItemID From ItemTransactionDetail Where TransactionDetailID In(" & ItemIDStr & ") AND CompanyID = B.CompanyID) AND B.CompanyID = " & GBLCompanyID & " GROUP BY B.WarehouseID, A.WarehouseBinName, B.ItemID, B.CompanyID,IM.ItemCode,IM.ItemName")
+
+            Dim datasource As ReportDataSource = New ReportDataSource("DataSet2", FDetail)
+            ReportViewer1.LocalReport.DataSources.Add(datasource)
+            'Add SubReport
+            'AddHandler ReportViewer1.LocalReport.SubreportProcessing, AddressOf WarehouseDetailSubreportProcessing
+            'refresh
+            'ReportViewer1.LocalReport.Refresh()
+        End If
+    End Sub
+
+    Private Function GetData(query As String) As DataTable
+        Dim con As New SqlConnection
+        Dim dss As DataSet = New DataSet()
+        Dim sql As String = ""
+        Dim dt As New DataTable
+        Try
+            con = db.OpenDataBase()
+            sql = query
+            Dim cmd As SqlCommand = New SqlCommand(sql, con)
+            Dim adapter As New SqlDataAdapter(cmd)
+            adapter.Fill(dt)
+            con.Close()
+            Return dt
+        Catch ex As Exception
+            Return dt
+        End Try
+    End Function
+End Class

@@ -1,0 +1,47 @@
+﻿<%@ Page Title="Daily Production Report" Language="VB" MasterPageFile="~/MasterPageMIS.master" AutoEventWireup="false" CodeFile="DailyProductionReport.aspx.vb" Inherits="DailyProductionReport" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="Server">
+</asp:Content>
+<asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="Server">
+    <div class="row padding-0 margin-0">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-0 margin-0">
+            <div class="col-lg-1 col-md-1 col-sm-1 col-xs-12" style="text-align: right;">
+                <br class="hidden-xs" />
+                <input type="checkbox" id="IsActiveDate" class="filled-in chk-col-red" />
+                <label for="IsActiveDate">Date</label>
+            </div>
+            <div class="col-lg-2 col-md-3 col-sm-4 col-xs-12">
+                <b>From Time</b>
+                <div id="DtFromTime"></div>
+            </div>
+            <div class="col-lg-2 col-md-3 col-sm-4 col-xs-12">
+                <b>To Time</b>
+                <div id="DtToTime"></div>
+            </div>
+            <div class="col-lg-3 col-md-4 col-sm-5 col-xs-12">
+                <b class="font-11">Machine</b>
+                <div id="SelMachine"></div>
+                <textarea id="MachineID" class="hidden"></textarea>
+            </div>
+            <div class="col-lg-2 col-md-3 col-sm-5 col-xs-12">
+                <b class="font-11">Supervisor</b>
+                <div id="SelUser"></div>
+                <textarea id="UserID" class="hidden"></textarea>
+            </div>
+
+            <div class="col-lg-1 col-md-1 col-sm-1 col-xs-3">
+                <br class="hidden-xs" />
+                <input type="button" name="BtnRefresh" onclick="BtnRefreshclick()" id="BtnRefresh" class="btn btn-primary" value="Refresh" />
+            </div>
+            <div class="col-lg-1 col-md-1 col-sm-1 col-xs-3">
+                <br class="hidden-xs" />
+                <input type="button" name="BtnPrint" onclick="BtnPrintclick()" id="BtnPrint" class="btn btn-warning" value="Print" />
+            </div>
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-0 margin-0">
+                <div id="GridProductionReport"></div>
+            </div>
+        </div>
+    </div>
+    <script src="CustomJS/DailyProductionReport.js"></script>
+</asp:Content>
+

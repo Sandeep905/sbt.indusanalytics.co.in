@@ -1,0 +1,389 @@
+﻿Imports System.Web
+Imports System.Web.Services
+Imports System.Web.Services.Protocols
+Imports System.Data
+Imports System.Data.SqlClient
+Imports System.Web.Script.Services
+Imports System.Web.Script.Serialization
+Imports Connection
+Imports System.Collections.Generic
+Imports System.Web.UI.WebControls
+Imports System.Net
+Imports System.IO
+Imports System.Net.Mail
+
+' To allow this Web Service to be called from script, using ASP.NET AJAX, uncomment the following line.
+<System.Web.Script.Services.ScriptService()>
+<WebService(Namespace:="http://tempuri.org/")>
+<WebServiceBinding(ConformsTo:=WsiProfiles.BasicProfile1_1)>
+<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
+Public Class WebService_MachineMaintenance
+    Inherits System.Web.Services.WebService
+
+    Dim db As New DBConnection
+    Dim Index_Form_Name As String
+    Dim k As String
+    Dim ss As String
+    Dim F_Year As String
+    Dim str_date As String
+    Dim js As New JavaScriptSerializer()
+    Dim data As New HelloWorldData()
+    Dim dataTable As New DataTable()
+    Dim str As String
+
+    Dim Person_Email As String
+    Dim GBLUserID As String
+    Dim GBLUserName As String
+    Dim GBLBranchID As String
+    Dim GBLCompanyID As String
+    Dim GBLFYear As String
+    Dim User_Name As String
+
+    <System.Web.Services.WebMethod(EnableSession:=True)>
+    <ScriptMethod(UseHttpGet:=True, ResponseFormat:=ResponseFormat.Json)>
+    Public Sub HelloWorld()
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
+
+        GBLUserName = Convert.ToString(HttpContext.Current.Session("UserName"))
+        GBLFYear = Convert.ToString(HttpContext.Current.Session("FYear"))
+        GBLBranchID = Convert.ToString(HttpContext.Current.Session("BranchId"))
+
+        Context.Response.Clear()
+        Context.Response.ContentType = "application/json"
+        data.Message = ConvertDataTableTojSonString(GetDataTable)
+        Context.Response.Write(js.Serialize(data.Message))
+    End Sub
+
+    <WebMethod()>
+    <ScriptMethod()>
+    Public Function GetDataTable() As DataTable
+
+        If k = "client" Then
+
+            str = " SELECT LedgerName as ClientName, MailingName,Address1,Address2,Address3,City,State,Country,Address,Phone,Fax,Email,PinCode,Website,PAN,ECC,CST,TIN,DeliveredQtyTolerence,ProfitPercentage,PaymentTerms,MinimumCreditLimit,UrgentCreditLimit,CriticalCreditLimit,LedgerID From LedgerMaster Where  UnderGroupID IN ( 28, 24)  Order By LedgerName "
+            '          LedgerName as ClientName, MailingName,Address, Nullif(Phone,'') As Phone,Email, Nullif(Tin,'') as Tin, Nullif(ConcerningPerson1,'') As ConcermingPerson, Nullif(City,'') as City,LedgerID FROM LedgerMaster Where  UnderGroupID IN ( 28, 24)   Order By LedgerName"
+        Else
+            str = " Select  Top 10 RollId,RollCode,ItemCode,Quality,Width,MfgBy ,'F: ' + cast(isnull(GSMFacePaper,0) as nvarchar)+ ' ' + ' R: ' + cast(isnull(GSMReleasePaper,0) as nvarchar)  " &
+                  " + ' ' + ' A: ' + cast(isnull(GSMAdhesive,0) as nvarchar) as GSM From RollMaster "
+        End If
+
+        db.FillDataTable(dataTable, str)
+        Return dataTable
+    End Function
+
+
+    <WebMethod()>
+    <ScriptMethod()>
+    Public Function ConvertDataTableTojSonString(ByVal dataTable As DataTable) As String
+        Dim serializer As New System.Web.Script.Serialization.JavaScriptSerializer()
+        serializer.MaxJsonLength = 2147483647
+        Dim tableRows As New List(Of Dictionary(Of [String], [Object]))()
+        Dim row As Dictionary(Of [String], [Object])
+        For Each dr As DataRow In dataTable.Rows
+            row = New Dictionary(Of [String], [Object])()
+            For Each col As DataColumn In dataTable.Columns
+                row.Add(col.ColumnName, dr(col))
+                System.Console.WriteLine(dr(col))
+            Next
+            tableRows.Add(row)
+        Next
+        Return serializer.Serialize(tableRows)
+    End Function
+    '---------------Open Master code---------------------------------
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function GetRTSVoucherNO(ByVal prefix As String) As String
+
+        Dim MaxVoucherNo As Long
+        Dim KeyField As String
+
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
+        GBLUserName = Convert.ToString(HttpContext.Current.Session("UserName"))
+        GBLFYear = Convert.ToString(HttpContext.Current.Session("FYear"))
+
+        Try
+            KeyField = db.GeneratePrefixedNo("SpareConsumptionMain", prefix, "MaxVoucherNo", MaxVoucherNo, GBLFYear, " Where VoucherPrefix='" & prefix & "' And  CompanyID=" & GBLCompanyID & " And FYear='" & GBLFYear & "' ")
+
+        Catch ex As Exception
+            KeyField = "fail"
+        End Try
+        Return KeyField
+    End Function
+
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function Showlist() As String
+        Try
+            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+            GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
+            GBLUserName = Convert.ToString(HttpContext.Current.Session("UserName"))
+            GBLFYear = Convert.ToString(HttpContext.Current.Session("FYear"))
+
+            str = "Select Isnull(ICM.ConsumptionTransactionID,0) AS TransactionID,	Isnull(ICD.JobBookingID,0) AS JobBookingID, " &
+                   "   Isnull(ICD.JobBookingJobCardContentsID,0) As JobBookingJobCardContentsID,Isnull(ICD.SpareID,0) As SpareID,Isnull(ICD.MachineID,0) AS MachineID, " &
+                   "   Isnull(IM.SparePartID,0) AS SpareGroupID,Isnull(ICD.IssueTransactionID,0) AS IssueTransactionID,	Isnull(ICM.CreatedBy,0) AS UserID,Isnull(ICM.VoucherID,0) AS VoucherID,   " &
+                   "   Isnull(ICM.MaxVoucherNo,0) As MaxVoucherNo,Nullif(ICM.VoucherNo,'') AS VoucherNo,Replace(Convert(Varchar(13),ICM.VoucherDate,106),' ','-') AS VoucherDate, " &
+                   "   Nullif(JC.JobCardContentNo,'') AS JobCardNo,Nullif(ITM.VoucherNo,'') AS IssueVoucherNo, " &
+                   "   Replace(Convert(Varchar(13),ITM.VoucherDate,106),' ','-') AS IssueVoucherDate,Nullif(IM.SparePartCode,'') AS SpareCode, " &
+                   "   Nullif(IM.SparePartName,'') AS SpareName,Nullif(IM.Unit,'') AS StockUnit, " &
+                   "   Nullif(ICM.MaintenanceType,'') AS MaintenanceType,Nullif(ICM.Description,'') AS Description, " &
+                   "   Nullif(ICM.Engineer,'') AS Engineer,Nullif(ICM.CompanyName,'') AS CompanyName,Nullif(ICM.Narration,'') AS Narration,Nullif(MM.MachineName,'') as MachineName, " &
+                   "   ROUND(Sum(Isnull(ICD.ConsumeQuantity,0)),3) AS ConsumeQuantity,Nullif(UM.UserName,'') AS CreatedBy,Nullif(ICM.FYear,'') AS FYear   " &
+                   "   From SpareConsumptionMain AS ICM   " &
+                   "   INNER JOIN SpareConsumptionDetail AS ICD ON ICM.ConsumptionTransactionID=ICD.ConsumptionTransactionID And ICM.CompanyID=ICD.CompanyID   " &
+                   "   INNER JOIN SpareTransactionMain AS ITM ON ITM.TransactionID=ICD.IssueTransactionID And ITM.CompanyID=ICD.CompanyID   " &
+                   "   INNER JOIN SparePartMaster AS IM ON IM.SparePartID=ICD.SpareID And IM.CompanyID=ICD.CompanyID    " &
+                   "   INNER JOIN UserMaster AS UM ON UM.UserID=ICM.CreatedBy And UM.CompanyID=ICM.CompanyID   " &
+                      "INNER JOIN MachineMaster AS MM ON MM.MachineID=ICD.MachineID And MM.CompanyID=ICM.CompanyID  " &
+                    "   LEFT JOIN JobBookingJobCardContents AS JC ON JC.JobBookingJobCardContentsID=ICD.JobBookingJobCardContentsID And JC.CompanyID=ICD.CompanyID   " &
+                   "   Where ICM.VoucherID=-118 And Isnull(ICM.IsDeletedTransaction,0)=0 And ICM.CompanyID='" & GBLCompanyID & "'   " &
+                   "   GROUP BY Isnull(ICM.ConsumptionTransactionID,0),Isnull(ICD.JobBookingID,0),Isnull(ICD.JobBookingJobCardContentsID,0),Isnull(ICD.SpareID,0),Isnull(IM.SparePartID,0), " &
+                   "   Isnull(ICD.IssueTransactionID,0),Isnull(ICM.CreatedBy,0),Isnull(ICM.VoucherID,0),   " &
+                   "   Isnull(ICM.MaxVoucherNo,0),Nullif(ICM.VoucherNo,''),Replace(Convert(Varchar(13),ICM.VoucherDate,106),' ','-'),Nullif(JC.JobCardContentNo,''), " &
+                   "   Nullif(ITM.VoucherNo,''),Replace(Convert(Varchar(13),ITM.VoucherDate,106),' ','-'),Nullif(IM.SparePartCode,''), " &
+                   "   Nullif(IM.SparePartName,''),Nullif(IM.Unit,''),Nullif(UM.UserName,''),Nullif(ICM.FYear,'')  ,Nullif(ICM.MaintenanceType,''),Nullif(ICM.Description,''),Nullif(ICM.Engineer,''),Nullif(ICM.CompanyName,''),Nullif(ICM.Narration,''),Isnull(ICD.MachineID,0),Nullif(MM.MachineName,'') " &
+                   "   Order By FYear,MaxVoucherNo Desc"
+
+            db.FillDataTable(dataTable, str)
+            data.Message = ConvertDataTableTojSonString(dataTable)
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+
+    End Function
+
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function MachineName() As String
+        Try
+            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+            GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
+            GBLUserName = Convert.ToString(HttpContext.Current.Session("UserName"))
+            GBLFYear = Convert.ToString(HttpContext.Current.Session("FYear"))
+
+            str = "Select Distinct Isnull(MachineID,0) As MachineID,NullIf(MachineName,'') AS MachineName From MachineMaster Where Isnull(IsDeletedTransaction,0)=0  And CompanyID='" & GBLCompanyID & "'"
+
+            db.FillDataTable(dataTable, str)
+            data.Message = ConvertDataTableTojSonString(dataTable)
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+
+    End Function
+
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function GetStockBatchWise(ByVal MachineID As String) As String
+        Try
+            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+            GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
+            GBLUserName = Convert.ToString(HttpContext.Current.Session("UserName"))
+            GBLFYear = Convert.ToString(HttpContext.Current.Session("FYear"))
+
+
+            'str = "Select Isnull(ITM.TransactionID,0) AS TransactionID,Isnull(ITD.TransactionDetailID,0) AS TransactionDetailID,Isnull(ITM.VoucherID,0) AS VoucherID,Isnull(ITM.LedgerID,0) AS LedgerID,     " &
+            '      "  Isnull(ITD.TransID,0) As TransID,Isnull(ITD.IssueQuantity,0) As IssueQuantity,Isnull(ITD.SpareID,0) As SpareID, Isnull(ITD.SpareGroupID,0) As SpareGroupID,   " &
+            '      "  NullIf(SPM.SparePartCode,'') AS SpareCode,NullIf(SPM.SparePartGroup,'') AS SpareGroupName,    " &
+            '      "  NullIf(Isnull(SPM.SparePartName,''),'') AS SpareName,   Isnull(ITM.MachineID,0) As MachineID,NullIf(MM.MachineName,'') AS MachineName,   " &
+            '      "  Isnull(ITM.MaxVoucherNo,0) AS MaxVoucherNo,NullIf(ITM.VoucherNo,'') AS VoucherNo, NullIf(ITD.StockUnit,'') AS StockUnit, NullIf(ITD.BatchNo,'') AS BatchNo,    " &
+            '      "  Replace(Convert(Varchar(13),ITM.VoucherDate,106),' ','-') AS VoucherDate,Isnull(ITD.WarehouseID,0) AS WarehouseID,NullIf(WM.WarehouseName,'') AS Warehouse,NullIf(WM.BinName,'') AS Bin,    " &
+            '      "  NullIf(Isnull(UA.UserName,''),'') AS CreatedBy,  NullIf(ITD.FYear,'') AS FYear, Nullif(ITD.RefJobCardContentNo,'') AS RefJobCardContentNo      " &
+            '      "  From SpareTransactionDetail AS ITD    " &
+            '      "  INNER JOIN SpareTransactionMain AS ITM  ON ITD.TransactionID=ITM.TransactionID And ITD.CompanyID=ITM.CompanyID      " &
+            '      "  INNER JOIN SparePartMaster AS SPM ON SPM.SparePartID=ITD.SpareID And SPM.CompanyID=ITD.CompanyID      " &
+            '      "  INNER JOIN UserMaster AS UA ON UA.UserID=ITM.CreatedBy And UA.CompanyID=ITM.CompanyID       " &
+            '      "  INNER JOIN MachineMaster AS MM ON MM.MachineID=ITM.MachineID And MM.CompanyID=ITM.CompanyID          " &
+            '      "  LEFT JOIN UserMaster AS UM ON UM.UserID=ITD.VoucherSpareApprovedBy AND UA.CompanyID=ITM.CompanyID     " &
+            '      "  INNer JOIN  WarehouseMaster as WM on ITD.WarehouseID=WM.WarehouseID And ITD.CompanyID=WM.CompanyID      " &
+            '      "  Where ITM.VoucherID= -114 And  ITM.MachineID='" & MachineID & "'  And ITM.CompanyID='" & GBLCompanyID & "'   AND Isnull(ITD.IsDeletedTransaction,0)<>1 Order By FYear,MaxVoucherNo Desc,TransID "
+
+            str = "Select Nullif(STM.VoucherNo,'') as VoucherNo, replace(convert(nvarchar(13),STM.VoucherDate,106),'','-') as VoucherDate, Isnull(ITD.ParentTransactionID,0) AS ParentTransactionID,Isnull(ITD.IssueTransactionID,0) AS IssueTransactionID,  " &
+                  " Isnull(ITD.SpareID,0) As SpareID, Isnull(ITD.SpareGroupID,0) As SpareGroupID,    " &
+                  " NullIf(SPM.SparePartCode,'') AS SpareCode,NullIf(SPM.SparePartGroup,'') AS SpareGroupName,     " &
+                  " NullIf(Isnull(SPM.SparePartName,''),'') AS SpareName,   Isnull(ITM.MachineID,0) As MachineID,NullIf(MM.MachineName,'') AS MachineName,    " &
+                  " NullIf(ITD.StockUnit,'') AS StockUnit, NullIf(ITD.BatchNo,'') AS BatchNo,(Sum(Isnull(ITD.ReceivedQuantity,0)) -  Sum(Isnull(ITD.IssueQuantity,0))) As FloorStock, " &
+                  " Isnull(ITD.WarehouseID,0) AS WarehouseID,NullIf(WM.WarehouseName,'') AS Warehouse,NullIf(WM.BinName,'') AS Bin, " &
+                  " NullIf(UA.UserName,'') AS CreatedBy  " &
+                  " From SpareTransactionMain AS STM INNER JOIN SpareTransactionDetail AS STD On STD.TransactionID = STM.TransactionID And STD.CompanyID = STM.CompanyID And Isnull(STM.IsDeletedTransaction,0)=0 " &
+                  " INNER JOIN SpareConsumptionDetail AS ITD ON ITD.IssueTransactionID = STM.TransactionID AND ITD.CompanyID = STM.CompanyID  " &
+                  " INNER JOIN SpareConsumptionMain AS ITM  ON ITD.ConsumptionTransactionID=ITM.ConsumptionTransactionID And ITD.CompanyID=ITM.CompanyID  And Isnull(ITM.IsDeletedTransaction,0)=0      " &
+                  " INNER JOIN SparePartMaster AS SPM ON SPM.SparePartID=ITD.SpareID And SPM.CompanyID=ITD.CompanyID      " &
+                  " INNER JOIN UserMaster AS UA ON UA.UserID=ITM.CreatedBy And UA.CompanyID=ITM.CompanyID        " &
+                  " INNER JOIN MachineMaster AS MM ON MM.MachineID=ITM.MachineID And MM.CompanyID=ITM.CompanyID              " &
+                  " INNer JOIN  WarehouseMaster as WM on ITD.WarehouseID=WM.WarehouseID And ITD.CompanyID=WM.CompanyID    " &
+                  " Where ITM.VoucherID= -119 And  ITM.MachineID= '" & MachineID & "' And ITM.CompanyID= '" & GBLCompanyID & "'    " &
+                  " GROUP BY Nullif(STM.VoucherNo,''), STM.VoucherDate,Isnull(ITD.ParentTransactionID,0) ,Isnull(ITD.IssueTransactionID,0) , Isnull(ITD.SpareID,0) , Isnull(ITD.SpareGroupID,0) , NullIf(SPM.SparePartCode,'') ,  " &
+                  " NullIf(SPM.SparePartGroup,'') , NullIf(Isnull(SPM.SparePartName,''),'') ,   Isnull(ITM.MachineID,0)  ,NullIf(MM.MachineName,'') ,  " &
+                  " NullIf(ITD.StockUnit,'') , NullIf(ITD.BatchNo,''), Isnull(ITD.WarehouseID,0) ,NullIf(WM.WarehouseName,'') ,NullIf(WM.BinName,'') ,  NullIf(UA.UserName,'')  " &
+                  " Order by STM.VoucherDate DESC"
+
+
+            db.FillDataTable(dataTable, str)
+            data.Message = ConvertDataTableTojSonString(dataTable)
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+
+    End Function
+
+    ''----------------------------Save Receipt Note Data  ------------------------------------------
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function SaveData(ByVal prefix As String, ByVal jsonObjectsTransactionMain As Object, ByVal jsonObjectsTransactionDetail As Object) As String
+
+        Dim dt As New DataTable
+        Dim VoucherNo As String = ""
+        Dim MaxVoucherNo As Long = 0
+        Dim KeyField, TransactionID As String
+        Dim AddColName, AddColValue, TableName As String
+        AddColName = ""
+        AddColValue = ""
+
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
+        GBLUserName = Convert.ToString(HttpContext.Current.Session("UserName"))
+        GBLFYear = Convert.ToString(HttpContext.Current.Session("FYear"))
+
+        Try
+
+            VoucherNo = db.GeneratePrefixedNo("SpareConsumptionMain", prefix, "MaxVoucherNo", MaxVoucherNo, GBLFYear, " Where VoucherPrefix='" & prefix & "'  And  CompanyID=" & GBLCompanyID & " And FYear='" & GBLFYear & "' ")
+
+            TableName = "SpareConsumptionMain"
+            AddColName = ""
+            AddColValue = ""
+            AddColName = "ModifiedDate,CreatedDate,UserID,CompanyID,FYear,CreatedBy,ModifiedBy,VoucherPrefix,MaxVoucherNo,VoucherNo"
+            AddColValue = "'" & DateTime.Now & "','" & DateTime.Now & "','" & GBLUserID & "','" & GBLCompanyID & "','" & GBLFYear & "','" & GBLUserID & "','" & GBLUserID & "','" & prefix & "','" & MaxVoucherNo & "','" & VoucherNo & "'"
+            TransactionID = db.InsertDatatableToDatabase(jsonObjectsTransactionMain, TableName, AddColName, AddColValue)
+            If IsNumeric(TransactionID) = False Then
+                Return "fail"
+            End If
+
+            TableName = "SpareConsumptionDetail"
+            AddColName = "ModifiedDate,CreatedDate,UserID,CompanyID,FYear,CreatedBy,ModifiedBy,ConsumptionTransactionID"
+            AddColValue = "'" & DateTime.Now & "','" & DateTime.Now & "','" & GBLUserID & "','" & GBLCompanyID & "','" & GBLFYear & "','" & GBLUserID & "','" & GBLUserID & "','" & TransactionID & "'"
+            db.InsertDatatableToDatabase(jsonObjectsTransactionDetail, TableName, AddColName, AddColValue, "Spare SpareConsumption", TransactionID)
+
+            KeyField = "Success"
+        Catch ex As Exception
+            KeyField = "fail"
+        End Try
+        Return KeyField
+
+    End Function
+
+    ''----------------------------Update Receipt Note Data  ------------------------------------------
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function UpdateData(ByVal TransactionID As String, ByVal jsonObjectsTransactionMain As Object, ByVal jsonObjectsTransactionDetail As Object) As String
+
+        Dim dt As New DataTable
+        Dim KeyField As String
+        Dim AddColName, wherecndtn, TableName, AddColValue As String
+        AddColName = ""
+
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
+        GBLUserName = Convert.ToString(HttpContext.Current.Session("UserName"))
+        GBLFYear = Convert.ToString(HttpContext.Current.Session("FYear"))
+        GBLBranchID = Convert.ToString(HttpContext.Current.Session("BranchId"))
+
+        Try
+            Dim dtExist As New DataTable
+
+            TableName = "SpareConsumptionMain"
+            AddColName = "ModifiedDate='" & DateTime.Now & "',UserID=" & GBLUserID & ",CompanyID=" & GBLCompanyID & ",FYear='" & GBLFYear & "',ModifiedBy='" & GBLUserID & "'"
+            wherecndtn = "CompanyID=" & GBLCompanyID & " And ConsumptionTransactionID='" & TransactionID & "' "
+            str = db.UpdateDatatableToDatabase(jsonObjectsTransactionMain, TableName, AddColName, 1, wherecndtn)
+            If str <> "Success" Then
+                Return str
+            End If
+
+            db.ExecuteNonSQLQuery("Delete from SpareConsumptionDetail WHERE CompanyID='" & GBLCompanyID & "' and ConsumptionTransactionID='" & TransactionID & "' ")
+
+            TableName = "SpareConsumptionDetail"
+            AddColName = "ModifiedDate,CreatedDate,UserID,CompanyID,FYear,CreatedBy,ModifiedBy,ConsumptionTransactionID"
+            AddColValue = "'" & DateTime.Now & "','" & DateTime.Now & "','" & GBLUserID & "','" & GBLCompanyID & "','" & GBLFYear & "','" & GBLUserID & "','" & GBLUserID & "','" & TransactionID & "'"
+            db.InsertDatatableToDatabase(jsonObjectsTransactionDetail, TableName, AddColName, AddColValue, "Spare SpareConsumption", TransactionID)
+
+            KeyField = "Success"
+        Catch ex As Exception
+            KeyField = "fail"
+        End Try
+        Return KeyField
+
+    End Function
+
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function DeleteSpareConsumption(ByVal TransactionID As String) As String
+
+        Dim KeyField As String
+
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
+        GBLUserName = Convert.ToString(HttpContext.Current.Session("UserName"))
+        GBLFYear = Convert.ToString(HttpContext.Current.Session("FYear"))
+
+        Try
+
+            str = "Update SpareConsumptionMain Set DeletedBy='" & GBLUserID & "',DeletedDate='" & DateTime.Now & "',IsDeletedTransaction=1  WHERE CompanyID='" & GBLCompanyID & "' and ConsumptionTransactionID='" & TransactionID & "'"
+            db.ExecuteNonSQLQuery(str)
+
+            str = "Update SpareConsumptionDetail Set DeletedBy='" & GBLUserID & "',DeletedDate='" & DateTime.Now & "',IsDeletedTransaction=1  WHERE CompanyID='" & GBLCompanyID & "' and ConsumptionTransactionID='" & TransactionID & "'"
+            db.ExecuteNonSQLQuery(str)
+
+            KeyField = "Success"
+        Catch ex As Exception
+            KeyField = "fail"
+        End Try
+        Return KeyField
+
+    End Function
+
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function SelectedRow(ByVal transactionID As String) As String
+        Try
+            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+            GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
+            GBLUserName = Convert.ToString(HttpContext.Current.Session("UserName"))
+            GBLFYear = Convert.ToString(HttpContext.Current.Session("FYear"))
+
+
+            str = "Select Isnull(ITM.ConsumptionTransactionID,0) AS TransactionID,Isnull(ITD.ConsumptionTransactionDetailID,0) AS TransactionDetailID,Isnull(ITM.VoucherID,0) AS VoucherID,    " &
+                  " Isnull(ITD.TransID,0) As TransID,Isnull(ITD.ConsumeQuantity,0) As IssueQuantity,Isnull(ITD.SpareID,0) As SpareID, Isnull(ITD.SpareGroupID,0) As SpareGroupID,    " &
+                  " NullIf(SPM.SparePartCode,'') AS SpareCode,NullIf(SPM.SparePartGroup,'') AS SpareGroupName,     " &
+                  " NullIf(Isnull(SPM.SparePartName,''),'') AS SpareName,   Isnull(ITD.MachineID,0) As MachineID,  " &
+                  " Isnull(ITM.MaxVoucherNo,0) AS MaxVoucherNo,NullIf(ITM.VoucherNo,'') AS VoucherNo, NullIf(ITD.StockUnit,'') AS StockUnit, NullIf(ITD.BatchNo,'') AS BatchNo,     " &
+                  " Replace(Convert(Varchar(13),ITM.VoucherDate,106),' ','-') AS VoucherDate,Isnull(ITD.FloorWarehouseID,0) AS WarehouseID,NullIf(WM.WarehouseName,'') AS Warehouse,NullIf(WM.BinName,'') AS Bin,     " &
+                  " NullIf(Isnull(UA.UserName,''),'') AS CreatedBy,  NullIf(ITD.FYear,'') AS FYear, Nullif('','') AS RefJobCardContentNo       " &
+                  " From SpareConsumptionMain AS ITM     " &
+                  " INNER JOIN  SpareConsumptionDetail AS ITD ON ITM.ConsumptionTransactionID=ITD.ConsumptionTransactionID And ITM.CompanyID=ITD.CompanyID       " &
+                  " INNER JOIN SparePartMaster AS SPM ON SPM.SparePartID=ITD.SpareID And SPM.CompanyID=ITD.CompanyID       " &
+                  " INNER JOIN UserMaster AS UA ON UA.UserID=ITM.CreatedBy And UA.CompanyID=ITM.CompanyID        " &
+                  " LEFT JOIN UserMaster AS UM ON UM.UserID=ITD.UserID AND UA.CompanyID=ITD.CompanyID     " &
+                  " INNer JOIN  WarehouseMaster as WM on ITD.FloorWarehouseID=WM.WarehouseID And ITD.CompanyID=WM.CompanyID      " &
+                  " Where ITM.VoucherID= -118 And  ITM.ConsumptionTransactionID='" & transactionID & "'  And ITM.CompanyID='" & GBLCompanyID & "'   AND Isnull(ITD.IsDeletedTransaction,0)<>1 Order By FYear,MaxVoucherNo Desc,TransID "
+
+            db.FillDataTable(dataTable, str)
+            data.Message = ConvertDataTableTojSonString(dataTable)
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+
+    End Function
+
+    '---------------Close Master code---------------------------------
+
+    Public Class HelloWorldData
+        Public Message As [String]
+    End Class
+
+
+End Class

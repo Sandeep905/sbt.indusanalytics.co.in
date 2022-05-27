@@ -1,0 +1,380 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="DataSet" targetNamespace="http://tempuri.org/DataSet.xsd" xmlns:mstns="http://tempuri.org/DataSet.xsd" xmlns="http://tempuri.org/DataSet.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" xmlns:msprop="urn:schemas-microsoft-com:xml-msprop" attributeFormDefault="qualified" elementFormDefault="qualified">
+  <xs:annotation>
+    <xs:appinfo source="urn:schemas-microsoft-com:xml-msdatasource">
+      <DataSource DefaultConnectionIndex="0" FunctionsComponentName="QueriesTableAdapter" Modifier="AutoLayout, AnsiClass, Class, Public" SchemaSerializationMode="IncludeSchema" xmlns="urn:schemas-microsoft-com:xml-msdatasource">
+        <Connections />
+        <Tables />
+        <Sources />
+      </DataSource>
+    </xs:appinfo>
+  </xs:annotation>
+  <xs:element name="DataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true" msprop:Generator_UserDSName="DataSet" msprop:Generator_DataSetName="DataSet">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="JobCard" msprop:Generator_TableClassName="JobCardDataTable" msprop:Generator_TableVarName="tableJobCard" msprop:Generator_TablePropName="JobCard" msprop:Generator_RowDeletingName="JobCardRowDeleting" msprop:Generator_RowChangingName="JobCardRowChanging" msprop:Generator_RowEvHandlerName="JobCardRowChangeEventHandler" msprop:Generator_RowDeletedName="JobCardRowDeleted" msprop:Generator_UserTableName="JobCard" msprop:Generator_RowChangedName="JobCardRowChanged" msprop:Generator_RowEvArgName="JobCardRowChangeEvent" msprop:Generator_RowClassName="JobCardRow">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="UserName" msprop:Generator_ColumnVarNameInTable="columnUserName" msprop:Generator_ColumnPropNameInRow="UserName" msprop:Generator_ColumnPropNameInTable="UserNameColumn" msprop:Generator_UserColumnName="UserName" type="xs:string" minOccurs="0" />
+              <xs:element name="LedgerName" msprop:Generator_ColumnVarNameInTable="columnLedgerName" msprop:Generator_ColumnPropNameInRow="LedgerName" msprop:Generator_ColumnPropNameInTable="LedgerNameColumn" msprop:Generator_UserColumnName="LedgerName" type="xs:string" minOccurs="0" />
+              <xs:element name="ConsigneeName" msprop:Generator_ColumnVarNameInTable="columnConsigneeName" msprop:Generator_ColumnPropNameInRow="ConsigneeName" msprop:Generator_ColumnPropNameInTable="ConsigneeNameColumn" msprop:Generator_UserColumnName="ConsigneeName" type="xs:string" minOccurs="0" />
+              <xs:element name="CategoryName" msprop:Generator_ColumnVarNameInTable="columnCategoryName" msprop:Generator_ColumnPropNameInRow="CategoryName" msprop:Generator_ColumnPropNameInTable="CategoryNameColumn" msprop:Generator_UserColumnName="CategoryName" type="xs:string" minOccurs="0" />
+              <xs:element name="JobBookingNo" msprop:Generator_ColumnVarNameInTable="columnJobBookingNo" msprop:Generator_ColumnPropNameInRow="JobBookingNo" msprop:Generator_ColumnPropNameInTable="JobBookingNoColumn" msprop:Generator_UserColumnName="JobBookingNo" type="xs:string" minOccurs="0" />
+              <xs:element name="JobBookingDate" msdata:DataType="System.DateTimeOffset" msprop:Generator_ColumnVarNameInTable="columnJobBookingDate" msprop:Generator_ColumnPropNameInRow="JobBookingDate" msprop:Generator_ColumnPropNameInTable="JobBookingDateColumn" msprop:Generator_UserColumnName="JobBookingDate" type="xs:anyType" minOccurs="0" />
+              <xs:element name="BookingNo" msprop:Generator_ColumnVarNameInTable="columnBookingNo" msprop:Generator_ColumnPropNameInRow="BookingNo" msprop:Generator_ColumnPropNameInTable="BookingNoColumn" msprop:Generator_UserColumnName="BookingNo" type="xs:string" minOccurs="0" />
+              <xs:element name="DeliveryDate" msdata:DataType="System.DateTimeOffset" msprop:Generator_ColumnVarNameInTable="columnDeliveryDate" msprop:Generator_ColumnPropNameInRow="DeliveryDate" msprop:Generator_ColumnPropNameInTable="DeliveryDateColumn" msprop:Generator_UserColumnName="DeliveryDate" type="xs:anyType" minOccurs="0" />
+              <xs:element name="OrderQuantity" msprop:Generator_ColumnVarNameInTable="columnOrderQuantity" msprop:Generator_ColumnPropNameInRow="OrderQuantity" msprop:Generator_ColumnPropNameInTable="OrderQuantityColumn" msprop:Generator_UserColumnName="OrderQuantity" type="xs:string" minOccurs="0" />
+              <xs:element name="JobName" msprop:Generator_ColumnVarNameInTable="columnJobName" msprop:Generator_ColumnPropNameInRow="JobName" msprop:Generator_ColumnPropNameInTable="JobNameColumn" msprop:Generator_UserColumnName="JobName" type="xs:string" minOccurs="0" />
+              <xs:element name="PONo" msprop:Generator_ColumnVarNameInTable="columnPONo" msprop:Generator_ColumnPropNameInRow="PONo" msprop:Generator_ColumnPropNameInTable="PONoColumn" msprop:Generator_UserColumnName="PONo" type="xs:string" minOccurs="0" />
+              <xs:element name="PODate" msdata:DataType="System.DateTimeOffset" msprop:Generator_ColumnVarNameInTable="columnPODate" msprop:Generator_ColumnPropNameInRow="PODate" msprop:Generator_ColumnPropNameInTable="PODateColumn" msprop:Generator_UserColumnName="PODate" type="xs:anyType" minOccurs="0" />
+              <xs:element name="JobPriority" msprop:Generator_ColumnVarNameInTable="columnJobPriority" msprop:Generator_ColumnPropNameInRow="JobPriority" msprop:Generator_ColumnPropNameInTable="JobPriorityColumn" msprop:Generator_UserColumnName="JobPriority" type="xs:string" minOccurs="0" />
+              <xs:element name="JobType" msprop:Generator_ColumnVarNameInTable="columnJobType" msprop:Generator_ColumnPropNameInRow="JobType" msprop:Generator_ColumnPropNameInTable="JobTypeColumn" msprop:Generator_UserColumnName="JobType" type="xs:string" minOccurs="0" />
+              <xs:element name="JobCoordinatorName" type="xs:string" minOccurs="0" />
+              <xs:element name="JobBookingJobCardContentsID" msprop:Generator_ColumnVarNameInTable="columnJobBookingJobCardContentsID" msprop:Generator_ColumnPropNameInRow="JobBookingJobCardContentsID" msprop:Generator_ColumnPropNameInTable="JobBookingJobCardContentsIDColumn" msprop:Generator_UserColumnName="JobBookingJobCardContentsID" type="xs:int" minOccurs="0" />
+              <xs:element name="JobBookingID" type="xs:string" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="JobCardContents" msprop:Generator_TableClassName="JobCardContentsDataTable" msprop:Generator_TableVarName="tableJobCardContents" msprop:Generator_TablePropName="JobCardContents" msprop:Generator_RowDeletingName="JobCardContentsRowDeleting" msprop:Generator_RowChangingName="JobCardContentsRowChanging" msprop:Generator_RowEvHandlerName="JobCardContentsRowChangeEventHandler" msprop:Generator_RowDeletedName="JobCardContentsRowDeleted" msprop:Generator_UserTableName="JobCardContents" msprop:Generator_RowChangedName="JobCardContentsRowChanged" msprop:Generator_RowEvArgName="JobCardContentsRowChangeEvent" msprop:Generator_RowClassName="JobCardContentsRow">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="JobCardContentNo" msprop:Generator_ColumnVarNameInTable="columnJobCardContentNo" msprop:Generator_ColumnPropNameInRow="JobCardContentNo" msprop:Generator_ColumnPropNameInTable="JobCardContentNoColumn" msprop:Generator_UserColumnName="JobCardContentNo" type="xs:string" minOccurs="0" />
+              <xs:element name="BookingDate" msdata:DataType="System.DateTimeOffset" msprop:Generator_ColumnVarNameInTable="columnBookingDate" msprop:Generator_ColumnPropNameInRow="BookingDate" msprop:Generator_ColumnPropNameInTable="BookingDateColumn" msprop:Generator_UserColumnName="BookingDate" type="xs:anyType" minOccurs="0" />
+              <xs:element name="BookingNo" msprop:Generator_ColumnVarNameInTable="columnBookingNo" msprop:Generator_ColumnPropNameInRow="BookingNo" msprop:Generator_ColumnPropNameInTable="BookingNoColumn" msprop:Generator_UserColumnName="BookingNo" type="xs:string" minOccurs="0" />
+              <xs:element name="DeliveryDate" msdata:DataType="System.DateTimeOffset" msprop:Generator_ColumnVarNameInTable="columnDeliveryDate" msprop:Generator_ColumnPropNameInRow="DeliveryDate" msprop:Generator_ColumnPropNameInTable="DeliveryDateColumn" msprop:Generator_UserColumnName="DeliveryDate" type="xs:anyType" minOccurs="0" />
+              <xs:element name="OrderQuantity" msprop:Generator_ColumnVarNameInTable="columnOrderQuantity" msprop:Generator_ColumnPropNameInRow="OrderQuantity" msprop:Generator_ColumnPropNameInTable="OrderQuantityColumn" msprop:Generator_UserColumnName="OrderQuantity" type="xs:string" minOccurs="0" />
+              <xs:element name="UserName" msprop:Generator_ColumnVarNameInTable="columnUserName" msprop:Generator_ColumnPropNameInRow="UserName" msprop:Generator_ColumnPropNameInTable="UserNameColumn" msprop:Generator_UserColumnName="UserName" type="xs:string" minOccurs="0" />
+              <xs:element name="LedgerName" msprop:Generator_ColumnVarNameInTable="columnLedgerName" msprop:Generator_ColumnPropNameInRow="LedgerName" msprop:Generator_ColumnPropNameInTable="LedgerNameColumn" msprop:Generator_UserColumnName="LedgerName" type="xs:string" minOccurs="0" />
+              <xs:element name="ConsigneeName" msprop:Generator_ColumnVarNameInTable="columnConsigneeName" msprop:Generator_ColumnPropNameInRow="ConsigneeName" msprop:Generator_ColumnPropNameInTable="ConsigneeNameColumn" msprop:Generator_UserColumnName="ConsigneeName" type="xs:string" minOccurs="0" />
+              <xs:element name="CategoryName" msprop:Generator_ColumnVarNameInTable="columnCategoryName" msprop:Generator_ColumnPropNameInRow="CategoryName" msprop:Generator_ColumnPropNameInTable="CategoryNameColumn" msprop:Generator_UserColumnName="CategoryName" type="xs:string" minOccurs="0" />
+              <xs:element name="JobBookingNo" msprop:Generator_ColumnVarNameInTable="columnJobBookingNo" msprop:Generator_ColumnPropNameInRow="JobBookingNo" msprop:Generator_ColumnPropNameInTable="JobBookingNoColumn" msprop:Generator_UserColumnName="JobBookingNo" type="xs:string" minOccurs="0" />
+              <xs:element name="JobBookingDate" msdata:DataType="System.DateTimeOffset" msprop:Generator_ColumnVarNameInTable="columnJobBookingDate" msprop:Generator_ColumnPropNameInRow="JobBookingDate" msprop:Generator_ColumnPropNameInTable="JobBookingDateColumn" msprop:Generator_UserColumnName="JobBookingDate" type="xs:anyType" minOccurs="0" />
+              <xs:element name="JobName" msprop:Generator_ColumnVarNameInTable="columnJobName" msprop:Generator_ColumnPropNameInRow="JobName" msprop:Generator_ColumnPropNameInTable="JobNameColumn" msprop:Generator_UserColumnName="JobName" type="xs:string" minOccurs="0" />
+              <xs:element name="PONo" msprop:Generator_ColumnVarNameInTable="columnPONo" msprop:Generator_ColumnPropNameInRow="PONo" msprop:Generator_ColumnPropNameInTable="PONoColumn" msprop:Generator_UserColumnName="PONo" type="xs:string" minOccurs="0" />
+              <xs:element name="PODate" msprop:Generator_ColumnVarNameInTable="columnPODate" msprop:Generator_ColumnPropNameInRow="PODate" msprop:Generator_ColumnPropNameInTable="PODateColumn" msprop:Generator_UserColumnName="PODate" type="xs:string" minOccurs="0" />
+              <xs:element name="JobPriority" msprop:Generator_ColumnVarNameInTable="columnJobPriority" msprop:Generator_ColumnPropNameInRow="JobPriority" msprop:Generator_ColumnPropNameInTable="JobPriorityColumn" msprop:Generator_UserColumnName="JobPriority" type="xs:string" minOccurs="0" />
+              <xs:element name="JobType" msprop:Generator_ColumnVarNameInTable="columnJobType" msprop:Generator_ColumnPropNameInRow="JobType" msprop:Generator_ColumnPropNameInTable="JobTypeColumn" msprop:Generator_UserColumnName="JobType" type="xs:string" minOccurs="0" />
+              <xs:element name="ContentName" msprop:Generator_ColumnVarNameInTable="columnContentName" msprop:Generator_ColumnPropNameInRow="ContentName" msprop:Generator_ColumnPropNameInTable="ContentNameColumn" msprop:Generator_UserColumnName="ContentName" type="xs:string" minOccurs="0" />
+              <xs:element name="Orientation" msprop:Generator_ColumnVarNameInTable="columnOrientation" msprop:Generator_ColumnPropNameInRow="Orientation" msprop:Generator_ColumnPropNameInTable="OrientationColumn" msprop:Generator_UserColumnName="Orientation" type="xs:string" minOccurs="0" />
+              <xs:element name="BookingID" msprop:Generator_ColumnVarNameInTable="columnBookingID" msprop:Generator_ColumnPropNameInRow="BookingID" msprop:Generator_ColumnPropNameInTable="BookingIDColumn" msprop:Generator_UserColumnName="BookingID" type="xs:string" minOccurs="0" />
+              <xs:element name="ProductCode" msprop:Generator_ColumnVarNameInTable="columnProductCode" msprop:Generator_ColumnPropNameInRow="ProductCode" msprop:Generator_ColumnPropNameInTable="ProductCodeColumn" msprop:Generator_UserColumnName="ProductCode" type="xs:string" minOccurs="0" />
+              <xs:element name="JobCoordinatorName" msprop:Generator_ColumnVarNameInTable="columnJobCoordinatorName" msprop:Generator_ColumnPropNameInRow="JobCoordinatorName" msprop:Generator_ColumnPropNameInTable="JobCoordinatorNameColumn" msprop:Generator_UserColumnName="JobCoordinatorName" type="xs:string" minOccurs="0" />
+              <xs:element name="Category" msprop:Generator_ColumnVarNameInTable="columnCategory" msprop:Generator_ColumnPropNameInRow="Category" msprop:Generator_ColumnPropNameInTable="CategoryColumn" msprop:Generator_UserColumnName="Category" type="xs:string" minOccurs="0" />
+              <xs:element name="JobReference" msprop:Generator_ColumnVarNameInTable="columnJobReference" msprop:Generator_ColumnPropNameInRow="JobReference" msprop:Generator_ColumnPropNameInTable="JobReferenceColumn" msprop:Generator_UserColumnName="JobReference" type="xs:string" minOccurs="0" />
+              <xs:element name="PlanType" msprop:Generator_ColumnVarNameInTable="columnPlanType" msprop:Generator_ColumnPropNameInRow="PlanType" msprop:Generator_ColumnPropNameInTable="PlanTypeColumn" msprop:Generator_UserColumnName="PlanType" type="xs:string" minOccurs="0" />
+              <xs:element name="Caliper" msprop:Generator_ColumnVarNameInTable="columnCaliper" msprop:Generator_ColumnPropNameInRow="Caliper" msprop:Generator_ColumnPropNameInTable="CaliperColumn" msprop:Generator_UserColumnName="Caliper" type="xs:string" minOccurs="0" />
+              <xs:element name="PaperCode" msprop:Generator_ColumnVarNameInTable="columnPaperCode" msprop:Generator_ColumnPropNameInRow="PaperCode" msprop:Generator_ColumnPropNameInTable="PaperCodeColumn" msprop:Generator_UserColumnName="PaperCode" type="xs:string" minOccurs="0" />
+              <xs:element name="OrderBookingNo" msprop:Generator_ColumnVarNameInTable="columnOrderBookingNo" msprop:Generator_ColumnPropNameInRow="OrderBookingNo" msprop:Generator_ColumnPropNameInTable="OrderBookingNoColumn" msprop:Generator_UserColumnName="OrderBookingNo" type="xs:string" minOccurs="0" />
+              <xs:element name="Paper" msprop:Generator_ColumnVarNameInTable="columnPaper" msprop:Generator_ColumnPropNameInRow="Paper" msprop:Generator_ColumnPropNameInTable="PaperColumn" msprop:Generator_UserColumnName="Paper" type="xs:string" minOccurs="0" />
+              <xs:element name="PaperSizeinMM" msprop:Generator_ColumnVarNameInTable="columnPaperSizeinMM" msprop:Generator_ColumnPropNameInRow="PaperSizeinMM" msprop:Generator_ColumnPropNameInTable="PaperSizeinMMColumn" msprop:Generator_UserColumnName="PaperSizeinMM" type="xs:string" minOccurs="0" />
+              <xs:element name="Paper_Size_in_Inch" msprop:Generator_ColumnVarNameInTable="columnPaper_Size_in_Inch" msprop:Generator_ColumnPropNameInRow="Paper_Size_in_Inch" msprop:Generator_ColumnPropNameInTable="Paper_Size_in_InchColumn" msprop:Generator_UserColumnName="Paper_Size_in_Inch" type="xs:string" minOccurs="0" />
+              <xs:element name="JobCloseSize" msprop:Generator_ColumnVarNameInTable="columnJobCloseSize" msprop:Generator_ColumnPropNameInRow="JobCloseSize" msprop:Generator_ColumnPropNameInTable="JobCloseSizeColumn" msprop:Generator_UserColumnName="JobCloseSize" type="xs:string" minOccurs="0" />
+              <xs:element name="FrontColor" msprop:Generator_ColumnVarNameInTable="columnFrontColor" msprop:Generator_ColumnPropNameInRow="FrontColor" msprop:Generator_ColumnPropNameInTable="FrontColorColumn" msprop:Generator_UserColumnName="FrontColor" type="xs:string" minOccurs="0" />
+              <xs:element name="BackColor" msprop:Generator_ColumnVarNameInTable="columnBackColor" msprop:Generator_ColumnPropNameInRow="BackColor" msprop:Generator_ColumnPropNameInTable="BackColorColumn" msprop:Generator_UserColumnName="BackColor" type="xs:string" minOccurs="0" />
+              <xs:element name="SpecialFrontColor" msprop:Generator_ColumnVarNameInTable="columnSpecialFrontColor" msprop:Generator_ColumnPropNameInRow="SpecialFrontColor" msprop:Generator_ColumnPropNameInTable="SpecialFrontColorColumn" msprop:Generator_UserColumnName="SpecialFrontColor" type="xs:string" minOccurs="0" />
+              <xs:element name="SpecialBackColor" msprop:Generator_ColumnVarNameInTable="columnSpecialBackColor" msprop:Generator_ColumnPropNameInRow="SpecialBackColor" msprop:Generator_ColumnPropNameInTable="SpecialBackColorColumn" msprop:Generator_UserColumnName="SpecialBackColor" type="xs:string" minOccurs="0" />
+              <xs:element name="PlateQty" msprop:Generator_ColumnVarNameInTable="columnPlateQty" msprop:Generator_ColumnPropNameInRow="PlateQty" msprop:Generator_ColumnPropNameInTable="PlateQtyColumn" msprop:Generator_UserColumnName="PlateQty" type="xs:string" minOccurs="0" />
+              <xs:element name="PrintingStyle" msprop:Generator_ColumnVarNameInTable="columnPrintingStyle" msprop:Generator_ColumnPropNameInRow="PrintingStyle" msprop:Generator_ColumnPropNameInTable="PrintingStyleColumn" msprop:Generator_UserColumnName="PrintingStyle" type="xs:string" minOccurs="0" />
+              <xs:element name="PaperBy" msprop:Generator_ColumnVarNameInTable="columnPaperBy" msprop:Generator_ColumnPropNameInRow="PaperBy" msprop:Generator_ColumnPropNameInTable="PaperByColumn" msprop:Generator_UserColumnName="PaperBy" type="xs:string" minOccurs="0" />
+              <xs:element name="CutSize" msprop:Generator_ColumnVarNameInTable="columnCutSize" msprop:Generator_ColumnPropNameInRow="CutSize" msprop:Generator_ColumnPropNameInTable="CutSizeColumn" msprop:Generator_UserColumnName="CutSize" type="xs:string" minOccurs="0" />
+              <xs:element name="JobBookingJobCardContentsID" msprop:Generator_ColumnVarNameInTable="columnJobBookingJobCardContentsID" msprop:Generator_ColumnPropNameInRow="JobBookingJobCardContentsID" msprop:Generator_ColumnPropNameInTable="JobBookingJobCardContentsIDColumn" msprop:Generator_UserColumnName="JobBookingJobCardContentsID" type="xs:string" minOccurs="0" />
+              <xs:element name="MachineName" msprop:Generator_ColumnVarNameInTable="columnMachineName" msprop:Generator_ColumnPropNameInRow="MachineName" msprop:Generator_ColumnPropNameInTable="MachineNameColumn" msprop:Generator_UserColumnName="MachineName" type="xs:string" minOccurs="0" />
+              <xs:element name="Gripper" msprop:Generator_ColumnVarNameInTable="columnGripper" msprop:Generator_ColumnPropNameInRow="Gripper" msprop:Generator_ColumnPropNameInTable="GripperColumn" msprop:Generator_UserColumnName="Gripper" type="xs:string" minOccurs="0" />
+              <xs:element name="PlateType" msprop:Generator_ColumnVarNameInTable="columnPlateType" msprop:Generator_ColumnPropNameInRow="PlateType" msprop:Generator_ColumnPropNameInTable="PlateTypeColumn" msprop:Generator_UserColumnName="PlateType" type="xs:string" minOccurs="0" />
+              <xs:element name="ClosedJobSize" msprop:Generator_ColumnVarNameInTable="columnClosedJobSize" msprop:Generator_ColumnPropNameInRow="ClosedJobSize" msprop:Generator_ColumnPropNameInTable="ClosedJobSizeColumn" msprop:Generator_UserColumnName="ClosedJobSize" type="xs:string" minOccurs="0" />
+              <xs:element name="DesignStyle" msprop:Generator_ColumnVarNameInTable="columnDesignStyle" msprop:Generator_ColumnPropNameInRow="DesignStyle" msprop:Generator_ColumnPropNameInTable="DesignStyleColumn" msprop:Generator_UserColumnName="DesignStyle" type="xs:string" minOccurs="0" />
+              <xs:element name="Cuts" msprop:Generator_ColumnVarNameInTable="columnCuts" msprop:Generator_ColumnPropNameInRow="Cuts" msprop:Generator_ColumnPropNameInTable="CutsColumn" msprop:Generator_UserColumnName="Cuts" type="xs:string" minOccurs="0" />
+              <xs:element name="TotalUps" msprop:Generator_ColumnVarNameInTable="columnTotalUps" msprop:Generator_ColumnPropNameInRow="TotalUps" msprop:Generator_ColumnPropNameInTable="TotalUpsColumn" msprop:Generator_UserColumnName="TotalUps" type="xs:string" minOccurs="0" />
+              <xs:element name="GrainDirection" msprop:Generator_ColumnVarNameInTable="columnGrainDirection" msprop:Generator_ColumnPropNameInRow="GrainDirection" msprop:Generator_ColumnPropNameInTable="GrainDirectionColumn" msprop:Generator_UserColumnName="GrainDirection" type="xs:string" minOccurs="0" />
+              <xs:element name="ActualSheets" msprop:Generator_ColumnVarNameInTable="columnActualSheets" msprop:Generator_ColumnPropNameInRow="ActualSheets" msprop:Generator_ColumnPropNameInTable="ActualSheetsColumn" msprop:Generator_UserColumnName="ActualSheets" type="xs:string" minOccurs="0" />
+              <xs:element name="WastageSheets" msprop:Generator_ColumnVarNameInTable="columnWastageSheets" msprop:Generator_ColumnPropNameInRow="WastageSheets" msprop:Generator_ColumnPropNameInTable="WastageSheetsColumn" msprop:Generator_UserColumnName="WastageSheets" type="xs:string" minOccurs="0" />
+              <xs:element name="MakeReadyWastageSheet" msprop:Generator_ColumnVarNameInTable="columnMakeReadyWastageSheet" msprop:Generator_ColumnPropNameInRow="MakeReadyWastageSheet" msprop:Generator_ColumnPropNameInTable="MakeReadyWastageSheetColumn" msprop:Generator_UserColumnName="MakeReadyWastageSheet" type="xs:string" minOccurs="0" />
+              <xs:element name="TotalSheets" msprop:Generator_ColumnVarNameInTable="columnTotalSheets" msprop:Generator_ColumnPropNameInRow="TotalSheets" msprop:Generator_ColumnPropNameInTable="TotalSheetsColumn" msprop:Generator_UserColumnName="TotalSheets" type="xs:string" minOccurs="0" />
+              <xs:element name="FullSheets" msprop:Generator_ColumnVarNameInTable="columnFullSheets" msprop:Generator_ColumnPropNameInRow="FullSheets" msprop:Generator_ColumnPropNameInTable="FullSheetsColumn" msprop:Generator_UserColumnName="FullSheets" type="xs:string" minOccurs="0" />
+              <xs:element name="TotalRequiredWt" msprop:Generator_ColumnVarNameInTable="columnTotalRequiredWt" msprop:Generator_ColumnPropNameInRow="TotalRequiredWt" msprop:Generator_ColumnPropNameInTable="TotalRequiredWtColumn" msprop:Generator_UserColumnName="TotalRequiredWt" type="xs:string" minOccurs="0" />
+              <xs:element name="CutSizeInch" msprop:Generator_ColumnVarNameInTable="columnCutSizeInch" msprop:Generator_ColumnPropNameInRow="CutSizeInch" msprop:Generator_ColumnPropNameInTable="CutSizeInchColumn" msprop:Generator_UserColumnName="CutSizeInch" type="xs:string" minOccurs="0" />
+              <xs:element name="CutSizeWInch" msprop:Generator_ColumnVarNameInTable="columnCutSizeWInch" msprop:Generator_ColumnPropNameInRow="CutSizeWInch" msprop:Generator_ColumnPropNameInTable="CutSizeWInchColumn" msprop:Generator_UserColumnName="CutSizeWInch" type="xs:string" minOccurs="0" />
+              <xs:element name="ActualWt" msprop:Generator_ColumnVarNameInTable="columnActualWt" msprop:Generator_ColumnPropNameInRow="ActualWt" msprop:Generator_ColumnPropNameInTable="ActualWtColumn" msprop:Generator_UserColumnName="ActualWt" type="xs:string" minOccurs="0" />
+              <xs:element name="WastageWt" msprop:Generator_ColumnVarNameInTable="columnWastageWt" msprop:Generator_ColumnPropNameInRow="WastageWt" msprop:Generator_ColumnPropNameInTable="WastageWtColumn" msprop:Generator_UserColumnName="WastageWt" type="xs:string" minOccurs="0" />
+              <xs:element name="OnlineCoating" msprop:Generator_ColumnVarNameInTable="columnOnlineCoating" msprop:Generator_ColumnPropNameInRow="OnlineCoating" msprop:Generator_ColumnPropNameInTable="OnlineCoatingColumn" msprop:Generator_UserColumnName="OnlineCoating" type="xs:string" minOccurs="0" />
+              <xs:element name="OrderRemark" msprop:Generator_ColumnVarNameInTable="columnOrderRemark" msprop:Generator_ColumnPropNameInRow="OrderRemark" msprop:Generator_ColumnPropNameInTable="OrderRemarkColumn" msprop:Generator_UserColumnName="OrderRemark" type="xs:string" minOccurs="0" />
+              <xs:element name="QcInstruction" msprop:Generator_ColumnVarNameInTable="columnQcInstruction" msprop:Generator_ColumnPropNameInRow="QcInstruction" msprop:Generator_ColumnPropNameInTable="QcInstructionColumn" msprop:Generator_UserColumnName="QcInstruction" type="xs:string" minOccurs="0" />
+              <xs:element name="Remark" msprop:Generator_ColumnVarNameInTable="columnRemark" msprop:Generator_ColumnPropNameInRow="Remark" msprop:Generator_ColumnPropNameInTable="RemarkColumn" msprop:Generator_UserColumnName="Remark" type="xs:string" minOccurs="0" />
+              <xs:element name="Remark1" msprop:Generator_ColumnVarNameInTable="columnRemark1" msprop:Generator_ColumnPropNameInRow="Remark1" msprop:Generator_ColumnPropNameInTable="Remark1Column" msprop:Generator_UserColumnName="Remark1" type="xs:string" minOccurs="0" />
+              <xs:element name="Remark2" msprop:Generator_ColumnVarNameInTable="columnRemark2" msprop:Generator_ColumnPropNameInRow="Remark2" msprop:Generator_ColumnPropNameInTable="Remark2Column" msprop:Generator_UserColumnName="Remark2" type="xs:string" minOccurs="0" />
+              <xs:element name="DieNo" msprop:Generator_ColumnVarNameInTable="columnDieNo" msprop:Generator_ColumnPropNameInRow="DieNo" msprop:Generator_ColumnPropNameInTable="DieNoColumn" msprop:Generator_UserColumnName="DieNo" type="xs:string" minOccurs="0" />
+              <xs:element name="Rulling" msprop:Generator_ColumnVarNameInTable="columnRulling" msprop:Generator_ColumnPropNameInRow="Rulling" msprop:Generator_ColumnPropNameInTable="RullingColumn" msprop:Generator_UserColumnName="Rulling" type="xs:string" minOccurs="0" />
+              <xs:element name="JobLineNo" msprop:Generator_ColumnVarNameInTable="columnJobLineNo" msprop:Generator_ColumnPropNameInRow="JobLineNo" msprop:Generator_ColumnPropNameInTable="JobLineNoColumn" msprop:Generator_UserColumnName="JobLineNo" type="xs:string" minOccurs="0" />
+              <xs:element name="JobTrimming" msprop:Generator_ColumnVarNameInTable="columnJobTrimming" msprop:Generator_ColumnPropNameInRow="JobTrimming" msprop:Generator_ColumnPropNameInTable="JobTrimmingColumn" msprop:Generator_UserColumnName="JobTrimming" type="xs:string" minOccurs="0" />
+              <xs:element name="PrintingMargin" msprop:Generator_ColumnVarNameInTable="columnPrintingMargin" msprop:Generator_ColumnPropNameInRow="PrintingMargin" msprop:Generator_ColumnPropNameInTable="PrintingMarginColumn" msprop:Generator_UserColumnName="PrintingMargin" type="xs:string" minOccurs="0" />
+              <xs:element name="StrippingMargin" msprop:Generator_ColumnVarNameInTable="columnStrippingMargin" msprop:Generator_ColumnPropNameInRow="StrippingMargin" msprop:Generator_ColumnPropNameInTable="StrippingMarginColumn" msprop:Generator_UserColumnName="StrippingMargin" type="xs:string" minOccurs="0" />
+              <xs:element name="BarcodePicture" msprop:Generator_ColumnVarNameInTable="columnBarcodePicture" msprop:Generator_ColumnPropNameInRow="BarcodePicture" msprop:Generator_ColumnPropNameInTable="BarcodePictureColumn" msprop:Generator_UserColumnName="BarcodePicture" type="xs:string" minOccurs="0" />
+              <xs:element name="AttachedPicture" msprop:Generator_ColumnVarNameInTable="columnAttachedPicture" msprop:Generator_ColumnPropNameInRow="AttachedPicture" msprop:Generator_ColumnPropNameInTable="AttachedPictureColumn" msprop:Generator_UserColumnName="AttachedPicture" type="xs:string" minOccurs="0" />
+              <xs:element name="PictureCutting" msprop:Generator_ColumnVarNameInTable="columnPictureCutting" msprop:Generator_ColumnPropNameInRow="PictureCutting" msprop:Generator_ColumnPropNameInTable="PictureCuttingColumn" msprop:Generator_UserColumnName="PictureCutting" type="xs:string" minOccurs="0" />
+              <xs:element name="PicturePrinting" msprop:Generator_ColumnVarNameInTable="columnPicturePrinting" msprop:Generator_ColumnPropNameInRow="PicturePrinting" msprop:Generator_ColumnPropNameInTable="PicturePrintingColumn" msprop:Generator_UserColumnName="PicturePrinting" type="xs:base64Binary" minOccurs="0" />
+              <xs:element name="TotalImpressions" msprop:Generator_ColumnVarNameInTable="columnTotalImpressions" msprop:Generator_ColumnPropNameInRow="TotalImpressions" msprop:Generator_ColumnPropNameInTable="TotalImpressionsColumn" msprop:Generator_UserColumnName="TotalImpressions" type="xs:string" minOccurs="0" />
+              <xs:element name="Correction" msprop:Generator_ColumnVarNameInTable="columnCorrection" msprop:Generator_ColumnPropNameInRow="Correction" msprop:Generator_ColumnPropNameInTable="CorrectionColumn" msprop:Generator_UserColumnName="Correction" type="xs:string" minOccurs="0" />
+              <xs:element name="ColorDetail" msprop:Generator_ColumnVarNameInTable="columnColorDetail" msprop:Generator_ColumnPropNameInRow="ColorDetail" msprop:Generator_ColumnPropNameInTable="ColorDetailColumn" msprop:Generator_UserColumnName="ColorDetail" type="xs:string" minOccurs="0" />
+              <xs:element name="NEWPRINTINGSTYLE" msprop:Generator_ColumnVarNameInTable="columnNEWPRINTINGSTYLE" msprop:Generator_ColumnPropNameInRow="NEWPRINTINGSTYLE" msprop:Generator_ColumnPropNameInTable="NEWPRINTINGSTYLEColumn" msprop:Generator_UserColumnName="NEWPRINTINGSTYLE" type="xs:string" minOccurs="0" />
+              <xs:element name="GRIPPERREMARK" msprop:Generator_ColumnVarNameInTable="columnGRIPPERREMARK" msprop:Generator_ColumnPropNameInRow="GRIPPERREMARK" msprop:Generator_ColumnPropNameInTable="GRIPPERREMARKColumn" msprop:Generator_UserColumnName="GRIPPERREMARK" type="xs:string" minOccurs="0" />
+              <xs:element name="FrontColorName" type="xs:string" minOccurs="0" />
+              <xs:element name="BackColorName" type="xs:string" minOccurs="0" />
+              <xs:element name="JobBookingRemark" type="xs:string" minOccurs="0" />
+              <xs:element name="ContentPlateType" type="xs:string" minOccurs="0" />
+              <xs:element name="JobBookingID" type="xs:string" minOccurs="0" />
+              <xs:element name="ProcessList" type="xs:string" minOccurs="0" />
+              <xs:element name="MaterialStatus" type="xs:string" minOccurs="0" />
+              <xs:element name="EstimationUnit" type="xs:string" minOccurs="0" />
+              <xs:element name="NoOfColors" type="xs:string" minOccurs="0" />
+              <xs:element name="PrintedBy" type="xs:string" minOccurs="0" />
+              <xs:element name="PrintedDate" type="xs:string" minOccurs="0" />
+              <xs:element name="SpecialInstructions" type="xs:string" minOccurs="0" />
+              <xs:element name="SequenceNo" type="xs:string" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="JobDescription" msprop:Generator_TableClassName="JobDescriptionDataTable" msprop:Generator_TableVarName="tableJobDescription" msprop:Generator_RowChangedName="JobDescriptionRowChanged" msprop:Generator_TablePropName="JobDescription" msprop:Generator_RowDeletingName="JobDescriptionRowDeleting" msprop:Generator_RowChangingName="JobDescriptionRowChanging" msprop:Generator_RowEvHandlerName="JobDescriptionRowChangeEventHandler" msprop:Generator_RowDeletedName="JobDescriptionRowDeleted" msprop:Generator_RowClassName="JobDescriptionRow" msprop:Generator_UserTableName="JobDescription" msprop:Generator_RowEvArgName="JobDescriptionRowChangeEvent">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="ContentName" msprop:Generator_ColumnVarNameInTable="columnContentName" msprop:Generator_ColumnPropNameInRow="ContentName" msprop:Generator_ColumnPropNameInTable="ContentNameColumn" msprop:Generator_UserColumnName="ContentName" type="xs:string" minOccurs="0" />
+              <xs:element name="Printing" msprop:Generator_ColumnVarNameInTable="columnPrinting" msprop:Generator_ColumnPropNameInRow="Printing" msprop:Generator_ColumnPropNameInTable="PrintingColumn" msprop:Generator_UserColumnName="Printing" type="xs:string" minOccurs="0" />
+              <xs:element name="ProcessDetail" msprop:Generator_ColumnVarNameInTable="columnProcessDetail" msprop:Generator_ColumnPropNameInRow="ProcessDetail" msprop:Generator_ColumnPropNameInTable="ProcessDetailColumn" msprop:Generator_UserColumnName="ProcessDetail" type="xs:string" minOccurs="0" />
+              <xs:element name="Material" msprop:Generator_ColumnVarNameInTable="columnOrderQuantity" msprop:Generator_ColumnPropNameInRow="OrderQuantity" msprop:Generator_ColumnPropNameInTable="OrderQuantityColumn" msprop:Generator_UserColumnName="OrderQuantity" type="xs:string" minOccurs="0" />
+              <xs:element name="JobSize" type="xs:string" minOccurs="0" />
+              <xs:element name="JobBookingNo" msprop:Generator_ColumnVarNameInTable="columnJobBookingNo" msprop:Generator_ColumnPropNameInRow="JobBookingNo" msprop:Generator_ColumnPropNameInTable="JobBookingNoColumn" msprop:Generator_UserColumnName="JobBookingNo" type="xs:string" minOccurs="0" />
+              <xs:element name="JobBookingJobCardContentsID" type="xs:string" minOccurs="0" />
+              <xs:element name="JobBookingID" type="xs:string" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="ItemDetail" msprop:Generator_TableClassName="ItemDetailDataTable" msprop:Generator_TableVarName="tableItemDetail" msprop:Generator_TablePropName="ItemDetail" msprop:Generator_RowDeletingName="ItemDetailRowDeleting" msprop:Generator_RowChangingName="ItemDetailRowChanging" msprop:Generator_RowEvHandlerName="ItemDetailRowChangeEventHandler" msprop:Generator_RowDeletedName="ItemDetailRowDeleted" msprop:Generator_UserTableName="ItemDetail" msprop:Generator_RowChangedName="ItemDetailRowChanged" msprop:Generator_RowEvArgName="ItemDetailRowChangeEvent" msprop:Generator_RowClassName="ItemDetailRow">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="ItemCode" msprop:Generator_ColumnVarNameInTable="columnItemCode" msprop:Generator_ColumnPropNameInRow="ItemCode" msprop:Generator_ColumnPropNameInTable="ItemCodeColumn" msprop:Generator_UserColumnName="ItemCode" type="xs:string" minOccurs="0" />
+              <xs:element name="ItemName" msprop:Generator_ColumnVarNameInTable="columnItemName" msprop:Generator_ColumnPropNameInRow="ItemName" msprop:Generator_ColumnPropNameInTable="ItemNameColumn" msprop:Generator_UserColumnName="ItemName" type="xs:string" minOccurs="0" />
+              <xs:element name="TotalSteets" msprop:Generator_ColumnVarNameInTable="columnTotalSteets" msprop:Generator_ColumnPropNameInRow="TotalSteets" msprop:Generator_ColumnPropNameInTable="TotalSteetsColumn" msprop:Generator_UserColumnName="TotalSteets" type="xs:int" minOccurs="0" />
+              <xs:element name="EstimatedQuantity" msprop:Generator_ColumnVarNameInTable="columnEstimatedQuantity" msprop:Generator_ColumnPropNameInRow="EstimatedQuantity" msprop:Generator_ColumnPropNameInTable="EstimatedQuantityColumn" msprop:Generator_UserColumnName="EstimatedQuantity" type="xs:int" minOccurs="0" />
+              <xs:element name="JobBookingJobCardContentsID" msprop:Generator_ColumnVarNameInTable="columnJobBookingJobCardContentsID" msprop:Generator_ColumnPropNameInRow="JobBookingJobCardContentsID" msprop:Generator_ColumnPropNameInTable="JobBookingJobCardContentsIDColumn" msprop:Generator_UserColumnName="JobBookingJobCardContentsID" type="xs:int" minOccurs="0" />
+              <xs:element name="CutSize" msprop:Generator_ColumnVarNameInTable="columnCutSize" msprop:Generator_ColumnPropNameInRow="CutSize" msprop:Generator_ColumnPropNameInTable="CutSizeColumn" msprop:Generator_UserColumnName="CutSize" type="xs:string" minOccurs="0" />
+              <xs:element name="Cuts" msprop:Generator_ColumnVarNameInTable="columnCuts" msprop:Generator_ColumnPropNameInRow="Cuts" msprop:Generator_ColumnPropNameInTable="CutsColumn" msprop:Generator_UserColumnName="Cuts" type="xs:string" minOccurs="0" />
+              <xs:element name="Final_Quantity" msprop:Generator_ColumnVarNameInTable="columnFinal_Quantity" msprop:Generator_ColumnPropNameInRow="Final_Quantity" msprop:Generator_ColumnPropNameInTable="Final_QuantityColumn" msprop:Generator_UserColumnName="Final_Quantity" type="xs:int" minOccurs="0" />
+              <xs:element name="JobBookingID" type="xs:string" minOccurs="0" />
+              <xs:element name="JobCardContentNo" type="xs:string" minOccurs="0" />
+              <xs:element name="PlanContName" type="xs:string" minOccurs="0" />
+              <xs:element name="StockUnit" type="xs:string" minOccurs="0" />
+              <xs:element name="MaterialStatus" type="xs:string" minOccurs="0" />
+              <xs:element name="WastageSheets" type="xs:string" minOccurs="0" />
+              <xs:element name="ActualSheets" type="xs:string" minOccurs="0" />
+              <xs:element name="RequiredQty" type="xs:string" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="FormDetails" msprop:Generator_TableClassName="FormDetailsDataTable" msprop:Generator_TableVarName="tableFormDetails" msprop:Generator_RowChangedName="FormDetailsRowChanged" msprop:Generator_TablePropName="FormDetails" msprop:Generator_RowDeletingName="FormDetailsRowDeleting" msprop:Generator_RowChangingName="FormDetailsRowChanging" msprop:Generator_RowEvHandlerName="FormDetailsRowChangeEventHandler" msprop:Generator_RowDeletedName="FormDetailsRowDeleted" msprop:Generator_RowClassName="FormDetailsRow" msprop:Generator_UserTableName="FormDetails" msprop:Generator_RowEvArgName="FormDetailsRowChangeEvent">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="TransID" msprop:Generator_ColumnVarNameInTable="columnTransID" msprop:Generator_ColumnPropNameInRow="TransID" msprop:Generator_ColumnPropNameInTable="TransIDColumn" msprop:Generator_UserColumnName="TransID" type="xs:int" minOccurs="0" />
+              <xs:element name="JobCardFormNo" msprop:Generator_ColumnVarNameInTable="columnJobCardFormNo" msprop:Generator_ColumnPropNameInRow="JobCardFormNo" msprop:Generator_ColumnPropNameInTable="JobCardFormNoColumn" msprop:Generator_UserColumnName="JobCardFormNo" type="xs:string" minOccurs="0" />
+              <xs:element name="PrintingStyle" msprop:Generator_ColumnVarNameInTable="columnPrintingStyle" msprop:Generator_ColumnPropNameInRow="PrintingStyle" msprop:Generator_ColumnPropNameInTable="PrintingStyleColumn" msprop:Generator_UserColumnName="PrintingStyle" type="xs:string" minOccurs="0" />
+              <xs:element name="Pages" msprop:Generator_ColumnVarNameInTable="columnPages" msprop:Generator_ColumnPropNameInRow="Pages" msprop:Generator_ColumnPropNameInTable="PagesColumn" msprop:Generator_UserColumnName="Pages" type="xs:string" minOccurs="0" />
+              <xs:element name="TotalSheets" msprop:Generator_ColumnVarNameInTable="columnTotalSheets" msprop:Generator_ColumnPropNameInRow="TotalSheets" msprop:Generator_ColumnPropNameInTable="TotalSheetsColumn" msprop:Generator_UserColumnName="TotalSheets" type="xs:string" minOccurs="0" />
+              <xs:element name="PrintingRemark" msprop:Generator_ColumnVarNameInTable="columnPrintingRemark" msprop:Generator_ColumnPropNameInRow="PrintingRemark" msprop:Generator_ColumnPropNameInTable="PrintingRemarkColumn" msprop:Generator_UserColumnName="PrintingRemark" type="xs:string" minOccurs="0" />
+              <xs:element name="JobBookingJobCardContentsID" msprop:Generator_ColumnVarNameInTable="columnJobBookingJobCardContentsID" msprop:Generator_ColumnPropNameInRow="JobBookingJobCardContentsID" msprop:Generator_ColumnPropNameInTable="JobBookingJobCardContentsIDColumn" msprop:Generator_UserColumnName="JobBookingJobCardContentsID" type="xs:int" minOccurs="0" />
+              <xs:element name="ActualSheets" type="xs:string" minOccurs="0" />
+              <xs:element name="WasteSheets" type="xs:string" minOccurs="0" />
+              <xs:element name="JobBookingID" type="xs:string" minOccurs="0" />
+              <xs:element name="RefNo" type="xs:string" minOccurs="0" />
+              <xs:element name="PageNo" type="xs:string" minOccurs="0" />
+              <xs:element name="PlanContName" type="xs:string" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="ReelDetails" msprop:Generator_TableClassName="ReelDetailsDataTable" msprop:Generator_TableVarName="tableReelDetails" msprop:Generator_TablePropName="ReelDetails" msprop:Generator_RowDeletingName="ReelDetailsRowDeleting" msprop:Generator_RowChangingName="ReelDetailsRowChanging" msprop:Generator_RowEvHandlerName="ReelDetailsRowChangeEventHandler" msprop:Generator_RowDeletedName="ReelDetailsRowDeleted" msprop:Generator_UserTableName="ReelDetails" msprop:Generator_RowChangedName="ReelDetailsRowChanged" msprop:Generator_RowEvArgName="ReelDetailsRowChangeEvent" msprop:Generator_RowClassName="ReelDetailsRow">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="JobBookingJobCardContentsID" msprop:Generator_ColumnVarNameInTable="columnJobBookingJobCardContentsID" msprop:Generator_ColumnPropNameInRow="JobBookingJobCardContentsID" msprop:Generator_ColumnPropNameInTable="JobBookingJobCardContentsIDColumn" msprop:Generator_UserColumnName="JobBookingJobCardContentsID" type="xs:int" minOccurs="0" />
+              <xs:element name="ReelCode" msprop:Generator_ColumnVarNameInTable="columnReelCode" msprop:Generator_ColumnPropNameInRow="ReelCode" msprop:Generator_ColumnPropNameInTable="ReelCodeColumn" msprop:Generator_UserColumnName="ReelCode" type="xs:string" minOccurs="0" />
+              <xs:element name="ReelName" msprop:Generator_ColumnVarNameInTable="columnReelName" msprop:Generator_ColumnPropNameInRow="ReelName" msprop:Generator_ColumnPropNameInTable="ReelNameColumn" msprop:Generator_UserColumnName="ReelName" type="xs:string" minOccurs="0" />
+              <xs:element name="Unit" msprop:Generator_ColumnVarNameInTable="columnUnit" msprop:Generator_ColumnPropNameInRow="Unit" msprop:Generator_ColumnPropNameInTable="UnitColumn" msprop:Generator_UserColumnName="Unit" type="xs:string" minOccurs="0" />
+              <xs:element name="RequiredStock" msprop:Generator_ColumnVarNameInTable="columnRequiredStock" msprop:Generator_ColumnPropNameInRow="RequiredStock" msprop:Generator_ColumnPropNameInTable="RequiredStockColumn" msprop:Generator_UserColumnName="RequiredStock" type="xs:string" minOccurs="0" />
+              <xs:element name="CutSheets" msprop:Generator_ColumnVarNameInTable="columnCutSheets" msprop:Generator_ColumnPropNameInRow="CutSheets" msprop:Generator_ColumnPropNameInTable="CutSheetsColumn" msprop:Generator_UserColumnName="CutSheets" type="xs:string" minOccurs="0" />
+              <xs:element name="Cuts" msprop:Generator_ColumnVarNameInTable="columnCuts" msprop:Generator_ColumnPropNameInRow="Cuts" msprop:Generator_ColumnPropNameInTable="CutsColumn" msprop:Generator_UserColumnName="Cuts" type="xs:string" minOccurs="0" />
+              <xs:element name="Working_Size" msprop:Generator_ColumnVarNameInTable="columnWorking_Size" msprop:Generator_ColumnPropNameInRow="Working_Size" msprop:Generator_ColumnPropNameInTable="Working_SizeColumn" msprop:Generator_UserColumnName="Working_Size" type="xs:string" minOccurs="0" />
+              <xs:element name="JobBookingID" type="xs:string" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="MaterialDetails" msprop:Generator_TableClassName="MaterialDetailsDataTable" msprop:Generator_TableVarName="tableMaterialDetails" msprop:Generator_TablePropName="MaterialDetails" msprop:Generator_RowDeletingName="MaterialDetailsRowDeleting" msprop:Generator_RowChangingName="MaterialDetailsRowChanging" msprop:Generator_RowEvHandlerName="MaterialDetailsRowChangeEventHandler" msprop:Generator_RowDeletedName="MaterialDetailsRowDeleted" msprop:Generator_UserTableName="MaterialDetails" msprop:Generator_RowChangedName="MaterialDetailsRowChanged" msprop:Generator_RowEvArgName="MaterialDetailsRowChangeEvent" msprop:Generator_RowClassName="MaterialDetailsRow">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="ProcessID" msprop:Generator_ColumnVarNameInTable="columnProcessID" msprop:Generator_ColumnPropNameInRow="ProcessID" msprop:Generator_ColumnPropNameInTable="ProcessIDColumn" msprop:Generator_UserColumnName="ProcessID" type="xs:int" minOccurs="0" />
+              <xs:element name="JobBookingJobCardContentsID" msprop:Generator_ColumnVarNameInTable="columnJobBookingJobCardContentsID" msprop:Generator_ColumnPropNameInRow="JobBookingJobCardContentsID" msprop:Generator_ColumnPropNameInTable="JobBookingJobCardContentsIDColumn" msprop:Generator_UserColumnName="JobBookingJobCardContentsID" type="xs:int" minOccurs="0" />
+              <xs:element name="MachineName" msprop:Generator_ColumnVarNameInTable="columnMachineName" msprop:Generator_ColumnPropNameInRow="MachineName" msprop:Generator_ColumnPropNameInTable="MachineNameColumn" msprop:Generator_UserColumnName="MachineName" type="xs:string" minOccurs="0" />
+              <xs:element name="ItemName" msprop:Generator_ColumnVarNameInTable="columnItemName" msprop:Generator_ColumnPropNameInRow="ItemName" msprop:Generator_ColumnPropNameInTable="ItemNameColumn" msprop:Generator_UserColumnName="ItemName" type="xs:string" minOccurs="0" />
+              <xs:element name="ProductionRemark" msprop:Generator_ColumnVarNameInTable="columnProductionRemark" msprop:Generator_ColumnPropNameInRow="ProductionRemark" msprop:Generator_ColumnPropNameInTable="ProductionRemarkColumn" msprop:Generator_UserColumnName="ProductionRemark" type="xs:string" minOccurs="0" />
+              <xs:element name="SpecialRemark" msprop:Generator_ColumnVarNameInTable="columnSpecialRemark" msprop:Generator_ColumnPropNameInRow="SpecialRemark" msprop:Generator_ColumnPropNameInTable="SpecialRemarkColumn" msprop:Generator_UserColumnName="SpecialRemark" type="xs:string" minOccurs="0" />
+              <xs:element name="RequiredQty" msprop:Generator_ColumnVarNameInTable="columnRequiredQty" msprop:Generator_ColumnPropNameInRow="RequiredQty" msprop:Generator_ColumnPropNameInTable="RequiredQtyColumn" msprop:Generator_UserColumnName="RequiredQty" type="xs:string" minOccurs="0" />
+              <xs:element name="Unit" msprop:Generator_ColumnVarNameInTable="columnUnit" msprop:Generator_ColumnPropNameInRow="Unit" msprop:Generator_ColumnPropNameInTable="UnitColumn" msprop:Generator_UserColumnName="Unit" type="xs:string" minOccurs="0" />
+              <xs:element name="JobBookingID" type="xs:string" minOccurs="0" />
+              <xs:element name="JobCardContentNo" type="xs:string" minOccurs="0" />
+              <xs:element name="ContentName" type="xs:string" minOccurs="0" />
+              <xs:element name="ActualQty" type="xs:string" minOccurs="0" />
+              <xs:element name="WasteQty" type="xs:string" minOccurs="0" />
+              <xs:element name="PresentStatus" type="xs:string" minOccurs="0" />
+              <xs:element name="ItemCode" type="xs:string" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="OperationDetails" msprop:Generator_TableClassName="OperationDetailsDataTable" msprop:Generator_TableVarName="tableOperationDetails" msprop:Generator_TablePropName="OperationDetails" msprop:Generator_RowDeletingName="OperationDetailsRowDeleting" msprop:Generator_RowChangingName="OperationDetailsRowChanging" msprop:Generator_RowEvHandlerName="OperationDetailsRowChangeEventHandler" msprop:Generator_RowDeletedName="OperationDetailsRowDeleted" msprop:Generator_UserTableName="OperationDetails" msprop:Generator_RowChangedName="OperationDetailsRowChanged" msprop:Generator_RowEvArgName="OperationDetailsRowChangeEvent" msprop:Generator_RowClassName="OperationDetailsRow">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="JobBookingJobCardContentsID" msprop:Generator_ColumnVarNameInTable="columnJobBookingJobCardContentsID" msprop:Generator_ColumnPropNameInRow="JobBookingJobCardContentsID" msprop:Generator_ColumnPropNameInTable="JobBookingJobCardContentsIDColumn" msprop:Generator_UserColumnName="JobBookingJobCardContentsID" type="xs:int" minOccurs="0" />
+              <xs:element name="ProcessName" msprop:Generator_ColumnVarNameInTable="columnProcessName" msprop:Generator_ColumnPropNameInRow="ProcessName" msprop:Generator_ColumnPropNameInTable="ProcessNameColumn" msprop:Generator_UserColumnName="ProcessName" type="xs:string" minOccurs="0" />
+              <xs:element name="EmployeeName" msprop:Generator_ColumnVarNameInTable="columnEmployeeName" msprop:Generator_ColumnPropNameInRow="EmployeeName" msprop:Generator_ColumnPropNameInTable="EmployeeNameColumn" msprop:Generator_UserColumnName="EmployeeName" type="xs:string" minOccurs="0" />
+              <xs:element name="ConsumedQty" msprop:Generator_ColumnVarNameInTable="columnConsumedQty" msprop:Generator_ColumnPropNameInRow="ConsumedQty" msprop:Generator_ColumnPropNameInTable="ConsumedQtyColumn" msprop:Generator_UserColumnName="ConsumedQty" type="xs:string" minOccurs="0" />
+              <xs:element name="ReadyQty" msprop:Generator_ColumnVarNameInTable="columnReadyQty" msprop:Generator_ColumnPropNameInRow="ReadyQty" msprop:Generator_ColumnPropNameInTable="ReadyQtyColumn" msprop:Generator_UserColumnName="ReadyQty" type="xs:string" minOccurs="0" />
+              <xs:element name="EndUnit" msprop:Generator_ColumnVarNameInTable="columnEndUnit" msprop:Generator_ColumnPropNameInRow="EndUnit" msprop:Generator_ColumnPropNameInTable="EndUnitColumn" msprop:Generator_UserColumnName="EndUnit" type="xs:string" minOccurs="0" />
+              <xs:element name="Modify_Date" msdata:DataType="System.DateTimeOffset" msprop:Generator_ColumnVarNameInTable="columnModify_Date" msprop:Generator_ColumnPropNameInRow="Modify_Date" msprop:Generator_ColumnPropNameInTable="Modify_DateColumn" msprop:Generator_UserColumnName="Modify_Date" type="xs:anyType" minOccurs="0" />
+              <xs:element name="Status" msprop:Generator_ColumnVarNameInTable="columnStatus" msprop:Generator_ColumnPropNameInRow="Status" msprop:Generator_ColumnPropNameInTable="StatusColumn" msprop:Generator_UserColumnName="Status" type="xs:string" minOccurs="0" />
+              <xs:element name="UserName" msprop:Generator_ColumnVarNameInTable="columnUserName" msprop:Generator_ColumnPropNameInRow="UserName" msprop:Generator_ColumnPropNameInTable="UserNameColumn" msprop:Generator_UserColumnName="UserName" type="xs:string" minOccurs="0" />
+              <xs:element name="MachineName" msprop:Generator_ColumnVarNameInTable="columnMachineName" msprop:Generator_ColumnPropNameInRow="MachineName" msprop:Generator_ColumnPropNameInTable="MachineNameColumn" msprop:Generator_UserColumnName="MachineName" type="xs:string" minOccurs="0" />
+              <xs:element name="Remark" msprop:Generator_ColumnVarNameInTable="columnRemark" msprop:Generator_ColumnPropNameInRow="Remark" msprop:Generator_ColumnPropNameInTable="RemarkColumn" msprop:Generator_UserColumnName="Remark" type="xs:string" minOccurs="0" />
+              <xs:element name="JobBookingID" type="xs:string" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="MachineWiseSchedule">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="MachineID" type="xs:string" minOccurs="0" />
+              <xs:element name="MachineName" type="xs:string" minOccurs="0" />
+              <xs:element name="LedgerName" type="xs:string" minOccurs="0" />
+              <xs:element name="JobBookingNo" type="xs:string" minOccurs="0" />
+              <xs:element name="JobCardContentNo" type="xs:string" minOccurs="0" />
+              <xs:element name="ProcessName" type="xs:string" minOccurs="0" />
+              <xs:element name="ScheduleQty" type="xs:string" minOccurs="0" />
+              <xs:element name="JobCardFormNo" type="xs:string" minOccurs="0" />
+              <xs:element name="StartTime" type="xs:string" minOccurs="0" />
+              <xs:element name="EndTime" type="xs:string" minOccurs="0" />
+              <xs:element name="TotalTime" type="xs:string" minOccurs="0" />
+              <xs:element name="DeliveryDate" type="xs:string" minOccurs="0" />
+              <xs:element name="TransID" type="xs:string" minOccurs="0" />
+              <xs:element name="OrderQuantity" type="xs:string" minOccurs="0" />
+              <xs:element name="JobName" type="xs:string" minOccurs="0" />
+              <xs:element name="ContentName" type="xs:string" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="OutsourceChallanMain">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="OutsourceChallanID" type="xs:string" minOccurs="0" />
+              <xs:element name="LedgerName" type="xs:string" minOccurs="0" />
+              <xs:element name="CompanyName" type="xs:string" minOccurs="0" />
+              <xs:element name="Address" type="xs:string" minOccurs="0" />
+              <xs:element name="ContactNo" type="xs:string" minOccurs="0" />
+              <xs:element name="GSTIN" type="xs:string" minOccurs="0" />
+              <xs:element name="ProductionUnitAddress" type="xs:string" minOccurs="0" />
+              <xs:element name="VoucherNo" type="xs:string" minOccurs="0" />
+              <xs:element name="VoucherDate" type="xs:string" minOccurs="0" />
+              <xs:element name="Transporter" type="xs:string" minOccurs="0" />
+              <xs:element name="VehicleNo" type="xs:string" minOccurs="0" />
+              <xs:element name="ReasonForTransportation" type="xs:string" minOccurs="0" />
+              <xs:element name="PlaceOfSupply" type="xs:string" minOccurs="0" />
+              <xs:element name="State" type="xs:string" minOccurs="0" />
+              <xs:element name="Remark" type="xs:string" minOccurs="0" />
+              <xs:element name="AmountInWords" type="xs:string" minOccurs="0" />
+              <xs:element name="GSTINo" type="xs:string" minOccurs="0" />
+              <xs:element name="CreatedBy" type="xs:string" minOccurs="0" />
+              <xs:element name="ReceiverAddress" type="xs:string" minOccurs="0" />
+              <xs:element name="WorkOrderNarration" type="xs:string" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="OutsourceChallanDetail">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="OutsourceChallanID" type="xs:string" minOccurs="0" />
+              <xs:element name="JobBookingNo" type="xs:string" minOccurs="0" />
+              <xs:element name="ItemName" type="xs:string" minOccurs="0" />
+              <xs:element name="HSNCode" type="xs:string" minOccurs="0" />
+              <xs:element name="Quantity" type="xs:string" minOccurs="0" />
+              <xs:element name="ItemRate" type="xs:string" minOccurs="0" />
+              <xs:element name="ItemAmount" type="xs:string" minOccurs="0" />
+              <xs:element name="StockUnit" type="xs:string" minOccurs="0" />
+              <xs:element name="MaterialStatus" type="xs:string" minOccurs="0" />
+              <xs:element name="JobCardFormNo" type="xs:string" minOccurs="0" />
+              <xs:element name="SequenceNo" type="xs:string" minOccurs="0" />
+              <xs:element name="ItemWeight" type="xs:string" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="OutsourceMain">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="JobBookingNo" type="xs:string" minOccurs="0" />
+              <xs:element name="JobCardContentNo" type="xs:string" minOccurs="0" />
+              <xs:element name="OutsourceID" type="xs:string" minOccurs="0" />
+              <xs:element name="LedgerName" type="xs:string" minOccurs="0" />
+              <xs:element name="VoucherNo" type="xs:string" minOccurs="0" />
+              <xs:element name="VoucherDate" type="xs:string" minOccurs="0" />
+              <xs:element name="Remark" type="xs:string" minOccurs="0" />
+              <xs:element name="Address" type="xs:string" minOccurs="0" />
+              <xs:element name="ContactNo" type="xs:string" minOccurs="0" />
+              <xs:element name="UserName" type="xs:string" minOccurs="0" />
+              <xs:element name="JobName" type="xs:string" minOccurs="0" />
+              <xs:element name="DeliveryNoteNo" type="xs:string" minOccurs="0" />
+              <xs:element name="DeliveryNoteDate" type="xs:string" minOccurs="0" />
+              <xs:element name="Transporter" type="xs:string" minOccurs="0" />
+              <xs:element name="ReceivedBy" type="xs:string" minOccurs="0" />
+              <xs:element name="VehicleNo" type="xs:string" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="OutsourceProcessDetails">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="ProcessID" type="xs:string" minOccurs="0" />
+              <xs:element name="ProcessName" type="xs:string" minOccurs="0" />
+              <xs:element name="RateFactor" type="xs:string" minOccurs="0" />
+              <xs:element name="JobCardFormNo" type="xs:string" minOccurs="0" />
+              <xs:element name="RequiredQty" type="xs:string" minOccurs="0" />
+              <xs:element name="Unit" type="xs:string" minOccurs="0" />
+              <xs:element name="ItemName" type="xs:string" minOccurs="0" />
+              <xs:element name="ItemID" type="xs:string" minOccurs="0" />
+              <xs:element name="ContentName" type="xs:string" minOccurs="0" />
+              <xs:element name="JobCardContentNo" type="xs:string" minOccurs="0" />
+              <xs:element name="ItemCode" type="xs:string" minOccurs="0" />
+              <xs:element name="Remark" type="xs:string" minOccurs="0" />
+              <xs:element name="OutsourceID" type="xs:string" minOccurs="0" />
+              <xs:element name="MaterialStatus" type="xs:string" minOccurs="0" />
+              <xs:element name="ReadyQuantity" type="xs:string" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="OutsourceReceivedProcessDetails">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="ProcessID" type="xs:string" minOccurs="0" />
+              <xs:element name="ProcessName" type="xs:string" minOccurs="0" />
+              <xs:element name="RateFactor" type="xs:string" minOccurs="0" />
+              <xs:element name="JobCardFormNo" type="xs:string" minOccurs="0" />
+              <xs:element name="RequiredQty" type="xs:string" minOccurs="0" />
+              <xs:element name="Unit" type="xs:string" minOccurs="0" />
+              <xs:element name="ItemName" type="xs:string" minOccurs="0" />
+              <xs:element name="ItemID" type="xs:string" minOccurs="0" />
+              <xs:element name="ContentName" type="xs:string" minOccurs="0" />
+              <xs:element name="JobCardContentNo" type="xs:string" minOccurs="0" />
+              <xs:element name="ItemCode" type="xs:string" minOccurs="0" />
+              <xs:element name="Remark" type="xs:string" minOccurs="0" />
+              <xs:element name="OutsourceID" type="xs:string" minOccurs="0" />
+              <xs:element name="MaterialStatus" type="xs:string" minOccurs="0" />
+              <xs:element name="ReadyQuantity" type="xs:string" minOccurs="0" />
+              <xs:element name="WastageQuantity" type="xs:string" minOccurs="0" />
+              <xs:element name="ProductionQuantity" type="xs:string" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

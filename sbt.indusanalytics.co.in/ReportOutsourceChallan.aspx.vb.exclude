@@ -1,0 +1,85 @@
+﻿
+Imports System.Data
+Imports System.Data.SqlClient
+Imports Connection
+Imports Microsoft.Reporting.WebForms
+
+Partial Class ReportOutsourceChallan
+    Inherits System.Web.UI.Page
+    Dim db As New DBConnection
+    Dim GBLCompanyID, TransID, PrintType As String
+
+    Private Sub form1_Load(sender As Object, e As EventArgs) Handles form1.Load
+        If Not IsPostBack Then
+            TransID = Convert.ToString(HttpContext.Current.Request.QueryString("UID"))
+            PrintType = Convert.ToString(HttpContext.Current.Request.QueryString("PrintType"))
+            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyId"))
+            ReportViewer1.Reset()
+            ReportViewer1.LocalReport.ReportPath = Server.MapPath("~/PrintOutsourceChallanMain.rdlc")
+
+            Dim DTPrintCopies As DataTable = GetData("Select NoOfCopies,PageCaption FROM PrintCopies Where PrintForm='Outsource Challan'")
+            Dim ds5 As ReportDataSource = New ReportDataSource("PrintCopies", DTPrintCopies)
+            ReportViewer1.LocalReport.DataSources.Add(ds5)
+
+            AddHandler ReportViewer1.LocalReport.SubreportProcessing, AddressOf ChallanMainSubreportProcessing
+            AddHandler ReportViewer1.LocalReport.SubreportProcessing, AddressOf ChallanDetailsSubreportProcessing
+            ReportViewer1.LocalReport.Refresh()
+        End If
+    End Sub
+
+    Private Sub ChallanMainSubreportProcessing(sender As Object, e As SubreportProcessingEventArgs)
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyId"))
+
+        Dim DTMain As New DataTable
+        If PrintType = "INWARD" Then
+            DTMain = GetData("SELECT DISTINCT OCM.VoucherNo, OCM.VoucherDate, OCM.LedgerID, OCM.Remark, LM.LedgerName, 'Job Work Return' AS ReasonForTransportation,LM.MobileNo AS ContactNo, JBC.JobName, JBC.JobBookingNo, JBC.JobBookingDate, OCM.DeliveryNoteNo, OCM.DeliveryNoteDate, OCM.Transporter, OCM.VehicleNo, OCM.ReceivedBy,CM.CompanyName,CM.Address,CM.ProductionUnitAddress,CM.ContactNo,CM.State As CompanyState,CM.GSTIN,CM.MobileNo,LM.State+' & '+LM.StateTinNo As State,LM.GSTNo As GSTINo,LM.MailingAddress As ReceiverAddress,OCM.PlaceOfSupply,UM.UserName As CreatedBy,'' AS AmountInWords " &
+                             " FROM OutsourceProductionMain AS OCM INNER JOIN (Select A.[LedgerID],A.[CompanyID],A.[LedgerName],A.[MailingName],A.[City],A.[State],Isnull(S.[StateCode],'') AS StateCode,Isnull(S.[StateTinNo],0) AS StateTinNo,A.[Country],A.[MobileNo],Isnull(A.[GSTNo],'') AS GSTNo,[MailingAddress] From (SELECT [LedgerID],[LedgerGroupID], [CompanyID],[LedgerName],[MailingName],[City],[State],[Country],[MobileNo],[GSTNo],[MailingAddress] FROM (SELECT [LedgerID],[LedgerGroupID],[CompanyID],[FieldName],Isnull([FieldValue],'') as FieldValue FROM [LedgerMasterDetails] Where Isnull(IsDeletedTransaction,0)<>1 )x unpivot (value for name in ([FieldValue])) up pivot (max(value) for FieldName in ([LedgerName],[MailingName],[City],[State],[Country],[MobileNo],[GSTNo],[MailingAddress])) P) AS A LEFT JOIN CountryStateMaster AS S ON S.State=A.State And ISNULL(A.State,'')<>'') As LM ON LM.LedgerID = OCM.LedgerID AND LM.CompanyID = OCM.CompanyID INNER JOIN UserMaster AS UM ON OCM.UserID = UM.UserID AND OCM.CompanyID = UM.CompanyID INNER JOIN JobBookingJobCard AS JBC ON OCM.JobBookingID = JBC.JobBookingID AND OCM.CompanyID = JBC.CompanyID And JBC.IsDeletedTransaction=0" &
+                             " Inner Join CompanyMaster As CM On CM.CompanyID=OCM.CompanyID WHERE (ISNULL(OCM.IsDeletedTransaction, 0) = 0) AND (OCM.CompanyID = " & GBLCompanyID & ") AND OCM.OutsourceID = " & TransID)
+        Else
+            DTMain = GetData("SELECT DISTINCT  OCM.OutsourceChallanID,  OCM.VoucherNo,OCM.VoucherDate, OCM.LedgerID, OCM.Remark, LM.LedgerName, UM.UserName, OCM.Transporter,OCM.VehicleNo ,CM.CompanyName,CM.Address,CM.ProductionUnitAddress,CM.ContactNo,CM.State As CompanyState,CM.GSTIN,CM.MobileNo,LM.State+' & '+LM.StateTinNo As State,LM.GSTNo As GSTINo,LM.StateCode,LM.MailingAddress As ReceiverAddress,'Job Work' As ReasonForTransportation,OCM.AmountInWords,OCM.PlaceOfSupply,UM.UserName As CreatedBy,OCM.EWayBillNumber,REPLACE(CONVERT(nvarchar(30),OCM.EWayBillDate , 106), ' ', '-') AS EWayBillDate" &
+                             " FROM OutsourceChallanMain AS OCM INNER JOIN (Select A.[LedgerID],A.[CompanyID],A.[LedgerName],A.[MailingName],A.[City],A.[State],Isnull(S.[StateCode],'') AS StateCode,Isnull(S.[StateTinNo],0) AS StateTinNo,A.[Country],A.[MobileNo],Isnull(A.[GSTNo],'') AS GSTNo,[MailingAddress] From (SELECT [LedgerID],[LedgerGroupID], [CompanyID],[LedgerName],[MailingName],[City],[State],[Country],[MobileNo],[GSTNo],[MailingAddress] FROM (SELECT [LedgerID],[LedgerGroupID],[CompanyID],[FieldName],nullif([FieldValue],'''') as FieldValue FROM [LedgerMasterDetails] Where Isnull(IsDeletedTransaction,0)<>1 )x unpivot (value for name in ([FieldValue])) up pivot (max(value) for FieldName in ([LedgerName],[MailingName],[City],[State],[Country],[MobileNo],[GSTNo],[MailingAddress])) P) AS A INNER JOIN LedgerGroupMaster AS B ON A.LedgerGroupID=B.LedgerGroupID AND A.CompanyID = B.CompanyID LEFT JOIN CountryStateMaster AS S ON S.State=A.State) As LM On LM.LedgerID=OCM.LedgerID AND LM.CompanyID = OCM.CompanyID INNER JOIN UserMaster AS UM ON OCM.UserID = UM.UserID And OCM.CompanyID=UM.CompanyID Inner Join CompanyMaster As CM On CM.CompanyID=OCM.CompanyID " &
+                             " Where Isnull(OCM.IsDeletedTransaction,0)=0 And OCM.CompanyID=" & GBLCompanyID & " And OCM.OutsourceChallanID= " & TransID)
+        End If
+
+        Dim DsMain As ReportDataSource = New ReportDataSource("DataSetMain", DTMain)
+        e.DataSources.Add(DsMain)
+
+    End Sub
+
+    Private Sub ChallanDetailsSubreportProcessing(sender As Object, e As SubreportProcessingEventArgs)
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyId"))
+
+        Dim DTDetails As New DataTable
+        If PrintType = "INWARD" Then
+            DTDetails = GetData("SELECT DISTINCT JSR.JobCardContentNo AS JobCardFormNo,ICD.ConsumptionTransactionDetailID,ICD.JobBookingJobCardContentsID, ICD.ItemID, JSR.JobCardContentNo, JSR.ContentName , OM.VoucherNo, CASE WHEN Isnull(ICD.WIPUnit, '') = '' THEN ICD.StockUnit ELSE ICD.WIPUnit END AS StockUnit, IM.ItemCode,Case When Isnull(ICD.Remark,'')='' Then IM.ItemName Else ICD.Remark End As ItemName, IM.ProductHSNID, IGM.HSNCode, IGM.ProductHSNName,CASE WHEN Upper(IM.PurchaseUnit) = 'KG' THEN Round(ICD.ConsumeQuantity * IM.WtPerPacking, 3) ELSE ICD.ConsumeQuantity END AS ItemWeight,CASE WHEN ICD.ProcessingQty = 0 THEN ICD.ConsumeQuantity ELSE ICD.ProcessingQty END AS Quantity,CASE WHEN ICD.ProcessingQty = 0 THEN OCD.ItemRate ELSE OCD.ItemAmount / ICD.ProcessingQty END AS ItemRate, OCD.ItemAmount,ICD.BatchNo, OM.Remark , ICD.Remark AS MaterialStatus " &
+                            " FROM OutsourceProductionMain AS OM INNER JOIN ItemConsumptionMain AS ICM ON ICM.OutsourceProductionID = OM.OutsourceID AND OM.CompanyID = ICM.CompanyID And ICM.VoucherID=-52 INNER JOIN ItemConsumptionDetail AS ICD ON ICD.ConsumptionTransactionID = ICM.ConsumptionTransactionID AND ICD.CompanyID = OM.CompanyID INNER JOIN ItemMaster AS IM ON ICD.ItemID = IM.ItemID AND ICD.CompanyID = IM.CompanyID INNER JOIN ProductHSNMaster AS IGM ON IM.ProductHSNID = IGM.ProductHSNID AND IM.CompanyID = IGM.CompanyID INNER JOIN JobScheduleRelease AS JSR ON OM.JobBookingJobCardContentsID = JSR.JobBookingJobCardContentsID AND OM.CompanyID = JSR.CompanyID " &
+                            " Left JOIN ItemConsumptionMain AS ICM1 ON ICM1.OutsourceProductionID = OM.OutsourceID AND OM.CompanyID = ICM1.CompanyID And ICM1.VoucherID=-51 Left JOIN ItemConsumptionDetail AS ICD1 ON ICD1.ConsumptionTransactionID = ICM1.ConsumptionTransactionID AND ICD1.CompanyID = ICM1.CompanyID And ICD1.ItemID=ICD.ItemID And ICD1.BatchNo=ICD.BatchNo Inner Join ItemConsumptionMain As OPM On OPM.OutsourceProductionID=OM.ParentOutsourceID And OPM.CompanyID=OM.CompanyID Inner Join ItemConsumptionDetail As OPD on OPM.ConsumptionTransactionID=OPD.ConsumptionTransactionID And OPD.ItemID=ICD.ItemID And OPD.BatchNo=ICD.BatchNo And OPM.IsDeletedTransaction=0 Inner JOIN OutsourceChallanDetails As OCD On OCD.OutsourceID=OM.ParentOutsourceID And OCD.ItemID=OPD.ItemID AND OPD.CompanyID = OCD.CompanyID AND OCD.IsDeletedTransaction = 0" &
+                            " WHERE (ISNULL(OM.IsDeletedTransaction, 0) = 0) AND (OM.OutsourceID = " & TransID & ") AND (OM.CompanyID =  " & GBLCompanyID & ") Order By ICD.ConsumptionTransactionDetailID")
+        Else
+            DTDetails = GetData("SELECT DISTINCT  ICD.ChallanDetailID As OutsourceChallanID,ICD.ItemID, JSR.JobCardContentNo As JobCardFormNo,ICM.VoucherNo,Case When ICD.ProcessingQty=0 Then ICD.ConsumeQuantity Else ICD.ProcessingQty End As Quantity,Case When Upper(IM.PurchaseUnit)='KG' Then Round(ICD.ConsumeQuantity*IM.WtPerPacking,3) Else ICD.ConsumeQuantity End As ItemWeight,Case When ICD.ProcessingQty=0 Then ICD.ItemRate Else ICD.ItemAmount/ICD.ProcessingQty End As ItemRate, ICD.ItemAmount,Case When Isnull(ICD.WIPUnit,'')='' Then ICD.StockUnit Else ICD.WIPUnit End As StockUnit ,IM.ItemCode,Case When Isnull(ICD.ItemDescription,'') ='' Then IM.ItemName Else ICD.ItemDescription END As ItemName, IGM.HSNCode, IGM.ProductHSNName,ICD.Remark As MaterialStatus " &
+                            " FROM OutsourceChallanMain AS ICM INNER JOIN OutsourceChallanDetails AS ICD ON ICM.OutsourceChallanID = ICD.OutsourceChallanID AND ICM.CompanyID = ICD.CompanyID INNER JOIN OutsourceProductionDetails As OPS On OPS.OutsourceID=ICD.OutsourceID And OPS.CompanyID=ICD.CompanyID INNER JOIN ItemMaster AS IM ON ICD.ItemID = IM.ItemID AND ICD.CompanyID = IM.CompanyID INNER JOIN ProductHSNMaster AS IGM ON IM.ProductHSNID = IGM.ProductHSNID AND IM.CompanyID = IGM.CompanyID INNER JOIN JobScheduleRelease AS JSR ON OPS.JobBookingJobCardContentsID = JSR.JobBookingJobCardContentsID AND ICM.CompanyID = JSR.CompanyID" &
+                            " WHERE (ISNULL(ICM.IsDeletedTransaction, 0) = 0) AND (ICM.OutsourceChallanID = " & TransID & ") AND (ICM.CompanyID = " & GBLCompanyID & ") Order By OutsourceChallanID")
+        End If
+
+        Dim DsDetails As ReportDataSource = New ReportDataSource("DataSetDetails", DTDetails)
+        e.DataSources.Add(DsDetails)
+
+    End Sub
+    Private Function GetData(query As String) As DataTable
+        Dim dt As New DataTable()
+        Dim dss As New DataSet()
+        Try
+            Dim con As New SqlConnection
+            con = db.OpenDataBase()
+
+            Dim cmd As SqlCommand = New SqlCommand(query, con)
+            Dim adapter As New SqlDataAdapter(cmd)
+
+            adapter.Fill(dt)
+            con.Close()
+            Return dt
+        Catch ex As Exception
+            Return dt
+        End Try
+    End Function
+End Class

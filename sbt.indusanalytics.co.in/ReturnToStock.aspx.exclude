@@ -1,0 +1,225 @@
+﻿<%@ Page Title="" Language="VB" MasterPageFile="~/MasterPage_Main.master" AutoEventWireup="false" CodeFile="ReturnToStock.aspx.vb" Inherits="ReturnToStock" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="Server">
+</asp:Content>
+<asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="Server">
+    <div id="LoadIndicator"></div>
+    <div class="row clearfix" style="padding: 0px; margin: 0px; margin-right: -15px">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding: 0px; margin: 0px;">
+            <div class="dialogboxContainerMainMAster">
+                <div class="DialogBoxCustom" style="float: left; background-color: #fff; padding-left: 0px; padding-bottom: 2px">
+                    <div id="ButtonDiv" style="height: auto; padding-bottom: 2px">
+                        <a id="CreateButton" href='#' class="iconButton" style="margin-top: 1px; margin-left: 2px;">
+                            <img src="images/NewClient.png" style="height: 20px; width: 25px; float: left; margin-top: 0px;" />
+                            &nbsp Create
+                        </a>
+                        <a id="EditButton" href='#' class="iconButton" style="margin-top: 1px; margin-left: 2px;">
+                            <img src="images/Edit.png" style="height: 20px; width: 25px; float: left; margin-top: 0px" />
+                            &nbsp Edit
+                        </a>
+                        <a id="DeleteButton" href='#' class="iconButton" style="margin-top: 1px; margin-left: 2px;">
+                            <img src="images/MasterDelete.png" style="height: 20px; width: 25px; float: left; margin-top: 0px" />
+                            &nbsp Delete
+                        </a>
+
+                    </div>
+                    <b id="MasterID" style="display: none"></b><b id="MasterName" style="display: none"></b>
+                    <strong id="MasterDisplayName" class="MasterDisplayName" style="float: right; color: #42909A">Return To Stock</strong>
+
+                </div>
+
+                <div class="ContainerBoxCustom" style="float: left;">
+                    <div id="ButtonGridDiv" style="height: auto; display: block">
+                        <div id="ReturnToStockShowListGrid" style="width: 100%; min-height: 100%; float: left; height: calc(100vh - 85px); overflow-y: auto"></div>
+                        <input type="text" id="TxtReturnToStockID" style="display: none" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <%--largeModalPickList Model PopUp (PickList) --%>
+    <div class="modal fade" id="largeModal" tabindex="-1" role="dialog" style="margin-left: -7px">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="DialogBoxCustom" style="float: left; border-top-left-radius: 4px; border-top-right-radius: 4px;">
+                    <strong>Return to stock</strong>
+                    <a href="javascript:void(0);" class="iconRightDbox btn-danger" data-dismiss="modal">
+                        <span data-dismiss="modal" style="font-weight: 900; margin-right: 8px">X</span>
+                    </a>
+                </div>
+
+                <div class="modal-body">
+                    <div id="popContenerContentPickList" style="display: block;">
+                        <ul class="nav nav-tabs tab-col-red" role="tablist" style="color: green; border: none; display: none">
+                            <li role='presentation' class="active"><a id="AnchorFieldCntainerPickList" href="#ReqGrid" data-toggle='tab' style='background-color: none;'>Text Field</a></li>
+                        </ul>
+                        <div id="FieldCntainerRowPickList" class="rowcontents clearfix">
+                            <div class="tab-content">
+                                <div role="tabpanel" class="tab-pane animated fadeInRight active" id="ReqGridPickList">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-0 margin-0">
+                                        <%--<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="float: left; margin: 0px; height: auto; padding: 0px; padding-top: 5px; padding-left: 10px; padding-right: 0px; margin-bottom: 0em">--%>
+                                        <div class="col-xs-12 col-sm-1 col-md-1 col-lg-1" style="padding-left: 0px; padding-top: 5px; margin-bottom: 0px">
+                                            <b class="font-11">Voucher No. :</b>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-2 col-md-2 col-lg-2" style="padding-left: 0px; margin-bottom: 0px;">
+                                            <input class="forTextBox" type="text" name="Return To Stock" id="TxtRTSVoucherNo" style="width: 100%;" readonly="readonly" value="" />
+                                            <input class="forTextBox" type="hidden" name="TxtMaxVoucherNo" id="TxtMaxVoucherNo" value="" />
+                                        </div>
+                                        <div class="col-xs-12 col-sm-1 col-md-1 col-lg-1" style="padding-left: 0px; padding-top: 5px; margin-bottom: 0px">
+                                            <b class="font-11">Voucher Date :</b>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-2 col-md-2 col-lg-2" style="padding-left: 0px; margin-bottom: 0px">
+                                            <div id="RTSDate" style="float: left; height: auto; width: 100%"></div>
+                                        </div>
+                                        <div class="col-xs-12 col-sm-1 col-md-1 col-lg-1" style="padding-left: 0px; padding-top: 7px; margin-bottom: 0px">
+                                            <b class="font-11">Issue Type :</b>
+                                        </div>
+                                        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12" style="padding-left: 0px; padding-right: 0px; margin-bottom: 0px">
+                                            <div id="RadioButtonReturnToStock"></div>
+                                        </div>
+                                        <div class="col-lg-1 col-md-1 col-sm-1 col-xs-12" style="float: left; margin-left: 0em; margin-bottom: 0px; padding-left: 0px;">
+                                            <div class="DialogBoxCustom" style="float: left; background-color: #fff; width: auto; margin-top: 2px; border-radius: 4px; text-align: left">
+                                                <a id="RefreshButton" href='#' class="iconButton" style="margin-top: 0px;" title="reload page">
+                                                    <i class="fa fa-refresh fa-2x fa-fw" style="font-size: 14px;"></i>&nbsp Refresh
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <%--<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top: -.5em; float: left; margin: 0px; height: auto; padding: 0px; padding-left: 0px; padding-right: 0px; margin-bottom: 0em">
+                                            <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12" style="margin-top: -.5em; float: left; margin: 0px; height: auto; padding: 0px; padding-left: 0px; padding-right: 0px; margin-bottom: 0em">
+                                                <div id="RadioButtonReturnToStock" style="float: left; margin-left: 1em; margin-top: 0em"></div>
+                                            </div>
+                                            <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12">
+                                                <label style="float: left; margin-top: 5px; margin-right: 8px">Issue Date  </label>
+                                                <div id="RTSDate" style="float: left; width: 100%"></div>
+                                            </div>
+                                            <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12">
+                                                <label style="float: left; margin-top: 5px; margin-right: 8px">Department  </label>
+                                                &nbsp;&nbsp;&nbsp;
+                                                    <div id="SelDepartment" style="float: left; width: 100%"></div>
+                                                <div style="min-height: 20px; float: left; width: 100%"><strong id="ValStrSelDepartment" style="color: red; font-size: 12px; display: none"></strong></div>
+                                            </div>
+                                            <div id="JobCardDiv" class="col-lg-2 col-md-2 col-sm-2 col-xs-12">
+                                                <label style="float: left; margin-top: 5px">Job Card No.</label>&nbsp;&nbsp;&nbsp;
+                                                    <input type="text" id="TxtJCN" onkeydown="keydownFunction()" onkeyup="keyupFunction()" class="forTextBox" style="width: 100%" placeholder="Job Card No." />
+                                                <div style="min-height: 20px; float: left; width: 100%"><strong id="ValStrTxtJCN" style="color: red; font-size: 12px; display: none"></strong></div>
+                                                <input type="text" id="TxtJobBookingID" class="forTextBox" style="width: 100%; display: none" readonly="" />
+                                                <input type="text" id="TxtJobBookingJobCardContentsID" class="forTextBox" style="width: 100%; display: none" readonly="" value="0" />
+                                                <input type="text" id="TxtLedgerID" class="forTextBox" style="width: 100%; display: none" readonly="" />
+                                                <input type="text" id="TxtJobBookingNo" class="forTextBox" style="width: 100%; display: none" readonly="" />
+                                                <input type="text" id="TxtJobCardContentNo" class="forTextBox" style="width: 100%; display: none" readonly="" />
+                                            </div>
+                                            <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12">
+                                                <label style="float: left; margin-top: 5px; margin-right: 8px">Job Name  </label>
+                                                <input type="text" id="TxtJobName" class="forTextBox" style="width: 100%" placeholder="Job Name" readonly="" />
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12">
+                                            <label style="float: left; margin-top: 5px; margin-right: 8px">Content Name  </label>
+                                            <input type="text" id="TxtContentName" class="forTextBox" style="width: 100%" placeholder="Content Name" readonly="" />
+                                        </div>--%>
+
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-0 margin-0">
+
+                                        <div style="float: left; width: 100%; height: auto; margin-top: 0px">
+                                            <label style="float: left; margin-top: 5px">Issue Floor Stock : -</label>
+                                        </div>
+                                        <div id="IssueFloorStock" style="float: left; width: 100%; height: 30em; margin-top: 0px"></div>
+
+                                        <div style="float: left; width: 100%; height: auto; margin-top: 2px">
+
+                                            <div class="col-lg-1 col-md-1 col-sm-2 col-xs-12" style="margin: 0px; padding: 0px; float: right">
+                                                <div class="DialogBoxCustom" style="float: right; background-color: #fff; padding-left: 0px; padding-bottom: 0px; width: auto; padding-right: 0px; margin-top: 0px; border-radius: 4px; text-align: left">
+                                                    <a id="BtnAddRow" href='#' class="iconButton" style="float: right; margin-top: 0px; margin-right: 0px; float: right" title="add new row">
+                                                        <i class="fa fa-plus fa-2x fa-fw" style="font-size: 12px;"></i>&nbsp Add
+                                                    </a>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12" style="margin: 0px; padding: 0px; float: right">
+                                                <input type="text" id="TxtReturnQuantity" class="forTextBox" style="width: 100%" placeholder="Return Quantity" />
+                                                <div style="min-height: 0px; float: left; width: 100%"><strong id="ValStrTxtReturnQuantity" style="color: red; font-size: 12px; display: none"></strong></div>
+                                            </div>
+                                            <div class="col-lg-1 col-md-1 col-sm-2 col-xs-12" style="margin: 0px; padding: 0px; float: right">
+                                                <label style="float: left; margin-top: 5px; float: right; margin-right: 10px">Return Quantity</label>
+                                            </div>
+
+                                            <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12" style="margin: 0px; padding: 0px; float: right">
+                                                <div id="SelBinName" style="float: left; width: 100%"></div>
+                                                <div style="min-height: 0px; float: left; width: 100%"><strong id="ValStrSelBinName" style="color: red; font-size: 12px; display: none"></strong></div>
+                                            </div>
+                                            <div class="col-lg-1 col-md-1 col-sm-1 col-xs-12" style="margin: 0px; padding: 0px; float: right">
+                                                <label style="float: left; margin-top: 5px; float: right; margin-right: 10px">Bin :</label>
+                                            </div>
+
+                                            <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12" style="margin: 0px; padding: 0px; float: right">
+                                                <div id="SelFloorGodown" style="float: left; width: 100%"></div>
+                                                <div style="min-height: 0px; float: left; width: 100%"><strong id="ValStrSelFloorGodown" style="color: red; font-size: 12px; display: none"></strong></div>
+                                            </div>
+                                            <div class="col-lg-1 col-md-1 col-sm-1 col-xs-12" style="margin: 0px; padding: 0px; float: right">
+                                                <label style="float: left; margin-top: 5px; float: right; margin-right: 10px">Warehouse :</label>
+                                            </div>
+                                        </div>
+
+                                        <div style="float: left; width: 100%; height: auto; margin-top: 0px">
+                                            <label style="float: left; margin-top: 0px; margin-bottom: 0px;">Return Floor Stock : -</label>
+                                        </div>
+                                        <div id="AllotedItemGrid" style="float: left; width: 100%; height: 12em; margin-top: 2px; margin-bottom: 5px"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="btnDivPickList" class="modal-footer" style="border-top: 1px solid #42909A;">
+                    <button type="button" id="BtnNew" class="btn btn-link waves-effect" style="margin-top: -1em; color: none">New</button>
+                    <button type="button" id="RTSPrintButton" class="btn btn-link waves-effect" style="margin-top: -1em; color: none" disabled="disabled">Print</button>
+                    <button type="button" id="BtnDeletePopUp" class="btn btn-link waves-effect" style="margin-top: -1em">Delete</button>
+                    <button type="button" id="BtnSave" class="btn btn-link waves-effect" style="margin-top: -1em">Save</button>
+                    <button type="button" id="BtnSaveAS" class="btn btn-link waves-effect" style="margin-top: -1em; display: none" disabled="disabled">Save As</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <%--largeModalFiltrJobcard Model PopUp (FiltrJobcard) --%>
+    <div class="modal fade" id="largeModalFiltrJobcard" tabindex="-1" role="dialog" style="padding: 0px; margin-top: 0px; margin-left: -7px">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content" style="border-radius: 4px; padding-bottom: .5em; padding-right: 0px">
+                <div class="DialogBoxCustom" style="float: left; border-top-left-radius: 4px; border-top-right-radius: 4px;">
+                    <strong>Exist Job Card</strong>
+                    <a href="javascript:void(0);" class="iconRightDbox btn-danger" data-dismiss="modal">
+                        <span data-dismiss="modal" style="font-weight: 900; margin-right: 8px">X</span>
+                        <input type="button" id="OpenPopupJobcard" style="display: none" />
+                    </a>
+                </div>
+
+                <div class="modal-body" style="position: initial; padding-right: 0px">
+                    <div id="popContenerContentFiltrJobcard" style="display: block; padding-top: 0px; padding-left: 0px;">
+                        <ul class="nav nav-tabs tab-col-red" role="tablist" style="color: green; border: none; display: none">
+                            <li role='presentation' class="active"><a id="AnchorFieldCntainerFiltrJobcard" href="#ReqGrid" data-toggle='tab' style='background-color: none;'>Text Field</a></li>
+                        </ul>
+                        <div id="FieldCntainerFiltrJobcard" class="rowcontents clearfix" style="padding-top: 0px; padding-left: 0px">
+                            <div class="tab-content" style="margin-bottom: 0em">
+                                <div role="tabpanel" class="tab-pane animated fadeInRight active" id="FiltrJobcard" style="margin-top: 10px;">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-bottom: 0px; margin-top: 0px; padding-right: 13px; height: calc(100vh - 125px); overflow-y: auto;">
+                                        <div id="FiltrJobcardGrid" style="float: left; width: 100%; height: 10em; margin-bottom: 13px"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="btnDivFiltrJobcard" class="modal-footer" style="margin-top: 0em; border-top: 1px solid #42909A; height: 3em">
+                    <button type="button" class="btn btn-link waves-effect" data-dismiss="modal" style="margin-top: -1em">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <script src="CustomJS/ReturnToStock.js"></script>
+</asp:Content>
+

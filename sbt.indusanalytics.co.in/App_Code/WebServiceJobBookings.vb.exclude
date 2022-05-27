@@ -1,0 +1,62 @@
+﻿Imports System.Data
+Imports System.Web
+Imports System.Web.Script.Serialization
+Imports System.Web.Script.Services
+Imports System.Web.Services
+Imports System.Web.Services.Protocols
+Imports Connection
+
+' To allow this Web Service to be called from script, using ASP.NET AJAX, uncomment the following line.
+<System.Web.Script.Services.ScriptService()>
+<WebService(Namespace:="http://tempuri.org/")>
+<WebServiceBinding(ConformsTo:=WsiProfiles.BasicProfile1_1)>
+<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
+Public Class WebServiceJobBookings
+    Inherits System.Web.Services.WebService
+
+    Dim FYear, Str As String
+    Dim CompanyId, UserId As Integer
+    Dim db As New DBConnection
+    Dim dataTable As New DataTable
+    Dim data As New HelloWorldData()
+    Dim js As New JavaScriptSerializer()
+
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function LoadProductMasterData(ByVal Type As String) As String
+        Try
+
+            FYear = Convert.ToString(HttpContext.Current.Session("FYear"))
+            CompanyId = Convert.ToString(HttpContext.Current.Session("CompanyId"))
+
+            Dim DtPM As New DataTable
+            If Type = "Pending" Then
+                Str = "SELECT Distinct JB.LedgerID,JB.BookingID,CM.CategoryID,LM.LedgerName,CM.CategoryName,JB.JobName,JEC.PlanContQty As OrderQuantity,JB.BookingNo,Replace(Convert(Varchar(13),JB.CreatedDate,106),' ','-') As QuoteDate,JAE.ApprovalNo,Replace(Convert(Varchar(13),JAE.PriceApprovedDate,106),' ','-') As ApprovedDate,JAE.ApprovedBy,UM.UserName As ApprovalByName,Replace(Convert(Varchar(13),JAE.AppliedDateValidUpto,106),' ','-') As AppliedDateValidUpto, Case When JAE.AppliedDateValidUpto<getDate() Then 1 Else 0 End As IsCostExpire,JB.ProductHSNID,JB.ProductCode,JOBD.JobType,JOBD.JobReference,JOBD.JobPriority,JOBD.JobCoordinatorID,JAE.Remark FROM LedgerMaster As LM INNER JOIN JobBooking As JB ON JB.LedgerId =LM.LedgerId And JB.CompanyID=" & CompanyId & " And Isnull(JB.IsDeletedTransaction,0)=0 INNER JOIN CategoryMaster as CM ON CM.CategoryId = JB.CategoryID INNER JOIN JobBookingContents As JEC ON JB.BookingID = JEC.BookingID INNER JOIN JobApprovedCost As JAE ON JAE.BookingID = JEC.BookingID  And JEC.PlanContQty=JAE.Quantity  And  Isnull(JAE.IsProductMaster,0)=0 INNER JOIN UserMaster AS UM ON UM.UserID = JAE.ApprovedBy And ISNULL(JB.IsApproved,0) =1 Left Join JobOrderBookingDetails As JOBD On JOBD.BookingID=JB.BookingID And JOBD.CompanyID=JB.CompanyID Order by QuoteDate Desc"
+            Else
+                Str = "SELECT Distinct PM.LedgerID,PM.BookingID,CM.CategoryID,LM.LedgerName ,CM.CategoryName,PM.JobName,PM.OrderQuantity,PM.ProductCode,Replace(Convert(Varchar(13),PM.JobDate,106),' ','-') As QuoteDate,UM.UserName,PM.ProductMasterCode,PM.ArtworkCode,PM.IsHidden,PGM.ProductHSNName,PM.MaxProductMasterCode,PM.ProductHSNID,PM.FYear,PM.ProductMasterCode, (Select Top(1) JobBookingNo From JobBookingJobCard Where ProductMasterCode = PM.ProductMasterCode And CompanyID=PM.CompanyID Order By ModifiedDate DESC) As JobBookingNo,PM.FileNo FROM LedgerMaster As LM INNER JOIN ProductMaster As PM ON PM.LedgerId =LM.LedgerId INNER JOIN CategoryMaster as CM ON CM.CategoryId = PM.CategoryID INNER JOIN UserMaster AS UM ON UM.UserId = PM.UserId and PM.CompanyID =" & CompanyId & " And Isnull(PM.IsDeletedTransaction,0)=0  LEFT JOIN ProductHSNMaster As PGM ON PGM.ProductHSNID=PM.ProductHSNID Order By PM.ProductMasterCode Desc"
+            End If
+            ''            Str = "SELECT Distinct PM.LedgerID,PM.BookingID,CM.CategoryID,LM.LedgerName ,CM.CategoryName,PM.JobName,PM.OrderQuantity,PM.ProductCode,Replace(Convert(Varchar(13),PM.JobDate,106),' ','-') As QuoteDate,UM.UserName,PM.ProductMasterCode,PM.ArtworkCode,PM.IsHidden,PGM.ProductHSNName,PM.MaxProductMasterCode,PM.ProductHSNID,PM.FYear,PM.ProductMasterCode,(Select Top(1) JobBookingNo From JobBookingJobCard Where ProductMasterCode = PM.ProductMasterCode And CompanyID=PM.CompanyID And Isnull(IsDeletedTransaction,0)=0 Order By ModifiedDate DESC) As JobBookingNo,PM.FileNo FROM LedgerMaster As LM INNER JOIN ProductMaster As PM ON PM.LedgerId =LM.LedgerId And PM.CompanyID =" & CompanyId & "  And Isnull(PM.IsDeletedTransaction,0)=0  INNER JOIN CategoryMaster as CM ON CM.CategoryId = PM.CategoryID INNER JOIN UserMaster AS UM ON UM.UserId = PM.UserId LEFT JOIN ProductHSNMaster As PGM ON PGM.ProductHSNID=PM.ProductHSNID Union All SELECT Distinct JB.LedgerID,JB.BookingID,CM.CategoryID,LM.LedgerName,CM.CategoryName,JB.JobName,JEC.PlanContQty As OrderQuantity,JB.BookingNo,Replace(Convert(Varchar(13),JB.CreatedDate,106),' ','-') As QuoteDate,UM.UserName,'' As PMCode,'' As ArtworkCode,0 As IsHidden,'' As ProductHSNName,'' As MaxProductMasterCode,0 As ProductHSNID,'' As FYear,'' As ProductMasterCode,'' As JobBookingNo,'' As FileNo FROM LedgerMaster As LM INNER JOIN JobBooking As JB ON JB.LedgerId =LM.LedgerId And JB.CompanyID=" & CompanyId & " And Isnull(JB.IsDeletedTransaction,0)=0 INNER JOIN CategoryMaster as CM ON CM.CategoryId = JB.CategoryID INNER JOIN UserMaster AS UM ON UM.UserId = JB.CreatedBy And ISNULL(JB.IsApproved,0) =1 INNER JOIN JobBookingContents As JEC ON JB.BookingID = JEC.BookingID INNER JOIN JobApprovedCost As JAE ON JAE.BookingID = JEC.BookingID  And JEC.PlanContQty=JAE.Quantity  And  Isnull(JAE.IsProductMaster,0)in(0) Order By QuoteDate Desc,PM.ProductMasterCode Desc"
+            db.FillDataTable(DtPM, Str)
+
+            DtPM.TableName = "PMData"
+
+            Dim dataset As New DataSet
+            dataset.Merge(DtPM)
+            data.Message = db.ConvertDataSetsTojSonString(dataset)
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
+
+    '"Select Case A.BookingID, A.JobContentsID, A.PlanContName, JobNoOfPages, SizeLength, SizeWidth, SizeHeight, PlanColorStrip, PlanGripper, PlanFColor, PlanBColor, GrainDirection, PlanPrintingGrain, MainPaperName, A.MachineID, A.MachineName, A.Gripper, A.GripperSide, A.MachineColors, A.PaperID, A.PaperSize, ActualSheets, A.CutL, A.CutW, Case When UpsL = 0 Then 0.5 Else UpsL End As UpsL, A.UpsW, Case When TotalUps = 0 Then 0.5 Else TotalUps End As UpsTotal, BalSide, BalPiece, WasteArea, WastePerc, WastageKg, A.GrainDirection, PlateQty, A.PlateRate, A.PlateAmount, MakeReadyWastageSheet, A.ActualSheets, A.WastageSheets, TotalPaperWeightInKg, A.FullSheets, A.PaperRate, A.PaperAmount, A.PrintingImpressions, ImpressionsToBeCharged, A.PrintingRate, A.PrintingAmount, TotalMakeReadies, A.MakeReadyRate, A.MakeReadyAmount, A.FinalQuantity, A.TotalColors, A.TotalAmount, TotalAmount, A.InterlockStyle, SizeOpenflap As OverlapFlap, SizeBottomflap, SizeOpenflap, NoOfSets,0 As ImpressionForFrontBackSets, 0 As ImpressionForFrontBackSetsCharged, 0 As PrintingChargesForFrontBackSets, " & _
+    '"0 As PrintingAmountForFrontBackSets, 0 As WastageForFrontBackSets, 0 As ProperWAndTSets, 0 As ImpressionForWandT, 0 As ImpressionForWandTCharged, 0 As PrintingChargesForWandT, 0 As PrintingAmountForWandT, 0 As WastageForWandT, 0 As FinalWAndTMultipleUpSets,0 As  ImpressionForWandTMultipleUps,0 As  ImpressionForWandTMultipleUpsCharged,0 As  PrintingChargesForWandTMultipleUps, 0 As PrintingAmountForWandTMultipleUps,0 As  WastageForWandTMultipleUps, 0 As WastagePercentSheets, 0 As FrontColorNames, 0 As BackColorNames, JobDetailsRemark,'' As ArtworkNo, A.MainPaperName, A.ExpectedExecutionTime, PlanWtageType, PlanPlateType,  PlanSpeFColor, PlanSpeBColor, '' As OnlineCoating, A.PlanType, A.CoatingCharges, A.CoatingAmount, SpeColorFCharges, SpeColorFAmt, SpeColorBCharges, SpeColorBAmt, A.CutLH, A.CutHL, A.PrintingStyle, A.PrintingChargesType, TotalColors, 0 As CorrugationAmount,0 As NoOfStitch,0 As TongueHeight, A.ProductMasterCode, ProductMasterContentsID, A.IsPlate, A.JobType, A.JobReference, A.JobPriority, CoordinatorLedgerID, A.JobDetailsRemark, CoordinatorLedgerName,A.Email,JobName, A.JobSize, A.Tolerence, ConsigneeID, A.PONo,  A.DieCutSize, A.BranchID, A.QCInstruction,0 As PaperTrimmingL,0 As PaperTrimmingR, 0 As PaperTrimmingT,0 As PaperTrimmingB FROM ProductMasterContents AS A INNER JOIN JobBooking As JB On JB.BookingID=A.BookingID And A.CompanyID=JB.CompanyID Inner Join ViewContentSizes AS VCS ON VCS.BookingID = A.BookingID AND VCS.CompanyID = A.CompanyID WHERE (A.ProductMasterCode = 'P00284/18-19') ORDER BY A.JobContentsID"
+
+
+    'Select Case A.BookingID, A.JobContentsID, A.PlanContName, JobNoOfPages, SizeLength, SizeWidth, SizeHeight, PlanColorStrip, PlanGripper, PlanFColor, PlanBColor, GrainDirection, PlanPrintingGrain, MainPaperName, A.MachineID, A.MachineName, A.Gripper, A.GripperSide, A.MachineColors, A.PaperID, A.PaperSize, ActualSheets, A.CutL, A.CutW, Case When UpsL = 0 Then 0.5 Else UpsL End As UpsL, A.UpsW, Case When TotalUps = 0 Then 0.5 Else TotalUps End As UpsTotal, BalSide, BalPiece, WasteArea, WastePerc, WastageKg, A.GrainDirection, PlateQty, A.PlateRate, A.PlateAmount, MakeReadyWastageSheet, A.ActualSheets, A.WastageSheets, TotalPaperWeightInKg, A.FullSheets, A.PaperRate, A.PaperAmount, A.PrintingImpressions, ImpressionsToBeCharged, A.PrintingRate, A.PrintingAmount, TotalMakeReadies, A.MakeReadyRate, A.MakeReadyAmount, A.FinalQuantity, A.TotalColors, A.TotalAmount, TotalAmount, A.InterlockStyle, SizeOpenflap As OverlapFlap, SizeBottomflap, SizeOpenflap, NoOfSets,0 As ImpressionForFrontBackSets, 0 As ImpressionForFrontBackSetsCharged, 0 As PrintingChargesForFrontBackSets,0 As PrintingAmountForFrontBackSets, 0 As WastageForFrontBackSets, 0 As ProperWAndTSets, 0 As ImpressionForWandT, 0 As ImpressionForWandTCharged, 0 As PrintingChargesForWandT, 0 As PrintingAmountForWandT, 0 As WastageForWandT, 0 As FinalWAndTMultipleUpSets,0 As  ImpressionForWandTMultipleUps,0 As  ImpressionForWandTMultipleUpsCharged,0 As  PrintingChargesForWandTMultipleUps, 0 As PrintingAmountForWandTMultipleUps,0 As  WastageForWandTMultipleUps, 0 As WastagePercentSheets, 0 As FrontColorNames, 0 As BackColorNames, BookingRemark,'' As ArtworkNo, A.MainPaperName, A.ExpectedExecutionTime, PlanWtageType, PlanPlateType,  PlanSpeFColor, PlanSpeBColor, '' As OnlineCoating, A.PlanType, A.CoatingCharges, A.CoatingAmount, SpeColorFCharges, SpeColorFAmt, SpeColorBCharges, SpeColorBAmt, A.CutLH, A.CutHL, A.PrintingStyle, A.PrintingChargesType, TotalColors, 0 As CorrugationAmount,0 As NoOfStitch,0 As TongueHeight,  JobName, ConsigneeID, A.DieCutSize, 0 As PaperTrimmingL,0 As PaperTrimmingR, 0 As PaperTrimmingT,0 As PaperTrimmingB FROM JobBookingContents AS A INNER JOIN JobBooking As JB On JB.BookingID=A.BookingID And A.CompanyID=JB.CompanyID Inner Join ViewContentSizes AS VCS ON VCS.BookingID = A.BookingID AND VCS.CompanyID = A.CompanyID WHERE (A.BookingID = 57) ORDER BY A.JobContentsID
+
+
+    Public Class HelloWorldData
+        Public Message As [String]
+    End Class
+End Class

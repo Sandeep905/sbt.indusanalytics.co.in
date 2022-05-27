@@ -1,0 +1,38 @@
+﻿<%@ Page Title="Stock Ledger" Language="VB" MasterPageFile="~/MasterPageMIS.master" AutoEventWireup="false" CodeFile="StockLedgerReport.aspx.vb" Inherits="StockLedgerReport" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="head" Runat="Server">
+</asp:Content>
+<asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
+    <div class="row padding-0 margin-0">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-0 margin-0">            
+            <div class="col-lg-2 col-md-3 col-sm-4 col-xs-12">
+                <b>From Time</b>
+                <div id="DtFromTime"></div>
+            </div>
+            <div class="col-lg-2 col-md-3 col-sm-4 col-xs-12">
+                <b>To Time</b>
+                <div id="DtToTime"></div>
+            </div>
+            <div class="col-lg-3 col-md-4 col-sm-5 col-xs-12">
+                <b class="font-11">Item Group</b>
+                <div id="SelItemGroups"></div>
+                <textarea id="TxtItemGroup" class="hidden"></textarea>
+            </div>
+            <div class="col-lg-2 col-md-3 col-sm-4 col-xs-12">
+                <b class="font-11">Item Code</b>
+                <div id="SelItemList"></div>
+            </div>
+            
+            <div class="col-lg-2 col-md-2 col-sm-2 col-xs-3">
+                <br class="hidden-xs" />
+                <input type="button" name="BtnRefresh" onclick="BtnRefreshclick()" id="BtnRefresh" class="btn btn-primary" value="Refresh" />
+                <input type="button" name="BtnPrint" onclick="BtnPrintclick()" id="BtnPrint" class="btn btn-warning" value="Print" />
+            </div>
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-0 margin-0">
+                <div id="GridReport"></div>
+            </div>
+        </div>
+    </div>
+    <script src="CustomJS/StockLedgerReport.js"></script>
+</asp:Content>
+

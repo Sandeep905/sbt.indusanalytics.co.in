@@ -1,0 +1,438 @@
+﻿<%@ Master Language="VB" CodeFile="MasterPageMIS.master.vb" Inherits="MasterPageMIS" %>
+
+<!DOCTYPE html>
+
+<html>
+
+<head runat="server">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta http-equiv="pragma" content="no-cache" />
+    <meta http-equiv="cache-control" content="no-cache, must-revalidate, post-check=0, pre-check=0" />
+    <meta http-equiv="cache-control" content="max-age=0" />
+
+    <title>MIS</title>
+    <!-- Favicon-->
+    <link rel="icon" href="images/Indus%20logo.ico" type="image/x-icon">
+
+    <!-- Google Fonts -->
+    <link rel="stylesheet" href="plugins/font-awesome/css/font-awesome.min.css">
+
+    <!-- Bootstrap Core Css -->
+    <link href="plugins/bootstrap/css/bootstrap.css" rel="stylesheet">
+
+    <!-- Waves Effect Css -->
+    <%--<link href="plugins/node-waves/waves.css" rel="stylesheet" />--%>
+
+    <!-- Animation Css -->
+    <link href="plugins/animate-css/animate.css" rel="stylesheet" />
+
+    <!-- Morris Chart Css-->
+    <%--<link href="plugins/morrisjs/morris.css" rel="stylesheet" />--%>
+
+    <!-- Sweetalert Css -->
+    <link href="../../plugins/sweetalert/sweetalert.css" rel="stylesheet" />
+
+    <!-- Custom Css -->
+    <link href="css/style.css" rel="stylesheet">
+
+    <!-- AdminBSB Themes. You can choose a theme from css/themes instead of get all themes -->
+    <link href="css/themes/all-themes.css" rel="stylesheet" />
+
+    <!-- Jquery Core Js -->
+    <script type="text/javascript" src="js/jquery3.js"></script>
+
+    <asp:ContentPlaceHolder ID="head" runat="server">
+    </asp:ContentPlaceHolder>
+
+    <%-- Created By Pradeep --%>
+    <link href="CustomCSS/SideBar.css" rel="stylesheet" />
+    <script src="CustomJS/MainMaster.js"></script>
+    <link href="CustomCSS/AdditinalDesign.css" rel="stylesheet" />
+    <script type="text/javascript">
+        function GetJsonConvertedObject(results) {
+            var res = results.replace(/\\/g, '');
+            res = res.replace(/{"d":null/g, '');
+            res = res.replace(/{"d":""/g, '');
+            res = res.replace(/u0026/g, '&');
+            res = res.replace(/u0027/g, "'");
+            res = res.slice(0, -3);
+            var Obj = JSON.parse(res.toString());
+            return Obj;
+        }
+    </script>
+</head>
+
+<body class="theme-red">
+    <!-- Page Loader -->
+    <div class="page-loader-wrapper" id="LOADER">
+        <div class="loader">
+            <div class="preloader">
+                <div class="spinner-layer pl-red">
+                    <div class="circle-clipper left">
+                        <div class="circle"></div>
+                    </div>
+                    <div class="circle-clipper right">
+                        <div class="circle"></div>
+                    </div>
+                </div>
+            </div>
+            <p>Please wait...</p>
+        </div>
+    </div>
+    <!-- #END# Page Loader -->
+    <!-- Overlay For Sidebars -->
+    <div class="overlay"></div>
+    <!-- #END# Overlay For Sidebars -->
+
+    <div id="LoadIndicator"></div>
+    <!-- #END# Search Bar -->
+    <form id="FormMIS" runat="server" style="margin-top: -1.5em;">
+        <!-- Top Bar -->
+        <asp:ScriptManager ID="scriptmanager1" runat="server" EnablePageMethods="true"></asp:ScriptManager>
+        <div class="topnavCustom" id="myTopnav" style="float: left">
+            <a id="Customleftsidebar1" href="javascript:void(0);" class="iconLeft" onclick="menubar(this)" style="z-index: 12" title="menu">
+                <i id="Customleftsidebar1_Span" class="fa fa-bars" style="font-size: 14px;"></i>
+            </a>
+            <a href="Home.aspx" runat="server" id="CompanyName" class="cut-text">Indus Analytics</a>
+            <a href="#" class="iconCustom" id="Btn_Logut" style="cursor: pointer" title="Log Out"><i class="fa fa-sign-out fa-2x fa-fw" style="font-size: 14px;"></i></a>
+
+            <a onclick="location.reload(true);" title="Reload from server" id="BtnRefresh" href="javascript:void(0);" class="iconCustom dropdown-toggle">
+                <i class="fa fa-refresh fa-2x fa-fw" style="font-size: 14px;"></i>
+            </a>
+        </div>
+        <!-- End Top Bar -->
+
+        <!-- Create Bar -->
+        <section>
+            <!-- left Sidebar -->
+
+            <div id="MYbackgroundOverlay"></div>
+            <div id="mySidenav" class="MYsidenav" style="margin-left: -60px;">
+                <div class="row clearfix" style="height: auto; padding-bottom: 0em; margin-right: -15px">
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="margin-top: 0em">
+                        <div class="DialogBoxCustom" style="float: left;">
+                            <strong id="displayStatus"></strong>
+                            <a href="javascript:void(0);" class="iconRightDbox btn-danger" onclick="closeNavLeft()">
+                                <span onclick="closeNavLeft()" style="font-weight: 900; margin-right: 8px">X</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rowcontents clearfix">
+                    <div id="Master_Div" style="float: left; height: calc(100vh - 80px); width: 100%; overflow-y: auto;">
+                        <nav id="ml-menu" style="margin-left: 1em; margin-top: .5em">
+                            <div id="DynamicMenuDiv" class="menu__wrap" style="margin-top: 3.5em">
+                            </div>
+                        </nav>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+        <%-- Merge Menu Bar --%>
+        <%--<link href="Merge_Menubar/css/demo.css" rel="stylesheet" />--%>
+        <link href="Merge_Menubar/css/component.css" rel="stylesheet" />
+        <script src="Merge_Menubar/js/modernizr-custom.js"></script>
+
+        <script src="Merge_Menubar/js/classie.js"></script>
+        <script src="CustomJS/DynamicMenu.js"></script>
+
+        <script src="Merge_Menubar/js/main.js"></script>
+        <%-- Merge Menu Bar --%>
+
+        <%-- DevExpress Control Grid --%>
+        <link type="text/css" href="CustomCSS/dx.common.css" rel="stylesheet" />
+        <link type="text/css" href="CustomCSS/dx.light.css" rel="stylesheet" />
+        <%--Use for Export data --%>
+        <script src="js/jszip.js"></script>
+        <script src="js/dx.all.19.2.3.js"></script>
+        <%-- DevExpress Control Grid --%>
+
+
+        <section class="content" style="margin-left: 0px; padding-left: 0px; width: 100%">
+            <div class="container-fluid" style="padding-right: 0px; padding-left: 0px">
+                <div class="card" style="margin-top: -55px; min-height: 0px; padding-left: 0px">
+                    <div class="body" style="padding-bottom: 3px; padding-left: 0px">
+                        <asp:ContentPlaceHolder ID="ContentPlaceHolder1" runat="server">
+                        </asp:ContentPlaceHolder>
+                    </div>
+                </div>
+            </div>
+
+            <%-- Model Logout --%>
+            <div class="modal fade" id="SessionExpirModel" tabindex="-1" role="dialog">
+                <div class="modal-dialog modal-lg" role="document" style="padding-top: 30px; width: 40%; display: block; float: right;">
+                    <div class="modal-content">
+                        <div class="row clearfix">
+                            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="margin-top: -.5em;">
+                                <a href="#" id="Btn_AlertSession" style="cursor: pointer; display: none">AlertSession</a>
+
+                                <div class="DialogBoxCustom" style="float: left; border-top-left-radius: 4px; border-top-right-radius: 4px;">
+                                    <strong id="ploout" style="display: block;">Log Out..!</strong>
+                                    <strong id="psessionOut" style="display: none;">Session Expiring..!</strong>
+                                    <a href="javascript:void(0);" class="iconRightDbox btn-danger" data-dismiss="modal">
+                                        <span data-dismiss="modal" style="font-weight: 900; margin-right: 8px">X</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="">
+                            <div class="row clearfix">
+                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="margin-top: .5em;">
+                                    <div style="width: 90%; float: left; height: auto; padding-left: 1em; padding-right: 1em; text-align: center;">
+                                        <div id="logotTag">
+                                            Hii..!&nbsp;<label id="UName" runat="server" style="color: #F6CF12">Admin</label><br>
+                                            <b id="logoutB">Do you want to LOGOUT..?
+                                            <br>
+                                                <span id="secondsIdle">Your Session will expire in&nbsp;<span>13409 </span>&nbsp;seconds.</span></b>
+                                            <b id="sessionB" style="display: none;">Your Session will expire in&nbsp;<span id="seconds">13409</span>&nbsp;seconds.<br>
+                                                Do you want to reset?</b>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="btnDiv" class="modal-footer" style="border-top: 1px solid #42909A;">
+                            <div id="btnLogoutDiv" style="height: auto; width: 100%; float: left; display: block;">
+                                <div style="width: 45%; margin-left: 5%; float: left">
+                                    <asp:LinkButton ID="Button1" runat="server" class="square_btn" Style="float: left; text-decoration: none; cursor: pointer">YES</asp:LinkButton>
+                                </div>
+                                <div style="width: 45%; margin-right: 5%; float: left">
+                                    <a class="square_btn" onclick="ResetSession();" data-dismiss="modal" style="float: right; text-decoration: none; cursor: pointer">NO</a>
+                                </div>
+                            </div>
+
+                            <div id="btnsessionDiv" style="height: auto; width: 100%; float: left; padding-bottom: 10px; display: none;">
+                                <div style="width: 45%; margin-left: 5%; float: left">
+                                    <button type="button" class="square_btn" data-dismiss="modal" style="float: left; text-decoration: none; cursor: pointer">Close</button>
+                                </div>
+                                <div style="width: 45%; margin-right: 5%; float: left">
+                                    <button type="button" onclick="ResetSession();" class="square_btn" style="float: right; text-decoration: none; cursor: pointer">Ok</button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <%--<input id="SessionBtn" value="chk" style="display: none" />--%>
+        </section>
+
+    </form>
+    <!-- Bootstrap Core Js -->
+    <script src="plugins/bootstrapv2/js/bootstrap.js"></script>
+
+    <!-- Select Plugin Js -->
+    <script src="plugins/bootstrap-select/js/bootstrap-select.js"></script>
+
+    <!-- Slimscroll Plugin Js -->
+    <script src="plugins/jquery-slimscroll/jquery.slimscroll.js"></script>
+
+    <!-- Waves Effect Plugin Js -->
+    <script src="plugins/node-waves/waves.js"></script>
+
+    <!-- Jquery CountTo Plugin Js -->
+    <script src="plugins/jquery-countto/jquery.countTo.js"></script>
+
+    <!-- Morris Plugin Js -->
+    <%-- <script src="plugins/raphael/raphael.min.js"></script>
+    <script src="plugins/morrisjs/morris.js"></script>--%>
+
+    <!-- ChartJs -->
+    <%--<script src="plugins/chartjs/Chart.bundle.js"></script>--%>
+
+
+    <!-- Flot Charts Plugin Js -->
+    <%-- <script src="plugins/flot-charts/jquery.flot.js"></script>
+    <script src="plugins/flot-charts/jquery.flot.resize.js"></script>
+    <script src="plugins/flot-charts/jquery.flot.pie.js"></script>
+    <script src="plugins/flot-charts/jquery.flot.categories.js"></script>
+    <script src="plugins/flot-charts/jquery.flot.time.js"></script>--%>
+
+    <!-- Sparkline Chart Plugin Js -->
+    <%--<script src="plugins/jquery-sparkline/jquery.sparkline.js"></script>--%>
+
+    <!-- Custom Js -->
+    <script src="js/admin.js"></script>
+
+    <!-- SweetAlert Plugin Js -->
+    <script src="../../plugins/sweetalert/sweetalert.min.js"></script>
+
+    <script src="../../js/pages/ui/dialogs.js"></script>
+
+    <script type="text/javascript">
+        var interval;
+        ResetSession();
+
+        function SessionExpireAlert(timeout) {
+            clearInterval(interval);
+            seconds = timeout / 1000;
+            $("#secondsIdle").html("Your Session will expire in&nbsp;<span>" + seconds + " </span>&nbsp;seconds.</b>");
+            $("#seconds").html(seconds);
+            interval = setInterval(function () {
+                seconds--;
+                $("#secondsIdle").html("Your Session will expire in&nbsp;<span>" + seconds + " </span>&nbsp;seconds.</b>");
+                $("#seconds").html(seconds);
+                if (seconds <= 0) {
+                    $("#secondsIdle").html("Your session is expired.");
+                    window.location = "Login.aspx";
+                }
+                else if (seconds === 2400) {
+                    $("#Btn_AlertSession").click();
+                }
+            }, 1000);
+        };
+
+        function ResetSession() {
+            try {
+                $.ajax({
+                    type: "POST",
+                    url: "WebService_LedgerMaster.asmx/SessionTimeOut",
+                    data: '{}',
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "text",
+                    success: function (results) {
+                        var res = results.replace(/\\/g, '');
+                        res = res.replace(/"d":/g, '');
+                        res = res.substr(1);
+                        res = res.slice(0, -1);
+                        SessionExpireAlert(res);
+                    }
+                });
+            } catch (e) {
+                console.log(e.message);
+            }
+        };
+
+    </script>
+
+    <script>
+        $("#LoadIndicator").dxLoadPanel({
+            shadingColor: "rgba(0,0,0,0.4)",
+            indicatorSrc: "images/Indus logo.png",
+            message: 'Please Wait...',
+            width: 310,
+            showPane: true,
+            shading: true,
+            closeOnOutsideClick: false,
+            visible: false
+        });
+
+        $("#Btn_Logut").click(function () {
+            document.getElementById("Btn_Logut").setAttribute("data-toggle", "modal");
+            document.getElementById("Btn_Logut").setAttribute("data-target", "#SessionExpirModel");
+
+            document.getElementById("ploout").style.display = "block";
+            document.getElementById("psessionOut").style.display = "none";
+            document.getElementById("logoutB").style.display = "block";
+            document.getElementById("sessionB").style.display = "none";
+            document.getElementById("btnLogoutDiv").style.display = "block";
+            document.getElementById("btnsessionDiv").style.display = "none";
+        });
+
+        $("#Btn_AlertSession").click(function () {
+            document.getElementById("Btn_AlertSession").setAttribute("data-toggle", "modal");
+            document.getElementById("Btn_AlertSession").setAttribute("data-target", "#SessionExpirModel");
+
+            document.getElementById("ploout").style.display = "none";
+            document.getElementById("psessionOut").style.display = "block";
+            document.getElementById("logoutB").style.display = "none";
+            document.getElementById("sessionB").style.display = "block";
+            document.getElementById("btnLogoutDiv").style.display = "none";
+            document.getElementById("btnsessionDiv").style.display = "block";
+        });
+        //=============Active Link By Element Class  By Pradeep============================     
+        $('a[class="menu__link"]').click(function (e) {
+
+            $('a[href="' + activeTab + '"]').addClass('menu__link');
+            //  $(this).addClass("menu__link menu__link--current")
+
+            if (($(e.target).attr('href')) == "#") {
+                return false;
+            }
+            localStorage.setItem('activeTab', $(e.target).attr('href'));
+            //localStorage.setItem('activeID', $(e.target).attr('id'));
+            //localStorage.setItem('activeName', document.getElementById($(e.target).attr('id')).innerHTML);
+        });
+        //);
+        var activeTab = localStorage.getItem('activeTab');
+
+        if (activeTab) {
+            $('a[href="' + activeTab + '"]').addClass('menu__link menu__link--current');
+        }
+
+        (function () {
+            var menuEl = document.getElementById('ml-menu'),
+                mlmenu = new MLMenu(menuEl, {
+                    backCtrl: false, // show back button
+                });
+        })();
+
+        var commentType = ["High", "Low", "Medium"];
+        $("#selCommentType").dxSelectBox({
+            items: commentType,
+            value: commentType[0],
+            placeholder: "Select --",
+            searchEnabled: false,
+            showClearButton: false,
+        });
+
+        var $window = $(window).on('resize', function () {
+            $(".modal-body").height(window.innerHeight / 1.2);
+            $(".modal-body").css('overflowY', 'auto');
+        }).trigger('resize'); //on page load
+
+        function JSON2CSV(objArray) {
+            var array = typeof objArray != 'object' ? JSON.parse(objArray) : objArray;
+
+            var str = '';
+            var line = '';
+
+            if ($("#labels").is(':checked')) {
+                var head = array[0];
+                if ($("#quote").is(':checked')) {
+                    for (var index in array[0]) {
+                        var value = index + "";
+                        line += '"' + value.replace(/"/g, '""') + '",';
+                    }
+                } else {
+                    for (var index in array[0]) {
+                        line += index + ',';
+                    }
+                }
+
+                line = line.slice(0, -1);
+                str += line + '\r\n';
+            }
+
+            for (var i = 0; i < array.length; i++) {
+                var line = '';
+
+                if ($("#quote").is(':checked')) {
+                    for (var index in array[i]) {
+                        var value = array[i][index] + "";
+                        line += '"' + value.replace(/"/g, '""') + '",';
+                    }
+                } else {
+                    for (var index in array[i]) {
+                        line += "\"" + array[i][index] + "\"" + ',';
+                    }
+                }
+
+                line = line.slice(0, -1);
+                str += line + '\r\n';
+            }
+            return str;
+
+        }
+    </script>
+
+</body>
+
+</html>

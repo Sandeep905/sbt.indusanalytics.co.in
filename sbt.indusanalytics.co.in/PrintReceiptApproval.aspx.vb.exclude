@@ -1,0 +1,5 @@
+﻿
+Partial Class ReceiptApproval
+    Inherits System.Web.UI.Page
+
+End Class

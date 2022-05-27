@@ -1,0 +1,232 @@
+﻿
+
+.addqty {
+    /*background-color: red;*/
+    color: white;
+    height: 1em;
+    text-align: left;
+}
+
+    .addqty:hover {
+        cursor: pointer;
+    }
+
+.content_div {
+    position: relative;
+    height: auto;
+    z-index: 5;
+}
+    /*.content_div:hover {
+        cursor: pointer;                  
+    }*/
+
+    .content_div:hover .planWindow {
+        display: block;
+        cursor: pointer;
+    }
+
+.planWindow {
+    display: block;
+    margin-top: 3px;
+    /*margin-right: 7px;*/
+    /*position: absolute;*/
+    right: 0;
+    bottom: 0;
+    height: auto;
+    width: auto;
+    margin-bottom: .2em;
+    background-repeat: no-repeat;
+    font-weight: 900;
+    z-index: 9;
+    color: red;
+    -webkit-animation: mymove 5s infinite; /* Safari 4.0 - 8.0 */
+    animation: mymove 5s infinite;
+}
+
+    .planWindow:hover {
+        color: #42909A;
+        /*background-color:#42909A;*/
+    }
+
+.addcontentsize {
+    /*width: 100%;*/
+    height: auto;
+    border: 1px solid black;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+}
+
+    .addcontentsize:hover {
+        border: 1px solid red;
+        cursor: pointer;
+    }
+
+
+.qtydelete {
+    position: relative;
+    height: 3em;
+    /*padding: 1em;*/
+    width: 10em;
+    z-index: 5;
+}
+
+    .qtydelete:hover .delete {
+        display: block;
+        /*background-color: transparent;*/
+        cursor: pointer;
+    }
+
+.delete {
+    margin-top: 3px;
+    margin-right: 7px;
+    position: absolute;
+    right: 0;
+    top: 0;
+    display: none;
+    height: 3em;
+    width: 2em;
+    margin-bottom: .2em;
+    background-repeat: no-repeat;
+    z-index: 15;
+}
+
+.firstcolumn {
+    width: 2em;
+    height: 2em;
+    margin-left: 2em;
+    margin-top: 0em;
+    margin-bottom: -.8em;
+}
+
+.forTextBox {
+    padding: 5px 5px;
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 12px;
+    font-family:DXIcons,Helvetica, sans-serif;
+}
+
+    .forTextBox:focus {
+        outline: none !important;
+        border: 1px solid #42909A;
+        box-shadow: 0 0 10px #42909A;
+        -webkit-animation: mymove 5s infinite; /* Safari 4.0 - 8.0 */
+        animation: mymove 5s infinite;
+    }
+
+.contentZoom {
+    padding: 1%;
+    position: fixed;
+    right: 35px;
+    top: 27%;
+    display: none;
+    height: 25em;
+    width: 22em;
+    background-color: white;
+    border-radius: 4px;
+    box-sizing: border-box;
+    border: 2px solid #eee;
+    z-index: 6;
+}
+
+.contentZoomQty {
+    padding: 1%;
+    position: fixed;
+    left: 64px;
+    top: 27%;
+    display: none;
+    height: 25em;
+    width: 17em;
+    background-color: white;
+    border-radius: 4px;
+    box-sizing: border-box;
+    border: 2px solid #eee;
+    z-index: 5;
+    background-color: #42909A;
+    color: white;
+}
+
+.inner { 
+    /*overflow-x: auto;*/
+    /*overflow-y:visible;*/
+    width: auto;
+    margin-left: 0em;
+    margin-top: 0em;
+    /*margin-bottom: -1em;*/
+    margin-right:14px;
+
+}
+
+.PlancontentZoom {
+    padding: 1%;
+    position: absolute;
+    right: 25%;
+    top: 25%;
+    display: none;
+    height: 50%;
+    width: 50%;
+    background-color: white;
+    border-radius: 4px;
+    box-sizing: border-box;
+    border: 2px solid #eee;
+    z-index: 5;
+}
+
+/*.hader_left {
+  position:absolute;
+  *position: relative; 
+  left:43px; 
+  min-width:16em; 
+}*/
+
+/* Safari 4.0 - 8.0 */
+@-webkit-keyframes mymove {
+    50% {
+        color: #3c0c0c;
+        box-shadow: 10px 5px 10px 5px #42909A;
+    }
+}
+
+@keyframes mymove {
+    50% {
+        color: #3c0c0c;
+        box-shadow: 10px 5px 10px 5px #42909A;
+    }
+}
+
+
+.Content_Details {
+    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+    border-collapse: collapse;
+    width: 97.5%;
+}
+
+    .Content_Details td, .Content_Details th {
+        border: 1px solid #ddd;
+        padding: 8px;
+        padding-top: 4px;
+        padding-Bottom: 4px;
+        font-size: 12px;
+        font: bold;
+        word-wrap: break-word;
+    }
+
+    /*.Content_Details tr:nth-child(even) {
+                background-color: #f2f2f2;
+                font-size: 12px;
+            }*/
+
+    .Content_Details tr:hover {
+        background-color: #ddd;
+    }
+
+    .Content_Details th {
+        padding-top: 5px;
+        padding-bottom: 5px;
+        text-align: left;
+        background-color: #fff;
+        color: #000;
+    }

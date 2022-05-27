@@ -1,0 +1,5 @@
+﻿
+Partial Class SupplierWisePurchaseSettingReport
+    Inherits System.Web.UI.Page
+
+End Class

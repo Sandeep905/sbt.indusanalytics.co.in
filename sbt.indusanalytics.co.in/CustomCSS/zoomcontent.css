@@ -1,0 +1,202 @@
+﻿
+.contclose {
+    float: right;
+    font-size: 21px;
+    font-weight: bold;
+    line-height: 1;
+    color: #000;
+    text-shadow: 0 1px 0 #fff;
+    filter: alpha(opacity=20);
+    opacity: .2;
+}
+
+    .contclose:hover,
+    .contclose:focus {
+        color: #000;
+        text-decoration: none;
+        cursor: pointer;
+        filter: alpha(opacity=50);
+        opacity: .5;
+    }
+
+button.contclose {
+    -webkit-appearance: none;
+    padding: 0;
+    cursor: pointer;
+    background: transparent;
+    border: 0;
+}
+
+.contmodal-open {
+    overflow: hidden;
+}
+
+.contmodal {
+    position: fixed;
+    top: 10%;
+    right: 10%;
+    bottom: 10%;
+    left: 10%;
+    z-index: 1050;
+    display: none;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    outline: 0;
+}
+
+    .contmodal.fade .contmodal-dialog {
+        -webkit-transition: -webkit-transform .3s ease-out;
+        -o-transition: -o-transform .3s ease-out;
+        transition: transform .3s ease-out;
+        -webkit-transform: translate(0, -25%);
+        -ms-transform: translate(0, -25%);
+        -o-transform: translate(0, -25%);
+        transform: translate(0, -25%);
+    }
+
+    .contmodal.in .contmodal-dialog {
+        -webkit-transform: translate(0, 0);
+        -ms-transform: translate(0, 0);
+        -o-transform: translate(0, 0);
+        transform: translate(0, 0);
+    }
+
+.contmodal-open .contmodal {
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.contmodal-dialog {
+    position: relative;
+    width: auto;
+    margin: 10px;
+}
+
+.contmodal-content {
+    position: relative;
+    background-color: #fff;
+    -webkit-background-clip: padding-box;
+    background-clip: padding-box;
+    border: 1px solid #999;
+    border: 1px solid rgba(0, 0, 0, .2);
+    border-radius: 6px;
+    outline: 0;
+    -webkit-box-shadow: 0 3px 9px rgba(0, 0, 0, .5);
+    box-shadow: 0 3px 9px rgba(0, 0, 0, .5);
+}
+
+.contmodal-backdrop {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1040;
+    background-color: #000;
+}
+
+    .contmodal-backdrop.fade {
+        filter: alpha(opacity=0);
+        opacity: 0;
+    }
+
+    .contmodal-backdrop.in {
+        filter: alpha(opacity=50);
+        opacity: .5;
+    }
+
+.contmodal-header {
+    padding: 15px;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+    .contmodal-header .close {
+        margin-top: -2px;
+    }
+
+.contmodal-title {
+    margin: 0;
+    line-height: 1.42857143;
+}
+
+.contmodal-body {
+    position: relative;
+    padding: 15px;
+}
+
+.contmodal-footer {
+    padding: 15px;
+    text-align: right;
+    border-top: 1px solid #e5e5e5;
+}
+
+    .contmodal-footer .btn + .btn {
+        margin-bottom: 0;
+        margin-left: 5px;
+    }
+
+    .contmodal-footer .btn-group .btn + .btn {
+        margin-left: -1px;
+    }
+
+    .contmodal-footer .btn-block + .btn-block {
+        margin-left: 0;
+    }
+
+.contmodal-scrollbar-measure {
+    position: absolute;
+    top: -9999px;
+    width: 50px;
+    height: 50px;
+    overflow: scroll;
+}
+
+/* Add Animation */
+.modal-content, #caption {
+    -webkit-animation-name: zoom;
+    -webkit-animation-duration: 0.6s;
+    animation-name: zoom;
+    animation-duration: 0.6s;
+}
+
+@-webkit-keyframes zoom {
+    from {
+        -webkit-transform: scale(0)
+    }
+
+    to {
+        -webkit-transform: scale(1)
+    }
+}
+
+@keyframes zoom {
+    from {
+        transform: scale(0)
+    }
+
+    to {
+        transform: scale(1)
+    }
+}
+
+@media (min-width: 768px) {
+    .contmodal-dialog {
+        width: 600px;
+        margin: 30px auto;
+    }
+
+    .contmodal-content {
+        -webkit-box-shadow: 0 5px 15px rgba(0, 0, 0, .5);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, .5);
+    }
+
+    .contmodal-sm {
+        width: 300px;
+    }
+}
+
+@media (min-width: 992px) {
+    .contmodal-lg {
+        width: 900px;
+    }
+}

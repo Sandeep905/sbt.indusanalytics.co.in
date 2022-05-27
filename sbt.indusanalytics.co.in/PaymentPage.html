@@ -1,0 +1,219 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="author" content="DSAThemes" />
+    <meta name="description" content="inPrint - The Business app for printers" />
+    <meta name="keywords" content="Offset, Digital, Corrugation, Printers, Packaging, Estimation, Costing, Artificial Intelligence, Quotation, Mobile App">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- SITE TITLE -->
+    <title>inPrint - Choose your payment plan</title>
+
+    <!-- GOOGLE FONTS -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,900" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,500,600,700" rel="stylesheet">
+
+    <!-- FAVICON AND TOUCH ICONS  -->
+    <link rel="shortcut icon" href="inPrintLandingPage/images/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="inPrintLandingPage/images/favicon.ico" type="image/x-icon">
+
+    <!-- BOOTSTRAP CSS -->
+    <link href="inPrintLandingPage/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- PLUGINS STYLESHEET -->
+    <link href="inPrintLandingPage/css/magnific-popup.css" rel="stylesheet">
+    <link href="inPrintLandingPage/css/slick.css" rel="stylesheet">
+    <link href="inPrintLandingPage/css/slick-theme.css" rel="stylesheet">
+
+    <!-- On Scroll Animations -->
+    <link href="inPrintLandingPage/css/animate.css" rel="stylesheet">
+
+    <!-- TEMPLATE CSS -->
+    <link href="inPrintLandingPage/css/style.css" rel="stylesheet">
+
+    <!-- RESPONSIVE CSS -->
+    <link href="inPrintLandingPage/css/responsive.css" rel="stylesheet">
+
+</head>
+<body>
+    <div id="page" class="page">
+        <section class="bg-lightgrey wide-100 pricing-section">
+
+            <div class="row">
+                <div class="col-lg-10 col-xl-8 offset-lg-1 offset-xl-2">
+                    <div class="row">
+
+                        <div class="col-md-12 col-xs-12 card p-4" style="background-color: #fff; padding: 5px">
+                            <img class="img-responsive" src="inPrintLandingPage/images/Indus-Analytics-Logo.png" alt="Indus-logo" />
+                        </div>
+                        <!-- PRICE PLAN FREE -->
+                        <div class="col-md-6 animated" data-animation="fadeInRight" data-animation-delay="400">
+                            <div class="pricing-table m-bottom-40">
+
+                                <!-- Plan Price  -->
+                                <div class="pricing-plan m-bottom-10">
+                                    <h4 class="h4-md">Billed Annually</h4>
+                                    <sup>₹</sup>
+                                    <span class="price">790</span>
+                                    <sup class="validity"> / monthly</sup>
+                                </div>
+
+                                <!-- Pricing Plan Features  -->
+                                <ul class="features">
+                                    <li><i class="fas fa-check"></i>Single User</li>
+                                    <li><i class="fas fa-check"></i>Unlimited Quotations</li>
+                                    <li><i class="fas fa-check"></i>20 hrs free training</li>
+                                    <li><i class="fas fa-check"></i>Free Support</li>
+                                    <li><i class="fas fa-check"></i>Free Video Tutorials</li>
+                                    <li><i class="fas fa-check"></i>Proper Handholding</li>
+                                </ul>
+
+                                <table border="1" cellpadding="4" cellspacing="3" class="m-top-20">
+                                    <tr>
+                                        <th colspan="2">
+                                            <h6>Pricing</h6>
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <td class="col-lg-10 col-md-6">
+                                            On time setup charge
+                                        </td>
+                                        <td align="right">15000</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="col-lg-10 col-md-6">Yearly Subscription</td>
+                                        <td align="right">9480</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="font-weight:bold" class="col-lg-10 col-md-6">Total</td>
+                                        <td align="right" style="font-weight:bold" id="grossamount">24480</td>
+                                    </tr>
+                                    <tr id="trdiscount">
+                                        <td class="col-lg-10 col-md-6">Payable after <b id="discpercentage">50%</b> Discount + 1 Year</td>
+                                        <td align="right" id="discamount">12240</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="col-lg-10 col-md-6">GST 18%</td>
+                                        <td align="right" id="gstamount">4406.4</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="col-lg-10 col-md-6">Round Off</td>
+                                        <td align="right" id="roundoffamount">-0.4</td>
+                                    </tr>
+                                    <tr class="font-weight-bold">
+                                        <td class="col-lg-10 col-md-6">Total Payable Amount</td>
+                                        <td align="right" id="totalpayableamount">₹28886</td>
+                                    </tr>
+                                </table>
+
+                                <!-- PRICING NOTICE TEXT -->
+                                <div class="pricing-notice text-center">
+                                    <p class="p-md">*Payable from next year <span>₹9480</span></p>
+                                </div>
+
+                                <!-- Pricing Table Button  -->
+                                <div class='pm-button' id="paymentbutton"></div>
+
+                            </div>
+                        </div>	<!-- END PRICE PLAN FREE -->
+                        <!-- PRICE PLAN PRO -->
+                        <div class="col-md-6 animated" data-animation="fadeInLeft" data-animation-delay="400">
+                            <div class="pricing-table m-bottom-40">
+
+                                <!-- Plan Price  -->
+                                <div class="pricing-plan m-bottom-10">
+                                    <h4 class="h4-md">Billed Monthly</h4>
+                                    <sup>₹</sup>
+                                    <span class="price">990</span>
+                                    <sup class="validity"> / monthly</sup>
+                                </div>
+
+                                <!-- Pricing Plan Features  -->
+                                <ul class="features">
+                                    <li><i class="fas fa-check"></i>Single User</li>
+                                    <li><i class="fas fa-check"></i>Unlimited Quotations</li>
+                                    <li><i class="fas fa-check"></i>20 hrs free training</li>
+                                    <li><i class="fas fa-check"></i>Free Support</li>
+                                    <li><i class="fas fa-check"></i>Free Video Tutorials</li>
+                                    <li><i class="fas fa-check"></i>Proper Handholding</li>
+                                </ul>
+
+                                <table border="1" cellpadding="4" cellspacing="3" class="m-top-20">
+                                    <tr>
+                                        <th colspan="2">
+                                            <h6>Pricing</h6>
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <td class="col-lg-10 col-md-6">
+                                            On time setup charge
+                                        </td>
+                                        <td align="right">15000</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="col-lg-10 col-md-6">Monthly Subscription</td>
+                                        <td align="right">990</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="font-weight:bold" class="col-lg-10 col-md-6">Total</td>
+                                        <td align="right" style="font-weight:bold" id="monthgrossamount">15990</td>
+                                    </tr>
+                                    <tr id="monthtrdiscount" style="display:none;">
+                                        <td class="col-lg-10 col-md-6">Payable after <b id="monthdiscamount">40%</b> Discount + 1 Month*</td>
+                                        <td align="right">9594</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="col-lg-10 col-md-6">GST 18%</td>
+                                        <td align="right" id="monthgstamount">2878.2</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="col-lg-10 col-md-6">Round Off</td>
+                                        <td align="right" id="monthroundoffamount">-0.2</td>
+                                    </tr>
+                                    <tr class="font-weight-bold">
+                                        <td class="col-lg-10 col-md-6">Total Payable Amount</td>
+                                        <td align="right" id="monthtotalpayableamount">₹18868</td>
+                                    </tr>
+                                </table>
+
+                                <!-- PRICING NOTICE TEXT -->
+                                <div class="pricing-notice text-center">
+                                    <p class="p-md">*Payable from next month <span>₹990</span></p>
+                                </div>
+
+                                <!-- Pricing Table Button  -->
+                                <div class='pm-button' id="paymentbuttonmonthly"></div>
+
+                            </div>
+                        </div>
+                        <div class="pricing-notice text-center">
+                            <label>Apply Promocode</label>
+                            <input type="text" name="txtpromo" onchange="getButtonDetails('');" id="txtpromocode" value="" />
+                            <input type="button" name="btnPromo" id="btnApplyPromo" value="Apply" />
+                            <label id="lblmessage" style="display:none;color:green">p</label>
+                        </div>
+                        <!-- END PRICE PLAN PRO -->
+                        <div class="pricing-notice text-center">
+                            <p>*Please share the payment id on <span><a href="mailto:info@indusanalytics.in">info@indusanalytics.in</a></span> or whatsapp the image of payment id on <a title="WhatsApp" href="https://api.whatsapp.com/send?phone=918103617108&amp;text=Hey INDUS! Please check my payment status&amp;source=&amp;data=" target="_blank"><span>+91 81036 17108</span></a></p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>	 <!-- End row -->
+
+        </section>
+    </div>
+    <!-- EXTERNAL SCRIPTS
+    ============================================= -->
+    <script src="inPrintLandingPage/js/jquery-3.2.1.min.js"></script>
+    <script src="inPrintLandingPage/js/bootstrap.min.js"></script>
+    <script src="inPrintLandingPage/js/jquery.appear.js"></script>
+
+    <!-- Custom Script -->
+    <script src="inPrintLandingPage/js/customlogin.js"></script>
+    <script src="inPrintLandingPage/js/PaymentPage.js"></script>
+
+</body>
+</html>

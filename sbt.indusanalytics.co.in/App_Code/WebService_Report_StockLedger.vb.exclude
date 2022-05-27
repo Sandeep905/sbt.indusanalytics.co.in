@@ -1,0 +1,194 @@
+﻿Imports System.Web
+Imports System.Web.Services
+Imports System.Web.Services.Protocols
+Imports System.Data
+Imports System.Data.SqlClient
+Imports System.Web.Script.Services
+Imports System.Web.Script.Serialization
+Imports Connection
+Imports System.Collections.Generic
+Imports System.Web.UI.WebControls
+Imports System.Net
+Imports System.IO
+Imports System.Net.Mail
+
+Imports Microsoft.VisualBasic
+Imports System.Configuration
+Imports Newtonsoft.Json
+
+' To allow this Web Service to be called from script, using ASP.NET AJAX, uncomment the following line.
+<System.Web.Script.Services.ScriptService()>
+<WebService(Namespace:="http://tempuri.org/")>
+<WebServiceBinding(ConformsTo:=WsiProfiles.BasicProfile1_1)>
+<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
+Public Class WebService_Report_StockLedger
+    Inherits System.Web.Services.WebService
+
+
+    Private DA As SqlDataAdapter
+    Dim db As New DBConnection
+    Dim IndexFormName As String
+    Dim k As String
+    Dim ss As String
+    Dim FYear As String
+    Dim strdate As String
+    Dim js As New JavaScriptSerializer()
+    Dim data As New HelloWorldData()
+    Dim dataTable As New DataTable()
+    Dim str As String
+
+    Dim PersonEmail As String
+    Dim GBLUserID As String
+    Dim GBLUserName As String
+    Dim GBLBranchID As String
+    Dim GBLCompanyID As String
+    Dim GBLFYear As String
+    Dim UserName As String
+
+    <System.Web.Services.WebMethod(EnableSession:=True)>
+    <ScriptMethod(UseHttpGet:=True, ResponseFormat:=ResponseFormat.Json)>
+    Public Sub HelloWorld()
+
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
+
+        GBLUserName = Convert.ToString(HttpContext.Current.Session("UserName"))
+        GBLFYear = Convert.ToString(HttpContext.Current.Session("FYear"))
+        GBLBranchID = Convert.ToString(HttpContext.Current.Session("BranchId"))
+
+        Context.Response.Clear()
+        Context.Response.ContentType = "application/json"
+        data.Message = ConvertDataTableTojSonString(GetDataTable)
+        Context.Response.Write(js.Serialize(data.Message))
+    End Sub
+
+    <WebMethod()>
+    <ScriptMethod()>
+    Public Function GetDataTable() As DataTable
+
+        If k = "client" Then
+
+            str = " SELECT LedgerName as ClientName, MailingName,Address1,Address2,Address3,City,State,Country,Address,Phone,Fax,Email,PinCode,Website,PAN,ECC,CST,TIN,DeliveredQtyTolerence,ProfitPercentage,PaymentTerms,MinimumCreditLimit,UrgentCreditLimit,CriticalCreditLimit,LedgerID From LedgerMaster Where  UnderGroupID IN ( 28, 24)  Order By LedgerName "
+            '          LedgerName as ClientName, MailingName,Address, Nullif(Phone,'') As Phone,Email, Nullif(Tin,'') as Tin, Nullif(ConcerningPerson1,'') As ConcermingPerson, Nullif(City,'') as City,LedgerID FROM LedgerMaster Where  UnderGroupID IN ( 28, 24)   Order By LedgerName"
+        Else
+            str = " Select  Top 10 RollId,RollCode,ItemCode,Quality,Width,MfgBy ,'F: ' + cast(isnull(GSMFacePaper,0) as nvarchar)+ ' ' + ' R: ' + cast(isnull(GSMReleasePaper,0) as nvarchar)  " &
+                  " + ' ' + ' A: ' + cast(isnull(GSMAdhesive,0) as nvarchar) as GSM From RollMaster "
+        End If
+
+        db.FillDataTable(dataTable, str)
+        Return dataTable
+    End Function
+
+
+    <WebMethod()>
+    <ScriptMethod()>
+    Public Function ConvertDataTableTojSonString(ByVal dataTable As DataTable) As String
+        Dim serializer As New System.Web.Script.Serialization.JavaScriptSerializer()
+        serializer.MaxJsonLength = 2147483647
+        Dim tableRows As New List(Of Dictionary(Of [String], [Object]))()
+        Dim row As Dictionary(Of [String], [Object])
+        For Each dr As DataRow In dataTable.Rows
+            row = New Dictionary(Of [String], [Object])()
+            For Each col As DataColumn In dataTable.Columns
+                row.Add(col.ColumnName, dr(col))
+                System.Console.WriteLine(dr(col))
+            Next
+            tableRows.Add(row)
+        Next
+        Return serializer.Serialize(tableRows)
+    End Function
+
+
+    Public Function DataSetToJSONWithJavaScriptSerializer(ByVal dataset As DataSet) As String
+        Dim jsSerializer As JavaScriptSerializer = New JavaScriptSerializer()
+        Dim ssvalue As Dictionary(Of String, Object) = New Dictionary(Of String, Object)()
+
+        For Each table As DataTable In dataset.Tables
+            Dim parentRow As List(Of Dictionary(Of String, Object)) = New List(Of Dictionary(Of String, Object))()
+            Dim childRow As Dictionary(Of String, Object)
+            Dim tablename As String = table.TableName
+
+            For Each row As DataRow In table.Rows
+                childRow = New Dictionary(Of String, Object)()
+
+                For Each col As DataColumn In table.Columns
+                    childRow.Add(col.ColumnName, row(col))
+                Next
+
+                parentRow.Add(childRow)
+            Next
+
+            ssvalue.Add(tablename, parentRow)
+        Next
+
+        Return jsSerializer.Serialize(ssvalue)
+    End Function
+
+
+    '---------------Open Master code---------------------------------
+    '---------------Get Stock Ledger---------------------------------
+
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function GetStockLedger(ByVal chkVal As String, ByVal frdt As String, ByVal todt As String) As String
+
+        Context.Response.Clear()
+        Context.Response.ContentType = "application/json"
+        Dim str_date1 As String = ""
+        Dim str_condi As String = ""
+
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
+        If chkVal = True Or chkVal = "true" Then
+            str_date1 = ""
+            str_date1 = "And Cast(Floor(Cast(ITM.VoucherDate as float)) AS Datetime) >=  '" & frdt & "' and  Cast(Floor(Cast(ITM.VoucherDate as float)) AS Datetime) <=  '" & todt & "'" 'Added by Pradeep Yadav 17-04-2018
+        Else
+            str_date1 = ""
+        End If
+        str_condi = "where ITM.CompanyID='" & GBLCompanyID & "'"
+
+        str = "select Isnull(IM.ItemID,0) AS ItemID,Nullif(IM.ItemCode,'') AS ItemCode,Nullif(IGM.ItemGroupName,'') AS ItemGroupName,Nullif(ISGM.ItemSubGroupName,'') AS ItemSubGroupName,Nullif(IM.ItemName,'') AS ItemName,Nullif(IM.ItemDescription,'') AS ItemDescription,VoucherName,  " &
+               "(case when Isnull(PurchaseVoucherNo,'')<>'' then Nullif(Supplier,'') else Nullif('','') end) as Supplier,isnull(JobBookingNo,0) as JobBookingNo,isnull(PurchaseVoucherNo,0) as PurchaseVoucherNo,Nullif(VoucherNo,'') AS VoucherNo,replace(convert(nvarchar(30),VoucherDate,106),'','-') AS VoucherDate,   " &
+               " Isnull(OpeningBalance,0) AS OpeningBalance,Isnull(ReceiptQty,0) AS ReceiptQty,Isnull(IssueuQty,0) AS IssueuQty,Isnull(Closingbalance,0) AS Closingbalance   " &
+               " From ItemMaster as IM   " &
+               " INNER JOIN (select 0 as TransactionID,IM.CompanyID,IM.ItemID,'Op/bal' as VoucherNo,cast('" & frdt & "' as datetime) as VoucherDate,Nullif('','') as PurchaseVoucherNo,Nullif('','') as JobBookingNo,Nullif('','') as Supplier,  " &
+               " Isnull(OpeningBalance,0) as OpeningBalance,0 as ReceiptQty,0 as IssueuQty,isnull(OpeningBalance,0) as Closingbalance ,'Opening' as VoucherName    " &
+               " From ItemMaster as IM    " &
+               " left join (select B.ItemID,A.CompanyID,Sum(Isnull(B.ReceiptQuantity,0)-Isnull(B.IssueQuantity,0)) as OpeningBalance From ItemTransactionMain AS A INNER JOIN ItemTransactionDetail AS B ON A.TransactionID=B.TransactionID And A.CompanyID=B.CompanyID    " &
+               " where A.CompanyID='" & GBLCompanyID & "' AND A.VoucherID not in (-8,-9)  and Cast(Floor(Cast(A.VoucherDate AS Float)) AS Datetime)<'" & frdt & "' AND Isnull(A.IsDeletedTransaction,0)=0  " &
+               " group by B.ItemID,A.CompanyID ) as IT on   IT.ItemID=IM.ItemID And IT.CompanyID=IM.CompanyID And Isnull(IM.IsDeletedTransaction,0)=0  " &
+               " Union All    " &
+               " select TransactionID,CompanyID,ItemID,VoucherNo, VoucherDate,PurchaseVoucherNo,JobBookingNo,Supplier,OpeningBalance,ReceiptQty,IssueuQty,((OpeningBalance+ReceiptQty)-IssueuQty) as Closingbalance,VoucherName   " &
+               " from  (Select ITM.VoucherDate,ITM.VoucherNo,ITM.TransactionID,ITM.CompanyID,ITD.TransID,ITD.ItemID,ITP.VoucherNo AS PurchaseVoucherNo,JJ.JobBookingNo,  " &
+               " (select Distinct LedgerName From LedgerMaster Where LedgerID=ITM.LedgerID And CompanyID=ITM.CompanyID And Isnull(ITM.LedgerID,0)>0) as supplier,  " &
+               " Isnull(IssueQuantity,0) as IssueuQty,isnull(ReceiptQuantity,0) as ReceiptQty,    " &
+               " Isnull((select Isnull(sum(isnull(ReceiptQuantity,0))-Sum(isnull(IssueQuantity,0)),0) From ItemTransactionMain AS A INNER JOIN ItemTransactionDetail AS B ON A.TransactionID=B.TransactionID And A.CompanyID=B.CompanyID    " &
+               " Where B.ItemID = ITD.ItemID And B.CompanyID=ITD.CompanyID AND Isnull(B.IsDeletedTransaction,0)=0 AND (Cast(Floor(Cast(A.VoucherDate AS Float)) AS Datetime)< Cast(Floor(Cast(ITM.VoucherDate AS Float)) AS Datetime) Or A.TransactionID < ITD.TransactionID)    " &
+               " And A.VoucherID Not in (-8,-9)),0) as OpeningBalance,  " &
+               " (select Top 1 VoucherName From VoucherMaster Where VoucherID=ITM.VoucherID AND CompanyID=ITM.CompanyID) as voucherName   " &
+               " from ItemTransactionMain as ITM   " &
+               " INNER JOIN ItemTransactionDetail as ITD ON ITD.TransactionID=ITM.TransactionID AND ITD.CompanyID=ITM.CompanyID  " &
+               " LEFT JOIN ItemTransactionMain as ITP ON ITP.TransactionID=ITD.PurchaseTransactionID AND ITP.CompanyID=ITD.CompanyID  " &
+                "LEFT JOIN JobBookingJobCardContents as JC ON JC.JobBookingJobCardContentsID=ITD.JobBookingJobCardContentsID And JC.CompanyID=ITD.CompanyID  " &
+                "LEFT JOIN JobBookingJobCard as JJ ON JJ.JobBookingID=JC.JobBookingID AND JJ.CompanyID=JC.CompanyID  " &
+                "" & str_condi & "  " & str_date1 & "" &
+                "and ITM.VoucherID NOT IN (-8,-9)) as qry ) as stk_qry on stk_qry.ItemID=IM.ItemID AND stk_qry.CompanyID=IM.CompanyID    " &
+                "INNER JOIN ItemGroupMaster AS IGM ON IGM.ItemGroupID=IM.ItemGroupID AND IGM.CompanyID=IM.CompanyID  " &
+                "LEFT JOIN ItemSubGroupMaster AS ISGM ON ISGM.ItemSubGroupID=IM.ItemSubGroupID And ISGM.CompanyID=IM.CompanyID  " &
+                "order by ItemID,TransactionID,VoucherDate"
+
+        db.FillDataTable(dataTable, str)
+        data.Message = ConvertDataTableTojSonString(dataTable)
+        js.MaxJsonLength = 2147483647
+        Return js.Serialize(data.Message)
+    End Function
+
+
+
+    '---------------Close Master code---------------------------------
+
+    Public Class HelloWorldData
+        Public Message As [String]
+    End Class
+
+End Class

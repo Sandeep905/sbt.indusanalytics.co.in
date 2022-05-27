@@ -1,0 +1,295 @@
+﻿Imports System.Web
+Imports System.Web.Services
+Imports System.Web.Services.Protocols
+Imports System.Data
+Imports System.Data.SqlClient
+Imports System.Web.Script.Services
+Imports System.Web.Script.Serialization
+Imports Connection
+Imports System.Collections.Generic
+Imports System.Web.UI.WebControls
+Imports System.Net
+Imports System.IO
+Imports System.Net.Mail
+
+Imports Microsoft.VisualBasic
+Imports System.Configuration
+Imports Newtonsoft.Json
+
+' To allow this Web Service to be called from script, using ASP.NET AJAX, uncomment the following line.
+<System.Web.Script.Services.ScriptService()>
+<WebService(Namespace:="http://tempuri.org/")>
+<WebServiceBinding(ConformsTo:=WsiProfiles.BasicProfile1_1)>
+<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()>
+Public Class WebService_ShiftMaster
+    Inherits System.Web.Services.WebService
+
+
+    Private DA As SqlDataAdapter
+    Dim db As New DBConnection
+    Dim IndexFormName As String
+    Dim k As String
+    Dim ss As String
+    Dim FYear As String
+    Dim strdate As String
+    Dim js As New JavaScriptSerializer()
+    Dim data As New HelloWorldData()
+    Dim dataTable As New DataTable()
+    Dim str As String
+
+    Dim PersonEmail As String
+    Dim GBLUserID As String
+    Dim GBLUserName As String
+    Dim GBLBranchID As String
+    Dim GBLCompanyID As String
+    Dim GBLFYear As String
+    Dim UserName As String
+
+    <System.Web.Services.WebMethod(EnableSession:=True)>
+    <ScriptMethod(UseHttpGet:=True, ResponseFormat:=ResponseFormat.Json)>
+    Public Sub HelloWorld()
+
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
+
+        GBLUserName = Convert.ToString(HttpContext.Current.Session("UserName"))
+        GBLFYear = Convert.ToString(HttpContext.Current.Session("FYear"))
+        GBLBranchID = Convert.ToString(HttpContext.Current.Session("BranchId"))
+
+        Context.Response.Clear()
+        Context.Response.ContentType = "application/json"
+        'data.Message = ConvertDataTableTojSonString(GetDataTable)
+        Context.Response.Write(js.Serialize(data.Message))
+    End Sub
+
+    '<WebMethod()>
+    '<ScriptMethod()>
+    'Public Function GetDataTable() As DataTable
+
+    '    If k = "client" Then
+
+    '        str = " SELECT LedgerName as ClientName, MailingName,Address1,Address2,Address3,City,State,Country,Address,Phone,Fax,Email,PinCode,Website,PAN,ECC,CST,TIN,DeliveredQtyTolerence,ProfitPercentage,PaymentTerms,MinimumCreditLimit,UrgentCreditLimit,CriticalCreditLimit,LedgerID From LedgerMaster Where  UnderGroupID IN ( 28, 24)  Order By LedgerName "
+    '        '          LedgerName as ClientName, MailingName,Address, Nullif(Phone,'') As Phone,Email, Nullif(Tin,'') as Tin, Nullif(ConcerningPerson1,'') As ConcermingPerson, Nullif(City,'') as City,LedgerID FROM LedgerMaster Where  UnderGroupID IN ( 28, 24)   Order By LedgerName"
+    '    Else
+    '        str = " Select  Top 10 RollId,RollCode,ItemCode,Quality,Width,MfgBy ,'F: ' + cast(isnull(GSMFacePaper,0) as nvarchar)+ ' ' + ' R: ' + cast(isnull(GSMReleasePaper,0) as nvarchar)  " &
+    '              " + ' ' + ' A: ' + cast(isnull(GSMAdhesive,0) as nvarchar) as GSM From RollMaster "
+    '    End If
+
+    '    db.FillDataTable(dataTable, str)
+    '    Return dataTable
+    'End Function
+
+
+    <WebMethod()>
+    <ScriptMethod()>
+    Public Function ConvertDataTableTojSonString(ByVal dataTable As DataTable) As String
+        Dim serializer As New System.Web.Script.Serialization.JavaScriptSerializer()
+        serializer.MaxJsonLength = 2147483647
+        Dim tableRows As New List(Of Dictionary(Of [String], [Object]))()
+        Dim row As Dictionary(Of [String], [Object])
+        For Each dr As DataRow In dataTable.Rows
+            row = New Dictionary(Of [String], [Object])()
+            For Each col As DataColumn In dataTable.Columns
+                row.Add(col.ColumnName, dr(col))
+                System.Console.WriteLine(dr(col))
+            Next
+            tableRows.Add(row)
+        Next
+        Return serializer.Serialize(tableRows)
+    End Function
+
+
+    Public Function DataSetToJSONWithJavaScriptSerializer(ByVal dataset As DataSet) As String
+        Dim jsSerializer As JavaScriptSerializer = New JavaScriptSerializer()
+        Dim ssvalue As Dictionary(Of String, Object) = New Dictionary(Of String, Object)()
+
+        For Each table As DataTable In dataset.Tables
+            Dim parentRow As List(Of Dictionary(Of String, Object)) = New List(Of Dictionary(Of String, Object))()
+            Dim childRow As Dictionary(Of String, Object)
+            Dim tablename As String = table.TableName
+
+            For Each row As DataRow In table.Rows
+                childRow = New Dictionary(Of String, Object)()
+
+                For Each col As DataColumn In table.Columns
+                    childRow.Add(col.ColumnName, row(col))
+                Next
+
+                parentRow.Add(childRow)
+            Next
+
+            ssvalue.Add(tablename, parentRow)
+        Next
+
+        Return jsSerializer.Serialize(ssvalue)
+    End Function
+
+
+    '---------------Open Master code---------------------------------
+    ''----------------------------Open Shift  Save Data  ------------------------------------------
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function SaveSiftMaster(ByVal jsonObjectsSaveRecord As Object) As String
+        Dim dt As New DataTable
+        Dim KeyField As String
+        Dim AddColName, AddColValue, TableName As String
+        AddColName = ""
+        AddColValue = ""
+
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
+        GBLUserName = Convert.ToString(HttpContext.Current.Session("UserName"))
+        GBLFYear = Convert.ToString(HttpContext.Current.Session("FYear"))
+
+        Try
+            Dim con As New SqlConnection
+            con = db.OpenDataBase()
+
+            If jsonObjectsSaveRecord.length > 0 Then
+                TableName = "ShiftManagement"
+                AddColName = ""
+                AddColValue = ""
+                AddColName = "ModifiedDate,CreatedDate,UserID,CompanyID,FYear,CreatedBy,ModifiedBy"
+                AddColValue = "'" & DateTime.Now & "','" & DateTime.Now & "','" & GBLUserID & "','" & GBLCompanyID & "','" & GBLFYear & "','" & GBLUserID & "','" & GBLUserID & "'"
+                db.InsertDatatableToDatabase(jsonObjectsSaveRecord, TableName, AddColName, AddColValue)
+
+            End If
+            con.Close()
+            KeyField = "Success"
+        Catch ex As Exception
+            KeyField = "fail"
+        End Try
+        Return KeyField
+    End Function
+
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function UpdateShiftMaster(ByVal jsonObjectsSaveRecord As Object, ByVal ShiftID As String) As String
+        'ByVal TxtWarehouseID As String, 
+        Dim dt As New DataTable
+        Dim KeyField, str2 As String
+        Dim AddColName, wherecndtn, TableName, AddColValue As String
+        AddColName = ""
+
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
+        GBLUserName = Convert.ToString(HttpContext.Current.Session("UserName"))
+        GBLFYear = Convert.ToString(HttpContext.Current.Session("FYear"))
+        GBLBranchID = Convert.ToString(HttpContext.Current.Session("BranchId"))
+
+        Try
+            Dim con As New SqlConnection
+            con = db.OpenDataBase()
+            Dim dtExist As New DataTable
+            If jsonObjectsSaveRecord.length > 0 Then
+                TableName = "ShiftManagement"
+                AddColName = ""
+                wherecndtn = ""
+                AddColName = "ModifiedDate='" & DateTime.Now & "',UserID=" & GBLUserID & ",CompanyID=" & GBLCompanyID & ",FYear='" & GBLFYear & "',ModifiedBy='" & GBLUserID & "'"
+                wherecndtn = "ShiftID='" & ShiftID & "' and CompanyID='" & GBLCompanyID & "' "
+                db.UpdateDatatableToDatabase(jsonObjectsSaveRecord, TableName, AddColName, 0, wherecndtn)
+
+            End If
+
+            con.Close()
+            KeyField = "Success"
+
+        Catch ex As Exception
+            KeyField = "fail"
+        End Try
+        Return KeyField
+
+    End Function
+
+    '-----------------------------------Get ShiftMaster List------------------------------------------
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function ShowListShiftMaster() As String
+        Try
+            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+            GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
+            GBLUserName = Convert.ToString(HttpContext.Current.Session("UserName"))
+            GBLFYear = Convert.ToString(HttpContext.Current.Session("FYear"))
+
+            'str = "select distinct isnull(ShiftID,0) As ShiftID, nullif(ShiftName,'') as ShiftName,nullif(FromShift,'') as FromShift, nullif(ToShift,'') as ToShift,isnull(WorkingMin,0) as WorkingMin," &
+            '      "cast(isnull(ShiftFromHr,0) as nvarchar(max))+':'+cast(isnull(ShiftFromMin,0)as nvarchar(max))+':00'+' '+nullif(FromShift,'') as StartShiftFrom, cast(isnull(ShiftToHr,0) as nvarchar(max))+':'+cast(isnull(ShiftToMin,0)as nvarchar(max))+':00'+' '+nullif(ToShift,'') as EndToShift, " &
+            '      "isnull(ShiftFromHr,0) as ShiftFromHr,  " &
+            '      "  isnull(ShiftFromMin,0) As ShiftFromMin, isnull(ShiftToHr,0) As ShiftToHr,isnull(ShiftToMin,0) As ShiftToMin,  " &
+            '      "  isnull(ShiftFromHr_Lunch,0) As ShiftFromHr_Lunch,isnull(ShiftFromMin_Lunch,0) As ShiftFromMin_Lunch,  " &
+            '       " isnull(ShiftToHr_Lunch, 0) As ShiftToHr_Lunch,isnull(ShiftToMin_Lunch,0) As ShiftToMin_Lunch,isnull(TotalLunchMin,0) As TotalLunchMin,  " &
+            '      "  nullif(FromShift_Lunch,'') as FromShift_Lunch,nullif(ToShift_Lunch,'') as ToShift_Lunch,  " &
+            '      "cast(isnull(ShiftFromHr_Lunch,0) as nvarchar(max))+':'+cast(isnull(ShiftToMin_Lunch,0)as nvarchar(max))+':00'+' '+nullif(FromShift_Lunch,'') as StartLunch,  " &
+            '       " cast(isnull(ShiftToHr_Lunch,0) as nvarchar(max))+':'+cast(isnull(ShiftToMin,0)as nvarchar(max))+':00'+' '+nullif(ToShift_Lunch,'') as EndLunch,  " &
+            '      "  nullif(ShiftNarration,'') As ShiftNarration ,nullif(CompanyID,0) As CompanyID, isnull(UserID,0) As UserID,nullif(FYear,'') as FYear,  " &
+            '      "  isnull(CreatedBy,0) as CreatedBy,isnull(ModifiedBy,0) as ModifiedBy,   " &
+            '      "  replace(convert(nvarchar(30),ModifiedDate,106),'','-') as ModifiedDate,isnull(DeletedBy,0) as DeletedBy,   " &
+            '      "  replace(convert(nvarchar(30),DeletedDate,106),'','-') as DeletedDate,replace(convert(nvarchar(30),CreatedDate,106),'','-') as CreatedDate  " &
+            '      "  from ShiftManagement  where CompanyID='" & GBLCompanyID & "' and isnull(IsDeletedTransaction,0)<>1"
+            str = "select distinct isnull(SM.ShiftID,0) As ShiftID, nullif(SM.ShiftName,'') as ShiftName,replace(convert(nvarchar(30),SM.StartTime,120),'','-') as  StartTime,replace(convert(nvarchar(30),SM.EndTime,120),'','-') as   EndTime,replace(convert(nvarchar(30),SM.EndTime,120),'','-') as EndTime,  " &
+                 "  isnull(SM.ShiftFromHr,0) As ShiftFromHr,  isnull(SM.ShiftFromMin,0) As ShiftFromMin, isnull(SM.ShiftToHr,0) As ShiftToHr,isnull(SM.ShiftToMin,0) As ShiftToMin,     nullif(SM.FromShift,'') as FromShift, nullif(SM.ToShift,'') as ToShift,  " &
+                 "  nullif(SM.ShiftNarration,'') As ShiftNarration,nullif(SM.Status,'') As Status   ,nullif(UM.UserName,'') As UserName,nullif(UM.UserName,'') As UserName,  " &
+                 "  nullif(SM.CompanyID,0) As CompanyID, isnull(SM.UserID,0) As UserID,nullif(SM.FYear,'') as FYear  ,isnull(SM.CreatedBy,0) as CreatedBy,isnull(SM.ModifiedBy,0) as ModifiedBy  " &
+                 "  ,replace(convert(nvarchar(30),SM.ModifiedDate,106),'','-') as ModifiedDate,isnull(SM.DeletedBy,0) as DeletedBy,     " &
+                 "  replace(convert(nvarchar(30),SM.DeletedDate,106),'','-') as DeletedDate,replace(convert(nvarchar(30),SM.CreatedDate,106),'','-') as CreatedDate   " &
+                 "  from ShiftManagement as SM  inner join UserMaster AS UM on UM.UserID=SM.UserID and UM.CompanyID=SM.CompanyID  " &
+                 "  where SM.CompanyID='" & GBLCompanyID & "' and isnull(IsDeletedTransaction,0)<>1"
+
+            db.FillDataTable(dataTable, str)
+            data.Message = ConvertDataTableTojSonString(dataTable)
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+
+    End Function
+
+    ''----------------------------Open Delete  Save Data  ------------------------------------------
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function DeleteData(ByVal TxtShiftMasterID As String) As String
+
+        Dim dt As New DataTable
+        Dim KeyField As String
+        Dim RevisionNo As Long = 0
+        Dim AddColName, AddColValue As String
+
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
+        GBLUserName = Convert.ToString(HttpContext.Current.Session("UserName"))
+        GBLFYear = Convert.ToString(HttpContext.Current.Session("FYear"))
+        GBLBranchID = Convert.ToString(HttpContext.Current.Session("BranchId"))
+
+        AddColName = ""
+        AddColValue = ""
+
+        Try
+            Dim con As New SqlConnection
+            con = db.OpenDataBase()
+            str = ""
+            str = "Update ShiftManagement Set ModifiedBy='" & GBLUserID & "',DeletedBy='" & GBLUserID & "',DeletedDate='" & DateTime.Now & "',ModifiedDate='" & DateTime.Now & "',IsDeletedTransaction=1  WHERE CompanyID='" & GBLCompanyID & "' and ShiftID='" & TxtShiftMasterID & "' "
+
+            Dim cmd As New SqlCommand(str, con)
+            cmd.CommandType = CommandType.Text
+            cmd.Connection = con
+            cmd.ExecuteNonQuery()
+
+            con.Close()
+            KeyField = "Success"
+
+
+        Catch ex As Exception
+            KeyField = "fail"
+        End Try
+        Return KeyField
+
+    End Function
+
+
+
+
+    '---------------Close Master code---------------------------------
+
+    Public Class HelloWorldData
+        Public Message As [String]
+    End Class
+End Class

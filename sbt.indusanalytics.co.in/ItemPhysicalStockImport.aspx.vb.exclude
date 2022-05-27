@@ -1,0 +1,16 @@
+﻿
+Partial Class ItemPhysicalStockImport
+    Inherits System.Web.UI.Page
+
+    Private Sub form1_Load(sender As Object, e As EventArgs) Handles form1.Load
+        Dim UserId As String = Convert.ToString(Session("UserID"))
+        Dim CompanyId As String = Convert.ToString(Session("CompanyId"))
+        If UserId = "" Or CompanyId = "" Then
+            Session.Remove("UserID")
+            Response.ClearHeaders()
+            Response.AddHeader("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate")
+            Response.AddHeader("Pragma", "no-cache")
+            Response.Redirect("Login.aspx")
+        End If
+    End Sub
+End Class

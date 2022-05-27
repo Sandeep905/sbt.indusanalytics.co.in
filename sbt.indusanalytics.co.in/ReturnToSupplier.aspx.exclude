@@ -1,0 +1,110 @@
+﻿<%@ Page Title="" Language="VB" MasterPageFile="~/MasterPage_Main.master" AutoEventWireup="false" CodeFile="ReturnToSupplier.aspx.vb" Inherits="ReturnToSupplier" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="Server">
+</asp:Content>
+<asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="Server">
+    <div class="row clearfix padding-0 margin-0 margin-right: -15px">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-0 margin-0">
+            <div class="dialogboxContainerMainMAster">
+                <div class="DialogBoxCustom" style="float: left; background-color: #fff; padding-left: 0px; padding-bottom: 2px">
+                    <div class="col-lg-10 col-md-10 col-sm-10 col-xs-12">
+                        <button type="button" id="CreateButton" class="btn btn-default waves-effect">Create</button>
+                        <button type="button" id="EditButton" class="btn btn-info waves-effect">Edit</button>
+                        <button type="button" id="DeleteButton" class="btn btn-danger waves-effect">Delete</button>
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12">
+                        <strong id="POMasterDisplayName" class="MasterDisplayName" style="float: right; color: #42909A">Item Return To Supplier</strong>
+                    </div>
+                </div>
+                <div class="ContainerBoxCustom" style="float: left; height: auto;">
+                    <div id="ShowListGrid"></div>
+                    <input type="text" id="ShowListID" style="display: none" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="largeModal" tabindex="-1" role="dialog" style="margin-left: -7px">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="DialogBoxCustom" style="float: left; border-top-left-radius: 4px; border-top-right-radius: 4px;">
+                    <strong>Item Return To Supplier</strong>
+                    <a href="javascript:void(0);" class="iconRightDbox btn-danger" data-dismiss="modal">
+                        <span data-dismiss="modal" style="font-weight: 900; margin-right: 8px">X</span>
+                    </a>
+                </div>
+                <div class="modal-body">
+                    <div id="FieldCntainerRowPickList" style="display: block;">
+                        <div class="row clearfix">
+                            <div class="tab-content">
+                                <div role="tabpanel" class="tab-pane animated fadeInRight active" id="ReqGridProductHSN">
+                                    <div class="col-xs-12 col-sm-3 col-md-2 col-lg-2">
+                                        <b class="font-11">Voucher No.</b>
+                                        <input class="forTextBox" type="text" name="TxtVoucherNo" id="TxtVoucherNo" readonly="readonly" value="" />
+                                        <input class="forTextBox" type="hidden" name="TxtMaxVoucherNo" id="TxtMaxVoucherNo" value="" />
+                                    </div>
+                                    <div class="col-xs-12 col-sm-3 col-md-2 col-lg-2">
+                                        <b class="font-11">Voucher Date</b>
+                                        <div id="RTSDate"></div>
+                                    </div>
+                                    <div class="col-xs-12 col-sm-4 col-md-3 col-lg-3">
+                                        <b class="font-11">Supplier Name</b>
+                                        <div id="TxtSupplierName"></div>
+                                    </div>
+
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                        <div id="WholeItemGrid"></div>
+                                    </div>
+                                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                        <div class="col-lg-5 col-md-5 col-sm-5 col-xs-12" style="float: right;">
+                                            <div class="col-lg-5 col-md-5 col-sm-5 col-xs-5" style="float: left;">
+                                                <label style="float: left; margin-top: 5px; width: 7em">Batch Stock</label>&nbsp;
+                                                <input type="text" id="TxtQuantity" class="forTextBox" style="width: 7em" disabled="disabled" readonly="" />
+                                            </div>
+                                            <div id="DivPicQty" class="col-lg-5 col-md5 col-sm-5 col-xs-5" style="float: left;">
+                                                <label style="float: left; margin-top: 5px; width: 5em">Quantity</label>&nbsp;
+                                                <input type="number" id="TxtReceiptQty" class="forTextBox" style="width: 7em" min="0" />
+                                            </div>
+                                            <div class="col-lg-2 col-md-2 col-sm-2 col-xs-2" style="float: left">
+                                                <div class="DialogBoxCustom" style="float: right; background-color: #fff; padding-left: 0px; padding-bottom: 0px; width: auto; padding-right: 0px; margin-top: 0px; margin-right: 0px; border-radius: 4px; text-align: left">
+                                                    <a id="BtnAddItemPop" href='#' class="iconButton" style="margin-top: 0px; margin-right: 0px; float: left" title="add new row">
+                                                        <i class="fa fa-edit fa-2x fa-fw" style="font-size: 14px;"></i>&nbsp Add
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                        <div id="AllotedItemGrid"></div>
+                                    </div>
+                                    <div class="col-xs-6 col-sm-2 col-md-2 col-lg-2" style="">
+                                        <b class="font-11">Challan No.</b>
+                                        <input class="forTextBox" type="text" name="Challan No" id="TxtChallanNo" style="width: 100%;" />
+                                    </div>
+                                    <div class="col-xs-6 col-sm-2 col-md-2 col-lg-2" style="">
+                                        <b class="font-11">Challan Date</b>
+                                        <div id="ChallanDate" style="float: left; height: auto; width: 100%"></div>
+                                    </div>
+                                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="padding-top: 0px;">
+                                        <b class="font-11">Remark</b>
+                                        <textarea class="forTextBox" id="TxtNarration" name="TxtNarration" placeholder="Remark" style="height: 60px;"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="btnDivPickList" class="modal-footer" style="border-top: 1px solid #42909A;">
+                    <button type="button" id="BtnNew" class="btn btn-link waves-effect">New</button>
+                    <button type="button" id="BtnSave" class="btn btn-link waves-effect">Save</button>
+                    <button type="button" id="BtnDeletePopUp" class="btn btn-link waves-effect">Delete</button>
+                    <button type="button" id="WOCSPrintButton" class="btn btn-link waves-effect" style="display: none" disabled="disabled">Print</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="CustomJS/ReturnToSupplier.js"></script>
+</asp:Content>
+

@@ -1,0 +1,212 @@
+﻿<%@ Page Title="" Language="VB" MasterPageFile="~/MasterPage_Main.master" AutoEventWireup="false" CodeFile="JobStatusModification.aspx.vb" Inherits="JobStatusModification" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="Server">
+    <style>
+        .Grid_Row {
+            background: linear-gradient(to bottom, #0684c7 5%, #0a3f63 100%);
+            background-color: #0684c7;
+            cursor: pointer;
+            color: #ffffff;
+            font-family: Arial;
+        }
+
+            .Grid_Row:hover {
+                background: linear-gradient(to bottom, blue 5%, #0684c7 100%);
+                background-color: blue;
+            }
+    </style>
+</asp:Content>
+<asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="Server">
+    <div class="row clearfix" style="padding: 0px; margin: 0px; margin-right: -15px">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding: 0px; margin: 0px;">
+            <div class="dialogboxContainerMainMAster">
+                <div class="DialogBoxCustom" style="float: left; background-color: #fff; padding-left: 10px; padding-right: 10px; padding-bottom: 2px">
+                    <div class="col-lg-10 col-md-10 col-sm-10 col-xs-12">
+                        <div class="col-lg-1 col-md-1 col-sm-1 col-xs-12">
+                            <label style="float: left; width: 100%; margin-top: 8px">Job Card</label>
+                        </div>
+                        <div class="col-lg-3 col-md-3 col-sm-5 col-xs-12">
+                            <div id="SelJobCard"></div>
+                        </div>
+                        <%--                        <div class="col-lg-1 col-md-1 col-sm-1 col-xs-12">
+                            <label style="float: left; width: 100%; margin-top: 8px; margin-left: 5px">Job Name</label>
+                        </div>
+                        <div class="col-lg-6 col-md-6 col-sm-5 col-xs-12">
+                            <input type="text" id="txtJobName" class="forTextBox" readonly="readonly" />
+                        </div>
+                        <div class="col-lg-1 col-md-1 col-sm-1 col-xs-12">
+                            <label style="float: left; width: 100%; margin-top: 8px; margin-left: 5px">Content</label>
+                        </div>
+                        <div class="col-lg-5 col-md-5 col-sm-5 col-xs-12">
+                            <input type="text" id="txtContentName" class="forTextBox" readonly="readonly" />
+                            <input type="text" id="txtScheduleID" class="forTextBox hidden" readonly="readonly" />
+                        </div>--%>
+                    </div>
+                    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12">
+                        <b id="PRID" style="display: none"></b><b id="PRDisName" style="display: none"></b>
+                        <strong id="PIMasterDisplayName" class="MasterDisplayName" style="float: right; color: #42909A">Job Status Modification</strong>
+                    </div>
+                </div>
+
+                <div class="ContainerBoxCustom" style="float: left; height: auto; padding-left: 10px; padding-right: 10px;">
+                    <div id="ButtonGridDiv">
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                            <label class="font-12">Job Card Detail's</label>
+                            <div id="JobCardGridGrid"></div>
+                        </div>
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding: 0px; margin: 0px">
+                            <div class="col-lg-4 col-md-4 col-sm-2 col-xs-3">
+                                <label>Process Details</label>
+                            </div>
+                            <div class="col-lg-8 col-md-8 col-sm-10 col-xs-9" style="text-align: right;">
+                                <label style="background-color: yellow; color: black;" class="btn btn-sm">In Queue</label>
+                                <label style="background-color: lightpink; color: black;" class="btn btn-sm">Running</label>
+                                <label style="background-color: coral; color: black;" class="btn btn-sm">Part Complete</label>
+                                <label style="background-color: green; color: white;" class="btn btn-sm">Complete</label>
+                                <label style="background-color: #34f2f4; color: black;" class="btn btn-sm">Outsource Send</label>
+                                <label style="background-color: #cc00ff; color: #fff;" class="btn btn-sm">Outsource Receive</label>
+                            </div>
+                        </div>
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                            <div id="JobStatusGrid"></div>
+                            <input type="text" id="TxtJobStatusGridID" style="display: none" />
+                        </div>
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="text-align: right;">
+                            <button id="ProductionDetailsButton" type="button" class="btn btn-warning waves-effect">Production Details</button>
+                            <button id="AddProcessButton" type="button" class="btn btn-info waves-effect">Add Process</button>
+                            <button id="BtnSaveProcess" type="button" class="btn btn-success waves-effect">Save Process</button>
+                            <button id="BtnDeleteProcess" type="button" class="btn btn-danger waves-effect" disabled="disabled">Delete Process</button>
+                            <button id="BtnReleaseSchedule" type="button" class="btn btn-primary waves-effect" disabled="disabled">Schedule Process</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="largeModalHSNGroup" tabindex="-1" role="dialog" style="margin-left: -7px">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="DialogBoxCustom" style="float: left; border-top-left-radius: 4px; border-top-right-radius: 4px;">
+                    <strong>Production Details </strong>
+                    <a href="javascript:void(0);" class="iconRightDbox btn-danger" data-dismiss="modal">
+                        <span data-dismiss="modal" style="font-weight: 900; margin-right: 8px">X</span>
+                    </a>
+                </div>
+
+                <div class="modal-body">
+                    <div id="popContenerContentProductHSN">
+                        <div id="FieldCntainerRowProductHSN" class="row clearfix">
+                            <div class="tab-content">
+                                <div role="tabpanel" class="tab-pane animated fadeInRight active" id="ReqGridProductHSN">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                        <label class="font-11">Schedule Details</label>
+                                        <div id="ScheduleGrid"></div>
+                                    </div>
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                        <div class="col-lg-3 col-md-4 col-sm-5 col-xs-12">
+                                            <div id="SelStatus"></div>
+                                        </div>
+                                        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12" id="ChangeStatusDiv">
+                                            <input type="button" name="button" id="ChangeStatusButton" class="btn btn-info" value="Change Status" />
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                        <label class="font-11">Production Details</label>
+                                        <div id="ProductionDetailsGrid"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="margin-top: 0em; border-top: 1px solid #42909A;">
+                    <button id="ProductDetailDelteButton" type="button" class="btn btn-danger waves-effect">Delete Production</button>
+                    <button type="button" class="btn btn-link waves-effect" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="largeModalAddProcess" tabindex="-1" role="dialog" style="margin-left: -7px">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="DialogBoxCustom" style="float: left; border-top-left-radius: 4px; border-top-right-radius: 4px;">
+                    <strong>Add New Process</strong>
+                    <a href="javascript:void(0);" class="iconRightDbox btn-danger" data-dismiss="modal">
+                        <span data-dismiss="modal" style="font-weight: 900; margin-right: 8px">X</span>
+                    </a>
+                </div>
+
+                <div class="modal-body">
+                    <div id="popContenerContentAddProcess" style="display: block; padding-top: 0px; padding-right: 0px;">
+                        <div id="FieldCntainerRowAddProcess" class="row clearfix">
+                            <div class="tab-content" style="margin-bottom: 0em">
+                                <div role="tabpanel" class="tab-pane animated fadeInRight active" id="ReqGridAddProcess" style="margin-top: 0em;">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                        <button type="button" id="BtnOpenAddProcessPopUp" class="btn btn-link waves-effect" data-dismiss="modal" style="display: none">Select Process</button>
+                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin: 0px; padding: 0px;">
+                                            <label style="float: left; width: 100%">Add Process</label>
+                                        </div>
+                                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                            <div id="GridOperation"></div>
+                                        </div>
+                                        <%--<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin: 0px; padding: 0px;">
+                                                <label style="float: left; width: 100%; margin-top: 8px">Production Details</label>
+                                            </div>--%>
+                                        <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                            <div id="GridOperationAllocated"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="btnDivAddProcess" class="modal-footer" style="border-top: 1px solid #42909A;">
+                    <button id="AddNewProcess" type="button" class="btn btn-link waves-effect">Add</button>
+                    <button type="button" class="btn btn-link waves-effect" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="largeModalScheduleRelease" tabindex="-1" role="dialog" style="margin-left: -7px">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="DialogBoxCustom" style="float: left; border-top-left-radius: 4px; border-top-right-radius: 4px;">
+                    <strong>Schedule Release</strong>
+                    <a href="javascript:void(0);" class="iconRightDbox btn-danger" data-dismiss="modal">
+                        <span data-dismiss="modal" style="font-weight: 900; margin-right: 8px">X</span>
+                    </a>
+                </div>
+
+                <div class="modal-body">
+                    <div id="popContenerContentScheduleRelease" style="display: block; padding-top: 0px; padding-right: 0px;">
+                        <div id="FieldCntainerRowScheduleRelease" class="row clearfix">
+                            <div class="tab-content" style="margin-bottom: 0em">
+                                <div role="tabpanel" class="tab-pane animated fadeInRight active" id="ReqGridScheduleRelease" style="margin-top: 0em;">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                        <div class="col-lg-8 col-md-8 col-sm-8 col-xs-12">
+                                            <div id="gridFormWiseDetail"></div>
+                                        </div>
+                                        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+                                            <div id="chartMachineLoads"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="btnDivScheduleRelease" class="modal-footer" style="border-top: 1px solid #42909A;">
+                    <button id="BtnScheduleRelease" type="button" class="btn btn-link waves-effect">Save</button>
+                    <button type="button" class="btn btn-link waves-effect" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="CustomJS/JobStatusModification.js"></script>
+</asp:Content>
+

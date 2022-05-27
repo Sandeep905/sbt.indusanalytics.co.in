@@ -1,0 +1,121 @@
+﻿<%@ Page Title="" Language="VB" MasterPageFile="~/MasterPage_Main.master" AutoEventWireup="false" CodeFile="ItemConsumption.aspx.vb" Inherits="ItemConsumption" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="Server">
+</asp:Content>
+<asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="Server">
+
+    <div class="row clearfix" style="padding: 0px; margin: 0px; margin-right: -15px">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding: 0px; margin: 0px;">
+            <div class="dialogboxContainerMainMAster">
+                <div class="DialogBoxCustom" style="float: left; background-color: #fff; padding-left: 0px; padding-bottom: 2px">
+                    <div id="ButtonDiv" style="height: auto; padding-bottom: 2px">
+                        <a id="CreateButton" href='#' class="iconButton" style="margin-top: 1px; margin-left: 2px;">
+                            <img src="images/NewClient.png" style="height: 20px; width: 25px; float: left; margin-top: 0px;" />
+                            &nbsp Create
+                        </a>
+                        <a id="EditButton" href='#' class="iconButton" style="margin-top: 1px; margin-left: 2px;">
+                            <img src="images/Edit.png" style="height: 20px; width: 25px; float: left; margin-top: 0px" />
+                            &nbsp Edit
+                        </a>
+                        <a id="DeleteButton" href='#' class="iconButton" style="margin-top: 1px; margin-left: 2px;">
+                            <img src="images/MasterDelete.png" style="height: 20px; width: 25px; float: left; margin-top: 0px" />
+                            &nbsp Delete
+                        </a>
+
+                    </div>
+                    <b id="MasterID" style="display: none"></b><b id="MasterName" style="display: none"></b>
+                    <strong id="MasterDisplayName" class="MasterDisplayName" style="float: right; color: #42909A">Item Consumption</strong>
+                </div>
+
+                <div class="ContainerBoxCustom">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <div id="ConsumptionShowListGrid"></div>
+                        <input type="text" id="TxtConsumptionID" style="display: none" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <%-- PopUp --%>
+    <div class="modal fade" id="largeModal" tabindex="-1" role="dialog" style="margin-left: -7px">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="DialogBoxCustom" style="float: left; border-top-left-radius: 4px; border-top-right-radius: 4px;">
+                    <strong>Item Consumption</strong>
+                    <a href="javascript:void(0);" class="iconRightDbox btn-danger" data-dismiss="modal">
+                        <span data-dismiss="modal" style="font-weight: 900; margin-right: 8px">X</span>
+                    </a>
+                </div>
+
+                <div class="modal-body">
+                    <div id="popContenerContentPickList" style="display: block;">
+                        <ul class="nav nav-tabs tab-col-red" role="tablist" style="color: green; border: none; display: none">
+                            <li role='presentation' class="active"><a id="AnchorFieldCntainerPickList" href="#ReqGrid" data-toggle='tab' style='background-color: none;'>Text Field</a></li>
+                        </ul>
+                        <div id="FieldCntainerRowPickList" class="rowcontents clearfix">
+                            <div class="tab-content">
+                                <div role="tabpanel" class="tab-pane animated fadeInRight active" id="ReqGridPickList">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                        <div class="col-xs-12 col-sm-3 col-md-2 col-lg-2">
+                                            <b class="font-11">Voucher No.</b>
+                                            <input class="forTextBox" type="text" name="Consumption" id="Consumption" readonly="readonly" value="" />
+                                            <input class="forTextBox" type="hidden" name="TxtMaxVoucherNo" id="TxtMaxVoucherNo" value="" />
+                                        </div>
+                                        <div class="col-xs-12 col-sm-3 col-md-2 col-lg-2">
+                                            <b class="font-11">Voucher Date</b>
+                                            <div id="IssueDate" style="float: left; height: auto; width: 100%"></div>
+                                        </div>
+                                        <div class="col-lg-4 col-md-5 col-sm-6 col-xs-12">
+                                            <b class="font-11">Issue Type</b>
+                                            <div id="RadioButtonConIssue"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                        <div id="PicklistGrid"></div>
+                                    </div>
+                                    <div class="col-lg-4 col-md-6 col-sm-7 col-xs-12" style="float: right;">
+                                        <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8">
+                                            <b class="font-11">Quantity</b>
+                                            <input type="text" id="TxtQuantity" class="forTextBox" style="width: 15em" placeholder="Quantity">
+                                            <input type="text" id="TxtUnitDecimalPlace" class="forTextBox" style="width: 15em; display: none" placeholder="Unit Decimal Place">
+                                        </div>
+                                        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
+                                            <div class="DialogBoxCustom" style="float: right; background-color: #fff; padding-left: 0px; padding-bottom: 0px; width: auto; padding-right: 0px; margin-top: 0px; border-radius: 4px; text-align: left">
+                                                <a id="BtnAddRow" href="#" class="iconButton" style="margin-top: 0px; margin-right: 0px; float: left" title="Click me to add item">
+                                                    <i class="fa fa-plus fa-2x fa-fw" style="font-size: 14px;"></i>&nbsp; Add Item
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                        <div id="AllotedItemGrid"></div>
+                                    </div>                                    
+                                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                        <b class="font-11">Remark</b>
+                                        <input class="forTextBox" type="text" id="TxtNarration" name="TxtNarration" placeholder="Remark" value="" />
+                                        <%--<textarea class="forTextBox" id="TxtNarration" name="TxtNarration" placeholder="Remark" style="height: 60px;"></textarea>--%>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="btnDivPickList" class="modal-footer" style="border-top: 1px solid #42909A;">
+                    <button type="button" id="BtnNew" class="btn btn-link waves-effect" style="margin-top: -1em; color: none">New</button>
+                    <button type="button" id="IssuePrintButton" class="btn btn-link waves-effect" style="margin-top: -1em; color: none" disabled="disabled">Print</button>
+                    <button type="button" id="BtnDeletePopUp" class="btn btn-link waves-effect" style="margin-top: -1em">Delete</button>
+                    <button type="button" id="BtnSave" class="btn btn-link waves-effect" style="margin-top: -1em">Save</button>
+                    <button type="button" id="BtnSaveAS" class="btn btn-link waves-effect" style="margin-top: -1em; display: none" disabled="disabled">Save As</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="CustomJS/ItemConsumption.js"></script>
+
+
+</asp:Content>
+

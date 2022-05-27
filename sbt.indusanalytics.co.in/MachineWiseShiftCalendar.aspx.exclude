@@ -1,0 +1,349 @@
+﻿<%@ Page Title="" Language="VB" MasterPageFile="~/MasterPage_Main.master" AutoEventWireup="false" CodeFile="MachineWiseShiftCalendar.aspx.vb" Inherits="MachineWiseShiftCalendar" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="Server">
+</asp:Content>
+<asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="Server">
+    <div class="row clearfix padding-0 margin-0 margin-right: -15px">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-0 margin-0">
+            <div class="dialogboxContainerMainMAster">
+                <div class="DialogBoxCustom" style="float: left; background-color: #fff; padding-left: 0px; padding-bottom: 2px">
+                    <div id="ButtonDiv" style="height: auto;">
+                        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12" style="float: left; margin: 0px; height: auto; padding: 0px; padding-top: 5px; padding-left: 0px; padding-right: 0px;">
+                            <a id="CreateButton" href='#' class="iconButton" style="margin-top: 1px; margin-left: 2px;">
+                                <img src="images/NewClient.png" style="height: 20px; width: 25px; float: left; margin-top: 0px;" />
+                                &nbsp Create
+                            </a>
+                            <a id="EditButton" href='#' class="iconButton" style="margin-top: 1px; margin-left: 2px;">
+                                <img src="images/Edit.png" style="height: 20px; width: 25px; float: left; margin-top: 0px" />
+                                &nbsp Edit
+                            </a>
+                            <a id="DeleteButton" href='#' class="iconButton" style="margin-top: 1px; margin-left: 2px;">
+                                <img src="images/MasterDelete.png" style="height: 20px; width: 25px; float: left; margin-top: 0px" />
+                                &nbsp Delete
+                            </a>
+                        </div>
+                        <div class="col-lg-9 col-md-9 col-sm-9 col-xs-12" style="float: left; margin: 0px; height: auto; padding: 0px; padding-top: 5px; padding-right: 0px;">
+                            <div class="col-lg-1 col-md-1 col-sm-1 col-xs-4" style="padding: 0px; margin: 0px">
+                                <label style="float: left; margin-top: 5px; margin-left: 5px">From</label>
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-8" style="padding: 0px; margin: 0px">
+                                <div id="FromDateShowlist" style="float: left;"></div>
+                            </div>
+                            <div class="col-lg-1 col-md-1 col-sm-1 col-xs-4" style="padding: 0px; margin: 0px">
+                                <label style="float: left; margin-top: 5px; margin-left: 5px">To</label>
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-8" style="padding: 0px; margin: 0px">
+                                <div id="ToDateShowlist" style="float: left;"></div>
+                            </div>
+                            <div class="col-lg-2 col-md-2 col-sm-2 col-xs-4" style="margin: 0px; padding: 0px; float: left; padding-left: 10px">
+                                <div class="DialogBoxCustom" style="float: left; background-color: #fff; padding-left: 0px; padding-bottom: 0px; width: auto; padding-right: 0px; margin-top: 0px; margin-right: 0px; border-radius: 4px; text-align: left">
+                                    <a id="BtnFilterShowlist" href='#' class="iconButton" style="margin-top: 0px; margin-right: 0px; float: left" title="add new row">
+                                        <i class="fa fa-search fa-2x fa-fw" style="font-size: 14px;"></i>&nbsp Filter
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="col-lg-2 col-md-2 col-sm-2 col-xs-8" style="margin: 0px; padding: 0px; float: left; padding-left: 3px; text-align: right">
+                                <b id="MasterID" style="display: none"></b><b id="MasterName" style="display: none"></b>
+                                <strong id="MasterDisplayName" class="MasterDisplayName" style="float: right; color: #42909A">Machine Wise Shift Calendar</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ContainerBoxCustom" style="float: left; height: auto;">
+                    <div id="ButtonGridDiv" style="height: auto; display: block; margin-top: 5px">
+                        <div id="ShowListGrid" style="width: 100%; height: calc(100vh - 88px); float: left; display: block"></div>
+                        <input type="text" id="TxtShowListGridID" style="display: none" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="largeModal" tabindex="-1" role="dialog" style="margin-left: -7px">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="DialogBoxCustom" style="float: left; border-top-left-radius: 4px; border-top-right-radius: 4px;">
+                    <strong>Machine Wise Shift Calendar</strong>
+                    <a href="javascript:void(0);" class="iconRightDbox btn-danger" data-dismiss="modal">
+                        <span data-dismiss="modal" style="font-weight: 900; margin-right: 8px">X</span>
+                    </a>
+                </div>
+                <div class="modal-body">
+                    <div id="FieldCntainerRowPickList" style="display: block;">
+                        <div class="row clearfix">
+                            <div class="tab-content">
+                                <div role="tabpanel" class="tab-pane animated fadeInRight active" id="ReqGridProductHSN" style="height: calc(100vh - 88px);">
+
+                                    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+                                        <div id="MachineGrid"></div>
+                                    </div>
+                                    <div class="col-lg-8 col-md-8 col-sm-8 col-xs-12">
+                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin: 0px; padding: 0px">
+                                            <div id="ShiftMasterGrid"></div>
+                                            <textarea id="TxtShiftID" style="display: none"></textarea>
+                                        </div>
+                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin: 0px; padding: 0px">
+                                            <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3">
+                                                <b class="font-11">Machine Name</b>
+                                                <input type="text" id="txtMachineName" class="forTextBox" placeholder="Machine Name" readonly="readonly" />
+                                            </div>
+                                            <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3">
+                                                <b class="font-11">From Date :</b>
+                                                <div id="FromDate"></div>
+                                            </div>
+                                            <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3">
+                                                <b class="font-11">To Date :</b>
+                                                <div id="ToDate"></div>
+                                            </div>
+                                            <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3">
+                                                <b class="font-11">Weekly Off Day :</b>
+                                                <div id="WeeklyOffDay"></div>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                            <div class="col-lg-2 col-md-2 col-sm-2 col-xs-6" style="margin: 0px; padding: 0px; float: right; padding-left: 10px">
+                                                <div class="DialogBoxCustom" style="float: right; background-color: #fff; padding-left: 0px; padding-bottom: 0px; width: auto; padding-right: 0px; margin-top: 0px; margin-right: 0px; border-radius: 4px; text-align: left">
+                                                    <a id="BtnSave" href='#' class="iconButton" style="margin-top: 0px; margin-right: 0px; float: right" title="add new row">
+                                                        <i class="fa fa-save fa-2x fa-fw" style="font-size: 14px;"></i>&nbsp save
+                                                    </a>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-6" style="margin: 0px; padding: 0px; float: right; padding-left: 10px">
+                                                <div class="DialogBoxCustom" style="float: right; background-color: #fff; padding-left: 0px; padding-bottom: 0px; width: auto; padding-right: 0px; margin-top: 0px; margin-right: 0px; border-radius: 4px; text-align: left">
+                                                    <a id="BtnDeletePopUp" href='#' class="iconButton" style="margin-top: 0px; margin-right: 0px; float: right" title="add new row">
+                                                        <i class="fa fa-trash fa-2x fa-fw" style="font-size: 14px;"></i>&nbsp Delete Calender
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="btnDivPickList" class="modal-footer" style="border-top: 1px solid #42909A;">
+                    <button type="button" id="BtnExtraShiftOnMachine" class="btn btn-link waves-effect">Extra Shift On Machine</button>
+                    <button type="button" id="BtnAddHoliday" class="btn btn-link waves-effect">Holiday</button>
+                    <button type="button" id="BtnNew" class="btn btn-link waves-effect">New</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="largeModalCalender" tabindex="-1" role="dialog" style="margin-left: -7px">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="DialogBoxCustom" style="float: left; border-top-left-radius: 4px; border-top-right-radius: 4px;">
+                    <strong>Machine Wise Shift Calendar</strong>
+                    <a href="javascript:void(0);" class="iconRightDbox btn-danger" data-dismiss="modal">
+                        <span data-dismiss="modal" style="font-weight: 900; margin-right: 8px">X</span>
+                    </a>
+                </div>
+                <div class="modal-body">
+                    <div id="FieldCntainerRowCalender" style="display: block;">
+                        <div class="row clearfix">
+                            <div class="tab-content">
+                                <div role="tabpanel" class="tab-pane animated fadeInRight active" id="ReqGridProductHSN" style="height: calc(100vh - 88px);">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                        <div class="col-lg-1 col-md-1 col-sm-1 col-xs-4" style="padding: 0px; margin: 0px">
+                                            <label style="float: left; margin-top: 5px; margin-left: 5px">From</label>
+                                        </div>
+                                        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-8" style="padding: 0px; margin: 0px">
+                                            <div id="FromDateDelete" style="float: left;"></div>
+                                        </div>
+                                        <div class="col-lg-1 col-md-1 col-sm-1 col-xs-4" style="padding: 0px; margin: 0px">
+                                            <label style="float: left; margin-top: 5px; margin-left: 5px">To</label>
+                                        </div>
+                                        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-8" style="padding: 0px; margin: 0px">
+                                            <div id="ToDateDelete" style="float: left;"></div>
+                                        </div>
+                                        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-4" style="margin: 0px; padding: 0px; float: left; padding-left: 10px">
+                                            <div class="DialogBoxCustom" style="float: left; background-color: #fff; padding-left: 0px; padding-bottom: 0px; width: auto; padding-right: 0px; margin-top: 0px; margin-right: 0px; border-radius: 4px; text-align: left">
+                                                <a id="BtnFilterDelete" href='#' class="iconButton" style="margin-top: 0px; margin-right: 0px; float: left" title="add new row">
+                                                    <i class="fa fa-search fa-2x fa-fw" style="font-size: 14px;"></i>&nbsp Filter
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                        <div id="CalenderGridGrid"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="btnDivCalender" class="modal-footer" style="border-top: 1px solid #42909A;">
+                    <button type="button" id="BtnDeleteSch" class="btn btn-link waves-effect">Delete</button>
+                    <button type="button" class="btn btn-link waves-effect" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="largeModalEXtraShift" tabindex="-1" role="dialog" style="margin-left: -7px">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="DialogBoxCustom" style="float: left; border-top-left-radius: 4px; border-top-right-radius: 4px;">
+                    <strong>Add Extra Shift On Machine</strong>
+                    <a href="javascript:void(0);" class="iconRightDbox btn-danger" data-dismiss="modal">
+                        <span data-dismiss="modal" style="font-weight: 900; margin-right: 8px">X</span>
+                    </a>
+                </div>
+                <div class="modal-body">
+                    <div id="FieldCntainerRowEXtraShift" style="display: block;">
+                        <div class="row clearfix">
+                            <div class="tab-content">
+                                <div role="tabpanel" class="tab-pane animated fadeInRight active" id="ReqGridProductHSN" style="height: calc(100vh - 88px);">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                        <div class="col-lg-1 col-md-1 col-sm-1 col-xs-4" style="padding: 0px; margin: 0px">
+                                            <label style="float: left; margin-top: 5px; margin-left: 5px">Machine Name</label>
+                                        </div>
+                                        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-8" style="padding: 0px; margin: 0px">
+                                            <input type="text" id="txtMachineNameExtra" class="forTextBox" placeholder="Machine Name" readonly="readonly" />
+                                        </div>
+                                        <div class="col-lg-1 col-md-1 col-sm-1 col-xs-4" style="padding: 0px; margin: 0px">
+                                            <label style="float: left; margin-top: 5px; margin-left: 5px">Shift Date</label>
+                                        </div>
+                                        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-8" style="padding: 0px; margin: 0px">
+                                            <div id="ShiftExtraDate" style="float: left;"></div>
+                                        </div>
+
+                                        <div class="col-lg-1 col-md-1 col-sm-1 col-xs-4" style="margin: 0px; padding: 0px; float: left; padding-left: 10px">
+                                            <div class="DialogBoxCustom" style="float: left; background-color: #fff; padding-left: 0px; padding-bottom: 0px; width: auto; padding-right: 0px; margin-top: 0px; margin-right: 0px; border-radius: 4px; text-align: left">
+                                                <a id="BtnFilterEXtraShift" href='#' class="iconButton" style="margin-top: 0px; margin-right: 0px; float: left" title="add new row">
+                                                    <i class="fa fa-search fa-2x fa-fw" style="font-size: 14px;"></i>&nbsp Filter
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-4" style="margin: 0px; padding: 0px; float: left; padding-left: 10px">
+                                            <div class="DialogBoxCustom" style="float: left; background-color: #fff; padding-left: 0px; padding-bottom: 0px; width: auto; padding-right: 0px; margin-top: 0px; margin-right: 0px; border-radius: 4px; text-align: left">
+                                                <a id="BtnDeleteShiftSlot" href='#' class="iconButton" style="margin-top: 0px; margin-right: 0px; float: left" title="add new row">
+                                                    <i class="fa fa-trash fa-2x fa-fw" style="font-size: 14px;"></i>&nbsp Delete Shift Slot
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-4" style="margin: 0px; padding: 0px; float: left; padding-left: 10px">
+                                            <div class="DialogBoxCustom" style="float: left; background-color: #fff; padding-left: 0px; padding-bottom: 0px; width: auto; padding-right: 0px; margin-top: 0px; margin-right: 0px; border-radius: 4px; text-align: left">
+                                                <a id="BtnRearrangeSchedule" href='#' class="iconButton" style="margin-top: 0px; margin-right: 0px; float: left" title="add new row">
+                                                    <i class="fa fa-edit fa-2x fa-fw" style="font-size: 14px;"></i>&nbsp Rearrange Schedule
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                        <b class="font-11">Selected day schedule :</b><br />
+                                        <div id="EXtraShiftUpperGrid"></div>
+                                    </div>
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                        <b class="font-11">Next day schedule :</b><br />
+                                        <div id="EXtraShiftLowerGrid"></div>
+                                    </div>
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                        <b class="font-11">Add new shift for selected machine :</b><br />
+                                        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12" style="margin-bottom: 1px; padding-top: 1px">
+                                            <label style="float: left; margin-top: 5px">Shift Date</label>
+                                            <div id="ShiftExtra_1Date" style="float: left;"></div>
+                                            <div style="min-height: 20px; float: left; width: 100%"><strong id="ValStrShiftExtra_1Date" style="color: red; font-size: 12px; display: none"></strong></div>
+                                        </div>
+                                        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12" style="margin-bottom: 1px; padding-top: 1px">
+                                            <label style="float: left; margin-top: 5px">Sihft Name</label>
+                                            <input type="text" id="txtSihft_1NameExtra" class="forTextBox" placeholder="Sihft Name" />
+                                            <div style="min-height: 20px; float: left; width: 100%"><strong id="ValStrtxtSihft_1NameExtra" style="color: red; font-size: 12px; display: none"></strong></div>
+                                        </div>
+                                        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12" style="margin-bottom: 1px; padding-top: 1px">
+                                            <label style="float: left; margin-top: 5px; width: 100%">Shift Time  (From hour's) </label>
+                                            <div style="float: left; padding: 0px; margin: 0px; padding-left: 2px">
+                                                <input type="number" id="TxtFromHr" class="forTextBox" style="float: left; width: 18%; margin-right: 2px" min="1" max="12" value="1" />
+                                                <label style="float: left; margin-top: 5px; width: 8%; margin-right: 2px">hh : </label>
+                                                <input type="number" id="TxtFromMin" class="forTextBox" style="float: left; width: 25%; margin-right: 2px; margin-left: 2px" min="0" max="60" value="0" />
+                                                <label style="float: left; margin-top: 5px; width: 8%; margin-right: 2px">mm</label>
+                                                <div id="SelShiftDay" style="float: left; width: 35%; display: block"></div>
+                                            </div>
+                                            <div style="min-height: 20px; float: left; width: 100%"><strong id="ValStrShiftTimeFrom" style="color: red; font-size: 12px; display: none"></strong></div>
+                                        </div>
+
+                                        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12" style="margin-bottom: 1px; padding-top: 1px">
+                                            <label style="float: left; margin-top: 5px; width: 100%">Shift Time  (To hour's) </label>
+                                            <div style="float: left; padding: 0px; margin: 0px; padding-left: 2px">
+                                                <input type="number" id="TxtToHr" class="forTextBox" style="float: left; width: 18%; margin-right: 2px" min="1" max="12" value="1" />
+                                                <label style="float: left; margin-top: 5px; width: 8%; margin-right: 2px">hh : </label>
+                                                <input type="number" id="TxtToMin" class="forTextBox" style="float: left; width: 25%; margin-right: 2px; margin-left: 2px" min="0" max="60" value="0" />
+                                                <label style="float: left; margin-top: 5px; width: 8%; margin-right: 2px">mm</label>
+                                                <div id="SelShiftDayTo" style="float: left; width: 35%; display: block"></div>
+                                            </div>
+                                            <div style="min-height: 20px; float: left; width: 100%"><strong id="ValStrShiftTimeTo" style="color: red; font-size: 12px; display: none"></strong></div>
+                                        </div>
+                                        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12" style="margin-bottom: 1px; padding-top: 1px">
+                                            <label style="float: left; margin-top: 5px">Status</label>
+                                            <div id="SelStatus" style="float: left;"></div>
+                                            <div style="min-height: 20px; float: left; width: 100%"><strong id="ValStrSelStatus" style="color: red; font-size: 12px; display: none"></strong></div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="btnDivEXtraShift" class="modal-footer" style="border-top: 1px solid #42909A;">
+                    <button type="button" id="BtnNewExtraShift" class="btn btn-link waves-effect">New</button>
+                    <button type="button" id="BtnSaveEXtraShift" class="btn btn-link waves-effect">Save</button>
+                    <button type="button" class="btn btn-link waves-effect" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="largeModalHoliday" tabindex="-1" role="dialog" style="margin-left: -7px">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="DialogBoxCustom" style="float: left; border-top-left-radius: 4px; border-top-right-radius: 4px;">
+                    <strong>Add Holiday</strong>
+                    <a href="javascript:void(0);" class="iconRightDbox btn-danger" data-dismiss="modal">
+                        <span data-dismiss="modal" style="font-weight: 900; margin-right: 8px">X</span>
+                    </a>
+                </div>
+                <div class="modal-body"  style="height: calc(100vh - 150px);">
+                    <div id="FieldCntainerRowHoliday" style="display: block;">
+                        <div class="row clearfix">
+                            <div class="tab-content">
+                                <div role="tabpanel" class="tab-pane animated fadeInRight active" id="ReqGridHoliday" >
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                        <div class="col-lg-1 col-md-1 col-sm-1 col-xs-4" style="padding: 0px; margin: 0px">
+                                            <label style="float: left; margin-top: 5px; margin-left: 5px">From</label>
+                                        </div>
+                                        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-8" style="padding: 0px; margin: 0px">
+                                            <div id="FromDateHoliday" style="float: left;"></div>
+                                        </div>
+                                        <div class="col-lg-1 col-md-1 col-sm-1 col-xs-4" style="padding: 0px; margin: 0px">
+                                            <label style="float: left; margin-top: 5px; margin-left: 5px">To</label>
+                                        </div>
+                                        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-8" style="padding: 0px; margin: 0px">
+                                            <div id="ToDateHoliday" style="float: left;"></div>
+                                        </div>
+                                        <div class="col-lg-1 col-md-1 col-sm-1 col-xs-4" style="padding: 0px; margin: 0px">
+                                            <label style="float: left; margin-top: 5px; margin-left: 5px">Remark</label>
+                                        </div>
+                                        <div class="col-lg-3 col-md-3 col-sm-3 col-xs-8" style="padding: 0px; margin: 0px">
+                                            <input type="text" id="txtHolidayRemark" class="forTextBox" placeholder="Holiday Remark" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="btnDivHoliday" class="modal-footer" style="border-top: 1px solid #42909A;">
+                    <button type="button" id="BtnSaveHoliday" class="btn btn-link waves-effect">Holiday</button>
+                    <button type="button" class="btn btn-link waves-effect" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="CustomJS/MachineWiseShiftCalendar.js"></script>
+</asp:Content>
+
