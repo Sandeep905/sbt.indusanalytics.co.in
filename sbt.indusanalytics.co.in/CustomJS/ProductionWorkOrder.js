@@ -1721,17 +1721,17 @@ function ShowAllProcesss() {
         { dataField: "Rate", allowEditing: false, format: { type: "decimal", /* one of the predefined formats*/ precision: 3 /* the precision of values*/ } },
         { dataField: "RateFactor", allowEditing: false, visible: false }, { dataField: "Remarks", caption: "Process Remark", allowEditing: true },
         { dataField: "PaperConsumptionRequired", width: 180, dataType: "boolean", allowEditing: true },
-        {
-            dataField: "AddTools", caption: "Tool", visible: true, allowEditing: false, fixedPosition: "right", fixed: true, width: 35,
-            cellTemplate: function (container, options) {
-                $('<div>').addClass('fa fa-plus customgridbtn')
-                    .on('dxclick', function () {
-                        document.getElementById("TxtToolProcessName").value = options.data.ProcessName;
-                        this.setAttribute("data-toggle", "modal");
-                        this.setAttribute("data-target", "#myModalTool");
-                    }).appendTo(container);
-            }
-        }
+        //{
+        //    dataField: "AddTools", caption: "Tool", visible: true, allowEditing: false, fixedPosition: "right", fixed: true, width: 35,
+        //    cellTemplate: function (container, options) {
+        //        $('<div>').addClass('fa fa-plus customgridbtn')
+        //            .on('dxclick', function () {
+        //                document.getElementById("TxtToolProcessName").value = options.data.ProcessName;
+        //                this.setAttribute("data-toggle", "modal");
+        //                this.setAttribute("data-target", "#myModalTool");
+        //            }).appendTo(container);
+        //    }
+        //}
         ],
         showRowLines: true,
         showBorders: true,

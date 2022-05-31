@@ -42,7 +42,7 @@
                             <ul id="ProcessTabDiv" class="nav nav-tabs tab-col-red" role="tablist" style="color: green; border: none">
                                 <li role='presentation' class="active"><a id="AnchorProcessMasterFieldCreation" href="#ProcessMasterFieldCreation" data-toggle='tab' style='background-color: none;'>Process Detail</a></li>
                                 <li role='presentation' class='hidden'><a id="AnchorProcessMasterSlab" href="#ProcessMasterSlab" data-toggle='tab' style='background-color: none;'>Slab</a></li>
-                                <li role='presentation' class='hidden'><a id="AnchorProcessMasterMachineAllocation" href="#ProcessMasterMachineAllocation" data-toggle='tab' style='background-color: none;'>Machine Allocation</a></li>
+                                <li role='presentation'><a id="AnchorProcessMasterMachineAllocation" href="#ProcessMasterMachineAllocation" data-toggle='tab' style='background-color: none;'>Machine Allocation</a></li>
                                 <%--<li role='presentation'><a id="AnchorProcessMasterContentAllocation" href="#ProcessMasterContentAllocation" data-toggle='tab' style='background-color: none;'>Content Allocation</a></li>--%>
                                 <%--<li role='presentation'><a id="AnchorProcessMasterMaterial" href="#ProcessMasterMaterial" data-toggle='tab' style='background-color: none;'>Material Allocation</a></li>--%>
                             </ul>

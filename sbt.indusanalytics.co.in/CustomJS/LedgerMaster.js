@@ -123,7 +123,6 @@ function getMasterLIST() {
                     valueExpr: "LedgerGroupID",
                     layout: 'horizontal',
                     onValueChanged: function (e) {
-                        check = e.value;
                         CurrentMaster(e);
                     }
                 });
@@ -786,9 +785,10 @@ $("#BtnSave").click(function () {
                     }
                     if (columnlength[j].FieldName.trim() === "LedgerName") {
                         OperationLedgerMasterRecord.LedgerName = OperationLedgerMasterDetailRecord.FieldValue;
-                    }
-                    if (columnlength[j].FieldName.trim() === "TallyCode") {
+                    } else if (columnlength[j].FieldName.trim() === "TallyCode") {
                         OperationLedgerMasterRecord.TallyCode = OperationLedgerMasterDetailRecord.FieldValue;
+                    } else if (columnlength[j].FieldName.trim() === "VendorID") {
+                        OperationLedgerMasterRecord.VendorID = OperationLedgerMasterDetailRecord.FieldValue;
                     }
                     OperationLedgerMasterDetailRecord.SequenceNo = j + 1;
                     OperationLedgerMasterDetailRecord.LedgerGroupID = document.getElementById("MasterID").innerHTML.trim();
@@ -1847,7 +1847,7 @@ $("#ConcernPersonBtnDeletePopUp").click(function () {
 
 //////////////////////////////////////////////////////////////////Get Operator Machine Allocation////////////////////////////////////////
 
-var MachiGrid = "", Objid = [];
+var Objid = [];
 
 $("#btnMachineAllo").click(function () {
     document.getElementById("MachineAllocationBtnDeletePopUp").disabled = true;
@@ -1884,7 +1884,6 @@ $("#btnMachineAllo").click(function () {
                         contentType: "application/json; charset=utf-8",
                         dataType: "text",
                         success: function (results) {
-                            ////console.debug(results);
                             var res = results.replace(/\\/g, '');
                             res = res.replace(/"d":""/g, '');
                             res = res.replace(/""/g, '');
@@ -1899,7 +1898,6 @@ $("#btnMachineAllo").click(function () {
                             if (IDString === "" || IDString === null || IDString === undefined) {
                                 document.getElementById("MachineAllocationBtnDeletePopUp").disabled = true;
                                 Objid = [];
-                                GblMachine();
                             }
                             else {
                                 document.getElementById("MachineAllocationBtnDeletePopUp").disabled = false;
@@ -1907,10 +1905,8 @@ $("#btnMachineAllo").click(function () {
                                 for (var s in selectMIDSplit) {
                                     Objid.push(selectMIDSplit[s]);
                                 }
-
-                                GblMachine();
                             }
-
+                            GblMachine(data.value);
                         }
                     });
 
@@ -1923,11 +1919,11 @@ $("#btnMachineAllo").click(function () {
     document.getElementById("btnMachineAllo").setAttribute("data-target", "#MachineAllocationModal");
 });
 
-function GblMachine() {
+function GblMachine(VendorID) {
     $.ajax({
         type: "POST",
-        url: "WebServiceProcessMaster.asmx/MachiGrid",
-        data: '{}',//UnderGroupID:' + JSON.stringify(UnderGroupID) + '
+        url: "WebService_LedgerMaster.asmx/VendorMachineGrid",
+        data: '{VendorID:' + JSON.stringify(VendorID) + '}',
         contentType: "application/json; charset=utf-8",
         dataType: "text",
         success: function (results) {
@@ -1939,13 +1935,15 @@ function GblMachine() {
             res = res.substr(1);
             res = res.slice(0, -1);
             $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
-            MachiGrid = JSON.parse(res);
-            MachineGrid();
+            MachineGrid(JSON.parse(res));
+        },
+        error: function (e) {
+            console.log(e);
         }
     });
 }
 
-function MachineGrid() {
+function MachineGrid(MachiGrid) {
     //alert(Objid);
     $("#GridMachineAllocation").dxDataGrid({
         // dataSource: MachiGrid,
@@ -1976,18 +1974,14 @@ function MachineGrid() {
             width: 200,
             text: 'Data is loading...'
         },
-
         onRowPrepared: function (e) {
             setDataGridRowCss(e);
         },
         columns: [
-            { dataField: "MachineID", visible: false, caption: "MachineID", width: 300 },
-            { dataField: "MachineName", visible: true, caption: "Machine Name" },
-            { dataField: "DepartmentID", visible: false, caption: "DepartmentID" },
-            { dataField: "DepartmentName", visible: true, caption: "Department Name" }],
+            { dataField: "MachineName", caption: "Machine Name" },
+            { dataField: "DepartmentName", caption: "Department Name" }],
         selectedRowKeys: Objid,
         onSelectionChanged: function (selectedItems) {
-
             var data = selectedItems.selectedRowsData;
             if (data.length > 0) {
                 $("#MachineId").text(
@@ -2104,11 +2098,9 @@ $("#MachineAllocationBtnSave").click(function () {
 });
 
 $("#MachineAllocationBtnNew").click(function () {
-    $("#selEmployetName").dxSelectBox({
-        value: ''
-    });
+    $("#selEmployetName").dxSelectBox({ value: null });
     Objid = [];
-    GblMachine();
+    GblMachine("");
 });
 
 $("#MachineAllocationBtnDeletePopUp").click(function () {

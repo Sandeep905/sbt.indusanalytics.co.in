@@ -130,128 +130,6 @@
               <VerticalAlign>Middle</VerticalAlign>
             </Style>
           </Textbox>
-          <Textbox Name="Textbox14">
-            <KeepTogether>true</KeepTogether>
-            <Paragraphs>
-              <Paragraph>
-                <TextRuns>
-                  <TextRun>
-                    <Value>Client Name :</Value>
-                    <Style>
-                      <FontSize>8pt</FontSize>
-                    </Style>
-                  </TextRun>
-                </TextRuns>
-                <Style>
-                  <TextAlign>Left</TextAlign>
-                </Style>
-              </Paragraph>
-            </Paragraphs>
-            <rd:DefaultName>Textbox10</rd:DefaultName>
-            <Top>0.28519in</Top>
-            <Left>0.02665in</Left>
-            <Height>0.175in</Height>
-            <Width>1.15069in</Width>
-            <ZIndex>1</ZIndex>
-            <Style>
-              <Border>
-                <Style>None</Style>
-              </Border>
-              <VerticalAlign>Middle</VerticalAlign>
-            </Style>
-          </Textbox>
-          <Textbox Name="UserName">
-            <KeepTogether>true</KeepTogether>
-            <Paragraphs>
-              <Paragraph>
-                <TextRuns>
-                  <TextRun>
-                    <Value>=First(Fields!LedgerName.Value, "JobcardSummary")</Value>
-                    <Style>
-                      <FontSize>8pt</FontSize>
-                      <FontWeight>Bold</FontWeight>
-                    </Style>
-                  </TextRun>
-                </TextRuns>
-                <Style>
-                  <TextAlign>Left</TextAlign>
-                </Style>
-              </Paragraph>
-            </Paragraphs>
-            <rd:DefaultName>UserName</rd:DefaultName>
-            <Top>0.72438cm</Top>
-            <Left>3.05394cm</Left>
-            <Height>0.4445cm</Height>
-            <Width>9.83425cm</Width>
-            <ZIndex>2</ZIndex>
-            <Style>
-              <Border>
-                <Style>None</Style>
-              </Border>
-              <VerticalAlign>Middle</VerticalAlign>
-            </Style>
-          </Textbox>
-          <Textbox Name="Textbox15">
-            <KeepTogether>true</KeepTogether>
-            <Paragraphs>
-              <Paragraph>
-                <TextRuns>
-                  <TextRun>
-                    <Value>Consignee :</Value>
-                    <Style>
-                      <FontSize>8pt</FontSize>
-                    </Style>
-                  </TextRun>
-                </TextRuns>
-                <Style>
-                  <TextAlign>Left</TextAlign>
-                </Style>
-              </Paragraph>
-            </Paragraphs>
-            <rd:DefaultName>Textbox10</rd:DefaultName>
-            <Top>0.28519in</Top>
-            <Left>7.13088in</Left>
-            <Height>0.175in</Height>
-            <Width>1.15069in</Width>
-            <ZIndex>3</ZIndex>
-            <Style>
-              <Border>
-                <Style>None</Style>
-              </Border>
-              <VerticalAlign>Middle</VerticalAlign>
-            </Style>
-          </Textbox>
-          <Textbox Name="UserName2">
-            <KeepTogether>true</KeepTogether>
-            <Paragraphs>
-              <Paragraph>
-                <TextRuns>
-                  <TextRun>
-                    <Value>=First(Fields!ConsigneeName.Value, "JobcardSummary")</Value>
-                    <Style>
-                      <FontSize>8pt</FontSize>
-                      <FontWeight>Bold</FontWeight>
-                    </Style>
-                  </TextRun>
-                </TextRuns>
-                <Style>
-                  <TextAlign>Left</TextAlign>
-                </Style>
-              </Paragraph>
-            </Paragraphs>
-            <rd:DefaultName>UserName</rd:DefaultName>
-            <Top>0.72438cm</Top>
-            <Left>21.10894cm</Left>
-            <Height>0.4445cm</Height>
-            <Width>8.09664cm</Width>
-            <ZIndex>4</ZIndex>
-            <Style>
-              <Border>
-                <Style>None</Style>
-              </Border>
-              <VerticalAlign>Middle</VerticalAlign>
-            </Style>
-          </Textbox>
           <Tablix Name="Tablix6">
             <TablixBody>
               <TablixColumns>
@@ -1192,11 +1070,11 @@
               </TablixMembers>
             </TablixRowHierarchy>
             <DataSetName>JobcardSummary</DataSetName>
-            <Top>0.47818in</Top>
+            <Top>0.31568in</Top>
             <Left>0.01064in</Left>
             <Height>0.62402in</Height>
             <Width>11.52512in</Width>
-            <ZIndex>5</ZIndex>
+            <ZIndex>1</ZIndex>
             <Style>
               <Border>
                 <Style>Solid</Style>
@@ -1225,7 +1103,7 @@
             </Style>
           </Tablix>
         </ReportItems>
-        <Height>1.12829in</Height>
+        <Height>0.96162in</Height>
         <Style />
       </Body>
       <Width>11.53576in</Width>

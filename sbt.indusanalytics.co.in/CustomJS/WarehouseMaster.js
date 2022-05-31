@@ -3,6 +3,17 @@ var GblStatus = "";
 var ShowListData = [];
 var GetRowWarehouseID = "";
 
+$("#LoadIndicator").dxLoadPanel({
+    shadingColor: "rgba(0,0,0,0.4)",
+    indicatorSrc: "images/Indus logo.png",
+    message: 'Please Wait...',
+    width: 310,
+    showPane: true,
+    shading: true,
+    closeOnOutsideClick: false,
+    visible: false
+});
+
 //City Name
 $.ajax({
     type: "POST",
@@ -11,13 +22,12 @@ $.ajax({
     contentType: "application/json; charset=utf-8",
     dataType: "text",
     success: function (results) {
-        ////console.debug(results);
         var res = results.replace(/\\/g, '');
         res = res.replace(/"d":""/g, '');
         res = res.replace(/""/g, '');
         res = res.substr(1);
         res = res.slice(0, -1);
-        RES1 = JSON.parse(res);
+        let RES1 = JSON.parse(res);
 
         $("#SelCity").dxSelectBox({
             items: RES1,
@@ -27,15 +37,50 @@ $.ajax({
             searchEnabled: true,
             showClearButton: true,
             acceptCustomValue: true,
-
         });
     }
 });
 
+$("#WarehouseShowListGrid").dxDataGrid({
+    dataSource: [],
+    showBorders: true,
+    showRowLines: true,
+    allowSorting: false,
+    allowColumnResizing: true,
+    selection: { mode: "single" },
+    filterRow: { visible: true, applyFilter: "auto" },
+    sorting: {
+        mode: "none" // or "multiple" | "single"
+    },
+    loadPanel: {
+        enabled: true,
+        text: 'Data is loading...'
+    },
+    onRowPrepared: function (e) {
+        setDataGridRowCss(e);
+    },
+    onSelectionChanged: function (Showlist) {
+        sholistData = Showlist.selectedRowsData;
+        document.getElementById("TxtWarehouseID").value = sholistData[0].WarehouseName;
+    },
+    columns: [
+        { dataField: "CreatedBy", visible: false, width: 120 },
+        { dataField: "ModifiedBy", visible: false, width: 100 },
+        { dataField: "DeletedBy", visible: false, width: 120 },
+        { dataField: "WarehouseName", visible: true, width: 250 },
+        { dataField: "City", visible: true, width: 100 },
+        { dataField: "Address", visible: true, width: 350 },
+        { dataField: "FYear", visible: true, width: 100 },
+        { dataField: "CreatedDate", visible: true, width: 120 },
+        { dataField: "ModifiedDate", visible: true, width: 120 },
+        { dataField: "DeletedDate", visible: true, width: 100 },
+    ]
+})
+
 //Get Show List
 Showlist();
 function Showlist() {
-    document.getElementById("LOADER").style.display = "block";
+    $("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
     $.ajax({
         type: "POST",
         url: "WebService_WarehouseMaster.asmx/ShowListWarehouseMaster",
@@ -48,84 +93,24 @@ function Showlist() {
             res = res.replace(/""/g, '');
             res = res.substr(1);
             res = res.slice(0, -1);
-            document.getElementById("LOADER").style.display = "none";
-            RES1 = JSON.parse(res.toString());
+            $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+            let RES1 = JSON.parse(res.toString());
 
-            $("#WarehouseShowListGrid").dxDataGrid({
-                dataSource: RES1,
-                showBorders: true,
-                paging: {
-                    enabled: false
-                },
-                showRowLines: true,
-                allowSorting: false,
-                allowColumnResizing: true,
-                selection: { mode: "single" },
-                paging: {
-                    pageSize: 15
-                },
-                pager: {
-                    showPageSizeSelector: true,
-                    allowedPageSizes: [15, 25, 50, 100]
-                },
-                filterRow: { visible: true, applyFilter: "auto" },
-                sorting: {
-                    mode: "none" // or "multiple" | "single"
-                },
-                loadPanel: {
-                    enabled: true,
-                    height: 90,
-                    width: 200,
-                    text: 'Data is loading...'
-                },
-
-                onRowPrepared: function (e) {
-                    if (e.rowType === "header") {
-                        e.rowElement.css('background', '#42909A');
-                        e.rowElement.css('color', 'white');
-                    }
-                    e.rowElement.css('fontSize', '11px');
-                },
-
-                onSelectionChanged: function (Showlist) {
-                    sholistData = [];
-                    sholistData = Showlist.selectedRowsData;
-                    document.getElementById("TxtWarehouseID").value = sholistData[0].WarehouseName;
-
-                },
-                columns: [{ dataField: "UserID", visible: false, width: 120 },
-                        { dataField: "CompanyID", visible: false, width: 120 },
-                        { dataField: "CreatedBy", visible: false, width: 120 },
-                        { dataField: "ModifiedBy", visible: false, width: 100 },
-                        { dataField: "DeletedBy", visible: false, width: 120 },
-                        { dataField: "WarehouseName", visible: true, width: 250 },
-                        { dataField: "City", visible: true, width: 100 },
-                        { dataField: "Address", visible: true, width: 350 },
-                        { dataField: "FYear", visible: true, width: 100 },
-                        //{ dataField: "ItemCode", visible: true, width: 100 },
-                        { dataField: "CreatedDate", visible: true, width: 120 },
-                        { dataField: "ModifiedDate", visible: true, width: 120 },
-                        { dataField: "DeletedDate", visible: true, width: 100 },
-                ]
-            })
+            $("#WarehouseShowListGrid").dxDataGrid({ dataSource: RES1 })
         }
     });
 }
 
 $("#BtnNew").click(function () {
     GblStatus = "";
-    // document.getElementById('TxtWarehouseID').value = "";
     document.getElementById('TxtWarehouseAddress').value = "";
     document.getElementById('TxtWarehouseName').value = "";
     GblStatus = "";
 
-    $("#SelCity").dxSelectBox({
-        value: null
-    });
+    $("#SelCity").dxSelectBox({ value: null });
 
     ObjBinNameGrid = [];
     CreateBin();
-
 });
 
 $("#CreateButton").click(function () {
@@ -159,15 +144,10 @@ function CreateBin() {
         editing: {
             mode: "cell",
             allowDeleting: true,
-            //allowAdding: true,
             allowUpdating: true
         },
-
         onRowRemoving: function (e) {
-
-            GetRowWarehouseID = "";
             GetRowWarehouseID = e.data.WarehouseID;
-
             if (isNaN(GetRowWarehouseID)) {
                 console.log("this row not exist");
             } else {
@@ -193,22 +173,10 @@ function CreateBin() {
                 });
             }
         },
-        //onRowRemoved: function (e) {           
-        //        e.component.undeleteRow(0);
-        //},
         onRowPrepared: function (e) {
-            if (e.rowType === "header") {
-                e.rowElement.css('background', '#509EBC');
-                e.rowElement.css('color', 'white');
-                e.rowElement.css('font-weight', 'bold');
-            }
-            e.rowElement.css('fontSize', '11px');
+            setDataGridRowCss(e);
         },
-        columns: [{ dataField: "WarehouseID", visible: false, caption: "WarehouseID", },
-        { dataField: "BinName", visible: true, caption: "Bin Name", },
-
-        ]
-
+        columns: [{ dataField: "BinName", visible: true, caption: "Bin Name", }]
     })
 }
 
@@ -388,82 +356,60 @@ $("#BtnSave").click(function () {
         showCancelButton: true,
         confirmButtonColor: "#DD6B55",
         confirmButtonText: "Yes, Save it !",
-        closeOnConfirm: false
+        closeOnConfirm: true
     },
-    function () {
-        if (GblStatus == "Update") {
-            //alert(JSON.stringify(jsonObjectsRecordMain));
-            document.getElementById("LOADER").style.display = "block";
-            $.ajax({
-                type: "POST",
-                url: "WebService_WarehouseMaster.asmx/UpdateWarehouse",
-                data: '{TxtWarehouseID:' + JSON.stringify(document.getElementById("TxtWarehouseID").value) + ',jsonObjectsSaveRecord:' + JSON.stringify(jsonObjectsSaveRecord) + ',jsonObjectsUpdateRecord:' + JSON.stringify(jsonObjectsUpdateRecord) + '}',
-                contentType: "application/json; charset=utf-8",
-                dataType: "json",
-                success: function (results) {
-                    var res = JSON.stringify(results);
-                    res = res.replace(/"d":/g, '');
-                    res = res.replace(/{/g, '');
-                    res = res.replace(/}/g, '');
-                    res = res.substr(1);
-                    res = res.slice(0, -1);
-
-                    document.getElementById("LOADER").style.display = "none";
-                    if (res == "Success") {
-                        document.getElementById("BtnSave").setAttribute("data-dismiss", "modal");
-                        swal("Updated!", "Your data Updated", "success");
-                        location.reload();
+        function () {
+            if (GblStatus == "Update") {
+                $("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
+                $.ajax({
+                    type: "POST",
+                    url: "WebService_WarehouseMaster.asmx/UpdateWarehouse",
+                    data: '{TxtWarehouseID:' + JSON.stringify(document.getElementById("TxtWarehouseID").value) + ',jsonObjectsSaveRecord:' + JSON.stringify(jsonObjectsSaveRecord) + ',jsonObjectsUpdateRecord:' + JSON.stringify(jsonObjectsUpdateRecord) + '}',
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (results) {
+                        $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+                        if (results.d == "Success") {
+                            swal("Updated!", "Your data Updated", "success");
+                            location.reload();
+                        } else {
+                            swal("Not Updated!", results.d, "warning");
+                        }
+                    },
+                    error: function errorFunc(jqXHR) {
+                        $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+                        swal("Error!", "Please try after some time..", "");
                     }
-                    else if (res == "Exist") {
-                        swal("Duplicate!", "This Group Name allready Exist..\n Please enter another Group Name..", "");
+                });
+            }
+            else {
+
+                $("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
+
+                $.ajax({
+                    type: "POST",
+                    url: "WebService_WarehouseMaster.asmx/SaveWarehouse",
+                    data: '{jsonObjectsSaveRecord:' + JSON.stringify(jsonObjectsSaveRecord) + '}',
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (results) {
+                        $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+
+                        if (results.d == "Success") {
+                            swal("Saved!", "Your data saved", "success");
+                            location.reload();
+                        } else {
+                            swal("Not Saved!", results.d, "warning");
+                        }
+                    },
+                    error: function errorFunc(jqXHR) {
+                        $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+                        swal("Error!", "Please try after some time..", "");
+                        alert(jqXHR);
                     }
-
-                },
-                error: function errorFunc(jqXHR) {
-                    document.getElementById("LOADER").style.display = "none";
-                    swal("Error!", "Please try after some time..", "");
-                }
-            });
-        }
-        else {
-
-            document.getElementById("LOADER").style.display = "block";
-
-            $.ajax({
-                type: "POST",
-                url: "WebService_WarehouseMaster.asmx/SaveWarehouse",
-                data: '{jsonObjectsSaveRecord:' + JSON.stringify(jsonObjectsSaveRecord) + '}',
-                // data: '{prefix:' + JSON.stringify(prefix) + '}',
-                contentType: "application/json; charset=utf-8",
-                dataType: "json",
-                success: function (results) {
-                    var res = JSON.stringify(results);
-                    res = res.replace(/"d":/g, '');
-                    res = res.replace(/{/g, '');
-                    res = res.replace(/}/g, '');
-                    res = res.substr(1);
-                    res = res.slice(0, -1);
-
-                    document.getElementById("LOADER").style.display = "none";
-
-                    if (res == "Success") {
-                        swal("Saved!", "Your data saved", "success");
-                        location.reload();
-                    }
-                    else if (res == "Exist") {
-                        swal("Duplicate!", "This Process Name allready Exist..\n Please enter another Process Name..", "");
-                    }
-
-                },
-                error: function errorFunc(jqXHR) {
-                    document.getElementById("LOADER").style.display = "none";
-                    //  $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
-                    swal("Error!", "Please try after some time..", "");
-                    alert(jqXHR);
-                }
-            });
-        }
-    });
+                });
+            }
+        });
 
 });
 
@@ -478,7 +424,7 @@ $("#EditButton").click(function () {
     document.getElementById("EditButton").setAttribute("data-toggle", "modal");
     document.getElementById("EditButton").setAttribute("data-target", "#largeModal");
 
-    document.getElementById("LOADER").style.display = "block";
+    $("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
 
     document.getElementById("TxtWarehouseName").value = sholistData[0].WarehouseName;
     document.getElementById("TxtWarehouseAddress").value = sholistData[0].Address;
@@ -500,7 +446,7 @@ $("#EditButton").click(function () {
             res = res.substr(1);
             res = res.slice(0, -1);
 
-            document.getElementById("LOADER").style.display = "none";
+            $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
             var IssueRetrive = JSON.parse(res);
 
             ObjBinNameGrid = [];

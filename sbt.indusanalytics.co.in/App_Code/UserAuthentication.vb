@@ -296,31 +296,32 @@ Public Class UserAuthentication
         Try
             TableName = "ERPParameterSetting"
             If PID = 0 Then
-                str = "Select Count(*) From " & TableName & " Where Isnull(IsDeletedTransaction,0)=0 And CompanyID=" & GBLCompanyID & " And ParameterName='" & JsonObjectReference(0)("ParameterName") & "' And ParameterValue='" & JsonObjectReference(0)("ParameterValue") & "'"
+                str = "Select Count(ParameterName) From " & TableName & " Where Isnull(IsDeletedTransaction,0)=0 And CompanyID=" & GBLCompanyID & " And ParameterName='" & JsonObjectReference(0)("ParameterName") & "' And ParameterValue='" & JsonObjectReference(0)("ParameterValue") & "'"
                 db.FillDataTable(dataTable, str)
                 If dataTable.Rows.Count > 0 Then
                     Return "Duplicate Data"
                 End If
+                If db.CheckAuthories("ERPSettings.aspx", GBLUserID, GBLCompanyID, "CanSave", PID) = False Then Return "You are not authorized to save..!, Can't Save"
                 AddColName = "CompanyID,CreatedBy,CreatedDate"
                 AddColValue = GBLCompanyID & "," & GBLUserID & ",getdate()"
-                db.InsertDatatableToDatabase(JsonObjectReference, TableName, AddColName, AddColValue)
+                KeyField = db.InsertDatatableToDatabase(JsonObjectReference, TableName, AddColName, AddColValue)
+                If IsNumeric(KeyField) = True Then KeyField = "Success"
             Else
                 str = "SELECT A.TABLE_NAME FROM INFORMATION_SCHEMA.TABLES as A Inner Join INFORMATION_SCHEMA.columns As B on A.Table_Name=B.Table_Name WHERE A.TABLE_TYPE='BASE TABLE' and B.Column_Name='" & Replace(JsonObjectReference(0)("ParameterName"), " ", "") & "' And B.Table_Name Not In ('JobType','JobPriority','JobBookingPrefix','JobReference')"
                 db.FillDataTable(dataTable, str)
                 If dataTable.Rows.Count > 0 Then
                     For index = 0 To dataTable.Rows.Count
-                        str = "Select * From " & dataTable.Rows(0)(0) & " Where Isnull(IsDeletedTransaction,0)=0 And " & Replace(JsonObjectReference(0)("ParameterName"), " ", "") & "='" & JsonObjectReference(0)("ParameterValue") & "'"
+                        str = "Select " & Replace(JsonObjectReference(0)("ParameterName"), " ", "") & " From " & dataTable.Rows(0)(0) & " Where Isnull(IsDeletedTransaction,0)=0 And " & Replace(JsonObjectReference(0)("ParameterName"), " ", "") & "='" & JsonObjectReference(0)("ParameterValue") & "'"
                         db.FillDataTable(DT, str)
                         If DT.Rows.Count > 0 Then
                             Return "This parameter has used in other process"
                         End If
                     Next
                 End If
-
+                If db.CheckAuthories("ERPSettings.aspx", GBLUserID, GBLCompanyID, "CanEdit", PID) = False Then Return "You are not authorized to update..!, Can't Update"
                 AddColName = "ModifiedBy=" & GBLUserID & ",ModifyDate=getdate()"
-                db.UpdateDatatableToDatabase(JsonObjectReference, TableName, AddColName, 0, " ParameterID=" & PID & " And CompanyID=" & GBLCompanyID)
+                KeyField = db.UpdateDatatableToDatabase(JsonObjectReference, TableName, AddColName, 0, " ParameterID=" & PID & " And CompanyID=" & GBLCompanyID)
             End If
-            KeyField = "Success"
         Catch ex As Exception
             KeyField = "fail " & ex.Message
         End Try

@@ -277,6 +277,158 @@ m:
             Return KeyReturn
         End Function
 
+
+        Public Function ProductionInsertDatatableToDatabase(ByVal JsonObject As Object, ByVal TableName As String, ByVal AddColName As String, ByVal AddColValue As String, ByRef con As SqlConnection, ByRef objTrans As SqlTransaction, Optional ByVal VoucherType As String = "", Optional ByVal TransactionID As String = "") As String
+
+            'Db = OpenDataBase()
+            'If Db.State = ConnectionState.Closed Then
+            '    Db.Open()
+            'End If
+            Db = con
+            Dim KeyReturn As String = ""
+            Dim ColName As String = ""
+            Dim TransID As String = ""
+            Dim ColValue As String
+            Dim dt As New DataTable
+            ConvertObjectToDatatable(JsonObject, dt)
+
+            Try
+                ColName = ""
+                For Each column In dt.Columns
+                    If column.ColumnName <> "Id" Then ''''indexed db Id not for store
+                        If ColName = "" Then
+                            ColName = column.ColumnName
+                        Else
+                            ColName = ColName & "," & column.ColumnName
+                        End If
+                    End If
+                Next
+
+                For i As Integer = 0 To dt.Rows.Count - 1
+                    ColValue = ""
+                    For Each column In dt.Columns
+                        If column.ColumnName <> "Id" Then
+                            'If column.dataType.Name = "String" Then
+                            '    If ColValue = "" Then
+                            '        ColValue = "'" & dt.Rows(i)(column.ColumnName) & "'"
+                            '    Else
+                            '        ColValue = ColValue & "," & "'" & Replace(dt.Rows(i)(column.ColumnName), "'", "") & "'"
+                            '    End If
+                            'Else
+                            If VoucherType = "Receipt Note" Then
+                                If column.ColumnName = "TransID" Then
+                                    TransID = "" & dt.Rows(i)(column.ColumnName) & ""
+                                End If
+                            End If
+                            If column.ColumnName = "BatchNo" And VoucherType = "Receipt Note" Then
+                                If ColValue = "" Then
+                                    ColValue = "'" & TransactionID & dt.Rows(i)(column.ColumnName) & "_" & TransID & "'"
+                                Else
+                                    ColValue = ColValue & "," & "'" & TransactionID & dt.Rows(i)(column.ColumnName) & "_" & TransID & "'"
+                                End If
+                            Else
+                                If column.ColumnName = "ParentTransactionID" Then
+                                    If dt.Rows(i)(column.ColumnName) <= 0 Then
+                                        dt.Rows(i)(column.ColumnName) = TransactionID
+                                    End If
+                                End If
+                                If ColValue = "" Then
+                                    ColValue = "'" & dt.Rows(i)(column.ColumnName) & "'"
+                                Else
+                                    ColValue = ColValue & "," & "'" & dt.Rows(i)(column.ColumnName) & "'"
+                                End If
+                            End If
+
+
+                            'End If
+                        End If
+                    Next
+                    If AddColName = "" Then
+                        str = "Insert Into " & TableName & "( " & ColName & ") Values( " & ColValue & ")"
+                    Else
+                        str = "Insert Into " & TableName & "( " & ColName & "," & AddColName & ") Values(" & ColValue & "," & AddColValue & ")"
+                    End If
+
+                    str = str & "SELECT SCOPE_IDENTITY();"
+                    Dim cmd = New SqlCommand(str, Db)
+                    cmd.Transaction = objTrans
+                    KeyReturn = cmd.ExecuteScalar()
+                Next
+                '  Db.Close()
+                dt = Nothing
+                Return KeyReturn
+            Catch ex As Exception
+                KeyReturn = ex.Message
+            End Try
+            Return KeyReturn
+        End Function
+
+        Public Function ProductionUpdateDatatableToDatabase(ByVal JsonObject As Object, ByVal TableName As String, ByVal AddColName As String, ByVal Pvalue As Integer, ByRef con As SqlConnection, ByRef objTrans As SqlTransaction, Optional ByVal wherecndtn As String = "") As String
+            Dim KeyField As String = ""
+
+            Try
+                UniqueId = ""
+                ConvertObjectToDatatable(JsonObject, dt)
+
+                'Db = OpenDataBase()
+                'If Db.State = ConnectionState.Closed Then
+                '    Db.Open()
+                'End If
+                Db = con
+                Dim Cnt As Integer = 1
+
+                For i As Integer = 0 To dt.Rows.Count - 1
+                    str = ""
+                    UniqueId = ""
+                    Cnt = 1
+                    For Each column In dt.Columns
+                        If Cnt <= Pvalue Then
+                            UniqueId = UniqueId & column.ColumnName & " ='" & dt.Rows(i)(column.ColumnName) & "' And "
+                            Cnt = Cnt + 1
+                        Else
+                            str = str & column.ColumnName & "='" & dt.Rows(i)(column.ColumnName) & "',"  ' Console.WriteLine(column.ColumnName)
+                        End If
+                    Next
+                    str = Left(str, Len(str) - 1)
+                    If UniqueId <> "" Then UniqueId = Left(UniqueId, Len(UniqueId) - 4)
+                    If (wherecndtn <> "") Then
+                        If UniqueId <> "" Then
+                            UniqueId = UniqueId & " And " & wherecndtn
+                        Else
+                            UniqueId = wherecndtn
+                        End If
+                    End If
+
+                    If (AddColName <> "") Then
+                        If str <> "" Then
+                            str = str & " , " & AddColName
+                        Else
+                            str = AddColName
+                        End If
+                    End If
+
+                    str = "Update " & TableName & " Set " & str & " Where " & UniqueId
+
+                    Dim cmd As New SqlCommand(str, Db) With {
+                    .CommandType = CommandType.Text,
+                    .Transaction = objTrans
+                }
+                    cmd.ExecuteNonQuery()
+                Next
+                'Db.Close()
+                KeyField = "Success"
+
+                'Dim query = From iex In dt.AsEnumerable()
+                '            Join idb In dt.AsEnumerable()
+                '                On iex("FieldName") Equals idb("FieldName") And iex("FieldValue") Equals idb("FieldValue")
+                '            Select iex
+
+            Catch ex As Exception
+                Return ex.Message
+            End Try
+            Return KeyField
+        End Function
+
         Public Function InsertKeylineDatatableToDatabase(ByVal JsonObject As Object, ByVal TableName As String, ByVal AddColName As String, ByVal AddColValue As String, Optional ByVal ConStr As String = "") As String
             Dim con As New SqlConnection(ConStr)
 

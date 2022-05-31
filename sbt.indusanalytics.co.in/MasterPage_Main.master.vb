@@ -67,7 +67,7 @@ Partial Class MasterPage_Main
                         '    ScriptManager.RegisterStartupScript(Me, Me.GetType(), "Close_Window", "window.close();", True)
                         'End If
 
-                        If DT.Rows(0)("Action") = False Then
+                        If DT.Rows(0)("Action") = False And Request.Url.ToString().Contains("localhost") = False Then
                             Response.Redirect(previousPageName)
                         End If
                         Page.Title = DT.Rows(0)("ModuleDisplayName")

@@ -123,13 +123,13 @@
 
                 <div class="modal-body" style="position: initial; padding-right: 0px">
                     <div class="tab-content" style="margin-bottom: 0em">
-                        <div id="FieldMachineAllocation" role="tabpanel" class="col-lg-4 col-md-4 col-sm-6 col-xs-12 tab-pane animated fadeInRight active">
+                        <div id="FieldMachineAllocation" role="tabpanel" class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
                             <label>Name</label>
                             <div id="selEmployetName"></div>
                             <div style="min-height: 15px; float: left; width: 100%"><strong id="ValStrEmployetName" style="color: red; font-size: 10px; display: block"></strong></div>
                         </div>
 
-                        <div id="DivMachineAllocation" role="tabpanel" class="col-lg-12 col-md-12 col-sm-12 col-xs-12 tab-pane animated fadeInRight">
+                        <div id="DivMachineAllocation" role="tabpanel" class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                             <div id="GridMachineAllocation"></div>
                             <textarea id="MachineId" style="display: none;">null</textarea>
                         </div>

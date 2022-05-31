@@ -78,12 +78,11 @@ Public Class WebServiceProcessMaster
     <WebMethod(EnableSession:=True)>
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function MachiGrid() As String
-
         GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
-
-        str = "Select MM.MachineID, nullif(MM.MachineName,'') As MachineName, nullif(MM.DepartmentID,'') as DepartmentID " &
-                ",nullif(DM.DepartmentName,'') As DepartmentName from MachineMaster as MM Inner Join DepartmentMaster as DM on MM.DepartmentID=DM.DepartmentID And MM.CompanyID=DM.CompanyID Where MM.CompanyID=" & GBLCompanyID & "" &
-                "And Isnull(MM.IsDeletedTransaction,0)<>1 Order By MM.MachineName"
+        Dim VendorID As String = Convert.ToString(HttpContext.Current.Session("VendorID"))
+        VendorID = IIf(VendorID = 0 Or VendorID = "", "", " And MM.VendorID =" & VendorID)
+        str = "Select MM.MachineID, MM.MachineName, MM.DepartmentID ,DM.DepartmentName From MachineMaster As MM Inner Join DepartmentMaster as DM on MM.DepartmentID=DM.DepartmentID And MM.CompanyID=DM.CompanyID Where MM.CompanyID=" & GBLCompanyID &
+                " And MM.IsDeletedTransaction = 0 " & VendorID & " Order By MM.MachineName"
         db.FillDataTable(dataTable, str)
         data.Message = ConvertDataTableTojSonString(dataTable)
         Return js.Serialize(data.Message)

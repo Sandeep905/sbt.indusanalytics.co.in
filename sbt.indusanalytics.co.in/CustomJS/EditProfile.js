@@ -71,9 +71,17 @@ $("#SelectBoxSMTPUseSSL").dxSelectBox({
     showClearButton: true
 });
 
+$("#SelectBoxVendor").dxSelectBox({
+    items: [],
+    placeholder: "Select--",
+    displayExpr: 'VendorName',
+    valueExpr: 'VendorID',
+    showClearButton: true,
+    searchEnabled: true
+});
 
 $("#UserGrid").dxDataGrid({
-    //dataSource: RES1,
+    dataSource: [],
     columnAutoWidth: true,
     showBorders: true,
     showRowLines: true,
@@ -81,11 +89,11 @@ $("#UserGrid").dxDataGrid({
     allowReordering: false,
     //allowColumnResizing: true,
     paging: {
-        pageSize: 15
+        pageSize: 20
     },
     pager: {
         showPageSizeSelector: true,
-        allowedPageSizes: [15, 25, 50, 100]
+        allowedPageSizes: [20, 40, 80, 300]
     },
     selection: { mode: "single" },
     grouping: {
@@ -94,11 +102,9 @@ $("#UserGrid").dxDataGrid({
     height: function () {
         return window.innerHeight / 1.2;
     },
-    // scrolling: { mode: 'virtual' },
     filterRow: { visible: true, applyFilter: "auto" },
-    columnChooser: { enabled: true },
     headerFilter: { visible: true },
-    //rowAlternationEnabled: true,
+    rowAlternationEnabled: true,
     searchPanel: { visible: true },
     loadPanel: {
         enabled: true,
@@ -233,6 +239,29 @@ $.ajax({
         var RES1 = JSON.parse(res);
         $("#OperatorAllocationGrid").dxDataGrid({
             dataSource: RES1
+        });
+    }
+});
+
+//Vendor List
+$.ajax({
+    type: 'POST',
+    url: 'WebService_LedgerMaster.asmx/GetVendorList',
+    contentType: "application/json; charset=utf-8",
+    dataType: "json",
+    success: function (results) {
+        var res = results.d.replace(/\\/g, '');
+        res = res.replace(/"d":""/g, '');
+        res = res.replace(/""/g, '');
+        res = res.replace(/u0026/g, "&");
+        res = res.replace(/u0027/g, "'");
+        res = res.replace(/:,/g, ":null,");
+        res = res.replace(/:}/g, ":null}");
+        res = res.substr(1);
+        res = res.slice(0, -1);
+        var RES1 = JSON.parse(res);
+        $("#SelectBoxVendor").dxSelectBox({
+            items: RES1
         });
     }
 });
@@ -515,25 +544,15 @@ $("#EditButton").click(function () {
     document.getElementById("Password").disabled = true;
     document.getElementById("REPassword").disabled = true;
 
-    $("#SelectBoxUnderUser").dxSelectBox({
-        value: selectedUserRows[0].UnderUserID
-    });
-    $("#SelectBoxDesignation").dxSelectBox({
-        value: selectedUserRows[0].Designation
-    });
+    $("#SelectBoxUnderUser").dxSelectBox({ value: selectedUserRows[0].UnderUserID });
+    $("#SelectBoxDesignation").dxSelectBox({ value: selectedUserRows[0].Designation });
+    $("#SelectBoxVendor").dxSelectBox({ value: selectedUserRows[0].VendorID });
+
+    $("#SelectBoxCountry").dxSelectBox({ value: selectedUserRows[0].Country });
+    $("#SelectBoxState").dxSelectBox({ value: selectedUserRows[0].State });
+    $("#SelectBoxCity").dxSelectBox({ value: selectedUserRows[0].City });
 
     document.getElementById("EmailID").value = selectedUserRows[0].EmailID;
-
-    $("#SelectBoxCountry").dxSelectBox({
-        value: selectedUserRows[0].Country
-    });
-    $("#SelectBoxState").dxSelectBox({
-        value: selectedUserRows[0].State
-    });
-    $("#SelectBoxCity").dxSelectBox({
-        value: selectedUserRows[0].City
-    });
-
     document.getElementById("SMTPUserName").value = selectedUserRows[0].smtpUserName;
     document.getElementById("SMTPPassword").value = selectedUserRows[0].smtpUserPassword;
     document.getElementById("RESMTPPassword").value = selectedUserRows[0].smtpUserPassword;
@@ -599,6 +618,8 @@ $("#EditButton").click(function () {
             var res = results.replace(/\\/g, '');
             res = res.replace(/"d":/g, '');
             res = res.replace(/""/g, '');
+            res = res.replace(/:,/g, ":null,");
+            res = res.replace(/:}/g, ":null}");
             res = res.substr(1);
             res = res.slice(0, -1);
             var RES1 = JSON.parse(res);
@@ -700,7 +721,6 @@ $("#BtnNew").click(function () {
 });
 
 $("#ProfileTab").click(function () {
-
     document.getElementById("BtnSave").disabled = "";
     document.getElementById("fotoupload").disabled = "";
     if (GblStatus === "Update") {
@@ -774,14 +794,11 @@ function FillGrid() {
             res = res.substr(1);
             res = res.slice(0, -1);
             var RES1 = JSON.parse(res);
-            newArray = [];
             newArray = { 'AllUser': RES1 };
 
             document.getElementById("LOADER").style.display = "none";
 
-            $("#UserGrid").dxDataGrid({
-                dataSource: RES1
-            });
+            $("#UserGrid").dxDataGrid({ dataSource: RES1 });
         }
     });
 }
@@ -899,7 +916,7 @@ $(function () {
 });
 
 $("#BtnSave").click(function () {
-    
+
     var UName = document.getElementById("UserName").value.trim();
     var Password = document.getElementById("Password").value.trim();
     var REPassword = document.getElementById("REPassword").value;
@@ -1108,7 +1125,7 @@ $("#BtnSave").click(function () {
 });
 
 function ProfileParameter() {
-   
+
     var UName = document.getElementById("UserName").value.trim();
     var Password = document.getElementById("Password").value.trim();
     var ContactNO = document.getElementById("ContactNO").value;
@@ -1128,6 +1145,7 @@ function ProfileParameter() {
     var Details = document.getElementById("Details").value;
     var UserProfilePic = document.getElementById("imgpathstring").value;
     var UserSignPic = document.getElementById("imgpathstringsign").value;
+    var SelectBoxVendorID = $("#SelectBoxVendor").dxSelectBox('instance').option('value');
 
     //var CHKCreateuser = document.getElementById("CHKCreateuser").checked;
     //var CHKAdministrativeRights = document.getElementById("CHKAdministrativeRights").checked;
@@ -1166,6 +1184,7 @@ function ProfileParameter() {
     OperationUserMasterRecord.EmailMessage = document.getElementById("TxtMessage").value;
     OperationUserMasterRecord.HeaderText = document.getElementById("TxtEmailHeader").value;
     OperationUserMasterRecord.FooterText = document.getElementById("TxtEmailFooter").value;
+    OperationUserMasterRecord.VendorID = SelectBoxVendorID;
 
     jsonObjectsUserMasterRecord.push(OperationUserMasterRecord);
 
@@ -1289,25 +1308,16 @@ function BlankField() {
     document.getElementById("REPassword").value = "";
     document.getElementById("ContactNO").value = "";
 
-    $("#SelectBoxUnderUser").dxSelectBox({
-        value: ""
-    });
-    $("#SelectBoxDesignation").dxSelectBox({
-        value: ""
-    });
+    $("#SelectBoxUnderUser").dxSelectBox({ value: null });
+    $("#SelectBoxDesignation").dxSelectBox({ value: null });
 
     document.getElementById("EmailID").value = "";
 
-    $("#SelectBoxCountry").dxSelectBox({
-        value: ""
-    });
-    $("#SelectBoxState").dxSelectBox({
-        value: ""
-    });
-    $("#SelectBoxCity").dxSelectBox({
-        value: ""
-    });
+    $("#SelectBoxCountry").dxSelectBox({ value: null });
+    $("#SelectBoxState").dxSelectBox({ value: null });
+    $("#SelectBoxCity").dxSelectBox({ value: null });
 
+    $("#SelectBoxVendor").dxSelectBox({ value: null });
     document.getElementById("SMTPUserName").value = "";
     document.getElementById("SMTPPassword").value = "";
     document.getElementById("RESMTPPassword").value = "";
@@ -1401,7 +1411,7 @@ $("#SavePassword").click(function () {
         showCancelButton: true,
         confirmButtonColor: "#DD6B55",
         confirmButtonText: "Yes, Change it !",
-        closeOnConfirm: false
+        closeOnConfirm: true
     },
         function () {
             document.getElementById("LOADER").style.display = "block";

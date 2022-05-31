@@ -99,11 +99,7 @@ $("#GridJobList").dxDataGrid({
     },
     selection: { mode: "single" },
     onRowPrepared: function (e) {
-        if (e.rowType === "header") {
-            e.rowElement.css('background', '#42909A');
-            e.rowElement.css('color', 'white');
-        }
-        e.rowElement.css('fontSize', '11px');
+        setDataGridRowCss(e);
     },
     columns: [
         { dataField: "LedgerName", caption: "Client Name", width: 180, minWidth: 100 },
@@ -137,6 +133,7 @@ $("#GridJobList").dxDataGrid({
                     res = res.replace(/""/g, '');
                     res = res.replace(/u0026/g, '&');
                     res = res.replace(/u0027/g, "'");
+                    res = res.replace(/:,/g, ":null,");
                     res = res.substr(1);
                     res = res.slice(0, -1);
                     var RES1 = JSON.parse(res);
@@ -178,11 +175,7 @@ $("#gridScheduleList").dxDataGrid({
     },
     selection: { mode: "single" },
     onRowPrepared: function (e) {
-        if (e.rowType === "header") {
-            e.rowElement.css('background', '#42909A');
-            e.rowElement.css('color', 'white');
-        }
-        e.rowElement.css('fontSize', '11px');
+        setDataGridRowCss(e);
     },
     columns: [
         { dataField: "LedgerName", caption: "Client Name", width: 180, minWidth: 100 },
@@ -205,7 +198,6 @@ $("#gridScheduleList").dxDataGrid({
     ],
     onSelectionChanged: function (Sel) {
         var data = Sel.selectedRowsData;
-        gridScheduleListObj = [];
         gridScheduleListObj = Sel.selectedRowsData;
         if (data.length > 0) {
             $("#TxtScheduleID").val(data[0].JobBookingJobCardContentsID);
@@ -226,7 +218,6 @@ $("#gridScheduleList").dxDataGrid({
                     res = res.replace(/u0027/g, "'");
                     res = res.substr(1);
                     res = res.slice(0, -1);
-                    FormWiseDetail = [];
                     FormWiseDetail = JSON.parse(res);
                     $("#gridFormWiseDetail").dxDataGrid({
                         dataSource: FormWiseDetail
@@ -248,7 +239,7 @@ $("#gridFormWiseDetail").dxDataGrid({
     allowColumnResizing: true,
     columnResizingMode: "widget",
     height: function () {
-        return window.innerHeight / 1.6;
+        return window.innerHeight / 1.8;
     },
     sorting: {
         mode: "none"
@@ -265,14 +256,9 @@ $("#gridFormWiseDetail").dxDataGrid({
         text: 'Data is loading...'
     },
     onRowPrepared: function (e) {
-        if (e.rowType === "header") {
-            e.rowElement.css('background', '#42909A');
-            e.rowElement.css('color', 'white');
-        }
-        e.rowElement.css('fontSize', '11px');
+        setDataGridRowCss(e);
     },
     columns: [
-        { dataField: "ProcessID", visible: false, caption: "ProcessID" },
         { dataField: "ProcessName", caption: "Process Name", allowEditing: false },
         { dataField: "RateFactor", caption: "Rate Factor", allowEditing: false },
         { dataField: "JobCardFormNo", caption: "Ref Form No", allowEditing: false },
@@ -446,11 +432,7 @@ $("#GridAllocatedDetails").dxDataGrid({
     },
     selection: { mode: "single" },
     onRowPrepared: function (e) {
-        if (e.rowType === "header") {
-            e.rowElement.css('background', '#42909A');
-            e.rowElement.css('color', 'white');
-        }
-        e.rowElement.css('fontSize', '11px');
+        setDataGridRowCss(e);
     },
     columns: [
         { dataField: "ItemID", visible: false, caption: "ItemID" },
@@ -458,10 +440,7 @@ $("#GridAllocatedDetails").dxDataGrid({
         { dataField: "ItemName", caption: "Item Name", width: 380 },
         { dataField: "RequiredQty", caption: "Required Qty", width: 150 },
         { dataField: "StockUnit", caption: "Stock Unit", width: 150 }
-    ],
-    onSelectionChanged: function (Alo) {
-        var Alodata = Alo.selectedRowsData;
-    }
+    ]
 });
 
 $("#GridDeliveryDetails").dxDataGrid({
@@ -487,11 +466,7 @@ $("#GridDeliveryDetails").dxDataGrid({
         return window.innerHeight / 1.26;
     },
     onRowPrepared: function (e) {
-        if (e.rowType === "header") {
-            e.rowElement.css('background', '#42909A');
-            e.rowElement.css('color', 'white');
-        }
-        e.rowElement.css('fontSize', '11px');
+        setDataGridRowCss(e);
     },
     columns: [
         { dataField: "LedgerID", visible: false, caption: "LedgerID" },
@@ -500,10 +475,7 @@ $("#GridDeliveryDetails").dxDataGrid({
         { dataField: "ScheduleQuantity", caption: "Schedule Qty", width: 150 },
         { dataField: "DeliveryDate", caption: "Delivery Date", width: 200 },
         { dataField: "TransporterName", caption: "Transporter Name", width: 200 }
-    ],
-    onSelectionChanged: function (Opt) {
-        var Optdata = Opt.selectedRowsData;
-    }
+    ]
 });
 
 FillJobGrid();
@@ -665,6 +637,7 @@ $("#BtnSave").click(function () {
             ObjDetail.ScheduleQty = gridFormWiseDetail._options.dataSource[i].ScheduleQty;
             ObjDetail.TotalTimeToBeTaken = gridFormWiseDetail._options.dataSource[i].TotalTimeToBeTaken;
             ObjDetail.RateFactor = gridFormWiseDetail._options.dataSource[i].RateFactor;
+            ObjDetail.VendorID = gridScheduleListObj[0].VendorID;
 
             ObjDetail.JobCardContentNo = gridScheduleListObj[0].JobCardContentNo;
             ObjDetail.JobName = gridScheduleListObj[0].JobName;
@@ -724,20 +697,13 @@ $("#BtnSave").click(function () {
                 data: '{FinalGridDetail:' + JSON.stringify(FinalGridDetail) + '}',
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
-                success: function (results) {
-                    var res = JSON.stringify(results);
-                    res = res.replace(/"d":/g, '');
-                    res = res.replace(/{/g, '');
-                    res = res.replace(/}/g, '');
-                    res = res.substr(1);
-                    res = res.slice(0, -1);
-
-                    if (res === "Success") {
+                success: function (results) {                    
+                    if (results.d === "Success") {
                         swal("Saved!", "Your data saved", "success");
-                        //$("#MinBtn").click();
                         RefreshDiv();
                         $("#Refresh").click();
-                    }
+                    } else
+                        swal("Not Saved!", results.d, "error");
                 },
                 error: function errorFunc(jqXHR) {
                     swal("Error!", "Please try after some time..", "");
@@ -782,11 +748,7 @@ $("#GridReleaseShowlist").dxDataGrid({
     },
     selection: { mode: "single" },
     onRowPrepared: function (e) {
-        if (e.rowType === "header") {
-            e.rowElement.css('background', '#42909A');
-            e.rowElement.css('color', 'white');
-        }
-        e.rowElement.css('fontSize', '11px');
+        setDataGridRowCss(e);
     },
     columns: [
         { dataField: "ReleasedDate", caption: "Released Date" },
@@ -862,17 +824,9 @@ $("#GridShowlistScheduledQty").dxDataGrid({
         allowDeleting: false
     },
     onRowPrepared: function (e) {
-        if (e.rowType === "header") {
-            e.rowElement.css('background', '#42909A');
-            e.rowElement.css('color', 'white');
-        }
-        e.rowElement.css('fontSize', '11px');
+        setDataGridRowCss(e);
     },
     columns: [
-        { dataField: "JobBookingJobCardContentsID", visible: false, caption: "ContentsID" },
-        { dataField: "ProcessID", visible: false, caption: "ProcessID" },
-        { dataField: "JobBookingID", visible: false, caption: "JobBookingID" },
-        { dataField: "MachineID", visible: false, caption: "MachineID" },
         { dataField: "JobCardContentNo", visible: false, caption: "JC Content No" },
         { dataField: "JobName", caption: "Job Name", width: 200, minWidth: 100, fixed: true },
         { dataField: "ReleasedDate", caption: "Released Date" },

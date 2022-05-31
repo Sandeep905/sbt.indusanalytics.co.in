@@ -3,17 +3,26 @@ Imports System.Configuration
 Imports System.Data.SqlClient
 Imports Microsoft.Reporting.WebForms
 Imports Connection
+Imports System.Net.Mail
+Imports System.Net
 
 Partial Class ReportJobCard
     Inherits System.Web.UI.Page
-    Dim db As New DBConnection
+    ReadOnly db As New DBConnection
     Dim GBLCompanyID As String
-    Dim ContID As String = Convert.ToString(HttpContext.Current.Request.QueryString("ContID"))
+    ReadOnly ContID As String = Convert.ToString(HttpContext.Current.Request.QueryString("ContID"))
+    Dim GBLUserID As String
     Dim dsContents As New DataTable
 
     Protected Sub Page_Load(sender As Object, e As EventArgs) Handles Me.Load
         If Not IsPostBack Then
+            GBLUserID = Convert.ToString(HttpContext.Current.Session("UserId"))
             GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyId"))
+            If db.CheckAuthories("ProductionWorkOrder.aspx", GBLUserID, GBLCompanyID, "CanPrint", ContID) = False Then
+                MailError.InnerHtml = "You are not authorized to print..!, Can't Print"
+                Exit Sub
+            End If
+
             ShowData()
         End If
     End Sub
@@ -78,24 +87,6 @@ Partial Class ReportJobCard
 
     Private Sub JobCardProductionDetailsSubreportProcessing(ByVal senderDS As Object, ByVal d As SubreportProcessingEventArgs)
         Dim JobBookingJobcardContentsID As String = d.Parameters("JobBookingID").Values(0)
-        'Dim JDS As DataTable = getData("Select Distinct UM.UserName ,JE.BookingNo AS QuotationNO, JE.BookingID, JEJC.JobBookingJobCardContentsID, JEJC.PlanContName AS ContentName,  " &
-        '                                           " ((Convert(NVARCHAR(20), (Isnull(JJC.PlanFColor, 0))) + '+' + Convert(NVARCHAR(20),Isnull(JJC.PlanSpeFColor, 0))) + '/' +   (Convert(NVARCHAR(20), (Isnull(JJC.PlanBColor, 0))) + '+' + Convert(NVARCHAR(20),Isnull(JJC.PlanSpeBColor, 0)))) as Printing,    " &
-        '                                           " Stuff((Select ','+PM.DisplayProcessName From JobBookingJobCard as JEJ1 INNER JOIN JobBookingJobCardContents  AS JEC1 on JEJ1.JobBookingID = JEC1.JobBookingID AND JEJ1.CompanyID=JEC1.CompanyID AND JEJC.JobBookingID=JEJ1.JobBookingID    " &
-        '                                           " INNER Join JobBookingJobCardProcess  as JEO ON JEO.JobBookingJobCardContentsID = JEC1.JobBookingJobCardContentsID And JEJC.JobBookingJobCardContentsID = JEC1.JobBookingJobCardContentsID And JEJC.CompanyID=JEO.CompanyID  " &
-        '                                           " INNER Join ProcessMaster AS PM ON JEO.ProcessID=PM.ProcessID And JEO.CompanyID=PM.CompanyID Order By JEO.SequenceNo  FOR XML PATH('')),1,1,'') AS ProcessDetail,   JEO.Remarks AS ProcessRemark ,JE.OrderQuantity , LM.LedgerName,  " &
-        '                                           " CM.LedgerName AS ConsigneeName, CC.CategoryName, Null As Shipper_Name, 0 As Shipper_Per_Box_Wt, 0 As Shipper_pack_Qty, 0 As Total_Shipper_Qty_Req, 0 As Shipper_NO_OF_Ply, 0 AS Shipper_ID,   " &
-        '                                           " JJC.JobPrePlan as JobSize,  (JJC.ItemPlanQuality  + ', '+  Convert(nvarchar(20),JJC.ItemPlanGSM) + ', '+  JJC.ItemPlanMill) as Material  From JobBookingJobCard As JEJ  " &
-        '                                           " INNER Join JobBookingJobCardContents AS JEJC on JEJ.JobBookingID = JEJC.JobBookingID  And JEJ.CompanyID=JEJC.CompanyID " &
-        '                                           " INNER Join JobBooking AS JE ON JEJ.BookingID = JE.BookingID And JEJ.CompanyID=JE.CompanyID    " &
-        '                                           " INNER Join LedgerMaster as LM ON JE.LedgerID = LM.LedgerID  And JE.CompanyID=LM.CompanyID    " &
-        '                                           " INNER Join ViewJobBookingJobCardContents as JJC ON JEJC.JobBookingID=JJC.JobBookingID And JEJC.JobBookingJobCardContentsID=JJC.JobBookingJobCardContentsID And JEJC.CompanyID=JJC.CompanyID " &
-        '                                           " Left Join JobBookingJobCardProcess AS JEO ON  JEO.JobBookingID=JEJC.JobBookingID And JEO.JobBookingJobCardContentsID=JEJC.JobBookingJobCardContentsID And JEO.CompanyID=JEJC.CompanyID " &
-        '                                           " Left Join ItemMaster AS IM ON IM.ItemID=JEJC.PaperID And IM.CompanyID=JEJC.CompanyID    " &
-        '                                           " Left Join LedgerMaster as CM ON JE.ConsigneeID=CM.LedgerID And JE.CompanyID=CM.CompanyID   " &
-        '                                           " Left Join CategoryMaster as CC ON JE.CategoryID=CC.CategoryID  And JE.CompanyID=CM.CompanyID   " &
-        '                                           " Left Join Usermaster as UM ON UM.UserID = JEJ.CreatedBy And UM.CompanyID=JEJ.CompanyID  " &
-        '                                           " Where JEJC.JobBookingID =(Select JobBookingID From JobBookingJobCardContents Where JobBookingJobcardContentsID =" & JobBookingJobcardContentsID & " AND CompanyID=" & GBLCompanyID & ") AND JEJ.CompanyID='" & GBLCompanyID & "'")
-
         'Dim dsContents As DataTable = getData("execute ProductionWorkOrderPrint 1," & ContID & ",'" & GBLCompanyID & "'")
         Dim datasource As ReportDataSource = New ReportDataSource("JobCardProductionDetails", dsContents)
         d.DataSources.Add(datasource)
@@ -109,23 +100,9 @@ Partial Class ReportJobCard
 
     Private Sub FormDetailSubreportProcessing(ByVal senderFD As Object, ByVal f As SubreportProcessingEventArgs)
         Dim JobBookingJobCardContentsID As Integer = f.Parameters("JobBookingID").Values(0)
-        'Dim FDetail As DataTable = getData("Select  JF.TransID,JF.JobCardFormNo, JEJ.PrintingStyle, JF.Pages, JF.TotalSheets, JF.PrintingRemark,JF.JobBookingJobCardContentsID,JEJ.WastageSheets,    " &
-        '                                    "ROUND(CONVERT(BIGINT, JF.TotalSheets) / ((CASE WHEN ISNULL((Select Sum(Isnull(CONVERT(REAL, JF.TotalSheets),0)) From  JobBookingJobCardFormWiseDetails Where JobBookingJobCardContentsID =  JF.JobBookingJobCardContentsID And CompanyID=JF.CompanyID),0)= 0 Then 1 Else    " &
-        '                                    "ISNULL((Select Sum(Isnull(CONVERT(REAL,TotalSheets),0)) From JobBookingJobCardFormWiseDetails Where JobBookingJobCardContentsID =   JF.JobBookingJobCardContentsID AND CompanyID=JF.CompanyID),0) END  /  " &
-        '                                    "CASE WHEN Isnull(JEJ.WastageSheets,0) = 0 THEN 1 ELSE Isnull(JEJ.WastageSheets,0) END )),0)  as Waste  ,      " &
-        '                                    "( ROUND(CONVERT(BIGINT,JF.TotalSheets)/ ((CASE WHEN ISNULL((Select Sum(Isnull(CONVERT(REAL,TotalSheets),0)) From  JobBookingJobCardFormWiseDetails Where JobBookingJobCardContentsID =  JF.JobBookingJobCardContentsID AND CompanyID=JF.CompanyID),0)= 0 THEN 1 ELSE    " &
-        '                                    "ISNULL((Select Sum(Isnull(CONVERT(REAL,TotalSheets),0)) From JobBookingJobCardFormWiseDetails Where JobBookingJobCardContentsID =   JF.JobBookingJobCardContentsID And CompanyID=JF.CompanyID),0) END  /  " &
-        '                                    "CASE WHEN Isnull(JEJ.WastageSheets,0) = 0 THEN 1 ELSE Isnull(JEJ.WastageSheets,0) END )),0)  + CONVERT(BIGINT,JF.TotalSheets)) AS TTL  " &
-        '                                    "From JobBookingJobCard AS J  " &
-        '                                    "INNER JOIN JobBookingJobCardContents AS JEJ ON J.JobBookingID=JEJ.JobBookingID AND J.CompanyID=JEJ.CompanyID " &
-        '                                    "INNER JOIN JobBookingJobCardFormWiseDetails AS JF ON JEJ.JobBookingJobCardContentsID=JF.JobBookingJobCardContentsID And JEJ.CompanyID=JF.CompanyID " &
-        '                                    "Where JF.CompanyID='" & GBLCompanyID & "' AND JF.JobBookingJobCardContentsID IN(Select Distinct JobBookingID From JobBookingJobCardContents Where JobBookingId='" & JobBookingJobCardContentsID & "' AND CompanyID='" & GBLCompanyID & "') " &
-        '                                    "GROUP BY JF.CompanyID,JEJ.WastageSheets,JF.TransID, JF.JobCardFormNo, JEJ.PrintingStyle, JF.Pages, JF.TotalSheets, JF.PrintingRemark,JEJ.WastageSheets, JF.JobBookingJobCardContentsID  Order By JF.TransID")
 
-        Dim FDetail As New DataTable
-        FDetail = GetData("Select JobCardFormNO,PlanContName,RefNo,TransID,PrintingStyle,Pages,PageNo,TotalSheets,PrintingRemark,ActualSheets,WasteSheets,JobBookingID,JobBookingJobCardContentsID From JobBookingJOBCardFormWiseDetails Where CompanyID='" & GBLCompanyID & "' AND JobBookingID ='" & JobBookingJobCardContentsID & "' Order By JobBookingJobCardContentsID,TransID")
-
-        Dim datasource As ReportDataSource = New ReportDataSource("FormDetails", FDetail)
+        Dim FDetail As DataTable = GetData("Select JobCardFormNO,PlanContName,RefNo,TransID,PrintingStyle,Pages,PageNo,TotalSheets,PrintingRemark,ActualSheets,WasteSheets,JobBookingID,JobBookingJobCardContentsID From JobBookingJOBCardFormWiseDetails Where CompanyID='" & GBLCompanyID & "' AND JobBookingID ='" & JobBookingJobCardContentsID & "' Order By JobBookingJobCardContentsID,TransID")
+        Dim datasource As New ReportDataSource("FormDetails", FDetail)
         f.DataSources.Add(datasource)
     End Sub
 
@@ -138,7 +115,7 @@ Partial Class ReportJobCard
                                         " INNER JOIN ItemGroupMaster as IGM ON IGM.ItemGroupID=IM.ItemGroupID And IGM.CompanyID=IM.CompanyID  And IGM.ItemGroupNameID In(-1,-2)  " &
                                         " Where J.CompanyID='" & GBLCompanyID & "' AND JM.JobBookingID='" & JobBookingJobCardContentsID & "'" &
                                         " GROUP BY JC.PlanContName,IGM.ItemGroupNameID,JC.JobCardContentNo,IM.ItemCode,JM.StockUnit,  IM.ItemName, JM.JobBookingJobCardContentsID, JM.JobBookingID, JC.CutSize, JC.CutL, JC.CutW, JC.CutLH, JC.CutHL,JM.ItemID,JC.CompanyID,JC.ActualSheets,JC.WastageSheets,JM.SequenceNo,JC.FullSheets,JC.MakeReadyWastageSheet ORDER BY JM.SequenceNo")
-        Dim datasource As ReportDataSource = New ReportDataSource("DataSetItemDetails", IDE)
+        Dim datasource As New ReportDataSource("DataSetItemDetails", IDE)
         i.DataSources.Add(datasource)
     End Sub
 
@@ -154,6 +131,7 @@ Partial Class ReportJobCard
         Dim datasource As ReportDataSource = New ReportDataSource("ReelDetails", RD)
         r.DataSources.Add(datasource)
     End Sub
+
     Private Sub ProductionMaterialDetailSubreportProcessing(ByVal senderMD As Object, ByVal m As SubreportProcessingEventArgs)
         Dim JobBookingJobCardContentsID As Integer = m.Parameters("JobBookingID").Values(0)
         Dim MD As DataTable = GetData("Select Distinct JP.ProcessID, PM.ProcessName + Case When JPM.RateFactor<>'' then '('+JPM.RateFactor+')'End As SpecialRemark,JP.JobBookingJobCardContentsID,JP.JobBookingID,IM.ItemCode,JP.PlanContName As ContentName,JJ.JobCardContentNo,  MM.MachineName , IM.ItemName,  JP.Remarks AS ProductionRemark ,JPM.EstimatedQuantity-JPM.WasteQty As ActualQty,JPM.WasteQty,JPM.RequiredQty, JPM.StockUnit AS Unit," &
@@ -170,6 +148,7 @@ Partial Class ReportJobCard
         Dim datasource As ReportDataSource = New ReportDataSource("MaterialDetails", MD)
         m.DataSources.Add(datasource)
     End Sub
+
     Private Sub OperationDetailSubreportProcessing(ByVal senderOD As Object, ByVal o As SubreportProcessingEventArgs)
         Dim JobBookingJobCardContentsID As Integer = o.Parameters("JobBookingJobCardContentsID").Values(0)
         Dim OD As DataTable = GetData("Select DISTINCT Null AS Remark,JP.JobBookingJobCardContentsID,JP.JobBookingID, JP.SequenceNo,Case When Isnull(JP.RateFactor,'')='' Then PM.ProcessName Else (PM.ProcessName +' - ('+ JP.RateFactor +')') End As ProcessName, Null AS MachineName,PM.ProcessID, Null AS EmployeeName, 0 AS ConsumedQty, 0 AS ReadyQty, PM.EndUnit, NUll as Modify_Date, 0 AS RejectedQty,JP.Status,Null AS UserName,Null AS Remark  " &
@@ -183,14 +162,12 @@ Partial Class ReportJobCard
     End Sub
 
     Private Function GetData(query As String) As DataTable
-        Dim con As New SqlConnection
-        Dim dss As DataSet = New DataSet()
-        Dim sql As String = ""
+        Dim dss As New DataSet()
         Dim dt As New DataTable
         Try
-            con = db.OpenDataBase()
-            sql = query
-            Dim cmd As SqlCommand = New SqlCommand(sql, con)
+            Dim con As SqlConnection = db.OpenDataBase()
+            Dim sql As String = query
+            Dim cmd As New SqlCommand(sql, con)
             Dim adapter As New SqlDataAdapter(cmd)
             adapter.Fill(dt)
             con.Close()
@@ -198,5 +175,73 @@ Partial Class ReportJobCard
         Catch ex As Exception
             Return dt
         End Try
+    End Function
+
+    Protected Sub Email()
+        MailError.InnerHtml = ""
+        GBLUserID = Convert.ToString(HttpContext.Current.Session("UserId"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyId"))
+        If ContID = "" Or GBLCompanyID <= 0 Or GBLUserID <= 0 Then Exit Sub
+        If (db.CheckAuthories("ProductionWorkOrder.aspx", GBLUserID, GBLCompanyID, "CanPrint", ContID) = False) Then
+            MailError.InnerHtml = "You are not authorized to print..!, Can't Print"
+            Exit Sub
+        End If
+
+        Dim DtUser As New DataTable
+        db.FillDataTable(DtUser, "SELECT Distinct IsnuLL(Nullif(EmailID,''),smtpUserName) As smtpUserID,  Isnull(smtpUserPassword,'') As smtpUserPassword,  Isnull(smtpServer,'smtp.gmail.com') As smtpServer,  Isnull(smtpServerPort,'587') As smtpServerPort,  Isnull(smtpAuthenticate,'True') As smtpAuthenticate,  Isnull(smtpUseSSL,'True') As smtpUseSSL FROM UserMaster Where Isnull(IsBlocked,0)=0 And IsnuLL(IsHidden,0)=0 And ISNULL(IsDeletedUser,0)=0 And CompanyID=" & GBLCompanyID & " And UserID=" & GBLUserID)
+        If DtUser.Rows.Count <= 0 Then MailError.InnerHtml = "Invalid user details" : Exit Sub
+        If DtUser.Rows(0)("smtpUserID") = "" Or DtUser.Rows(0)("smtpUserID").contains("@") = False Then
+            MailError.InnerHtml = "Invalid sender mail id, Please update mail id in user master"
+            Exit Sub
+        End If
+        Try
+            Dim mm As MailMessage = New MailMessage(DtUser.Rows(0)("smtpUserID").ToString(), TxtEmailTo.Value.ToString()) With {
+                .Subject = TxtSubject.Value.ToString(),
+                .Body = TxtEmailBody.Value.ToString()
+            }
+            mm.Attachments.Add(New Attachment(ExportReportToPDF(Server.MapPath("~/Files/JobCard/"), "JobCard.pdf")))
+            mm.IsBodyHtml = True
+            mm.Priority = MailPriority.High
+            If TxtEmailCC.Value.ToString() <> "" And TxtEmailCC.Value.Contains("@") = True Then
+                mm.CC.Add(TxtEmailCC.Value.ToString())
+            End If
+            If TxtEmailBcc.Value.ToString() <> "" And TxtEmailBcc.Value.Contains("@") = True Then
+                mm.Bcc.Add(TxtEmailBcc.Value.ToString())
+            End If
+
+            Dim credential As NetworkCredential = New NetworkCredential With {
+                .UserName = DtUser.Rows(0)("smtpUserID").ToString(),
+                .Password = DtUser.Rows(0)("smtpUserPassword").ToString()
+            }
+
+            Dim smtp As SmtpClient = New SmtpClient With {
+                .Host = DtUser.Rows(0)("smtpServer").ToString(),
+                .Credentials = credential,
+                .Port = DtUser.Rows(0)("smtpServerPort").ToString(),
+                .EnableSsl = DtUser.Rows(0)("smtpUseSSL").ToString()
+                }
+            smtp.Send(mm)
+
+            MailError.InnerHtml = "Email Send Successfully"
+            db.ExecuteNonSQLQuery("Update JobBookingJobCard Set IsMailSend=1,MailSendBy=" & GBLUserID & ",MailSendDate=GETDATE() Where CompanyID=" & GBLCompanyID & " And JobBookingNo='" & ContID & "'")
+        Catch ex As Exception
+            'MsgBox(ex.Message)
+            MailError.InnerHtml = ex.Message
+        End Try
+    End Sub
+
+    Private Function ExportReportToPDF(ByVal path As String, ByVal reportName As String) As String
+        Dim warnings As Warning()
+        Dim streamids As String()
+        Dim DeviceInfo = "<DeviceInfo><EmbedFonts>None</EmbedFonts></DeviceInfo>"
+        Dim bytes As Byte() = ReportViewer1.LocalReport.Render("PDF", DeviceInfo)
+        Dim filename As String = path & reportName
+
+        Using fs = New System.IO.FileStream(filename, System.IO.FileMode.Create)
+            fs.Write(bytes, 0, bytes.Length)
+            fs.Close()
+        End Using
+
+        Return filename
     End Function
 End Class

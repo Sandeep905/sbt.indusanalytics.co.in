@@ -377,19 +377,17 @@ Public Class WebService_OtherMaster
     <WebMethod(EnableSession:=True)>
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function GetUser() As String
-        Context.Response.Clear()
-        Context.Response.ContentType = "application/json"
 
         GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
-
-        Dim IsUserCreate As String
-        IsUserCreate = db.GetColumnValue("Isnull(IsAdmin,'False')", "UserMaster", " CompanyID=" & GBLCompanyID & " And UserID=" & GBLUserID & " And Isnull(IsBlocked,0)=0 And Isnull(IsDeletedUser,0)=0")
+        Dim VendorID As String = Convert.ToString(HttpContext.Current.Session("VendorID"))
+        If VendorID <> "" Or Val(VendorID) > 0 Then VendorID = "And VendorID=" & VendorID
+        str = ""
+        Dim IsUserCreate As String = db.GetColumnValue("Isnull(IsCreateUser,'False')", "UserMaster", " CompanyID=" & GBLCompanyID & " And UserID=" & GBLUserID & " And Isnull(IsBlocked,0)=0 And Isnull(IsDeletedUser,0)=0")
         If IsUserCreate = False Or IsUserCreate = "False" Then
-            str = "Select nullif(UserID,'') as UserID,nullif(UserName,'') as UserName,nullif(Password,'') as Password,nullif(ContactNo,'') as ContactNo,nullif(UnderUserID,'') as UnderUserID,nullif(Designation,'') as Designation,nullif(EmailID,'') as EmailID,nullif(Country,'') as Country,nullif(State,'') as State,nullif(City,'') as City,nullif(smtpUserName,'') as smtpUserName,nullif(smtpUserPassword,'') as smtpUserPassword,nullif(smtpServer,'') as smtpServer,nullif(smtpServerPort,'') as smtpServerPort,nullif(smtpAuthenticate,'') as smtpAuthenticate,nullif(smtpUseSSL,'') as smtpUseSSL,nullif(Details,'') as Details,nullif(IsCreateUser,'') as IsCreateUser,nullif(IsExtraPaperIssue,'') as IsExtraPaperIssue,nullif(IsUserCannotViewCostingDetail,'') as IsUserCannotViewCostingDetail,nullif(IsHidden,'') as IsHidden,nullif(IsAdmin,'') as IsAdmin,nullif(ISChooseAnotherPaper,'') as ISChooseAnotherPaper,nullif(IsEditableProductionDate,'') as IsEditableProductionDate,nullif(ProfilePicHref,'') as ProfilePicHref,nullif(SignPicHref,'') as SignPicHref,Nullif(UserWiseOperatorsIDStr,'') As UserWiseOperatorsIDStr,Nullif(EmailMessage,'') As EmailMessage,Nullif(HeaderText,'') As HeaderText,Nullif(FooterText,'') As FooterText from UserMaster Where CompanyID=" & GBLCompanyID & " And UserID=" & GBLUserID & " and Isnull(IsDeletedUser,0)<>1  order by UserID desc "
-        Else
-            str = "Select nullif(UserID,'') as UserID,nullif(UserName,'') as UserName,nullif(Password,'') as Password,nullif(ContactNo,'') as ContactNo,nullif(UnderUserID,'') as UnderUserID,nullif(Designation,'') as Designation,nullif(EmailID,'') as EmailID,nullif(Country,'') as Country,nullif(State,'') as State,nullif(City,'') as City,nullif(smtpUserName,'') as smtpUserName,nullif(smtpUserPassword,'') as smtpUserPassword,nullif(smtpServer,'') as smtpServer,nullif(smtpServerPort,'') as smtpServerPort,nullif(smtpAuthenticate,'') as smtpAuthenticate,nullif(smtpUseSSL,'') as smtpUseSSL,nullif(Details,'') as Details,nullif(IsCreateUser,'') as IsCreateUser,nullif(IsExtraPaperIssue,'') as IsExtraPaperIssue,nullif(IsUserCannotViewCostingDetail,'') as IsUserCannotViewCostingDetail,nullif(IsHidden,'') as IsHidden,nullif(IsAdmin,'') as IsAdmin,nullif(ISChooseAnotherPaper,'') as ISChooseAnotherPaper,nullif(IsEditableProductionDate,'') as IsEditableProductionDate,nullif(ProfilePicHref,'') as ProfilePicHref,nullif(SignPicHref,'') as SignPicHref,Nullif(UserWiseOperatorsIDStr,'') As UserWiseOperatorsIDStr,Nullif(EmailMessage,'') As EmailMessage,Nullif(HeaderText,'') As HeaderText,Nullif(FooterText,'') As FooterText from UserMaster Where CompanyID=" & GBLCompanyID & " and Isnull(IsDeletedUser,0)<>1  order by UserID desc "
+            str = " And UserID=" & GBLUserID
         End If
+        str = "Select UserID,UserName,Password,ContactNo,UnderUserID,nullif(Designation,'') as Designation,nullif(EmailID,'') as EmailID,nullif(Country,'') as Country,nullif(State,'') as State,nullif(City,'') as City,nullif(smtpUserName,'') as smtpUserName,nullif(smtpUserPassword,'') as smtpUserPassword,nullif(smtpServer,'') as smtpServer,nullif(smtpServerPort,'') as smtpServerPort,nullif(smtpAuthenticate,'') as smtpAuthenticate,nullif(smtpUseSSL,'') as smtpUseSSL,nullif(Details,'') as Details,IsCreateUser,IsExtraPaperIssue,IsUserCannotViewCostingDetail,IsHidden,IsAdmin,ISChooseAnotherPaper,IsEditableProductionDate,nullif(ProfilePicHref,'') as ProfilePicHref,nullif(SignPicHref,'') as SignPicHref,Nullif(UserWiseOperatorsIDStr,'') As UserWiseOperatorsIDStr,Nullif(EmailMessage,'') As EmailMessage,Nullif(HeaderText,'') As HeaderText,Nullif(FooterText,'') As FooterText from UserMaster Where CompanyID=" & GBLCompanyID & str & " And IsDeletedUser=0 " & VendorID & " Order By UserID desc "
 
         db.FillDataTable(dataTable, str)
         data.Message = ConvertDataTableTojSonString(dataTable)
@@ -433,19 +431,14 @@ Public Class WebService_OtherMaster
     <WebMethod(EnableSession:=True)>
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function showData(ByVal ID As String) As String
-        'ByVal UserId As String
         GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
 
         Try
-            Dim str As String
 
-            str = "Select isnull(MM.SetGroupIndex, 0) As SetGroupIndex,Isnull(MM.ModuleID,0) AS ModuleID,Isnull(MM.ModuleHeadDisplayOrder,0) AS ModuleHeadDisplayOrder,  " &
-                   " Nullif(MM.ModuleHeadName,'') AS ModuleHeadName,Nullif(MM.ModuleName,'') AS ModuleName,nullif(MM.ModuleDisplayName,'') as ModuleDisplayName  " &
-                   " ,Isnull(MA.CanView,0) AS CanView,Isnull(MA.CanSave,0) AS CanSave,Isnull(MA.CanEdit,0) AS CanEdit,Isnull(MA.CanDelete,0) AS CanDelete,  " &
-                   " Isnull(MA.CanPrint, 0) As CanPrint,Isnull(MA.CanExport,0) As CanExport,(select count(distinct(SetGroupIndex)) from ModuleMaster) as SectionCount From ModuleMaster As MM Left Join UserModuleAuthentication As MA On MA.ModuleID=MM.ModuleID And MM.CompanyID=MA.CompanyID And MA.UserID='" & ID & "' Where MM.CompanyID=" & GBLCompanyID & ""
+            str = "Select MM.SetGroupIndex,MM.ModuleID,MM.ModuleHeadDisplayOrder, MM.ModuleHeadName,MM.ModuleName,MM.ModuleDisplayName ,MA.CanView,MA.CanSave,MA.CanEdit,MA.CanDelete,  " &
+                   " MA.CanPrint,MA.CanExport,(Select count(Distinct(SetGroupIndex)) from ModuleMaster) as SectionCount From ModuleMaster As MM Left Join UserModuleAuthentication As MA On MA.ModuleID=MM.ModuleID And MM.CompanyID=MA.CompanyID And MA.UserID='" & ID & "' Where MM.CompanyID=" & GBLCompanyID & ""
 
             db.FillDataTable(dataTable, str)
-            'dataTable.Rows.Add(0, "All", 0, 0, 0, 0, 0, 0)
             data.Message = ConvertDataTableTojSonString(dataTable)
             Return js.Serialize(data.Message)
         Catch ex As Exception
@@ -458,33 +451,26 @@ Public Class WebService_OtherMaster
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function GridColumnDynamic(ByVal ID As String) As String
         GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
-        GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
         Try
-            Dim str As String
-            str = "select isnull(ModuleID,0) as ModuleID,nullif(GridName,'') as GridName,isnull(nullif(GridColumnIndexNo,''),0) as GridColumnIndexNo, " &
-                    "nullif(GridColumnDatafieldName,'') as GridColumnDatafieldName,isnull(GridColumnWidth,0) as GridColumnWidth,nullif(GridColumnCaption,'') as GridColumnCaption,nullif(ColumnString,'') as ColumnString,nullif(ColumnVisibe,'') as ColumnVisibe " &
-                    ",nullif(ColumnDataType,'') as ColumnDataType,nullif(ColumnGroupIndex,'') as ColumnGroupIndex,nullif(ColummnFormat,'') as ColummnFormat" &
-                   " From UserModuleGridLayout Where UserID = '" & ID & "' And CompanyID =" & GBLCompanyID & ""
+            str = "Select ModuleID,nullif(GridName,'') as GridName,GridColumnIndexNo, " &
+                    " nullif(GridColumnDatafieldName,'') as GridColumnDatafieldName,GridColumnWidth,nullif(GridColumnCaption,'') as GridColumnCaption,nullif(ColumnString,'') as ColumnString,nullif(ColumnVisibe,'') as ColumnVisibe " &
+                    " ,nullif(ColumnDataType,'') as ColumnDataType,ColumnGroupIndex,nullif(ColummnFormat,'') as ColummnFormat" &
+                    " From UserModuleGridLayout Where UserID = " & ID & " And CompanyID =" & GBLCompanyID
             db.FillDataTable(dataTable, str)
             data.Message = ConvertDataTableTojSonString(dataTable)
             Return js.Serialize(data.Message)
         Catch ex As Exception
             Return ex.Message
         End Try
-
     End Function
 
     '---------------Open UserMaster code---------------------------------
     <WebMethod(EnableSession:=True)>
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function UserDesignation() As String
-        Context.Response.Clear()
-        Context.Response.ContentType = "application/json"
-
         GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
-        GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
 
-        str = "Select distinct nullif(Designation,'') as Designation from UserMaster where CompanyID=" & GBLCompanyID & " and Isnull(IsDeletedUser,0)<>1 "
+        str = "Select Distinct nullif(Designation,'') as Designation From UserMaster Where CompanyID=" & GBLCompanyID & " And Isnull(IsDeletedUser,0)=0 "
         db.FillDataTable(dataTable, str)
         data.Message = ConvertDataTableTojSonString(dataTable)
         Return js.Serialize(data.Message)
@@ -495,36 +481,32 @@ Public Class WebService_OtherMaster
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function SaveUserData(ByVal CostingDataUserMaster As Object, ByVal OperatorAllocation As Object) As String
 
-        Dim dt As New DataTable
         Dim KeyField As String
         Dim AddColName, AddColValue, TableName As String
-        AddColName = ""
-        AddColValue = ""
 
         GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
 
-        If db.CheckAuthories("EditProfile.aspx", GBLUserID, GBLCompanyID, "CanSave") = False Then
-            Return "You are not authorized to save user profile..!"
-        End If
+        If db.CheckAuthories("EditProfile.aspx", GBLUserID, GBLCompanyID, "CanSave") = False Then Return "You are not authorized to save user profile..!"
 
         Try
 
             TableName = "UserMaster"
-            AddColName = "LastModiDate,CreationDate,CompanyID,FYear,CreatedBy,ModifiedBy"
-            AddColValue = "GETDATE(),GETDATE()," & GBLCompanyID & ",'" & GBLFYear & "'," & GBLUserID & "," & GBLUserID & ""
+            AddColName = "LastModiDate,CreationDate,CompanyID,FYear,CreatedBy"
+            AddColValue = "GETDATE(),GETDATE()," & GBLCompanyID & ",'" & GBLFYear & "'," & GBLUserID
             str = db.InsertDatatableToDatabase(CostingDataUserMaster, TableName, AddColName, AddColValue)
             If IsNumeric(str) = False Then
-                Return "Error: " & str
+                Return "Error in main: " & str
             End If
 
             TableName = "UserOperatorAllocation"
             AddColName = "CreatedDate,CompanyID,FYear,CreatedBy,UserID"
-            AddColValue = "GETDATE()," & GBLCompanyID & ",'" & GBLFYear & "'," & GBLUserID & ",'" & str & "'"
+            AddColValue = "GETDATE()," & GBLCompanyID & ",'" & GBLFYear & "'," & GBLUserID & "," & str
             KeyField = db.InsertDatatableToDatabase(OperatorAllocation, TableName, AddColName, AddColValue)
             If IsNumeric(KeyField) = False Then
                 db.ExecuteNonSQLQuery("Delete From UserMaster Where UserID=" & str & " And CompanyID=" & GBLCompanyID)
-                Return "Error: " & KeyField
+                db.ExecuteNonSQLQuery("Delete From UserOperatorAllocation Where UserID=" & str & " And CompanyID=" & GBLCompanyID)
+                Return "Error in operator allocation: " & KeyField
             End If
 
             KeyField = "Success"
@@ -544,7 +526,6 @@ Public Class WebService_OtherMaster
         Dim dt As New DataTable
         Dim KeyField As String
         Dim AddColName, wherecndtn, TableName As String
-        AddColName = ""
 
         GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
@@ -691,9 +672,9 @@ Public Class WebService_OtherMaster
         GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
 
-        str = " Select Distinct MM.ModuleHeadName,nullif(MM.ModuleDisplayName,'') as ModuleDisplayName,isnull(MM.SetGroupIndex,0) as SetGroupIndex,(Select Count(ModuleHeadName) From ModuleMaster where ModuleHeadName=MM.ModuleHeadName And CompanyID=MM.CompanyID And IsDeletedTransaction=0) as NumberOfChild,MM.ModuleName ,MM.ModuleDisplayOrder " &
+        str = " Select Distinct MM.ModuleHeadName,MM.ModuleDisplayName,MM.SetGroupIndex,(Select Count(ModuleHeadName) From ModuleMaster where ModuleHeadName=MM.ModuleHeadName And CompanyID=MM.CompanyID And IsDeletedTransaction=0) as NumberOfChild,MM.ModuleName ,MM.ModuleDisplayOrder " &
                "  From UserModuleAuthentication As UMA Inner Join ModuleMaster As MM On UMA.ModuleID=MM.ModuleID And UMA.CompanyID=MM.CompanyID And MM.IsDeletedTransaction=0 And MM.IsLocked=0 " &
-               "  Where UMA.CompanyID=" & GBLCompanyID & " AND UMA.UserID=" & GBLUserID & " AND Isnull(UMA.CanView,0)=1 And Isnull(MM.IsDeletedTransaction,0)=0 " &
+               "  Where UMA.CompanyID=" & GBLCompanyID & " AND UMA.UserID=" & GBLUserID & " AND Isnull(UMA.CanView,0)=1 And Isnull(MM.IsDeletedTransaction,0)=0 And Isnull(MM.ModuleDisplayName,'')<>''" &
                "  Group by MM.ModuleHeadName,MM.SetGroupIndex,MM.ModuleName,MM.ModuleDisplayName,MM.ModuleDisplayOrder,MM.CompanyID " &
                "  HAVING (select Count(ModuleHeadName) from ModuleMaster where ModuleHeadName=MM.ModuleHeadName And CompanyID=MM.CompanyID And IsDeletedTransaction=0)>0 Order By SetGroupIndex,MM.ModuleDisplayOrder"
         db.FillDataTable(dataTable, str)

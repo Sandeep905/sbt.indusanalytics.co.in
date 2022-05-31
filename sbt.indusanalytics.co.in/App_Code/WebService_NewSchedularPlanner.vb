@@ -55,6 +55,8 @@ Public Class WebService_NewSchedularPlanner
             GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
             GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
             GBLFYear = Convert.ToString(HttpContext.Current.Session("FYear"))
+            Dim VendorID As String = Convert.ToString(HttpContext.Current.Session("VendorID"))
+            VendorID = IIf(VendorID = 0 Or VendorID = "", "", " And MM.VendorID =" & VendorID)
 
             Dim sql As String
             If checkB = "True" And checkD = "False" Then
@@ -72,7 +74,7 @@ Public Class WebService_NewSchedularPlanner
                   " From LedgerMaster as LM   " &
                   " INNER JOIN JobOrderBooking AS JOB ON  JOB.LedgerID = LM.LedgerID And JOB.CompanyID = LM.CompanyID   " &
                   " INNER JOIN JobBookingJobCard AS JC ON JC.OrderBookingID = JOB.OrderBookingID AND JC.CompanyID = JOB.CompanyID INNER JOIN CategoryMaster AS CM ON JC.CategoryID = CM.CategoryID AND JC.CompanyID = CM.CompanyID " &
-                  " Where JC.IsClose=0 And Isnull((Select Count(1) From JobBookingJobCardContents Where isnull(IsRelease,0)=0 And JobBookingID=JC.JobBookingID And CompanyID=JC.CompanyID ),0)>0 And JC.CompanyID='" & GBLCompanyID & "' " & sql & " AND Isnull(JC.IsDeletedTransaction,0) = 0   " &
+                  " Where JC.IsClose=0 And Isnull((Select Count(1) From JobBookingJobCardContents Where isnull(IsRelease,0)=0 And JobBookingID=JC.JobBookingID And CompanyID=JC.CompanyID ),0)>0 And JC.CompanyID='" & GBLCompanyID & "' " & sql & " AND Isnull(JC.IsDeletedTransaction,0) = 0   " & VendorID &
                   " GROUP BY LM.LedgerID , LM.LedgerName ,JOB.SalesOrderNO , JC.PONO ,CM.CategoryName, Replace(convert(nvarchar(30),JC.JobBookingDate,106),' ','-')  ,  JC.JobName  , JC.OrderQuantity,replace(convert(nvarchar(30),JC.DeliveryDate,106),' ','-') , JC.JobBookingNo,JC.JobBookingID,JC.ProductCode , JC.JobPriority  " &
                   " ORDER BY JC.JobBookingID"
 
@@ -95,19 +97,17 @@ Public Class WebService_NewSchedularPlanner
             GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
             GBLFYear = Convert.ToString(HttpContext.Current.Session("FYear"))
 
-            str = "Select isnull(JCD.JobBookingJobCardContentsID,0) as JobBookingJobCardContentsID,isnull(LM.LedgerID,0) as LedgerID, nullif(LM.LedgerName,'') as LedgerName,  " &
-                  "nullif(JOB.SalesOrderNO,'') as SalesOrderNO, nullif(JC.PONO,'') as PONO, nullif(JCD.JobCardContentNo,'') as JobCardContentNo,     " &
-                  "replace(convert(nvarchar(30),JC.JobBookingDate,106),' ','-') as JobBookingDate, nullif(JC.JobName,'') as JobName, nullif(JCD.PlanContName,'') as PlanContName,  " &
-                  "isnull(JC.OrderQuantity,0) as OrderQuantity,    replace(convert(nvarchar(30),JC.DeliveryDate,106),' ','-') as DeliveryDate, nullif(JC.ProductCode,'') as ProductCode,  " &
-                  "nullif(JC.JobPriority,'') as JobPriority, nullif(JCD.JobType,'') as JobType,    nullif(IM.ItemCode,'') as ItemCode,nullif(IM.ItemType,'') as ItemType,   " &
-                  "nullif(IM.ItemName,'') as ItemName,isnull(JCD.FullSheets,0) as FullSheets, isnull(JCD.ActualSheets,0) as ActualSheets     " &
-                  "From LedgerMaster as LM   " &
-                  "INNER JOIN JobOrderBooking AS JOB ON  JOB.LedgerID = LM.LedgerID And JOB.CompanyID = LM.CompanyID AND Isnull(JOB.IsDeletedTransaction,0)=0 " &
+            str = "Select JCD.JobBookingJobCardContentsID,LM.LedgerID, LM.LedgerName,JOB.SalesOrderNO, nullif(JC.PONO,'') as PONO, JCD.JobCardContentNo,     " &
+                  "replace(convert(nvarchar(30),JC.JobBookingDate,106),' ','-') as JobBookingDate, JC.JobName, JCD.PlanContName, JCD.VendorID, " &
+                  "JC.OrderQuantity, replace(convert(nvarchar(30),JC.DeliveryDate,106),' ','-') As DeliveryDate, nullif(JC.ProductCode,'') as ProductCode,  " &
+                  "nullif(JC.JobPriority,'') As JobPriority, nullif(JCD.JobType,'') as JobType, IM.ItemCode,IM.ItemType, IM.ItemName,JCD.FullSheets, JCD.ActualSheets " &
+                  "From LedgerMaster as LM  " &
+                  "INNER JOIN JobOrderBooking AS JOB ON JOB.LedgerID = LM.LedgerID And JOB.CompanyID = LM.CompanyID AND Isnull(JOB.IsDeletedTransaction,0)=0 " &
                   "INNER JOIN JobBookingJobCard AS JC ON JC.OrderBookingID = JOB.OrderBookingID AND JC.CompanyID = JOB.CompanyID   " &
                   "INNER JOIN  JobBookingJobCardContents as JCD ON JCD.JobBookingID = JC.JobBookingID And JCD.CompanyID = JC.CompanyID   " &
                   "INNER JOIN ItemMaster as IM ON IM.ItemID = JCD.PaperID And JCD.CompanyID = IM.CompanyID   " &
                   "Where isnull(JCD.IsRelease,0)<>1 And JCD.CompanyID='" & GBLCompanyID & "' And JC.JobBookingID=" & JCId & " AND Isnull(JC.IsDeletedTransaction,0) = 0   " &
-                  "GROUP BY JCD.JobBookingJobCardContentsID   , LM.LedgerID ,  LM.LedgerName ,JOB.SalesOrderNO  ,  JC.PONO   ,  JCD.JobCardContentNo ,  " &
+                  "GROUP BY JCD.JobBookingJobCardContentsID , JCD.VendorID,LM.LedgerID ,  LM.LedgerName ,JOB.SalesOrderNO  ,  JC.PONO   ,  JCD.JobCardContentNo ,  " &
                   "replace(convert(nvarchar(30),JC.JobBookingDate,106),' ','-')  ,  JC.JobName   ,  JCD.PlanContName   , JC.OrderQuantity   ,    replace(convert(nvarchar(30),JC.DeliveryDate,106),' ','-') ,   " &
                   "JC.ProductCode , JC.JobPriority  ,  JCD.JobType ,    IM.ItemCode   , IM.ItemType ,  IM.ItemName  ,     JCD.FullSheets  ,  JCD.ActualSheets   " &
                   "ORDER BY JCD.JobCardContentNo"
@@ -224,11 +224,9 @@ Public Class WebService_NewSchedularPlanner
     Public Function GetMachine() As String
         'ByVal UserId As String
         Try
-            Dim str As String
-
             GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
 
-            str = " Select Distinct isnull(MM.MachineID,0) as MachineID, nullif(MM.MachineName,'') as MachineName, isnull(MM.MachineSpeed,0) as MachineSpeed,isnull(PM.ProcessID,0) as ProcessID  From ProcessMaster as PM INNER JOIN ProcessAllocatedMachineMaster as PAM ON PAM.ProcessID = PM.ProcessID AND PAM.CompanyID = PM.CompanyID INNER JOIN   " &
+            str = " Select Distinct MM.MachineID, MM.MachineName, MM.MachineSpeed,PM.ProcessID,MM.VendorID From ProcessMaster As PM INNER JOIN ProcessAllocatedMachineMaster As PAM ON PAM.ProcessID = PM.ProcessID AND PAM.CompanyID = PM.CompanyID INNER JOIN   " &
                     "MachineMaster AS MM ON MM.MachineID = PAM.MachineID AND  PAM.CompanyID = MM.CompanyID Where PAM.CompanyID = " & GBLCompanyID & " Order BY MachineName"
 
             db.FillDataTable(dataTable, str)
@@ -267,12 +265,9 @@ Public Class WebService_NewSchedularPlanner
         Dim dt As New DataTable
         Dim KeyField As String
         Dim AddColName, AddColValue, TableName, ScheduleID As String
-        AddColName = ""
-        AddColValue = ""
 
         GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
-        GBLUserName = Convert.ToString(HttpContext.Current.Session("UserName"))
         GBLFYear = Convert.ToString(HttpContext.Current.Session("FYear"))
 
         Try
@@ -286,18 +281,16 @@ Public Class WebService_NewSchedularPlanner
 
             TableName = "JobScheduleRelease"
             ScheduleID = db.GenerateMaxVoucherNo(TableName, "ScheduleID", " Where CompanyID=" & GBLCompanyID)
-            AddColName = "ModifiedDate,CreatedDate,CompanyID,CreatedBy,ModifiedBy,ScheduleID"
-            AddColValue = "'" & DateTime.Now & "',Getdate(),'" & GBLCompanyID & "','" & GBLUserID & "','" & GBLUserID & "'," & ScheduleID & ""
+            AddColName = "CreatedDate,CompanyID,CreatedBy,ScheduleID"
+            AddColValue = "Getdate()," & GBLCompanyID & "," & GBLUserID & "," & ScheduleID
 
             str = db.InsertDatatableToDatabase(FinalGridDetail, TableName, AddColName, AddColValue)
             If IsNumeric(str) = False Then
                 Return "Error: " & str
             End If
 
-            str = "Update JobBookingJobCardContents Set IsRelease = 1, ReleasedBy = '" & GBLUserID & "', ReleasedDate = '" & DateTime.Now & "' Where  JobBookingJobCardContentsID = '" & FinalGridDetail(0)("JobBookingJobCardContentsID") & "' And  CompanyID = " & GBLCompanyID
-            db.ExecuteNonSQLQuery(str)
-
-            KeyField = "Success"
+            str = "Update JobBookingJobCardContents Set IsRelease = 1, ReleasedBy = '" & GBLUserID & "', ReleasedDate = GETDATE() Where  JobBookingJobCardContentsID = " & FinalGridDetail(0)("JobBookingJobCardContentsID") & " And  CompanyID = " & GBLCompanyID
+            KeyField = db.ExecuteNonSQLQuery(str)
 
         Catch ex As Exception
             KeyField = "Error: " & ex.Message
@@ -352,15 +345,12 @@ Public Class WebService_NewSchedularPlanner
             GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
             GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
 
-            If db.CheckAuthories("JobScheduleRelease.aspx", GBLUserID, GBLCompanyID, "CanDelete") = False Then
-                Return "You are not authorized to delete"
-            End If
+            If db.CheckAuthories("JobScheduleRelease.aspx", GBLUserID, GBLCompanyID, "CanDelete") = False Then Return "You are not authorized to delete"
+
             If db.IsDeletable("JobBookingID", "ProductionEntry", "Where CompanyID = " & GBLCompanyID & " And JobBookingJobCardContentsID = " & JobContentsID & "") = False Then
                 Return "Production is started you can't delete this schedule"
             End If
-            If db.IsDeletable("JobBookingID", "JobBookingJobCard", "Where CompanyID = " & GBLCompanyID & " And JobBookingID = " & JobContentsID & "") = False Then
-                Return "Production is started you can't delete this schedule"
-            End If
+
             str = "Update JobScheduleRelease Set IsDeletedTransaction=1,DeletedDate=Getdate(),DeletedBy=" & GBLUserID & " Where ScheduleID=" & JobScheduleID & " And JobBookingJobCardContentsID = '" & JobContentsID & "' And CompanyID=" & GBLCompanyID
             db.ExecuteNonSQLQuery(str)
 

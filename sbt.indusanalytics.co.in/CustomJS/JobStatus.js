@@ -68,7 +68,7 @@ $("#JobCardGridGrid").dxDataGrid({
         text: 'Data is loading...'
     },
     height: function () {
-        return window.innerHeight / 2.8;
+        return window.innerHeight / 4;
     },
     columns: [{ dataField: "JobCardContentNo", visible: true, caption: "Job Content No" },
     { dataField: "LedgerName", visible: true, caption: "Ledger Name", width: 150, hidingPriority: 1 },
@@ -164,7 +164,7 @@ $("#JobStatusGrid").dxDataGrid({
         text: 'Data is loading...'
     },
     height: function () {
-        return window.innerHeight / 2;
+        return window.innerHeight / 2.8;
     },
     onRowPrepared: function (e) {
         if (e.rowType === "header") {

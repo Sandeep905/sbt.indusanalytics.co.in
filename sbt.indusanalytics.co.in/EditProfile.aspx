@@ -172,6 +172,11 @@
                                         <textarea id="Details" class="forTextBox" style="margin-top: 0px;"></textarea>
                                         <div style="min-height: 20px; float: left; width: 100%"><strong id="ValStrDetails" style="color: red; font-size: 12px; display: none"></strong></div>
                                     </div>
+                                    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+                                        <label class="font-11">Associate Partner</label>
+                                        <div id="SelectBoxVendor"></div>
+                                        <strong id="ValStrSelectBoxVendor" style="color: red; font-size: 12px; display: none"></strong>
+                                    </div>
 
                                     <%--<div class="col-lg-3 col-md-3 col-sm-3 col-xs-12" >
                                                 <div style="float: left; width: 100%; height: auto">

@@ -107,10 +107,6 @@
                         <div id="SelJobCard"></div>
                     </div>
                 </div>
-                <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12">
-                    <b id="PRID" style="display: none"></b><b id="PRDisName" style="display: none"></b>
-                    <strong id="PIMasterDisplayName" class="MasterDisplayName" style="float: right; color: #42909A">Job Status</strong>
-                </div>
             </div>
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                 <label class="font-12">Job Card Detail's</label>

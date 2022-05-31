@@ -870,18 +870,29 @@ Public Class WebService_LedgerMaster
     <WebMethod(EnableSession:=True)>
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function ExistMachineID(ByVal EmployeeID As String) As String
-        Context.Response.Clear()
-        Context.Response.ContentType = "application/json"
-
         GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+        Dim VendorID As String = Convert.ToString(HttpContext.Current.Session("VendorID"))
+        VendorID = IIf(VendorID = 0 Or VendorID = "", "", " And VendorID =" & VendorID)
 
-        str = "Select Top(1) MachineIDString from EmployeeMachineAllocation where CompanyID=" & GBLCompanyID & " and LedgerID='" + EmployeeID + "' And isnull(IsDeletedTransaction,0)<>1"
+        str = "Select Top(1) MachineIDString from EmployeeMachineAllocation Where CompanyID=" & GBLCompanyID & " and LedgerID='" + EmployeeID + "' And isnull(IsDeletedTransaction,0)<>1 " & VendorID
 
         db.FillDataTable(dataTable, str)
         data.Message = ConvertDataTableTojSonString(dataTable)
         Return js.Serialize(data.Message)
     End Function
 
+    '-----------------------------------Get Vendor Wise Machine Master------------------------------------------
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function VendorMachineGrid(ByVal VendorID As String) As String
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+        VendorID = IIf(VendorID = 0 Or VendorID = "", "", " And MM.VendorID IN(Select VendorID From LedgerMaster Where CompanyID=" & GBLCompanyID & " And IsDeletedTransaction = 0 And LedgerID=" & VendorID & ")")
+        str = "Select MM.MachineID, MM.MachineName, MM.DepartmentID ,DM.DepartmentName From MachineMaster As MM Inner Join DepartmentMaster as DM on MM.DepartmentID=DM.DepartmentID And MM.CompanyID=DM.CompanyID Where MM.CompanyID=" & GBLCompanyID &
+                " And MM.IsDeletedTransaction = 0 " & VendorID & " Order By MM.MachineName"
+        db.FillDataTable(dataTable, str)
+        data.Message = ConvertDataTableTojSonString(dataTable)
+        Return js.Serialize(data.Message)
+    End Function
     ''----------------------------Open EmployeeMachineAllocation  Delete From GridClick  ------------------------------------------
     <WebMethod(EnableSession:=True)>
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>

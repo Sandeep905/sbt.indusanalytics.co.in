@@ -134,18 +134,15 @@
                         </div>
                         <div class="col-lg-2 col-md-2 col-sm-2 col-xs-9 padding-0 margin-0 hidden">
                             <div class="col-lg-4 col-md-1 col-sm-4 col-xs-3" style="padding: 0px; margin: 0px; display: none;">
-                                <a id="BtnBooked" href='#' class="iconButton" style="margin-top: 1px; margin-left: 2px;">Booked
-                                </a>
+                                <a id="BtnBooked" href='#' class="iconButton" style="margin-top: 1px; margin-left: 2px;">Booked</a>
                             </div>
                             <div class="col-lg-4 col-md-4 col-sm-4 col-xs-3" style="padding: 0px; margin: 0px; display: none;">
-                                <a id="BtnDelivery" href='#' class="iconButton" style="margin-top: 1px; margin-left: 2px;">Delivery
-                                </a>
+                                <a id="BtnDelivery" href='#' class="iconButton" style="margin-top: 1px; margin-left: 2px;">Delivery</a>
                             </div>
                         </div>
 
                         <div class="col-lg-1 col-md-1 col-sm-1 col-xs-3 padding-0 margin-0" style="float: right;" title="Job Schedule Release">
                             <b id="MasterID" style="display: none"></b><b id="MasterName" style="display: none"></b>
-                            <strong id="MasterDisplayName" class="MasterDisplayName" style="color: #42909A">Sch. Release</strong>
                         </div>
                     </div>
                 </div>

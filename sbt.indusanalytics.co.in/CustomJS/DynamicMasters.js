@@ -697,7 +697,7 @@ $("#BtnSave").click(function () {
                                 alertTag = "ValStr" + columnlength[i].FieldName;
                                 document.getElementById(alertTag).style.fontSize = "10px";
                                 document.getElementById(alertTag).style.display = "block";
-                                document.getElementById(alertTag).innerHTML = columnlength[i].FieldDisplayName+ ' should not be empty..';
+                                document.getElementById(alertTag).innerHTML = columnlength[i].FieldDisplayName + ' should not be empty..';
                                 return false;
                             }
                             else {
@@ -712,7 +712,7 @@ $("#BtnSave").click(function () {
                                 alertTag = "ValStr" + columnlength[i].FieldName;
                                 document.getElementById(alertTag).style.fontSize = "10px";
                                 document.getElementById(alertTag).style.display = "block";
-                                document.getElementById(alertTag).innerHTML = columnlength[i].FieldDisplayName+ ' should not be empty..';
+                                document.getElementById(alertTag).innerHTML = columnlength[i].FieldDisplayName + ' should not be empty..';
                                 return false;
                             }
                             else {
@@ -792,28 +792,17 @@ $("#BtnSave").click(function () {
 
                 FilterObj = { 'GetFilterData': OperationItemMasterRecord };
 
-                if (GblItemNameString !== "" && GblItemNameString !== undefined && GblItemNameString !== "null" && GblItemNameString !== null) {
+                if (GblItemNameString.length > 0) {
                     var strIN = GblItemNameString;
                     strIN = strIN.split(",");
                     INValue = "";
-                    var optIN = {};
                     for (var INS in strIN) {
                         var INobj = strIN[INS];
 
                         if (INValue === "") {
-                            if (OperationItemMasterRecord.UnitMeasurement === "") {
-                                INValue = OperationItemMasterRecord.UnitMeasurement;
-                            }
-                            else {
-                                INValue = OperationItemMasterRecord[INobj] + " " + OperationItemMasterRecord.UnitMeasurement;
-                            }
+                            INValue = OperationItemMasterRecord[INobj] + " " + OperationItemMasterRecord.UnitMeasurement;
                         } else {
-                            if (OperationItemMasterRecord.UnitMeasurement === "") {
-                                INValue = INValue + ", " + OperationItemMasterRecord[INobj];
-                            }
-                            else {
-                                INValue = INValue + ", " + OperationItemMasterRecord[INobj] + " " + OperationItemMasterRecord.UnitMeasurement;
-                            }
+                            INValue = INValue + ", " + OperationItemMasterRecord[INobj] + " " + OperationItemMasterRecord.UnitMeasurement;
                         }
                     }
                 }
@@ -1102,6 +1091,7 @@ $("#EditButton").click(function () {
             else {
                 document.getElementById("IsactivItemstatic").checked = false;
             }
+            document.getElementById("TxtItemName").value = LoadedData["ItemName"];
 
             for (var e = 0; e < GBLField.length; e++) {
 

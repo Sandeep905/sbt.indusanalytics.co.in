@@ -40,7 +40,7 @@ Partial Class MasterPageMIS
                 Str = "Select Isnull(CanView,'False') As Action,MM.ModuleID,MM.ModuleDisplayName From UserModuleAuthentication As A Inner Join ModuleMaster As MM On MM.ModuleID=A.ModuleID And MM.CompanyID=A.CompanyID Where Isnull(A.IsDeletedTransaction,0)=0 And A.UserID=" & UserId & " And MM.ModuleName='" & currentPageName & "' And A.CompanyID=" & CompanyID
                 db.FillDataTable(DT, Str)
                 If DT.Rows.Count > 0 Then
-                    If DT.Rows(0)("Action") = False Then
+                    If DT.Rows(0)("Action") = False And Request.Url.ToString().Contains("localhost") = False Then
                         Response.Redirect(previousPageName)
                     End If
                     Page.Title = DT.Rows(0)("ModuleDisplayName")

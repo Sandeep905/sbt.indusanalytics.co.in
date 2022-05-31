@@ -21,10 +21,10 @@ Public Class WebService_JobStatus
     Dim dataTable As New DataTable()
     Dim str As String
 
-    Dim GBLUserID As String
-    Dim GBLUserName As String
-    Dim GBLCompanyID As String
-    Dim GBLFYear As String
+    ReadOnly GBLUserID As String = Convert.ToString(HttpContext.Current.Session("UserID"))
+    ReadOnly GBLCompanyID As String = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+    ReadOnly GBLFYear As String = Convert.ToString(HttpContext.Current.Session("FYear"))
+    Dim VendorID As String = Convert.ToString(HttpContext.Current.Session("VendorID"))
 
     '---------------Open Master code---------------------------------
 
@@ -32,11 +32,12 @@ Public Class WebService_JobStatus
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function GetJobCardNo() As String
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
-        GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
+        'GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        'GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
+        VendorID = IIf(VendorID = 0 Or VendorID = "", "", " And JSR.VendorID=" & VendorID)
 
-        str = "SELECT Distinct JC.JobBookingID,JC.JobBookingNo FROM   JobBookingJobCard As JC /*INNER JOIN JobScheduleRelease As JSR On JSR.JobBookingID = JC.JobBookingID And JSR.CompanyID = JC.CompanyID */" &
-              " WHERE (JC.CompanyID = '" & GBLCompanyID & "')  AND (ISNULL(JC.IsDeletedTransaction, 0) = 0) ORDER BY JC.JobBookingNo"
+        str = "SELECT Distinct JC.JobBookingID,JC.JobBookingNo FROM JobBookingJobCard As JC INNER JOIN JobScheduleRelease As JSR On JSR.JobBookingID = JC.JobBookingID And JSR.CompanyID = JC.CompanyID " &
+              " WHERE (JC.CompanyID = " & GBLCompanyID & ")" & VendorID & " And JC.FYear='" & GBLFYear & "' AND (JC.IsDeletedTransaction = 0) ORDER BY JC.JobBookingNo"
 
         db.FillDataTable(dataTable, str)
         data.Message = db.ConvertDataTableTojSonString(dataTable)
@@ -48,7 +49,7 @@ Public Class WebService_JobStatus
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function GetJobCardContentsDetail(ByVal JCID As String) As String
         Try
-            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+            'GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
 
             str = "Select Distinct LM.LedgerName,JEJ.JobBookingID, JEJC.JobCardContentNo, JEJ.JobBookingNo, Replace(convert(nvarchar(30),JEJ.JobBookingDate,106),'','-') as BookingDate, Replace(JEJ.JobName,'""','') As JobName, Replace(JEJC.PlanContName,'""','')as ContentName, JEJ.OrderQuantity,  nullif(JEJ.PONO,'') as PONo,  replace(convert(nvarchar(30),JEJ.PODate,106),'','-') as PODate, nullif(JEJ.ProductCode,'') as ProductCode,nullif(JOB.SalesOrderNo,'') As OrderBookingNo,JEJC.JobBookingJobCardContentsID,JEJ.IsClose From LedgerMaster as LM INNER JOIN JobBookingJobCard as JEJ ON JEJ.LedgerID = LM.LedgerID AND  JEJ.CompanyID = LM.CompanyID Inner Join JobOrderBookingDetails As JOB On JOB.BookingID=JEJ.BookingID And JOB.CompanyID=JEJ.CompanyID And JEJ.OrderBookingID=JOB.OrderBookingID INNER JOIN JobBookingJobCardContents as JEJC ON JEJC.JobBookingID =  JEJ.JobBookingID And  JEJ.CompanyID = JEJC.CompanyID And JEJC.IsDeletedTransaction=0 Where ISNULL(JEJ.IsDeletedTransaction,0)=0 And JEJ.JobBookingID ='" & JCID & "'  and JEJC.CompanyId=" & GBLCompanyID & " Order BY JEJ.JobBookingID DESC"
             db.FillDataTable(dataTable, str)
@@ -66,8 +67,8 @@ Public Class WebService_JobStatus
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function GetAfterJobCardData(ByVal JobBookingJobCardContentsID As String) As String
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
-        GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
+        'GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        'GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
 
         str = "Exec GetProductionStatus " & JobBookingJobCardContentsID & " ," & GBLCompanyID
 
@@ -81,8 +82,8 @@ Public Class WebService_JobStatus
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function OperationDetailData(ByVal JobBookingJobCardContentsID As String) As String
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
-        GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
+        'GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        'GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
 
         str = "  Select  JS.SequenceNo as SN, Isnull(JS.ProcessID,0) as ProcessID, nullif(JS.ProcessName ,'') as ProcessName, nullif(JS.RateFactor ,'') as RateFactor, nullif(JS.JobCardFormNo ,'') as JobCardFormNo, Isnull(JS.ScheduleQty,0) as ScheduleQty,JS.ContentName,  " &
                 " Isnull((Select Sum(Isnull(ProductionQuantity,0)) As ProductionQuantity From ProductionEntry Where JobCardFormNO = JS.JobCardFormNO And RateFactor = JS.RateFactor And CompanyID = JS.CompanyID),0) As ProductionQuantity,  " &
@@ -101,11 +102,9 @@ Public Class WebService_JobStatus
     <WebMethod(EnableSession:=True)>
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function DrawStatus(ByVal JobBookingJobCardContentsID As String) As String
-        Context.Response.Clear()
-        Context.Response.ContentType = "application/json"
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
-        GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
+        'GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        'GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
 
         str = "Select nullif(PM.ProcessName,'') As ProcessName,Isnull(JSP.Status,'In Queue') as Status   " &
               " From JobBookingJobCardProcess as JSP INNER JOIN ProcessMaster as PM ON PM.ProcessID = JSP.ProcessID AND PM.CompanyID = JSP.CompanyID    " &
@@ -122,8 +121,8 @@ Public Class WebService_JobStatus
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function GetProductionDetailPopUp(ByVal JobBookingJobCardContentsID As String) As String
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
-        GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
+        'GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        'GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
 
         str = "Select  JS.SequenceNo As SN, JS.JobBookingJobCardContentsID, ISNULL(JS.ProcessID,0) as ProcessID, nullif(JS.ProcessName,'') as ProcessName, nullif(JS.RateFactor,'') as RateFactor,  nullif(JS.JobCardFormNo,'') as JobCardFormNo, ISNULL(JS.ScheduleQty,0) as ScheduleQty,    " &
               " nullif(MM.MachineName,'') as MachineName, nullif(EM.LedgerName,'') as LedgerName, replace(convert(nvarchar(30),PE.FromTime,106),'','-')  as FromTime, replace(convert(nvarchar(30),PE.ToTime,106),'','-')  as ToTime,         " &
@@ -147,8 +146,8 @@ Public Class WebService_JobStatus
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function GetJobCardNoFormWise() As String
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
-        GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
+        'GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        'GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
 
         str = "SELECT Distinct JC.JobBookingID,JC.JobBookingNo FROM JobBookingJobCard As JC LEFT JOIN JobScheduleRelease As JSR On JSR.JobBookingID = JC.JobBookingID And JSR.CompanyID = JC.CompanyID  " &
               " INNER JOIN JobBookingJobCardFormWiseDetails AS JEJF ON JC.JobBookingID = JEJF.JobBookingID AND JEJF.CompanyID = JC.CompanyID  AND ISNULL(JSR.Status, N'In Queue')='In Queue'  WHERE (JC.CompanyID = '" & GBLCompanyID & "')  AND (ISNULL(JC.IsDeletedTransaction, 0) = 0) ORDER BY JobBookingNo"
@@ -165,7 +164,7 @@ Public Class WebService_JobStatus
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function GetJobCardFormContentsDetail(ByVal JCID As String) As String
         Try
-            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+            'GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
 
             str = "Select Distinct LM.LedgerName,JEJ.JobBookingID, JEJC.JobCardContentNo, JEJ.JobBookingNo, Replace(convert(nvarchar(30),JEJ.JobBookingDate,106),'','-') as BookingDate, Replace(JEJ.JobName,'""','') As JobName, Replace(JEJC.PlanContName,'""','')as ContentName, JEJ.OrderQuantity,  nullif(JEJ.PONO,'') as PONo,  replace(convert(nvarchar(30),JEJ.PODate,106),'','-') as PODate, nullif(JEJ.ProductCode,'') as ProductCode,nullif(JOB.SalesOrderNo,'') As OrderBookingNo,JEJC.JobBookingJobCardContentsID From LedgerMaster as LM INNER JOIN JobBookingJobCard as JEJ ON JEJ.LedgerID = LM.LedgerID AND  JEJ.CompanyID = LM.CompanyID Inner Join JobOrderBookingDetails As JOB On JOB.BookingID=JEJ.BookingID And JOB.CompanyID=JEJ.CompanyID And JEJ.OrderBookingID=JOB.OrderBookingID INNER JOIN JobBookingJobCardContents as JEJC ON JEJC.JobBookingID =  JEJ.JobBookingID And  JEJ.CompanyID = JEJC.CompanyID And JEJC.IsDeletedTransaction=0 INNER JOIN JobBookingJobCardFormWiseDetails AS JEJF ON JEJC.JobBookingID = JEJF.JobBookingID AND JEJF.CompanyID = JEJC.CompanyID And JEJF.JobBookingJobCardContentsID=JEJC.JobBookingJobCardContentsID Where ISNULL(JEJ.IsDeletedTransaction,0)=0 And JEJ.JobBookingID ='" & JCID & "'  and JEJC.CompanyId=" & GBLCompanyID & " Order BY JEJ.JobBookingID DESC"
             db.FillDataTable(dataTable, str)
@@ -181,8 +180,8 @@ Public Class WebService_JobStatus
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function GetContentWiseFormsDetails(ByVal ContentsID As Integer, ByVal BKID As Integer) As String
         Try
-            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
-            GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
+            'GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+            'GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
 
             str = "SELECT JCFW.JobCardFormDetailID,JCFW.JobBookingJobCardContentsID,JCFW.PlanContName, JCFW.PlanContQty, JCFW.PlanContentType, JCFW.JobCardFormNo, MM.MachineName, JCFW.PlateSize, JCFW.ColorsFB, JCFW.Pages, JCFW.Ups, JCFW.SetsForms, JCFW.SheetSize, JCFW.PageNo,JCFW.RefNo, JCFW.TotalSheets, JCFW.PrintingStyle, JCFW.PaperDetails, JCFW.FoldingStyle, JCFW.TotalFolds, JCFW.PrintingRemark, JCFW.FoldingRemark, JCFW.OtherRemark, JCFW.MachineID, JCFW.PaperID,JCFW.TransID,JCFW.ActualSheets,JCFW.WasteSheets FROM JobBookingJobCardFormWiseDetails AS JCFW INNER JOIN MachineMaster AS MM ON MM.MachineId = JCFW.MachineID And MM.CompanyID=JCFW.CompanyID WHERE (JCFW.JobBookingID = '" & BKID & "')  And (JCFW.JobBookingJobCardContentsID = '" & ContentsID & "')  And JCFW.CompanyID = " & GBLCompanyID & " And Isnull(JCFW.IsDeletedTransaction,0)=0 Order By TransID"
 
@@ -203,8 +202,8 @@ Public Class WebService_JobStatus
         Dim KeyField As String
         Dim AddColName, wherecndtn, TableName As String
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
-        GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
+        'GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        'GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
 
         If db.CheckAuthories("ContentsBookFormSequence.aspx", GBLUserID, GBLCompanyID, "CanSave") = False Then Return "You are not authorized to save"
 
@@ -226,7 +225,7 @@ Public Class WebService_JobStatus
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function GridJobCardData() As String
         Try
-            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyId"))
+            'GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyId"))
             str = "SELECT Distinct JEJ.JobBookingDate ,JEJ.CoordinatorLedgerID,JEJ.JobPriority,JEJ.CategoryID,Replace(Nullif(JEJ.Remark,''),'""','') As Remark,JOB.JobReference, JOB.JobType, Replace(Nullif(LM.LedgerName,''),'"" ','') as LedgerName ,Nullif(JEJ.PONo,'') as PONo,Replace(Convert(Nvarchar(13),JEJ.PODate,106),' ','-') As PODate,Replace(Nullif(CM.CategoryName,''),'""','') as CategoryName,JOB.SalesOrderNo,Replace(Nullif(JEJ.JobName,''),'""','') as JobName,JEJ.OrderQuantity As OrderQty,Replace(Nullif(JEJ.ProductCode,''),'""','') as ProductCode,JEJ.JobBookingNo,  JE.BookingNo,Replace(Convert(Nvarchar(13),JEJ.JobBookingDate,106),' ','-') as BookingDate,UM.UserName as BookedBy,Replace(Nullif(PM.ProductMasterCode,''),'""','') as ProductMasterCode,JEJ.FYear,JEJ.LedgerID,JEJ.ProductHSNID,Nullif(LM.Email,'') As Email,JEJ.OrderQuantity as Quantity,JEJ.BookingID,Replace(Convert(Nvarchar(13),JEJ.DeliveryDate,106),' ','-') as DeliveryDate,JE.ExpectedCompletionDays,JOB.OrderBookingID,JOB.OrderBookingDetailsID,JEJ.ProductMasterID,JEJ.JobBookingID,JEJ.ConsigneeID,JEJ.CriticalInstructions ,JEJ.IsClose,ISNULL(SPM.TotalPackedQuantity,0) As TotalPackedQuantity " &
                   " FROM LedgerMaster As LM INNER JOIN JobBookingJobCard  As JEJ ON JEJ.LedgerId =LM.LedgerId And JEJ.CompanyID = " & GBLCompanyID & " And JEJ.IsDeletedTransaction=0  INNER JOIN JobOrderBookingDetails As JOB ON JEJ.LedgerId =JOB.LedgerId And JEJ.OrderBookingID=JOB.OrderBookingID And JEJ.CompanyID = JOB.CompanyID INNER JOIN CategoryMaster as CM ON  CM.CategoryId = JEJ.CategoryID  AND CM.CompanyID = JEJ.CompanyID INNER JOIN UserMaster AS UM ON UM.UserId = JEJ.CreatedBy LEFT JOIN JobBooking As JE  ON JE.BookingID = JEJ.BookingID LEFT JOIN ProductMaster AS PM On PM.ProductMasterID =JEJ.ProductMasterID Left JOIN JobSemiPackingMain As SPM On SPM.JobBookingID=JEJ.JobBookingID And SPM.CompanyID=JEJ.CompanyID And  SPM.IsDeletedTransaction=0 Order by JobBookingDate DESC "
             db.FillDataTable(dataTable, str)
@@ -242,7 +241,7 @@ Public Class WebService_JobStatus
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function JobCardEntryClose(ByVal BKID As Integer, ByVal IsClose As String) As String
         Try
-            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyId"))
+            'GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyId"))
             db.ExecuteNonSQLQuery("Update JobBookingJobCard Set IsClose='" & IsClose & "' Where JobBookingID=" & BKID & " And CompanyID=" & GBLCompanyID)
             Return "Success"
         Catch ex As Exception

@@ -6,16 +6,6 @@ Imports System.Data.SqlClient
 Imports System.Web.Script.Services
 Imports System.Web.Script.Serialization
 Imports Connection
-Imports System.Collections.Generic
-Imports System.Web.UI.WebControls
-Imports System.Net
-Imports System.IO
-Imports System.Net.Mail
-
-Imports Microsoft.VisualBasic
-Imports System.Configuration
-Imports Newtonsoft.Json
-
 ' To allow this Web Service to be called from script, using ASP.NET AJAX, uncomment the following line.
 <System.Web.Script.Services.ScriptService()>
 <WebService(Namespace:="http://tempuri.org/")>
@@ -25,36 +15,26 @@ Public Class WebService_WarehouseMaster
     Inherits System.Web.Services.WebService
 
 
-    Private DA As SqlDataAdapter
-    Dim db As New DBConnection
-    Dim IndexFormName As String
-    Dim k As String
-    Dim ss As String
-    Dim FYear As String
-    Dim strdate As String
-    Dim js As New JavaScriptSerializer()
-    Dim data As New HelloWorldData()
+    Private ReadOnly DA As SqlDataAdapter
+    ReadOnly db As New DBConnection
+    ReadOnly IndexFormName As String
+    ReadOnly k As String
+    ReadOnly js As New JavaScriptSerializer()
+    ReadOnly data As New HelloWorldData()
     Dim dataTable As New DataTable()
     Dim str As String
 
-    Dim PersonEmail As String
     Dim GBLUserID As String
-    Dim GBLUserName As String
-    Dim GBLBranchID As String
     Dim GBLCompanyID As String
     Dim GBLFYear As String
-    Dim UserName As String
 
     <System.Web.Services.WebMethod(EnableSession:=True)>
     <ScriptMethod(UseHttpGet:=True, ResponseFormat:=ResponseFormat.Json)>
     Public Sub HelloWorld()
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
-
-        GBLUserName = Convert.ToString(HttpContext.Current.Session("UserName"))
         GBLFYear = Convert.ToString(HttpContext.Current.Session("FYear"))
-        GBLBranchID = Convert.ToString(HttpContext.Current.Session("BranchId"))
 
         Context.Response.Clear()
         Context.Response.ContentType = "application/json"
@@ -67,9 +47,7 @@ Public Class WebService_WarehouseMaster
     Public Function GetDataTable() As DataTable
 
         If k = "client" Then
-
             str = " SELECT LedgerName as ClientName, MailingName,Address1,Address2,Address3,City,State,Country,Address,Phone,Fax,Email,PinCode,Website,PAN,ECC,CST,TIN,DeliveredQtyTolerence,ProfitPercentage,PaymentTerms,MinimumCreditLimit,UrgentCreditLimit,CriticalCreditLimit,LedgerID From LedgerMaster Where  UnderGroupID IN ( 28, 24)  Order By LedgerName "
-            '          LedgerName as ClientName, MailingName,Address, Nullif(Phone,'') As Phone,Email, Nullif(Tin,'') as Tin, Nullif(ConcerningPerson1,'') As ConcermingPerson, Nullif(City,'') as City,LedgerID FROM LedgerMaster Where  UnderGroupID IN ( 28, 24)   Order By LedgerName"
         Else
             str = " Select  Top 10 RollId,RollCode,ItemCode,Quality,Width,MfgBy ,'F: ' + cast(isnull(GSMFacePaper,0) as nvarchar)+ ' ' + ' R: ' + cast(isnull(GSMReleasePaper,0) as nvarchar)  " &
                   " + ' ' + ' A: ' + cast(isnull(GSMAdhesive,0) as nvarchar) as GSM From RollMaster "
@@ -78,13 +56,10 @@ Public Class WebService_WarehouseMaster
         db.FillDataTable(dataTable, str)
         Return dataTable
     End Function
-
-
-    <WebMethod()>
-    <ScriptMethod()>
-    Public Function ConvertDataTableTojSonString(ByVal dataTable As DataTable) As String
-        Dim serializer As New System.Web.Script.Serialization.JavaScriptSerializer()
-        serializer.MaxJsonLength = 2147483647
+    Private Function ConvertDataTableTojSonString(ByVal dataTable As DataTable) As String
+        Dim serializer As New System.Web.Script.Serialization.JavaScriptSerializer With {
+            .MaxJsonLength = 2147483647
+        }
         Dim tableRows As New List(Of Dictionary(Of [String], [Object]))()
         Dim row As Dictionary(Of [String], [Object])
         For Each dr As DataRow In dataTable.Rows
@@ -100,11 +75,11 @@ Public Class WebService_WarehouseMaster
 
 
     Public Function DataSetToJSONWithJavaScriptSerializer(ByVal dataset As DataSet) As String
-        Dim jsSerializer As JavaScriptSerializer = New JavaScriptSerializer()
-        Dim ssvalue As Dictionary(Of String, Object) = New Dictionary(Of String, Object)()
+        Dim jsSerializer As New JavaScriptSerializer()
+        Dim ssvalue As New Dictionary(Of String, Object)()
 
         For Each table As DataTable In dataset.Tables
-            Dim parentRow As List(Of Dictionary(Of String, Object)) = New List(Of Dictionary(Of String, Object))()
+            Dim parentRow As New List(Of Dictionary(Of String, Object))()
             Dim childRow As Dictionary(Of String, Object)
             Dim tablename As String = table.TableName
 
@@ -131,12 +106,9 @@ Public Class WebService_WarehouseMaster
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function GetCity() As String
         Try
-            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
-            GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
-            GBLUserName = Convert.ToString(HttpContext.Current.Session("UserName"))
-            GBLFYear = Convert.ToString(HttpContext.Current.Session("FYear"))
+            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
 
-            str = "Select distinct nullif(City,'') as City From CountryStateMaster Where Isnull(City,'')<>'' And CompanyID= '" & GBLCompanyID & "' and Isnull(IsDeletedTransaction, 0) <> 1"
+            str = "Select Distinct nullif(City,'') as City From CountryStateMaster Where Isnull(City,'')<>'' And CompanyID= " & GBLCompanyID & " And IsDeletedTransaction=0 "
 
             db.FillDataTable(dataTable, str)
             data.Message = ConvertDataTableTojSonString(dataTable)
@@ -144,93 +116,57 @@ Public Class WebService_WarehouseMaster
         Catch ex As Exception
             Return ex.Message
         End Try
-
     End Function
 
     ''----------------------------Open Warehouse  Save Data  ------------------------------------------
     <WebMethod(EnableSession:=True)>
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function SaveWarehouse(ByVal jsonObjectsSaveRecord As Object) As String
-
-        Dim dt As New DataTable
-
         Dim KeyField As String
         Dim AddColName, AddColValue, TableName As String
-        AddColName = ""
-        AddColValue = ""
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
-        GBLUserName = Convert.ToString(HttpContext.Current.Session("UserName"))
         GBLFYear = Convert.ToString(HttpContext.Current.Session("FYear"))
 
         Try
-            Dim con As New SqlConnection
-            con = db.OpenDataBase()
-
-            If jsonObjectsSaveRecord.length > 0 Then
-                TableName = "WarehouseMaster"
-                AddColName = ""
-                AddColValue = ""
-                AddColName = "ModifiedDate,CreatedDate,UserID,CompanyID,FYear,CreatedBy,ModifiedBy"
-                AddColValue = "'" & DateTime.Now & "','" & DateTime.Now & "','" & GBLUserID & "','" & GBLCompanyID & "','" & GBLFYear & "','" & GBLUserID & "','" & GBLUserID & "'"
-                db.InsertDatatableToDatabase(jsonObjectsSaveRecord, TableName, AddColName, AddColValue)
-
-            End If
-
-
-            con.Close()
-            KeyField = "Success"
-
+            TableName = "WarehouseMaster"
+            AddColName = "CreatedDate,UserID,CompanyID,FYear,CreatedBy"
+            AddColValue = "GETDATE(),'" & GBLUserID & "','" & GBLCompanyID & "','" & GBLFYear & "'," & GBLUserID
+            KeyField = db.InsertDatatableToDatabase(jsonObjectsSaveRecord, TableName, AddColName, AddColValue)
+            If IsNumeric(KeyField) Then KeyField = "Success"
         Catch ex As Exception
             KeyField = "fail"
         End Try
         Return KeyField
-
     End Function
 
     ''----------------------------Open RTS  Update Data  ------------------------------------------
     <WebMethod(EnableSession:=True)>
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function UpdateWarehouse(ByVal jsonObjectsSaveRecord As Object, ByVal jsonObjectsUpdateRecord As Object) As String
-        'ByVal TxtWarehouseID As String, 
-        Dim dt As New DataTable
-        Dim KeyField, str2 As String
+        Dim KeyField As String
         Dim AddColName, wherecndtn, TableName, AddColValue As String
-        AddColName = ""
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
-        GBLUserName = Convert.ToString(HttpContext.Current.Session("UserName"))
         GBLFYear = Convert.ToString(HttpContext.Current.Session("FYear"))
-        GBLBranchID = Convert.ToString(HttpContext.Current.Session("BranchId"))
 
         Try
-            Dim con As New SqlConnection
-            con = db.OpenDataBase()
-            Dim dtExist As New DataTable
-            ' And WarehouseID='" & TxtWarehouseID & "'
             If jsonObjectsUpdateRecord.length > 0 Then
                 TableName = "WarehouseMaster"
-                AddColName = ""
-                wherecndtn = ""
-                AddColName = "ModifiedDate='" & DateTime.Now & "',UserID=" & GBLUserID & ",CompanyID=" & GBLCompanyID & ",FYear='" & GBLFYear & "',ModifiedBy='" & GBLUserID & "'"
+                AddColName = "ModifiedDate=GETDATE(),ModifiedBy=" & GBLUserID
                 wherecndtn = "CompanyID=" & GBLCompanyID & " "
-                db.UpdateDatatableToDatabase(jsonObjectsUpdateRecord, TableName, AddColName, 1, wherecndtn)
-
+                KeyField = db.UpdateDatatableToDatabase(jsonObjectsUpdateRecord, TableName, AddColName, 1, wherecndtn)
             End If
 
             If jsonObjectsSaveRecord.length > 0 Then
                 TableName = "WarehouseMaster"
-                AddColName = ""
-                AddColValue = ""
-                AddColName = "ModifiedDate,CreatedDate,UserID,CompanyID,FYear,CreatedBy,ModifiedBy"
-                AddColValue = "'" & DateTime.Now & "','" & DateTime.Now & "','" & GBLUserID & "','" & GBLCompanyID & "','" & GBLFYear & "','" & GBLUserID & "','" & GBLUserID & "'"
-                db.InsertDatatableToDatabase(jsonObjectsSaveRecord, TableName, AddColName, AddColValue)
+                AddColName = "CreatedDate,UserID,CompanyID,FYear,CreatedBy"
+                AddColValue = "GETDATE()," & GBLUserID & "," & GBLCompanyID & ",'" & GBLFYear & "'," & GBLUserID
+                KeyField = db.InsertDatatableToDatabase(jsonObjectsSaveRecord, TableName, AddColName, AddColValue)
+                If IsNumeric(KeyField) Then KeyField = "Success"
             End If
-
-            con.Close()
-            KeyField = "Success"
 
         Catch ex As Exception
             KeyField = "fail"
@@ -244,9 +180,9 @@ Public Class WebService_WarehouseMaster
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function ShowListWarehouseMaster() As String
         Try
-            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
             GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
-            GBLUserName = Convert.ToString(HttpContext.Current.Session("UserName"))
+
             GBLFYear = Convert.ToString(HttpContext.Current.Session("FYear"))
 
             str = "select distinct nullif(WarehouseName,'') as WarehouseName, nullif(City,'') as City, nullif(Address,'') as Address,  " &
@@ -269,9 +205,9 @@ Public Class WebService_WarehouseMaster
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function SelectBinName(ByVal WarehouseName As String) As String
         Try
-            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
             GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
-            GBLUserName = Convert.ToString(HttpContext.Current.Session("UserName"))
+
             GBLFYear = Convert.ToString(HttpContext.Current.Session("FYear"))
 
             str = "select isnull(WarehouseID,0) as WarehouseID,nullif(BinName,'') as BinName from WarehouseMaster where WarehouseName='" & WarehouseName & "' and CompanyID='" & GBLCompanyID & "' And  isnull(IsDeletedTransaction,0)<>1"
@@ -294,7 +230,7 @@ Public Class WebService_WarehouseMaster
             Dim con As New SqlConnection
             con = db.OpenDataBase()
 
-            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
 
             Dim dtExist As New DataTable
             Dim dtExist1 As New DataTable

@@ -8,7 +8,7 @@ Imports System.Net
 
 Partial Class ReportQuotation
     Inherits System.Web.UI.Page
-    Dim db As New DBConnection
+    ReadOnly db As New DBConnection
     Dim GBLCompanyID, GBLUserID, GblBookingNo As String
 
     Protected Sub Page_Load(sender As Object, e As EventArgs) Handles Me.Load
