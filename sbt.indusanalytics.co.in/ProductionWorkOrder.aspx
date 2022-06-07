@@ -188,10 +188,13 @@
                         </div>
 
                         <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-                            <div class="font-11">User Picture</div>
-                            <input type="file" capture="camera" name="photo" accept=".png, .jpg, .jpeg, .gif" id="file" style="width: 54%; float: left; height: 2.5em" />
+                            <div class="font-11">User Attachement</div>
+                            <input type="file" capture="camera" name="photo" accept=".png, .jpg, .jpeg, .gif, .pdf" id="file" style="width: 54%; float: left; height: 2.5em" />
                             <input type="button" name="BtnRemoveFile" id="BtnRemoveFile" value="Remove File" class="btn btn-warning" />
-                            <img src="" id="PreviewAttachedFile" style="display: none; width: auto; height: 200px" />
+                            <div style="clear: both">
+                                <img src="#" id="PreviewAttachedFile" style="display: none; width: auto; height: 200px" />
+                                <iframe id="viewer" frameborder="0" scrolling="no" width="300" height="200"></iframe>
+                            </div>
                         </div>
 
                     </div>
@@ -906,7 +909,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Tools Modal -->
     <div class="modal fade" id="myModalTool" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-lg" role="document">

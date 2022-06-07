@@ -195,11 +195,31 @@ Partial Class ReportJobCard
             Exit Sub
         End If
         Try
-            Dim mm As MailMessage = New MailMessage(DtUser.Rows(0)("smtpUserID").ToString(), TxtEmailTo.Value.ToString()) With {
+            Dim mm As New MailMessage(DtUser.Rows(0)("smtpUserID").ToString(), TxtEmailTo.Value.ToString()) With {
                 .Subject = TxtSubject.Value.ToString(),
                 .Body = TxtEmailBody.Value.ToString()
             }
             mm.Attachments.Add(New Attachment(ExportReportToPDF(Server.MapPath("~/Files/JobCard/"), "JobCard.pdf")))
+
+            Dim DT_New As New DataTable()
+            db.FillDataTable(DT_New, "SELECT Distinct AttachedFileName,UserAttachedPicture FROM JobBookingJobCardContents Where AttachedFileName<>'' And IsDeletedTransaction=0 And CompanyID=" & GBLCompanyID & " And JobBookingID=(Select JobBookingID From JobBookingJobCard Where IsDeletedTransaction=0 And JobBookingNo='" & ContID & "' And CompanyID=" & GBLCompanyID & ")")
+            For i = 0 To DT_New.Rows.Count - 1
+                'Dim bytes As Byte() = System.Text.Encoding.Unicode.GetBytes(DT_New.Rows(i)("UserAttachedPicture"))
+                Dim filename As String = Server.MapPath("~/Files/JobCard/UserAttchedFiles/" & DT_New.Rows(i)("AttachedFileName"))
+
+                'Dim fi As New FileInfo(filename)
+                'If (fi.Exists) Then    'if file exists, delete it
+                '    'fi.Delete()
+                'Else
+                '    Using fs = New System.IO.FileStream(filename, System.IO.FileMode.Create)
+                '        fs.Write(bytes, 0, bytes.Length)
+                '        fs.Close()
+                '    End Using
+                'End If
+
+                mm.Attachments.Add(New Attachment(filename))
+            Next
+
             mm.IsBodyHtml = True
             mm.Priority = MailPriority.High
             If TxtEmailCC.Value.ToString() <> "" And TxtEmailCC.Value.Contains("@") = True Then

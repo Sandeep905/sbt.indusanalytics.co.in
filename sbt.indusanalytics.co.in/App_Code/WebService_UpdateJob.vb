@@ -563,6 +563,28 @@ Public Class WebService_UpdateJob
         End Try
     End Function
 
+    <WebMethod>
+    Public Function UploadFileProductionUpdate() As String
+        Dim httpPostedFile = HttpContext.Current.Request.Files("UserAttchedFiles")
+        Try
+
+            If httpPostedFile IsNot Nothing Then
+                ' Get the complete file path
+                Dim fileSavePath = Path.Combine(HttpContext.Current.Server.MapPath("/Files/Production/UpdateFiles/"), httpPostedFile.FileName)
+
+                Dim fi As New FileInfo(fileSavePath)
+                If (fi.Exists) Then    'if file exists, delete it
+                    fi.Delete()
+                End If
+                ' Save the uploaded file to "UserAttachedFiles" folder
+                httpPostedFile.SaveAs(fileSavePath)
+            End If
+            Return "Success"
+
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
     '*******************************************************Close Job Status Data**************************************************
 
     <WebMethod(EnableSession:=True)>

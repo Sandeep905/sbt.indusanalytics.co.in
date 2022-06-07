@@ -174,7 +174,7 @@
                         </div>
                         <div id="DivCretbtn" class="col-lg-2 col-md-3 col-sm-4 col-xs-6 padding-0 margin-0">
                             <input type="button" name="BtnInvoice" value="Create Invoice" class="btn btn-primary" id="BtnCreateInvoice" />
-                            <input type="button" name="BtnInvoice" value="Direct Invoice" class="btn btn-warning" id="BtnCreateDirectInvoice" />
+                            <input type="button" name="BtnInvoice" value="Direct Invoice" class="btn btn-warning hidden" hidden="hidden" id="BtnCreateDirectInvoice" />
                         </div>
                         <div id="DivEdit" class="col-lg-10 col-md-9 col-sm-8 col-xs-12" style="display: none">
                             <input type="button" name="EditCHButton" value="Edit Invoice" class="btn btn-info" id="EditCHButton" />

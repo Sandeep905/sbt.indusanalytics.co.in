@@ -1957,7 +1957,7 @@ function updateAttachedPicture(ContName, ContentType, AttachedPicture, FileName)
             return ex.PlanContName === ContName && ex.PlanContentType === ContentType;
         });
         if (result.length >= 1) {
-            var ext = FileName.split(';')[0].match(/jpeg|png|gif|jpg/)[0];
+            //var ext = FileName.split(';')[0].match(/jpeg|png|gif|jpg/)[0];
             grid._options.dataSource[result.length - 1].UserAttachedPicture = AttachedPicture.replace("data:image/png;base64,", "");
             grid._options.dataSource[result.length - 1].AttachedFileName = FileName;
             //grid.component.refresh();

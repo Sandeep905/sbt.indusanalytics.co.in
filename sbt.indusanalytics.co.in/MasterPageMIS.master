@@ -310,6 +310,12 @@
             }
         };
 
+        $(".forTextBox").keyup(function (e) {
+            if (e.target.value.includes('"') || e.target.value.includes("'")) {
+                e.target.value = e.target.value.replace(/"/g, '');
+                e.target.value = e.target.value.replace(/'/g, "");
+            }
+        });
     </script>
 
     <script>

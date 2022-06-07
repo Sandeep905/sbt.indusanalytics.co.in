@@ -2344,7 +2344,7 @@ function callSaveJobCard(TblPlanning, TblOperations, TblContentForms, TblContent
         var SbJobType = $("#SbJobType").dxSelectBox("instance").option('value');
         var SbJobReference = $("#SbJobReference").dxSelectBox("instance").option('value');
         var DeliveryDate = $('#SelDeliveryDate').dxDateBox('instance').option('value'); //  document.getElementById("TxtDeliveryDate").value.trim();
-
+        
         if (GblBookingID === undefined || GblBookingID <= 0 || GblBookingID === null) {
             return;
         }
@@ -2515,6 +2515,7 @@ function callSaveJobCard(TblPlanning, TblOperations, TblContentForms, TblContent
                     type = "success";
                     document.getElementById("TxtBookingNoAuto").value = RES1.d;
                     $("#BtnSaveJobcard").hide();
+                    uploadFileJobCard();
                 }
                 $("#image-indicator").dxLoadPanel("instance").option("visible", false);
                 swal({
@@ -2536,6 +2537,23 @@ function callSaveJobCard(TblPlanning, TblOperations, TblContentForms, TblContent
     } catch (e) {
         alert(e);
     }
+}
+
+function uploadFileJobCard() {
+    var fd = new FormData();
+    fd.append('UserAttchedFiles', $('#file')[0].files[0]);
+
+    $.ajax({
+        url: 'WebServiceProductionWorkOrder.asmx/UploadFileDetails',
+        data: fd,
+        cache: false,
+        processData: false,
+        contentType: false,
+        type: 'POST',
+        success: function (fd) {
+            console.log(fd);
+        }
+    });
 }
 
 $("#GridRequiredItemList").dxDataGrid({
@@ -3121,7 +3139,7 @@ $(function () {
                 res = res.slice(0, -1);
                 //if (res === "Success") {
                 // RadioValue = "Pending Requisitions";
-                alert("Comment saved!", "Comment saved successfully.", "success");
+                swal("Comment saved!", "Comment saved successfully.", "success");
                 var commentData = "";
                 var newHtml = '';
                 jobBookingID = Number(GblJobBookingID);
@@ -3170,6 +3188,7 @@ $(function () {
 $("#BtnRemoveFile").click(function () {
     updateAttachedPicture(GblContentName, GblContentType, "", "");
     $("#PreviewAttachedFile").fadeIn("fast").attr('src', "");
+    $('#viewer').attr('src', "");
 });
 
 //////Add Tool Process Wise///////////

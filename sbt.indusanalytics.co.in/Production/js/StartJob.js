@@ -816,6 +816,11 @@ $("#BtnSaveStartJob").click(function () {
         document.getElementById("ddlJobCard").style.borderColor = "";
     }
 
+    if ($('#file')[0].files.length === 0) {
+        DevExpress.ui.notify("Please attach file to start this process ..!", "warning", 2000);
+        return false;
+    }
+
     if (ObjJobDetail[0].PaperConsumptionRequired === true) {
         if (PaperDetail.length === 0 || PaperDetail.length === [] || PaperDetail.length === "") {
             DevExpress.ui.notify("Please issue Paper for start this process ..!", "error", 2000);
@@ -837,10 +842,6 @@ $("#BtnSaveStartJob").click(function () {
     else {
         document.getElementById("TxtReceivedQuantity").style.borderColor = "";
     }
-    if (FetchData.length > 0) {
-        UpdateRecord();
-        return;
-    };
 
     var objMachineEntry = [];
     var OptMachineEntry = {};
@@ -857,6 +858,7 @@ $("#BtnSaveStartJob").click(function () {
     OptMachineEntry.JobCardFormNo = ddlFormNo;
     OptMachineEntry.EmployeeID = ddlOperator;
     OptMachineEntry.ScheduleSequenceID = ObjJobDetail[0].ScheduleSequenceID;
+    OptMachineEntry.AttachedFileName = $('#file')[0].files[0].name;
 
     if (PaperDetailSelectedData.length > 0) {
         OptMachineEntry.PaperID = PaperDetailSelectedData[0].PaperID;
@@ -900,7 +902,7 @@ $("#BtnSaveStartJob").click(function () {
         confirmButtonColor: "#DD6B55",
         showLoaderOnConfirm: true
     }, function () {
-        
+
         $.ajax({
             type: "POST",
             url: "WebService_StartJob.asmx/EstimoStartProductionData" + Qstring,
@@ -910,6 +912,7 @@ $("#BtnSaveStartJob").click(function () {
             success: function (results) {
                 if (results.d === "Success") {
                     swal("Job Started..", "Job started successfully..", "success");
+                    uploadFileProduction("Start");
                     window.location = "Home.aspx";
                 } else {
                     swal("Failed..!", results.d, "error");

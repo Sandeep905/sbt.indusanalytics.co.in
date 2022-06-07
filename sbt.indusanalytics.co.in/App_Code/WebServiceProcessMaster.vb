@@ -68,7 +68,7 @@ Public Class WebServiceProcessMaster
 
         GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
 
-        str = "Select Distinct nullif(DepartmentID,'') as DepartmentID, nullif(DepartmentName,'') as DepartmentName  From DepartmentMaster where CompanyID=" & GBLCompanyID & " And isnull(IsDeletedTransaction,0)<>1"
+        str = "Select Distinct DepartmentID, DepartmentName From DepartmentMaster where CompanyID=" & GBLCompanyID & " And isnull(IsDeletedTransaction,0)<>1"
         db.FillDataTable(dataTable, str)
         data.Message = ConvertDataTableTojSonString(dataTable)
         Return js.Serialize(data.Message)

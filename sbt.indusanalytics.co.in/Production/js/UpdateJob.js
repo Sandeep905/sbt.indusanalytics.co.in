@@ -570,6 +570,11 @@ function UpdateRecord(XX) {
         document.getElementById("TxtDetailsForStatus").style.borderColor = "";
     }
 
+    if ($('#file')[0].files.length === 0) {
+        DevExpress.ui.notify("Please attach file to update this process ..!", "warning", 2000);
+        return false;
+    }
+
     //if (FetchData[0].PaperConsumptionRequired === true && PaperDetailSelectedData.length <= 0) {
     //    DevExpress.ui.notify("Please select paper batch..!", "warning", 2000);
     //    return false;
@@ -626,6 +631,7 @@ function UpdateRecord(XX) {
     //OptPEEntry.WastageRemark = TxtWastageremark;
     //OptPEEntry.SuspenseRemark = TxtSuspenseRemark;
     OptPEEntry.ScheduleSequenceID = FetchData[0].ScheduleSequenceID;
+    OptPEEntry.AttachedFileName = $('#file')[0].files[0].name;
 
     if (FetchData[0].PaperConsumptionRequired === true && PaperDetailSelectedData.length > 0) {
         OptPEEntry.PaperID = PaperDetailSelectedData[0].PaperID;
@@ -870,19 +876,13 @@ function UpdateRecord(XX) {
             contentType: "application/json; charset=utf-8",
             dataType: "json",
             success: function (results) {
-                var res = JSON.stringify(results);
-                res = res.replace(/"d":/g, '');
-                res = res.replace(/{/g, '');
-                res = res.replace(/}/g, '');
-                res = res.substr(1);
-                res = res.slice(0, -1);
-
                 $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
-                if (res === "Update") {
-                    if (/*UpdateStatus.toUpperCase() === "COMPLETE" || */UpdateStatus.toUpperCase() === "RUNNING") { window.location = "UpdateJob.aspx"; } else { window.location = "StartJob.aspx"; }
+                if (results.d === "Update") {
+                    uploadFileProduction("Update");
                     swal("Updated..", "Machine status updated successfully..", "success");
+                    if (/*UpdateStatus.toUpperCase() === "COMPLETE" || */UpdateStatus.toUpperCase() === "RUNNING") { window.location = "UpdateJob.aspx"; } else { window.location = "StartJob.aspx"; }
                 } else {
-                    swal("Failed..!", res, "error");                    
+                    swal("Failed..!", results.d, "error");
                 }
             },
             error: function errorFunc(jqXHR) {

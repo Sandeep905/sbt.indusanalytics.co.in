@@ -6,6 +6,7 @@ Imports System.Data.SqlClient
 Imports System.Web.Script.Services
 Imports System.Web.Script.Serialization
 Imports Connection
+Imports System.IO
 
 ' To allow this Web Service to be called from script, using ASP.NET AJAX, uncomment the following line.
 <System.Web.Script.Services.ScriptService()>
@@ -522,6 +523,29 @@ Public Class WebService_StartJob
         End Try
         Return KeyField
 
+    End Function
+
+    <WebMethod>
+    Public Function UploadFileProductionStart() As String
+        Dim httpPostedFile = HttpContext.Current.Request.Files("UserAttchedFiles")
+        Try
+
+            If httpPostedFile IsNot Nothing Then
+                ' Get the complete file path
+                Dim fileSavePath = Path.Combine(HttpContext.Current.Server.MapPath("/Files/Production/StartFiles/"), httpPostedFile.FileName)
+
+                Dim fi As New FileInfo(fileSavePath)
+                If (fi.Exists) Then    'if file exists, delete it
+                    fi.Delete()
+                End If
+                ' Save the uploaded file to "UserAttachedFiles" folder
+                httpPostedFile.SaveAs(fileSavePath)
+            End If
+            Return "Success"
+
+        Catch ex As Exception
+            Return ex.Message
+        End Try
     End Function
     Public Class HelloWorldData
         Public Message As [String]

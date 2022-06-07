@@ -990,7 +990,8 @@ if (window.File && window.FileReader && window.FormData) {
         var file = e.target.files[0];
 
         if (file) {
-            if (/^image\//i.test(file.type)) {
+            $("#BtnRemoveFile").click();
+            if (/^image\//i.test(file.type) || "application/pdf" === file.type) {
                 readFile(file);
             } else {
                 alert('Not a valid image!');
@@ -1005,13 +1006,30 @@ function readFile(file) {
     var reader = new FileReader();
 
     reader.onloadend = function () {
-        processFile(reader.result, file.type, file.name);
+        if ("application/pdf" === file.type) {
+            PreviewFile(reader.result, file);
+        } else
+            processFile(reader.result, file.type, file.name);
     };
 
     reader.onerror = function () {
         alert('There was an error reading the file!');
     };
     reader.readAsDataURL(file);
+}
+
+function PreviewFile(pdffile, file) {
+    let pdffile_url = URL.createObjectURL(file);
+    $('#viewer').attr('src', pdffile_url);
+    //const ext = pdffile.name.split('.')[1].match(/jpeg|png|gif|jpg|pdf/)[0];
+    //const xdataURL = pdffile.replace("data:" + pdffile.type + ";base64,", '');
+    try {
+        if (GblContentName !== "" && file !== "") {
+            updateAttachedPicture(GblContentName, GblContentType, "", file.name);
+        }
+    } catch (e) {
+        console.log("Attachement err: " + e);
+    }
 }
 
 function processFile(dataURL, fileType, fileName) {
@@ -1075,7 +1093,7 @@ function processFile(dataURL, fileType, fileName) {
         dataURL = canvas1.toDataURL(fileType);
 
         $("#PreviewAttachedFile").fadeIn("fast").attr('src', dataURL);
-        
+
         xdataURL = dataURL.replace("data:image/" + ext + ";base64,", '');
         try {
             if (GblContentName !== "" && xdataURL !== "") {

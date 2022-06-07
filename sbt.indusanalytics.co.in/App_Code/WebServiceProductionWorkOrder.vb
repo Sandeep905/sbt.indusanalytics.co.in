@@ -1,4 +1,5 @@
 ﻿Imports System.Data
+Imports System.IO
 Imports System.Web
 Imports System.Web.Script.Serialization
 Imports System.Web.Script.Services
@@ -651,12 +652,35 @@ Public Class WebServiceProductionWorkOrder
 
                 updateTransaction.Complete()
             End Using
+
             Return JobBookingNo
         Catch ex As Exception
             Return "Error:500," & ex.Message
         End Try
     End Function
 
+    <WebMethod>
+    Public Function UploadFileDetails() As String
+        Dim httpPostedFile = HttpContext.Current.Request.Files("UserAttchedFiles")
+        Try
+
+            If httpPostedFile IsNot Nothing Then
+                ' Get the complete file path
+                Dim fileSavePath = Path.Combine(HttpContext.Current.Server.MapPath("/Files/JobCard/UserAttchedFiles/"), httpPostedFile.FileName)
+
+                Dim fi As New FileInfo(fileSavePath)
+                If (fi.Exists) Then    'if file exists, delete it
+                    fi.Delete()
+                End If
+                ' Save the uploaded file to "UserAttachedFiles" folder
+                httpPostedFile.SaveAs(fileSavePath)
+            End If
+            Return "Success"
+
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
     ''**********************************************   Save Product Catalog   *****************************************************************
 
     ''' <summary>

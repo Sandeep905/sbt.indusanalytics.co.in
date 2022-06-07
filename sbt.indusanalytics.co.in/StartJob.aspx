@@ -62,7 +62,14 @@
     </div>
     <div class="row clearfix" style="padding: 0px; margin: 0px;">
 
-        <div class="col-lg-2 col-md-3 col-sm-4 col-xs-12 m-t-10">
+        <div class="col-lg-3 col-md-5 col-sm-6 col-xs-12 m-t-10">
+            <div class="font-11">Attachement</div>
+            <input type="file" capture="camera" name="photo" accept=".png, .jpg, .jpeg, .gif" id="file" style="width: 60%; float: left; height: 2.5em" />
+            <input type="button" name="BtnRemoveFile" id="BtnRemoveFile" value="Remove File" class="btn btn-warning" />
+            <div style="clear: both">
+                <img src="#" id="PreviewAttachedFile" style="display: none; width: auto; height: 200px" />
+            </div>
+
             <button type="button" class="btn btn-success" id="BtnSaveStartJob">Start Job</button>
             <input type="button" name="BtnForms" id="BtnForms" value="Form Details" class="btn btn-info hidden" />
             <input type="button" name="BtnPaperDetails" id="BtnPaperDetails" onclick="document.getElementById('PaperGridDiv').style.display = 'block'" value="Paper Details" class="btn btn-primary hidden" />
@@ -92,5 +99,6 @@
     </div>
 
     <script src="Production/js/StartJob.js?<%=System.Configuration.ConfigurationManager.AppSettings("VersionNo")%>"></script>
+    <script src="Production/js/FileAttachment.js"></script>
 </asp:Content>
 

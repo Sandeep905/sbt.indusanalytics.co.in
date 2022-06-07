@@ -133,9 +133,16 @@
         </div>
 
         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 m-t-5 hidden">
+            <div class="font-11">Attachement</div>
+            <input type="file" capture="camera" name="photo" accept=".png, .jpg, .jpeg, .gif" id="file" style="width: 60%; float: left; height: 2.5em" />
+            <input type="button" name="BtnRemoveFile" id="BtnRemoveFile" value="Remove File" class="btn btn-warning" />
+            <div style="clear: both">
+                <img src="#" id="PreviewAttachedFile" style="display: none; width: auto; height: 200px" />
+            </div>
             <button type="button" class="btn btn-warning" id="BtnUpdate" value="Running" onclick="UpdateRecord(this)">Update</button>
         </div>
     </div>
     <script src="Production/js/UpdateJob.js?<%=System.Configuration.ConfigurationManager.AppSettings("VersionNo")%>"></script>
+    <script src="Production/js/FileAttachment.js"></script>
 </asp:Content>
 
