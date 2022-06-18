@@ -6,14 +6,11 @@
     <div class="row clearfix" style="padding: 0px; margin: 0px; margin-right: -15px">
         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding: 0px; margin: 0px;">
             <div class="dialogboxContainerMainMAster">
-                <div class="DialogBoxCustom" style="float: left; background-color: #fff; padding-left: 0px; padding-bottom: 2px">
-                    <div id="ButtonDiv" style="height: auto;">
-                        <div id="optreceiptradio" style="float: left; margin-left: 2em; margin-top: .4em; margin-right: 2em;"></div>
-                        <a id="Btn_Next" href='#' class="iconButton" style="margin-top: 1px; margin-left: 4px;">
-                            <i style="font-size: 14px;"></i>&nbsp Next >
-                        </a>
-                    </div>
-                    <strong id="PRMasterDisplayName" class="MasterDisplayName" style="float: right; color: #42909A">Receipt Note</strong>
+                <div class="col-lg-3 col-md-4 col-sm-5 col-xs-10">
+                    <div id="optreceiptradio"></div>
+                </div>
+                <div class="col-lg-1 col-md-2 col-sm-2 col-xs-2">
+                    <input type="button" name="Btn_Next" id="Btn_Next" class="btn btn-primary" value="Next" />
                 </div>
                 <div class="ContainerBoxCustom" style="float: left; height: auto;">
                     <div id="ButtonGridDiv" style="height: auto; display: block; margin-top: 5px">
@@ -111,10 +108,10 @@
 
                 </div>
                 <div id="btnDiv" class="modal-footer" style="border-top: 1px solid #42909A;">
-                    <button type="button" id="BtnSave" class="btn btn-link waves-effect" style="margin-top: -1em">Save</button>
-                    <button type="button" id="BtnPrint" class="btn btn-link waves-effect" style="margin-top: -1em">Print</button>
-                    <button type="button" id="BtnTransporterSlip" class="btn btn-link waves-effect" style="margin-top: -1em">Transporter Slip</button>
-                    <button type="button" id="BtnDelete" class="btn btn-link waves-effect" style="margin-top: -1em">Delete</button>
+                    <button type="button" id="BtnSave" class="btn btn-success waves-effect">Save</button>
+                    <button type="button" id="BtnPrint" class="btn btn-primary waves-effect">Print</button>
+                    <button type="button" id="BtnTransporterSlip" class="btn btn-secondary waves-effect">Transporter Slip</button>
+                    <button type="button" id="BtnDelete" class="btn btn-danger waves-effect">Delete</button>
                 </div>
             </div>
         </div>

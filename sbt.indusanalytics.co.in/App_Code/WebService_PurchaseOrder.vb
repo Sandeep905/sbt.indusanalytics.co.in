@@ -15,29 +15,21 @@ Imports Connection
 Public Class WebService_PurchaseOrder
     Inherits System.Web.Services.WebService
 
-    Dim db As New DBConnection
-    Dim js As New JavaScriptSerializer()
-    Dim data As New HelloWorldData()
+    ReadOnly db As New DBConnection
+    ReadOnly js As New JavaScriptSerializer()
+    ReadOnly data As New HelloWorldData()
     Dim dataTable As New DataTable()
     Dim str As String
 
     Dim GBLUserID As String
-    Dim GBLUserName As String
-    Dim GBLBranchID As String
     Dim GBLCompanyID As String
     Dim GBLFYear As String
 
     <System.Web.Services.WebMethod(EnableSession:=True)>
     <ScriptMethod(UseHttpGet:=True, ResponseFormat:=ResponseFormat.Json)>
     Public Sub HelloWorld()
-
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
-
-        GBLUserName = Convert.ToString(HttpContext.Current.Session("UserName"))
-        GBLFYear = Convert.ToString(HttpContext.Current.Session("FYear"))
-        GBLBranchID = Convert.ToString(HttpContext.Current.Session("BranchId"))
-
     End Sub
 
     Private Function ConvertDataTableTojSonString(ByVal dataTable As DataTable) As String
@@ -92,7 +84,7 @@ Public Class WebService_PurchaseOrder
         Context.Response.Clear()
         Context.Response.ContentType = "application/json"
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
 
         If RadioValue = "Pending Requisitions" Then
@@ -119,7 +111,7 @@ Public Class WebService_PurchaseOrder
         Context.Response.Clear()
         Context.Response.ContentType = "application/json"
         Dim dateString As String
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
 
         If Detail = "True" Then
@@ -162,7 +154,7 @@ Public Class WebService_PurchaseOrder
         Context.Response.Clear()
         Context.Response.ContentType = "application/json"
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
 
         str = " Select Isnull(ITM.TransactionID,0) AS PurchaseTransactionID,Isnull(ITM.VoucherID,0) AS PurchaseVoucherID,Isnull(IPR.RequisitionTransactionID,0) AS TransactionID,Isnull(IR.VoucherID,0) AS VoucherID,Isnull(ITM.LedgerID,0) AS LedgerID,Isnull(ITD.TransID,0) AS TransID,Isnull(ITD.ItemID,0) AS ItemID,  Isnull(ITD.ItemGroupID,0) As ItemGroupID, NullIf(LM.LedgerName,'') AS LedgerName,Isnull(ITM.MaxVoucherNo,0) AS PurchaseMaxVoucherNo,Isnull(IR.MaxVoucherNo,0) AS MaxVoucherNo,NullIf(ITM.VoucherNo,'') AS PurchaseVoucherNo,NullIf(IR.VoucherNo,'') AS VoucherNo, Replace(Convert(Varchar(13),ITM.VoucherDate,106),' ','-') AS PurchaseVoucherDate,Replace(Convert(Varchar(13),IR.VoucherDate,106),' ','-') AS VoucherDate, NullIf(IM.ItemCode,'') AS ItemCode, NullIf(IGM.ItemGroupName,'') AS ItemGroupName,NullIf(ISGM.ItemSubGroupName,'') AS ItemSubGroupName, " &
@@ -187,7 +179,7 @@ Public Class WebService_PurchaseOrder
         Context.Response.Clear()
         Context.Response.ContentType = "application/json"
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
 
         str = ""
@@ -209,7 +201,7 @@ Public Class WebService_PurchaseOrder
         Context.Response.Clear()
         Context.Response.ContentType = "application/json"
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
 
         str = ""
@@ -231,7 +223,7 @@ Public Class WebService_PurchaseOrder
         Context.Response.Clear()
         Context.Response.ContentType = "application/json"
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
 
         str = ""
@@ -265,7 +257,7 @@ Public Class WebService_PurchaseOrder
         Context.Response.Clear()
         Context.Response.ContentType = "application/json"
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
 
         ''New query 12-11-20
         str = "SELECT LM.LedgerID, IPOT.TransID, IPOT.TransactionID, ISNULL(LM.TaxRatePer, 0) AS TaxRatePer, ISNULL(IPOT.Amount, 0) AS ChargesAmount, ISNULL(LM.InAmount, 0) AS InAmount, ISNULL(LM.IsCumulative, 0) AS IsCumulative, ISNULL(IPOT.GSTApplicable, 0) AS GSTApplicable,IPOT.CalculatedON As CalculateON, LM.LedgerName, NULLIF (LM.TaxType, '') AS TaxType, NULLIF (LM.GSTLedgerType, '') AS GSTLedgerType " &
@@ -285,7 +277,7 @@ Public Class WebService_PurchaseOrder
         Dim KeyField As String
         Dim dtExist As New DataTable
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
 
         If db.CheckAuthories("PurchaseOrder.aspx", GBLUserID, GBLCompanyID, "CanDelete") = False Then Return "You are not authorized to delete..!"
@@ -343,7 +335,7 @@ Public Class WebService_PurchaseOrder
         Dim KeyField As String
         Try
 
-            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
 
             Dim dtExist As New DataTable
             Dim dtExist1 As New DataTable
@@ -351,15 +343,14 @@ Public Class WebService_PurchaseOrder
 
             Dim D1, D2 As String
 
-            SxistStr = ""
-            SxistStr = "select isnull(TransactionID,0) as TransactionID from ItemTransactionDetail where CompanyID='" & GBLCompanyID & "' and  TransactionID='" & TransactionID & "' and Isnull(IsvoucherItemApproved,0)=1  and isnull(IsDeletedTransaction,0)<>1"
+            SxistStr = "Select TransactionID from ItemTransactionDetail where CompanyID='" & GBLCompanyID & "' and  TransactionID='" & TransactionID & "' and Isnull(IsvoucherItemApproved,0)=1  and isnull(IsDeletedTransaction,0)<>1"
             db.FillDataTable(dtExist, SxistStr)
             Dim E As Integer = dtExist.Rows.Count
             If E > 0 Then
                 D1 = dtExist.Rows(0)(0)
             End If
-            SxistStr = ""
-            SxistStr = "Select  * From ItemTransactionDetail Where Isnull(IsDeletedTransaction, 0) = 0 And isnull(QCApprovalNo,'')<>'' AND TransactionID=" & TransactionID & "  AND (Isnull(ApprovedQuantity,0)>0 OR  Isnull(RejectedQuantity,0)>0)"
+
+            SxistStr = "Select TransactionID From ItemTransactionDetail Where Isnull(IsDeletedTransaction, 0) = 0 And isnull(QCApprovalNo,'')<>'' AND TransactionID=" & TransactionID & "  AND (Isnull(ApprovedQuantity,0)>0 OR  Isnull(RejectedQuantity,0)>0)"
             db.FillDataTable(dtExist1, SxistStr)
             Dim F As Integer = dtExist1.Rows.Count
             If F > 0 Then
@@ -369,8 +360,6 @@ Public Class WebService_PurchaseOrder
             If D1 <> "" Or D2 <> "" Then
                 KeyField = "Exist"
             End If
-
-            KeyField = KeyField
 
         Catch ex As Exception
             KeyField = "fail"
@@ -386,7 +375,7 @@ Public Class WebService_PurchaseOrder
         Context.Response.Clear()
         Context.Response.ContentType = "application/json"
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
 
         If SelSupplierName = "" Then
@@ -414,21 +403,16 @@ Public Class WebService_PurchaseOrder
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function GetPONO(ByVal prefix As String) As String
 
-        Dim dt As New DataTable
-        Dim PONo As String
         Dim MaxVoucherNo As Long
         Dim KeyField As String
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
-        GBLUserName = Convert.ToString(HttpContext.Current.Session("UserName"))
         GBLFYear = Convert.ToString(HttpContext.Current.Session("FYear"))
 
         Try
 
-            PONo = db.GeneratePrefixedNo("ItemTransactionMain", prefix, "MaxVoucherNo", MaxVoucherNo, GBLFYear, " Where VoucherPrefix='" & prefix & "' And  CompanyID=" & GBLCompanyID & " And FYear='" & GBLFYear & "' ")
-
-            KeyField = PONo
+            Return db.GeneratePrefixedNo("ItemTransactionMain", prefix, "MaxVoucherNo", MaxVoucherNo, GBLFYear, " Where VoucherPrefix='" & prefix & "' And  CompanyID=" & GBLCompanyID & " And FYear='" & GBLFYear & "' ")
 
         Catch ex As Exception
             KeyField = "fail"
@@ -444,9 +428,9 @@ Public Class WebService_PurchaseOrder
 
         Dim IsAdminUser As String
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
-        GBLUserName = Convert.ToString(HttpContext.Current.Session("UserName"))
+        Dim GBLUserName = Convert.ToString(HttpContext.Current.Session("UserName"))
 
         Try
             If GBLUserName = "Admin" Then
@@ -469,10 +453,9 @@ Public Class WebService_PurchaseOrder
         Context.Response.Clear()
         Context.Response.ContentType = "application/json"
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
 
-        str = ""
         str = "Select Distinct A.[LedgerID],B.[LedgerGroupID],B.[LedgerGroupNameID],A.[CompanyID],A.[LedgerName],nullif(A.[MailingName],'') as MailingName,nullif(A.[City],'') as City,nullif(A.[State],'') as SupState,nullif(S.[StateCode],'') AS StateCode,Isnull(S.[StateTinNo],0) AS StateTinNo,nullif(A.[Country],'') as Country,nullif(A.[MobileNo],'') as MobileNo,nullif(A.[GSTNo],'') AS GSTNo,nullif(A.[CurrencyCode],'') AS CurrencyCode,Isnull(A.[GSTApplicable],0) AS GSTApplicable,Isnull(C.stateTinNo,0) AS CompanyStateTinNo " &
                 "From LedgerMaster AS A " &
                 "INNER JOIN LedgerGroupMaster AS B ON A.LedgerGroupID=B.LedgerGroupID And A.CompanyID = B.CompanyID INNER JOIN CompanyMaster AS C ON C.CompanyID =A.CompanyID LEFT JOIN CountryStateMaster AS S ON S.State=A.State " &
@@ -492,7 +475,7 @@ Public Class WebService_PurchaseOrder
         Context.Response.Clear()
         Context.Response.ContentType = "application/json"
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
 
         str = ""
@@ -512,7 +495,7 @@ Public Class WebService_PurchaseOrder
         Context.Response.Clear()
         Context.Response.ContentType = "application/json"
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
 
         str = ""
@@ -532,7 +515,7 @@ Public Class WebService_PurchaseOrder
         Context.Response.Clear()
         Context.Response.ContentType = "application/json"
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
         str = ""
         str = "Select isnull(HeadID,0) as HeadID,nullif(Head,'') as Head,nullif(RateType,'') as RateType,0 as Weight,0 as Rate,0 as HeadAmount From PurchaseHeadMaster where CompanyID='" & GBLCompanyID & "'"
@@ -549,7 +532,7 @@ Public Class WebService_PurchaseOrder
         Context.Response.Clear()
         Context.Response.ContentType = "application/json"
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
         str = ""
         str = "Select Distinct isnull(ItemID,0) AS ItemID,QuantityTolerance,Isnull(PurchaseRate,0) AS PurchaseRate,isnull(LedgerID,'') as LedgerID  From SupplierWisePurchaseSetting Where LedgerID='" & LedgerId & "' AND CompanyID='" & GBLCompanyID & "' "
@@ -564,7 +547,7 @@ Public Class WebService_PurchaseOrder
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function SavePaperPurchaseOrder(ByVal prefix As String, ByVal jsonObjectsRecordMain As Object, ByVal jsonObjectsRecordDetail As Object, ByVal jsonObjectsRecordOverHead As Object, ByVal jsonObjectsRecordTax As Object, ByVal jsonObjectsRecordSchedule As Object, ByVal jsonObjectsRecordRequisition As Object, ByVal TxtNetAmt As String, ByVal CurrencyCode As String) As String
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
         GBLFYear = Convert.ToString(HttpContext.Current.Session("FYear"))
         If db.CheckAuthories("PurchaseOrder.aspx", GBLUserID, GBLCompanyID, "CanSave") = False Then Return "You are not authorized to save..!"
@@ -577,8 +560,6 @@ Public Class WebService_PurchaseOrder
         Dim KeyField, str2, TransactionID, NumberToWord As String
         Dim AddColName, AddColValue, TableName As String
         Dim result As String
-        AddColName = ""
-        AddColValue = ""
 
         Try
             NumberToWord = ""
@@ -687,21 +668,18 @@ Public Class WebService_PurchaseOrder
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function UpdatePurchaseOrder(ByVal TransactionID As String, ByVal jsonObjectsRecordMain As Object, ByVal jsonObjectsRecordDetail As Object, ByVal jsonObjectsRecordOverHead As Object, ByVal jsonObjectsRecordTax As Object, ByVal jsonObjectsRecordSchedule As Object, ByVal jsonObjectsRecordRequisition As Object, ByVal TxtNetAmt As String, ByVal CurrencyCode As String) As String
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
         If db.CheckAuthories("PurchaseOrder.aspx", GBLUserID, GBLCompanyID, "CanEdit") = False Then Return "You are not authorized to update..!"
 
-        GBLUserName = Convert.ToString(HttpContext.Current.Session("UserName"))
         GBLFYear = Convert.ToString(HttpContext.Current.Session("FYear"))
-        GBLBranchID = Convert.ToString(HttpContext.Current.Session("BranchId"))
+
         Dim dt As New DataTable
         Dim dtCurrency As New DataTable 'For Currency
         Dim CurrencyHeadName, CurrencyChildName, str2 As String 'For Currency
         Dim KeyField, NumberToWord As String
         Dim AddColName, wherecndtn, TableName, AddColValue As String
-        AddColName = ""
 
-        NumberToWord = ""
         If CurrencyCode = "INR" Or CurrencyCode = "" Then
             CurrencyHeadName = ""
             CurrencyChildName = ""
@@ -709,7 +687,6 @@ Public Class WebService_PurchaseOrder
             NumberToWord = db.ReadNumber(TxtNetAmt, CurrencyHeadName, CurrencyChildName, CurrencyCode)
         Else
             NumberToWord = ""
-            str2 = ""
             str2 = "Select nullif(CurrencyHeadName,'') as CurrencyHeadName,Nullif(CurrencyChildName,'') as CurrencyChildName From CurrencyMaster Where CurrencyCode='" & CurrencyCode & "'"
             db.FillDataTable(dtCurrency, str2)
             Dim j As Integer = dtCurrency.Rows.Count
@@ -807,7 +784,7 @@ Public Class WebService_PurchaseOrder
         Context.Response.Clear()
         Context.Response.ContentType = "application/json"
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
 
         str = "Select Distinct Isnull(LM.LedgerID,0) as LedgerID,Nullif(LM.LedgerName,'') as LedgerName from SupplierWisePurchaseSetting as STGA inner join LedgerMaster as LM on STGA.LedgerID=LM.LedgerID And STGA.CompanyID=LM.CompanyID where STGA.ItemGroupID='" & ItemGroupID & "'  AND STGA.CompanyID='" & GBLCompanyID & "' and Isnull(STGA.IsDeletedTransaction,0)<>1 "
@@ -827,7 +804,7 @@ Public Class WebService_PurchaseOrder
         Context.Response.Clear()
         Context.Response.ContentType = "application/json"
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
 
         str = ""
@@ -910,9 +887,8 @@ Public Class WebService_PurchaseOrder
         Context.Response.Clear()
         Context.Response.ContentType = "application/json"
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
-        str = ""
         str = "Select distinct Isnull(ITM.TransactionID,0) AS PurchaseTransactionID,Isnull(ITM.VoucherID,0) AS PurchaseVoucherID,Isnull(ITM.VoucherID,0) AS VoucherID,Isnull(ITM.LedgerID,0) AS LedgerID,  " &
                     "Isnull(ITD.TransID,0) As TransID,Isnull(ITD.ItemID,0) As ItemID,  Isnull(ITD.ItemGroupID,0) As ItemGroupID,  " &
                     "NullIf(LM.LedgerName,'') AS LedgerName,Isnull(ITM.MaxVoucherNo,0) AS PurchaseMaxVoucherNo,Isnull(ITM.MaxVoucherNo,0) AS MaxVoucherNo,  " &
@@ -962,11 +938,10 @@ Public Class WebService_PurchaseOrder
         Context.Response.Clear()
         Context.Response.ContentType = "application/json"
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
 
         If itemIds <> "" And supID <> "" Then
-            str = ""
             str = " Select Distinct Isnull(ITM.TransactionID,0) AS TransactionID,Isnull(ITD.TransID,0) AS TransID,Isnull(ITM.VoucherID,0) AS VoucherID,Isnull(ITD.ItemID,0) AS ItemID,Isnull(IM.ItemGroupID,0) AS ItemGroupID,Isnull(IM.ItemSubGroupID,0) AS ItemSubGroupID,Isnull(IGM.ItemGroupNameID,0) AS ItemGroupNameID,Isnull(ITM.MaxVoucherNo,0) As MaxVoucherNo,NullIf(ITM.VoucherNo,'') AS VoucherNo,Replace(Convert(Varchar(13),ITM.VoucherDate,106),' ','-') AS VoucherDate,Nullif(IGM.ItemGroupName,'') AS ItemGroupName,Nullif(ISGM.ItemSubGroupName,'') AS ItemSubGroupName,Nullif(IM.ItemCode,'') AS ItemCode,Nullif(IM.ItemName,'') AS ItemName,    Nullif(IM.ItemDescription,'') AS ItemDescription,Nullif(ITD.RefJobBookingJobCardContentsID,'') AS RefJobBookingJobCardContentsID,Nullif(ITD.RefJobCardContentNo,'') AS RefJobCardContentNo,Isnull(ITD.RequiredQuantity,0) AS RequiredQuantity,NullIf(ITD.StockUnit,'') AS StockUnit,NullIf(ITD.ItemNarration,'') AS ItemNarration,     " &
                 " NullIf(ITM.Narration,'') AS Narration,NullIf(ITM.FYear,'') AS FYear,NullIf(UA.UserName,'') AS CreatedBy,  (Isnull(ITD.RequiredQuantity, 0) - Isnull((Select Sum(Isnull(RequisitionProcessQuantity, 0))  From ItemPurchaseRequisitionDetail Where Isnull(IsDeletedTransaction, 0) = 0 And RequisitionTransactionID = ITD.TransactionID And ItemID = ITD.ItemID And CompanyID = ITD.CompanyID),0)) As PurchaseQuantityComp,(Isnull(ITD.RequiredQuantity, 0) - Isnull((Select Sum(Isnull(RequisitionProcessQuantity, 0))  From ItemPurchaseRequisitionDetail Where Isnull(IsDeletedTransaction, 0) = 0 And RequisitionTransactionID = ITD.TransactionID And ItemID = ITD.ItemID And CompanyID = ITD.CompanyID),0)) As PurchaseQuantity,Isnull(Nullif(IM.PurchaseRate,''),0) as PurchaseRate,  nullif(IM.PurchaseUnit,'') as PurchaseUnit, nullif(PHM.ProductHSNName,'') as ProductHSNName,  " &
                 " replace(convert(nvarchar(30),ITD.ExpectedDeliveryDate,106),'','-') AS ExpectedDeliveryDate,nullif(PHM.HSNCode,'') as HSNCode, isnull(PHM.GSTTaxPercentage,0) as GSTTaxPercentage, isnull(PHM.CGSTTaxPercentage,0) as CGSTTaxPercentage, isnull(PHM.SGSTTaxPercentage,0) as SGSTTaxPercentage, isnull(PHM.IGSTTaxPercentage ,0) as IGSTTaxPercentage  ,Isnull(IM.WtPerPacking,0) AS WtPerPacking,Isnull(IM.UnitPerPacking,1) AS UnitPerPacking,Isnull(IM.ConversionFactor,1) AS ConversionFactor,Isnull(Nullif(IM.SizeW,''),0) AS SizeW,Isnull(IGM.ItemGroupNameID,0) AS ItemGroupNameID,Nullif(C.ConversionFormula,'') AS  ConversionFormula,Isnull(C.ConvertedUnitDecimalPlace,0) AS UnitDecimalPlace   " &
@@ -990,10 +965,9 @@ Public Class WebService_PurchaseOrder
         Context.Response.Clear()
         Context.Response.ContentType = "application/json"
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
 
-        str = ""
         str = " Select Distinct CurrencyCode From CurrencyMaster Where Isnull(CurrencyCode,'')<>'' Order by CurrencyCode"
 
         db.FillDataTable(dataTable, str)
@@ -1007,13 +981,9 @@ Public Class WebService_PurchaseOrder
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function GetPOApprovalBy() As String
 
-        Context.Response.Clear()
-        Context.Response.ContentType = "application/json"
-
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
 
-        str = ""
         str = "Select Distinct Isnull(LM.LedgerID,0) as LedgerID,Nullif(LM.LedgerName,'') as LedgerName  From LedgerMaster As LM where LM.CompanyID ='" & GBLCompanyID & "' And Isnull(LM.IsDeletedTransaction,0)<>1 AND  LM.LedgerGroupID IN(Select Distinct LedgerGroupID From LedgerGroupMaster Where LedgerGroupNameID=27 AND CompanyID='" & GBLCompanyID & "')"
 
         db.FillDataTable(dataTable, str)
@@ -1030,7 +1000,7 @@ Public Class WebService_PurchaseOrder
         Context.Response.Clear()
         Context.Response.ContentType = "application/json"
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
         str = ""
         If PurchaseTransactionID <> "0" Then
@@ -1053,12 +1023,9 @@ Public Class WebService_PurchaseOrder
         Dim dt As New DataTable
         Dim KeyField As String
         Dim AddColName, AddColValue, TableName As String
-        AddColName = ""
-        AddColValue = ""
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
-        GBLUserName = Convert.ToString(HttpContext.Current.Session("UserName"))
         GBLFYear = Convert.ToString(HttpContext.Current.Session("FYear"))
 
         Try

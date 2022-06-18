@@ -1,13 +1,6 @@
 ﻿<%@ Page Title="" Language="VB" MasterPageFile="~/MasterPage_Main.master" AutoEventWireup="false" CodeFile="CostApproval.aspx.vb" Inherits="CostApproval" %>
 
-<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="Server">
-    <style>
-        .title {
-            border-bottom: 2px solid #E6E9ED;
-            padding: 1px 2px 2px;
-            margin-bottom: 5px;
-        }
-    </style>
+<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="Server">   
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="Server">
     <div class="row clearfix" style="padding: 0px; margin: 0px">

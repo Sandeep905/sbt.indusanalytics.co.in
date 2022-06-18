@@ -119,6 +119,13 @@
         </div>
         <div id="StatusDiv">
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-0 margin-0">
+                <div class="font-11">Attachement</div>
+                <input type="file" capture="camera" name="photo" accept=".png, .jpg, .jpeg, .gif" id="file" style="width: 60%; float: left; height: 2.5em" />
+                <input type="button" name="BtnRemoveFile" id="BtnRemoveFile" value="Remove File" class="btn btn-warning" />
+                <div style="clear: both">
+                    <img src="#" id="PreviewAttachedFile" style="display: none; width: auto; height: 200px" />
+                </div>
+
                 <div class="col-lg-2 col-md-2 col-sm-3 col-xs-6 btn">
                     <div class='statusbtn' onclick='UpdateMachineStatus(this)' title="Running">
                         <img style='width: 100%; height: 10em;' src="icon/PartCompleted.png" /><div class='font-12 dx-word-wrap' style='height: 2.5em;'><b title="Running" style='white-space: pre-wrap;'>CONTINUING</b></div>
@@ -133,12 +140,6 @@
         </div>
 
         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 m-t-5 hidden">
-            <div class="font-11">Attachement</div>
-            <input type="file" capture="camera" name="photo" accept=".png, .jpg, .jpeg, .gif" id="file" style="width: 60%; float: left; height: 2.5em" />
-            <input type="button" name="BtnRemoveFile" id="BtnRemoveFile" value="Remove File" class="btn btn-warning" />
-            <div style="clear: both">
-                <img src="#" id="PreviewAttachedFile" style="display: none; width: auto; height: 200px" />
-            </div>
             <button type="button" class="btn btn-warning" id="BtnUpdate" value="Running" onclick="UpdateRecord(this)">Update</button>
         </div>
     </div>

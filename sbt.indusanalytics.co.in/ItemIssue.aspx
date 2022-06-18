@@ -77,12 +77,8 @@
                                             <div id="RadioButtonPicklistIssue"></div>
                                         </div>
                                         <div class="col-lg-2 col-md-2 col-sm-2 col-xs-4 p-l-0">
-                                            <br />
-                                            <div class="DialogBoxCustom" style="float: left; background-color: #fff; width: auto; margin-top: 2px; border-radius: 4px; text-align: left">
-                                                <a id="RefreshButton" href='#' class="iconButton" style="margin-top: 0px;" title="reload page">
-                                                    <i class="fa fa-refresh fa-2x fa-fw" style="font-size: 14px;"></i>&nbsp Refresh
-                                                </a>
-                                            </div>
+                                            <br class="hidden-xs" />
+                                            <input type="button" name="RefreshButton" id="RefreshButton" class="btn btn-primary" value="Refresh" />
                                         </div>
                                     </div>
                                     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-0">
@@ -98,7 +94,7 @@
                                                 <label class="font-11">Already Issued Qty</label>
                                             </div>
                                             <div class="col-lg-3 col-md-3 col-sm-3 col-xs-7">
-                                                <input type="text" id="TxtIssuedQuantity" class="forTextBox" placeholder="Already Issued Qty" readonly="" />
+                                                <input type="text" id="TxtIssuedQuantity" class="forTextBox" placeholder="Already Issued Qty" disabled="disabled" readonly="" />
                                             </div>
                                             <div class="col-xs-5 col-sm-1 col-md-1 col-lg-1">
                                                 <label class="font-11">Quantity</label>
@@ -108,11 +104,7 @@
                                                 <input type="text" id="TxtUnitDecimalPlace" class="forTextBox" style="display: none" placeholder="Unit Decimal Place" />
                                             </div>
                                             <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12">
-                                                <div class="DialogBoxCustom">
-                                                    <a id="BtnAddRow" href='#' class="iconButton" style="margin-top: 0px; margin-right: 0px; float: left" title="add new row">
-                                                        <i class="fa fa-plus fa-2x fa-fw" style="font-size: 14px;"></i>&nbsp Add
-                                                    </a>
-                                                </div>
+                                                <input type="button" name="BtnAddRow" id="BtnAddRow" class="btn btn-primary" value="Add" />
                                             </div>
                                         </div>
                                         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
@@ -149,13 +141,11 @@
                         </div>
                     </div>
                 </div>
-                <div id="btnDivPickList" class="modal-footer" style="margin-top: 0em; border-top: 1px solid #42909A; height: 3em">
-                    <button type="button" id="BtnNew" class="btn btn-link waves-effect" style="margin-top: -1em; color: none">New</button>
-                    <button type="button" id="IssuePrintButton" class="btn btn-link waves-effect" style="margin-top: -1em; color: none" disabled="disabled">Print</button>
-                    <button type="button" id="BtnDeletePopUp" class="btn btn-link waves-effect" style="margin-top: -1em">Delete</button>
-                    <button type="button" id="BtnSave" class="btn btn-link waves-effect" style="margin-top: -1em">Save</button>
-                    <button type="button" id="BtnSaveAS" class="btn btn-link waves-effect" style="margin-top: -1em; display: none" disabled="disabled">Save As</button>
-                    <button type="button" class="btn btn-link waves-effect" data-dismiss="modal" style="margin-top: -1em">Close</button>
+                <div id="btnDivPickList" class="modal-footer" style="border-top: 1px solid #42909A;">
+                    <button type="button" id="BtnNew" class="btn btn-default waves-effect">New</button>
+                    <button type="button" id="IssuePrintButton" class="btn btn-primary waves-effect" disabled="disabled">Print</button>
+                    <button type="button" id="BtnDeletePopUp" class="btn btn-danger waves-effect">Delete</button>
+                    <button type="button" id="BtnSave" class="btn btn-success waves-effect">Save</button>
                 </div>
             </div>
         </div>
@@ -188,7 +178,7 @@
                     </div>
                 </div>
                 <div id="btnDivFiltrJobcard" class="modal-footer" style="margin-top: 0em; border-top: 1px solid #42909A; height: 3em">
-                    <button type="button" class="btn btn-link waves-effect" data-dismiss="modal" style="margin-top: -1em">Close</button>
+                    <button type="button" class="btn btn-link waves-effect" data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>

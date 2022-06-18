@@ -141,12 +141,7 @@ $("#PicklistGrid").dxDataGrid({
         text: 'Data is loading...'
     },
     onRowPrepared: function (e) {
-        if (e.rowType === "header") {
-            e.rowElement.css('background', '#509EBC');
-            e.rowElement.css('color', 'white');
-            e.rowElement.css('font-weight', 'bold');
-        }
-        e.rowElement.css('fontSize', '11px');
+        setDataGridRowCss(e);
     },
     onSelectionChanged: function (selectedItems) {
         PickListGriddata = [];
@@ -203,12 +198,7 @@ $("#FiltrJobcardGrid").dxDataGrid({
         text: 'Data is loading...'
     },
     onRowPrepared: function (e) {
-        if (e.rowType === "header") {
-            e.rowElement.css('background', '#509EBC');
-            e.rowElement.css('color', 'white');
-            e.rowElement.css('font-weight', 'bold');
-        }
-        e.rowElement.css('fontSize', '11px');
+        setDataGridRowCss(e);
     },
     onSelectionChanged: function (Items) {
         JCdata = Items.selectedRowsData;
@@ -268,12 +258,7 @@ $("#IssueShowListGrid").dxDataGrid({
         text: 'Data is loading...'
     },
     onRowPrepared: function (e) {
-        if (e.rowType === "header") {
-            e.rowElement.css('background', '#509EBC');
-            e.rowElement.css('color', 'white');
-            e.rowElement.css('font-weight', 'bold');
-        }
-        e.rowElement.css('fontSize', '11px');
+        setDataGridRowCss(e);
     },
     onSelectionChanged: function (Showlist) {
         sholistData = [];
@@ -507,7 +492,7 @@ $("#ShowListButton").click(function () {
 $("#CreateButton").click(function () {
     GblStatus = "";
     document.getElementById("BtnDeletePopUp").disabled = true;
-    document.getElementById("BtnSaveAS").disabled = true;
+
     radioGroup();
     $("#RadioButtonPicklistIssue").dxRadioGroup({ disabled: false });
 
@@ -610,12 +595,7 @@ $("#StockBatchWiseGrid").dxDataGrid({
         allowDeleting: true
     },
     onRowPrepared: function (e) {
-        if (e.rowType === "header") {
-            e.rowElement.css('background', '#509EBC');
-            e.rowElement.css('color', 'white');
-            e.rowElement.css('font-weight', 'bold');
-        }
-        e.rowElement.css('fontSize', '11px');
+        setDataGridRowCss(e);
     },
     onSelectionChanged: function (selectedBatchWisdata) {
         BatchWisdata = [];
@@ -681,13 +661,7 @@ $("#AllotedItemGrid").dxDataGrid({
         allowDeleting: true
     },
     onRowPrepared: function (e) {
-        if (e.rowType === "header") {
-            e.rowElement.css('background', '#509EBC');
-            e.rowElement.css('color', 'white');
-            e.rowElement.css('font-weight', 'bold');
-            e.rowElement.css('font-weight', 'bold');
-        }
-        e.rowElement.css('fontSize', '11px');
+        setDataGridRowCss(e);
     },
     onRowRemoved: function (e) {
         if (e.component.totalCount() === 0) {
@@ -1427,7 +1401,6 @@ $("#EditButton").click(function () {
     $("#SelBinName").dxSelectBox({ value: sholistData[0].FloorWarehouseID });
 
     document.getElementById("BtnDeletePopUp").disabled = false;
-    document.getElementById("BtnSaveAS").disabled = false;
 });
 
 $("#IssuePrintButton").click(function () {

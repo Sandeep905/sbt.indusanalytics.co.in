@@ -681,6 +681,7 @@ function UpdateRecord(XX) {
     //OptUpdateEntry.WastageRemark = TxtWastageremark;
     //OptUpdateEntry.SuspenseRemark = TxtSuspenseRemark;
     OptUpdateEntry.ScheduleSequenceID = FetchData[0].ScheduleSequenceID;
+    OptUpdateEntry.AttachedFileName = $('#file')[0].files[0].name;
 
     if (FetchData[0].PaperConsumptionRequired === true && PaperDetailSelectedData.length > 0) {
         OptUpdateEntry.PaperID = PaperDetailSelectedData[0].PaperID;
@@ -880,7 +881,7 @@ function UpdateRecord(XX) {
                 if (results.d === "Update") {
                     uploadFileProduction("Update");
                     swal("Updated..", "Machine status updated successfully..", "success");
-                    if (/*UpdateStatus.toUpperCase() === "COMPLETE" || */UpdateStatus.toUpperCase() === "RUNNING") { window.location = "UpdateJob.aspx"; } else { window.location = "StartJob.aspx"; }
+                    //if (/*UpdateStatus.toUpperCase() === "COMPLETE" || */UpdateStatus.toUpperCase() === "RUNNING") { window.location = "UpdateJob.aspx"; } else { window.location = "StartJob.aspx"; }
                 } else {
                     swal("Failed..!", results.d, "error");
                 }

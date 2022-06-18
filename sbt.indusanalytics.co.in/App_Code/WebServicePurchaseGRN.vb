@@ -15,14 +15,13 @@ Imports Connection
 Public Class WebServicePurchaseGRN
     Inherits System.Web.Services.WebService
 
-    Dim db As New DBConnection
-    Dim js As New JavaScriptSerializer()
-    Dim data As New HelloWorldData()
+    ReadOnly db As New DBConnection
+    ReadOnly js As New JavaScriptSerializer()
+    ReadOnly data As New HelloWorldData()
     Dim dataTable As New DataTable()
     Dim str As String
 
     Dim GBLUserID As String
-    Dim GBLUserName As String
     Dim GBLCompanyID As String
     Dim GBLFYear As String
 
@@ -31,7 +30,7 @@ Public Class WebServicePurchaseGRN
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function GetPurchaseSuppliersList() As String
         Try
-            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
             str = "Select Distinct LM.LedgerID,LM.LedgerName From ItemTransactionMain AS ITM INNER JOIN LedgerMaster AS LM ON LM.LedgerID=ITM.LedgerID AND LM.CompanyID=ITM.CompanyID Inner Join LedgerGroupMaster AS LGM On LGM.LedgerGroupID=LM.LedgerGroupID And LGM.CompanyID=LM.CompanyID  AND LGM.LedgerGroupNameID=23 Where ITM.CompanyID=" & GBLCompanyID & " AND ITM.VoucherID=-11 Order By LM.LedgerName"
             db.FillDataTable(dataTable, str)
             data.Message = db.ConvertDataTableTojSonString(dataTable)
@@ -46,7 +45,7 @@ Public Class WebServicePurchaseGRN
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function GetPendingOrdersList() As String
         Try
-            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
             str = "Select ITM.TransactionID,ITM.VoucherID,ITM.LedgerID,ITD.TransID,ITD.ItemID,ITD.ItemGroupID,IGM.ItemGroupNameID,LM.LedgerName,ITM.MaxVoucherNo,ITM.VoucherNo AS PurchaseVoucherNo,Replace(Convert(Varchar(13),ITM.VoucherDate,106),' ','-') AS PurchaseVoucherDate,IM.ItemCode ,IGM.ItemGroupName,ISGM.ItemSubGroupName,IM.ItemName,Isnull(ITD.PurchaseOrderQuantity,0) AS PurchaseOrderQuantity,Isnull(ITD.PurchaseOrderQuantity,0) AS PendingQty, Isnull(IM.PurchaseUnit,'') AS PurchaseUnit,Isnull(IM.StockUnit,'') AS StockUnit,Isnull(ITD.PurchaseTolerance,0) AS PurchaseTolerance,NullIf(Isnull(UA.UserName,''),'') AS CreatedBy,NullIf(Isnull(UM.UserName,''),'') AS ApprovedBy, " &
                   " nullif(ITD.RefJobCardContentNo ,'') AS RefJobCardContentNo,NullIf(ITD.FYear,'') AS FYear,NullIf(ITM.PurchaseDivision,'') AS PurchaseDivision,NULLIf(ITM.PurchaseReferenceRemark,'') AS PurchaseReferenceRemark,Isnull(IM.SizeW,1) AS SizeW,Isnull(IM.WtPerPacking,0) AS WtPerPacking,Isnull(IM.UnitPerPacking,1) AS UnitPerPacking,Isnull(IM.ConversionFactor,1) AS ConversionFactor,Nullif(C.ConversionFormula,'') AS FormulaStockToPurchaseUnit,ISNULL(C.ConvertedUnitDecimalPlace,0) AS UnitDecimalPlacePurchaseUnit,(Select ROUND(Sum(Isnull(ChallanQuantity,0)),3) From ItemTransactionDetail Where PurchaseTransactionID=ITD.TransactionID AND ItemID=ITD.ItemID AND Isnull(IsDeletedTransaction,0)<>1) AS ReceiptQuantity,Nullif(CU.ConversionFormula,'') AS FormulaPurchaseToStockUnit,ISNULL(CU.ConvertedUnitDecimalPlace,0) AS UnitDecimalPlaceStockUnit " &
                   " From ItemTransactionMain AS ITM INNER JOIN ItemTransactionDetail AS ITD ON ITM.TransactionID=ITD.TransactionID AND ITM.CompanyID=ITD.CompanyID AND Isnull(ITM.IsDeletedTransaction,0)=0 INNER JOIN UserMaster AS UA ON UA.UserID=ITM.CreatedBy AND UA.CompanyID=ITM.CompanyID INNER JOIN ItemMaster AS IM ON IM.ItemID=ITD.ItemID AND IM.CompanyID=ITD.CompanyID INNER JOIN ItemGroupMaster AS IGM ON IGM.ItemGroupID=IM.ItemGroupID AND IGM.CompanyID=IM.CompanyID INNER JOIN LedgerMaster AS LM ON LM.LedgerID=ITM.LedgerID AND LM.CompanyID=ITM.CompanyID  LEFT JOIN ItemSubGroupMaster AS ISGM ON ISGM.ItemSubGroupID=IM.ItemSubGroupID AND ISGM.CompanyID=IM.CompanyID LEFT JOIN UserMaster AS UM ON UM.UserID=ITD.VoucherItemApprovedBy AND UA.CompanyID=ITM.CompanyID LEFT JOIN ConversionMaster AS C ON C.BaseUnitSymbol=IM.StockUnit AND C.ConvertedUnitSymbol=IM.PurchaseUnit  LEFT JOIN ConversionMaster AS CU ON CU.BaseUnitSymbol=IM.PurchaseUnit AND CU.ConvertedUnitSymbol=IM.StockUnit   " &
@@ -65,7 +64,7 @@ Public Class WebServicePurchaseGRN
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function GetReceiptNoteList() As String
         Try
-            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
             str = "Select ITM.TransactionID,nullif(ITD.RefJobCardContentNo ,'') AS RefJobCardContentNo,ITD.PurchaseTransactionID,ITM.LedgerID,ITM.MaxVoucherNo,LM.LedgerName,ITM.VoucherNo AS ReceiptVoucherNo,Replace(Convert(Varchar(13),ITM.VoucherDate,106),' ','-') AS ReceiptVoucherDate,NullIf(ITMP.VoucherNo,'') AS PurchaseVoucherNo,Replace(Convert(Varchar(13),ITMP.VoucherDate,106),' ','-') AS PurchaseVoucherDate,ROUND(SUM(Isnull(ITD.ChallanQuantity,0)),2) AS ChallanQuantity,NullIf(ITM.DeliveryNoteNo,'') AS DeliveryNoteNo,Replace(Convert(Varchar(13),ITM.DeliveryNoteDate,106),' ','-') AS DeliveryNoteDate,NullIf(ITM.GateEntryNo,'') AS GateEntryNo,Replace(Convert(Varchar(13),ITM.GateEntryDate,106),' ','-') AS GateEntryDate,NullIf(ITM.LRNoVehicleNo,'') AS LRNoVehicleNo,NullIf(ITM.Transporter,'') AS Transporter,NullIf(EM.LedgerName,'') AS ReceiverName,NullIf(ITM.Narration,'') AS Narration,NullIf(ITM.FYear,'') AS FYear,NullIf(UM.UserName,'') AS CreatedBy,Isnull(ITM.ReceivedBy,0) AS ReceivedBy,ITD.IsVoucherItemApproved " &
                   " From ItemTransactionMain AS ITM INNER JOIN ItemTransactionDetail AS ITD ON ITM.TransactionID=ITD.TransactionID AND ITM.CompanyID=ITD.CompanyID AND Isnull(ITM.IsDeletedTransaction,0)=0 AND Isnull(ITD.IsDeletedTransaction,0)=0 INNER JOIN ItemTransactionMain AS ITMP ON ITMP.TransactionID=ITD.PurchaseTransactionID AND ITMP.CompanyID=ITD.CompanyID AND Isnull(ITMP.IsDeletedTransaction,0)=0 INNER JOIN LedgerMaster AS LM ON LM.LedgerID=ITM.LedgerID AND LM.CompanyID=ITM.CompanyID And LM.IsDeletedTransaction=0" &
                   " INNER JOIN UserMaster AS UM ON UM.UserID=ITM.CreatedBy AND UM.CompanyID=ITM.CompanyID LEFT JOIN LedgerMaster AS EM ON EM.LedgerID=ITM.ReceivedBy AND EM.CompanyID=ITM.CompanyID And EM.IsDeletedTransaction=0 Where ITM.VoucherID=-14 AND  ITM.CompanyID=" & GBLCompanyID & " GROUP BY ITM.TransactionID,ITD.PurchaseTransactionID,ITM.LedgerID,ITM.VoucherNo,ITM.VoucherDate, " &
@@ -85,7 +84,7 @@ Public Class WebServicePurchaseGRN
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function GetReceiptVoucherBatchDetail(ByVal TransactionID As String) As String
         Try
-            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
             str = "Select nullif(ITMPD.RefJobCardContentNo,'') AS RefJobCardContentNo,Isnull(ITD.PurchaseTransactionID,0) AS PurchaseTransactionID,Isnull(ITM.LedgerID,0) AS LedgerID,Isnull(ITD.TransID,0) AS TransID,Isnull(ITD.ItemID,0) AS ItemID,Isnull(IM.ItemGroupID,0) As ItemGroupID,Isnull(IGM.ItemGroupNameID,0) As ItemGroupNameID,NullIf(ITMP.VoucherNo,'') AS PurchaseVoucherNo,Replace(Convert(Varchar(13),ITMP.VoucherDate,106),' ','-') AS PurchaseVoucherDate,  " &
                   "  NullIf(IM.ItemCode,'') AS ItemCode,NullIf(IM.ItemName,'') AS ItemName,Isnull(ITMPD.PurchaseOrderQuantity,0) AS PurchaseOrderQuantity,NullIf(ITMPD.PurchaseUnit,'') AS PurchaseUnit,Isnull(ITD.ChallanQuantity, 0) As ChallanQuantity, NullIf(ITD.BatchNo,'') AS BatchNo,NullIf(IM.StockUnit,'') AS StockUnit,Isnull(ITD.ReceiptWtPerPacking,0) AS ReceiptWtPerPacking,Isnull(ITMPD.PurchaseTolerance,0) AS PurchaseTolerance,Isnull(IM.WtPerPacking,0) AS WtPerPacking,  " &
                   "  Isnull(IM.UnitPerPacking, 1) As UnitPerPacking, Isnull(IM.ConversionFactor, 1) As ConversionFactor, Isnull(IM.SizeW, 1) As SizeW, Isnull(ITD.WarehouseID, 0) As WarehouseID, Nullif(WM.WarehouseName,'') AS Warehouse,Nullif(WM.BinName,'') AS Bin,Isnull((Select Sum(Isnull(ChallanQuantity,0))  From ItemTransactionDetail Where Isnull(IsDeletedTransaction,0)=0 AND Isnull(PurchaseTransactionID,0)>0 AND Isnull(ChallanQuantity,0)>0 AND PurchaseTransactionID=ITMPD.TransactionID AND ItemID=ITMPD.ItemID),0) AS ReceiptQuantity,Nullif(CM.ConversionFormula,'') AS FormulaStockToPurchaseUnit,Isnull(CM.ConvertedUnitDecimalPlace,0) AS UnitDecimalPlacePurchaseUnit,Nullif(CU.ConversionFormula,'') AS FormulaPurchaseToStockUnit,Isnull(CU.ConvertedUnitDecimalPlace,0) AS UnitDecimalPlaceStockUnit  " &
@@ -107,7 +106,7 @@ Public Class WebServicePurchaseGRN
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function GetReceiverList() As String
         Try
-            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
             str = "Select Distinct LM.LedgerID,LM.LedgerName From LedgerMaster As LM Inner Join LedgerGroupMaster AS LGM On LGM.LedgerGroupID=LM.LedgerGroupID And LGM.CompanyID=LM.CompanyID  AND LGM.LedgerGroupNameID=27 Where LM.CompanyID=" & GBLCompanyID & " And LM.IsDeletedTransaction=0 Order By LM.LedgerName"
             db.FillDataTable(dataTable, str)
             data.Message = db.ConvertDataTableTojSonString(dataTable)
@@ -123,7 +122,7 @@ Public Class WebServicePurchaseGRN
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function GetWarehouseList() As String
         Try
-            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
             str = "Select DISTINCT WarehouseName AS Warehouse From WarehouseMaster Where Isnull(IsDeletedTransaction,0)=0 AND Isnull(WarehouseName,'')<>'' AND CompanyID=" & GBLCompanyID & "  Order By WarehouseName"
             db.FillDataTable(dataTable, str)
             data.Message = db.ConvertDataTableTojSonString(dataTable)
@@ -139,7 +138,7 @@ Public Class WebServicePurchaseGRN
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function GetBinsList(ByVal warehousename As String) As String
         Try
-            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
             If warehousename = "" Then
                 str = "SELECT Distinct Nullif(BinName,'') AS Bin,Isnull(WarehouseID,0) AS WarehouseID FROM WarehouseMaster Where Isnull(IsDeletedTransaction,0)=0 AND Isnull(BinName,'')<>'' AND CompanyID=" & GBLCompanyID & " Order By Bin"
             Else str = "SELECT Distinct Nullif(BinName,'') AS Bin,Isnull(WarehouseID,0) AS WarehouseID FROM WarehouseMaster Where Isnull(IsDeletedTransaction,0)=0 AND WarehouseName='" & warehousename & "' AND Isnull(BinName,'')<>'' AND CompanyID=" & GBLCompanyID & " Order By Bin"
@@ -158,7 +157,7 @@ Public Class WebServicePurchaseGRN
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function GetPreviousReceivedQuantity(ByVal PurchaseTransactionID As String, ByVal ItemID As String, ByVal GRNTransactionID As String) As String
         Try
-            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
             str = "Select Isnull(PTM.TransactionID,0) AS TransactionID,Isnull(PTD.ItemID,0) AS ItemID,Isnull(PTD.ItemID,0) AS ItemID,Isnull(PTD.PurchaseTolerance,0) AS PurchaseTolerance,Isnull(PTD.PurchaseOrderQuantity,0) AS PurchaseOrderQuantity,IM.PurchaseUnit,Isnull((Select Sum(Isnull(ChallanQuantity,0)) From ItemTransactionDetail Where ISNULL(ChallanQuantity,0)>0 AND PurchaseTransactionID=PTM.TransactionID AND TransactionID<>" & GRNTransactionID & " AND ItemID=PTD.ItemID AND CompanyID=PTM.CompanyID AND Isnull(IsDeletedTransaction,0)<>1),0 ) AS PreReceiptQuantity,IM.StockUnit,Nullif(C.ConversionFormula,'') AS FormulaPurchaseToStockUnit,Isnull(C.ConvertedUnitDecimalPlace,0) AS UnitDecimalPlaceStockUnit  " &
                 " From ItemTransactionMain AS PTM INNER JOIN ItemTransactionDetail AS PTD ON PTD.TransactionID=PTM.TransactionID AND PTM.CompanyID=PTD.CompanyID AND Isnull(PTM.IsDeletedTransaction,0)=0 AND Isnull(PTD.IsDeletedTransaction,0)=0 INNER JOIN ItemMaster AS IM ON IM.ItemID=PTD.ItemID AND IM.CompanyID=PTD.CompanyID LEFT JOIN ConversionMaster AS C ON C.BaseUnitSymbol=IM.PurchaseUnit AND C.ConvertedUnitSymbol=IM.StockUnit AND C.CompanyID=IM.CompanyID Where PTM.VoucherID=-11 AND PTM.TransactionID=" & PurchaseTransactionID & " AND PTD.ItemID=" & ItemID & "  AND PTM.CompanyID=" & GBLCompanyID & ""
             db.FillDataTable(dataTable, str)
@@ -179,7 +178,7 @@ Public Class WebServicePurchaseGRN
         Dim MaxVoucherNo As Long
         Dim KeyField As String
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
         GBLFYear = Convert.ToString(HttpContext.Current.Session("FYear"))
 
@@ -205,7 +204,7 @@ Public Class WebServicePurchaseGRN
         AddColName = ""
         AddColValue = ""
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
         GBLFYear = Convert.ToString(HttpContext.Current.Session("FYear"))
         If db.CheckAuthories("PurchaseGRN.aspx", GBLUserID, GBLCompanyID, "CanSave") = False Then Return "You are not authorized to save..!, Can't Save"
@@ -251,7 +250,7 @@ Public Class WebServicePurchaseGRN
         Dim AddColName, wherecndtn, TableName, AddColValue As String
         AddColName = ""
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
         GBLFYear = Convert.ToString(HttpContext.Current.Session("FYear"))
 
@@ -298,7 +297,7 @@ Public Class WebServicePurchaseGRN
 
         Dim KeyField As String
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
         If (db.CheckAuthories("PurchaseGRN.aspx", GBLUserID, GBLCompanyID, "CanDelete") = False) Then Return "You are not authorized to delete..!, Can't Delete"
 
@@ -324,10 +323,10 @@ Public Class WebServicePurchaseGRN
     <WebMethod(EnableSession:=True)>
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function CheckPermission(ByVal TransactionID As String) As String
-        Dim KeyField As String
+        Dim KeyField As String = ""
         Try
 
-            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
 
             Dim dtExist As New DataTable
             Dim dtExist1 As New DataTable
@@ -335,15 +334,14 @@ Public Class WebServicePurchaseGRN
 
             Dim D1, D2 As String
 
-            SxistStr = ""
-            SxistStr = "Select * From ItemTransactionDetail Where Isnull(IsDeletedTransaction, 0) = 0 And ParentTransactionID = " & TransactionID & " And CompanyID = '" & GBLCompanyID & "' And TransactionID <> ParentTransactionID"
+            SxistStr = "Select TransactionID From ItemTransactionDetail Where Isnull(IsDeletedTransaction, 0) = 0 And ParentTransactionID = " & TransactionID & " And CompanyID = '" & GBLCompanyID & "' And TransactionID <> ParentTransactionID"
             db.FillDataTable(dtExist, SxistStr)
             Dim E As Integer = dtExist.Rows.Count
             If E > 0 Then
                 D1 = dtExist.Rows(0)(0)
             End If
-            SxistStr = ""
-            SxistStr = "Select  * From ItemTransactionDetail Where Isnull(IsDeletedTransaction, 0) = 0 And isnull(QCApprovalNo,'')<>'' AND TransactionID=" & TransactionID & "  AND (Isnull(ApprovedQuantity,0)>0 OR  Isnull(RejectedQuantity,0)>0)"
+
+            SxistStr = "Select TransactionID From ItemTransactionDetail Where Isnull(IsDeletedTransaction, 0) = 0 And isnull(QCApprovalNo,'')<>'' AND TransactionID=" & TransactionID & "  AND (Isnull(ApprovedQuantity,0)>0 OR  Isnull(RejectedQuantity,0)>0)"
             db.FillDataTable(dtExist1, SxistStr)
             Dim F As Integer = dtExist1.Rows.Count
             If F > 0 Then
@@ -369,7 +367,7 @@ Public Class WebServicePurchaseGRN
         Context.Response.Clear()
         Context.Response.ContentType = "application/json"
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
         str = ""
         If receiptTransactionID <> "0" Then
@@ -394,7 +392,7 @@ Public Class WebServicePurchaseGRN
         AddColName = ""
         AddColValue = ""
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
         GBLFYear = Convert.ToString(HttpContext.Current.Session("FYear"))
 
@@ -433,7 +431,7 @@ Public Class WebServicePurchaseGRN
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function TransactionWiseStockData(ByVal TransID As Integer) As String
         Try
-            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
 
             str = "SELECT IM.ItemID,IM.ItemGroupID,ISGM.ItemSubGroupID,IM.ItemCode,IGM.ItemGroupName,ISGM.ItemSubGroupName,IM.ItemName,IM.StockUnit,IM.PhysicalStock,IM.BookedStock,IM.AllocatedStock,IM.UnapprovedStock,IM.PhysicalStock - IM.AllocatedStock AS FreeStock,IM.IncomingStock,IM.FloorStock,IM.PhysicalStock - IM.AllocatedStock + IM.IncomingStock - IM.BookedStock AS TheoriticalStock,IM.WtPerPacking,Isnull(IM.UnitPerPacking,1) AS UnitPerPacking,Isnull(IM.ConversionFactor,1) AS ConversionFactor,Isnull(UOM.DecimalPlace,0) AS UnitDecimalPlace  " &
                   " From ItemMaster AS IM INNER JOIN ItemTransactionDetail As ITD ON ITD.ItemID=IM.ItemID And IM.CompanyID=ITD.CompanyID And ITD.IsDeletedTransaction = 0 INNER JOIN ItemGroupMaster AS IGM ON IGM.ItemGroupID=IM.ItemGroupID AND IGM.CompanyID=IM.CompanyID And IM.IsDeletedTransaction=0 LEFT JOIN ItemSubGroupMaster AS ISGM ON ISGM.ItemSubGroupID=IM.ItemSubGroupID AND ISGM.CompanyID=IM.CompanyID LEFT JOIN UnitMaster AS UOM ON UOM.UnitSymbol=IM.StockUnit AND UOM.CompanyID=IM.CompanyID Where IM.CompanyID=" & GBLCompanyID & " And ITD.TransactionID=" & TransID & " Order By IM.ItemName"

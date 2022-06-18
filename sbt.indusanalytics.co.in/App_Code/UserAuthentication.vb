@@ -299,7 +299,7 @@ Public Class UserAuthentication
                 str = "Select Count(ParameterName) From " & TableName & " Where Isnull(IsDeletedTransaction,0)=0 And CompanyID=" & GBLCompanyID & " And ParameterName='" & JsonObjectReference(0)("ParameterName") & "' And ParameterValue='" & JsonObjectReference(0)("ParameterValue") & "'"
                 db.FillDataTable(dataTable, str)
                 If dataTable.Rows.Count > 0 Then
-                    Return "Duplicate Data"
+                    If dataTable.Rows(0)(0) > 0 Then Return "Duplicate Data"
                 End If
                 If db.CheckAuthories("ERPSettings.aspx", GBLUserID, GBLCompanyID, "CanSave", PID) = False Then Return "You are not authorized to save..!, Can't Save"
                 AddColName = "CompanyID,CreatedBy,CreatedDate"
@@ -314,7 +314,7 @@ Public Class UserAuthentication
                         str = "Select " & Replace(JsonObjectReference(0)("ParameterName"), " ", "") & " From " & dataTable.Rows(0)(0) & " Where Isnull(IsDeletedTransaction,0)=0 And " & Replace(JsonObjectReference(0)("ParameterName"), " ", "") & "='" & JsonObjectReference(0)("ParameterValue") & "'"
                         db.FillDataTable(DT, str)
                         If DT.Rows.Count > 0 Then
-                            Return "This parameter has used in other process"
+                            Return "This parameter has been used in another process"
                         End If
                     Next
                 End If
@@ -352,9 +352,7 @@ Public Class UserAuthentication
             End If
 
             str = "Update ERPParameterSetting Set IsDeletedTransaction=1,DeletedBy=" & GBLUserID & ",DeletedDate=getdate() Where ParameterID=" & ParameterID & " And CompanyID=" & GBLCompanyID
-            db.ExecuteNonSQLQuery(str)
-
-            keyfield = "success"
+            keyfield = db.ExecuteNonSQLQuery(str)
         Catch ex As Exception
             keyfield = "failed " & ex.Message
         End Try

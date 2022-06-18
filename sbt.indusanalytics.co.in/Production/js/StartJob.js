@@ -913,7 +913,6 @@ $("#BtnSaveStartJob").click(function () {
                 if (results.d === "Success") {
                     swal("Job Started..", "Job started successfully..", "success");
                     uploadFileProduction("Start");
-                    window.location = "Home.aspx";
                 } else {
                     swal("Failed..!", results.d, "error");
                 }

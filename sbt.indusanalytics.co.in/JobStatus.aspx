@@ -116,12 +116,12 @@
                 <label>Process Details</label>
             </div>
             <div class="col-lg-8 col-md-8 col-sm-10 col-xs-9" style="text-align: right;">
-                <label style="background-color: yellow; color: black;" class="btn btn-sm">In Queue</label>
-                <label style="background-color: lightpink; color: black;" class="btn btn-sm">Running</label>
-                <label style="background-color: coral; color: black;" class="btn btn-sm">Part Complete</label>
-                <label style="background-color: green; color: white;" class="btn btn-sm">Complete</label>
-                <label style="background-color: #34f2f4; color: black;" class="btn btn-sm">Outsource Send</label>
-                <label style="background-color: #cc00ff; color: #fff;" class="btn btn-sm">Outsource Receive</label>
+                <label style="background-color: yellow; color: black;" class="btn-sm">In Queue</label>
+                <label style="background-color: lightpink; color: black;" class="btn-sm">Running</label>
+                <label style="background-color: coral; color: black;" class="btn-sm">Part Complete</label>
+                <label style="background-color: green; color: white;" class="btn-sm">Complete</label>
+<%--                <label style="background-color: #34f2f4; color: black;" class="btn btn-sm">Outsource Send</label>
+                <label style="background-color: #cc00ff; color: #fff;" class="btn btn-sm">Outsource Receive</label>--%>
             </div>
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                 <div id="JobStatusGrid"></div>

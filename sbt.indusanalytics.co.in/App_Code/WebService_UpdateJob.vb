@@ -563,7 +563,7 @@ Public Class WebService_UpdateJob
         End Try
     End Function
 
-    <WebMethod>
+    <WebMethod(EnableSession:=True)>
     Public Function UploadFileProductionUpdate() As String
         Dim httpPostedFile = HttpContext.Current.Request.Files("UserAttchedFiles")
         Try

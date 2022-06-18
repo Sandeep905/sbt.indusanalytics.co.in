@@ -731,42 +731,9 @@ function SetPendingReceiptGrid(tt) {
             allowExportSelectedData: true,
         },
         onRowPrepared: function (e) {
-            if (e.rowType === "header") {
-                e.rowElement.css('background', '#509EBC');
-                e.rowElement.css('color', 'white');
-                e.rowElement.css('font-weight', 'bold');
-            }
-            e.rowElement.css('fontSize', '11px');
-        },
-
-        onCellClick: function (e) {
-            if (e.row === undefined || e.rowType === "filter" || e.rowType === "header") return false;
-            var Row = e.row.rowIndex;
-            var Col = e.columnIndex;
-        },
-
-        editing: {
-            mode: "cell",
-            allowUpdating: true
-        },
-        onEditorPreparing: function (e) {
-            if (e.parentType === 'headerRow' && e.command === 'select') {
-                e.editorElement.remove();
-            }
-        },
-        onEditingStart: function (e) {
-            if (e.column.visibleIndex > 1) {
-                e.cancel = true;
-            }
+            setDataGridRowCss(e);
         },
         onSelectionChanged: function (clickedIndentCell) {
-            //if (clickedIndentCell.currentSelectedRowKeys.length > 0) {
-            //    document.getElementById("TxtGRNID").value = clickedIndentCell.currentSelectedRowKeys[0].LedgerID;
-            //}
-            //else {
-            //    document.getElementById("TxtGRNID").value = "";
-            //}
-
             if (clickedIndentCell.currentSelectedRowKeys.length > 0) {
                 if (supplieridvalidate === "") {
                     supplieridvalidate = clickedIndentCell.currentSelectedRowKeys[0].LedgerID;
@@ -786,16 +753,7 @@ function SetPendingReceiptGrid(tt) {
                 document.getElementById("TxtGRNID").value = "";
             }
         },
-        //focusedRowEnabled: true,
         columns: [
-            //{ dataField: "Sel", visible: true, caption: "Select", dataType: "boolean", width: 80 },
-            { dataField: "TransactionID", visible: false, caption: "Transaction ID", width: 120 },
-            { dataField: "VoucherID", visible: false, caption: "VoucherID", width: 120 },
-            { dataField: "LedgerID", visible: false, caption: "LedgerID", width: 120 },
-            { dataField: "TransID", visible: false, caption: "TransID", width: 120 },
-            { dataField: "ItemID", visible: false, caption: "ItemID", width: 120 },
-            { dataField: "ItemGroupID", visible: false, caption: "ItemGroupID", width: 120 },
-            { dataField: "ItemGroupNameID", visible: false, caption: "ItemGroupNameID", width: 120 },
             { dataField: "LedgerName", visible: true, caption: "Supplier Name", width: 150, fixed: true },
             { dataField: "MaxVoucherNo", visible: true, caption: "Ref.P.O. No.", width: 100 },
             { dataField: "PurchaseVoucherNo", visible: true, caption: "P.O. No.", width: 100 },
@@ -805,25 +763,7 @@ function SetPendingReceiptGrid(tt) {
             { dataField: "ItemSubGroupName", visible: true, caption: "Sub Group", width: 120 },
             { dataField: "ItemName", visible: true, caption: "Item Name", width: 200 },
             { dataField: "PurchaseOrderQuantity", visible: true, caption: "P.O. Qty", width: 80 },
-            {
-                dataField: "PendingQty", visible: true, caption: "Pending Qty", width: 100,
-                //calculateCellValue: function (e) {
-                //    var qty = Number(e.ReceiptQuantity);
-                //    if (e.FormulaStockToPurchaseUnit !== "" && e.FormulaStockToPurchaseUnit !== null) {
-                //        if (Number(e.UnitPerPacking) > 0) {
-                //            qty = eval(e.FormulaStockToPurchaseUnit.replace("Quantity", "ReceiptQuantity"));
-                //            return (Number(e.PurchaseOrderQuantity) - Number(qty)).toFixed(Number(e.UnitDecimalPlacePurchaseUnit));
-                //        }
-                //    } else {
-                //        if (qty > 0) {
-                //            return (Number(e.PurchaseOrderQuantity) - Number(qty)).toFixed(Number(e.UnitDecimalPlacePurchaseUnit));
-                //        } else {
-                //            return Number(e.PurchaseOrderQuantity)
-                //        }
-                //    }
-
-                //}
-            },
+            { dataField: "PendingQty", visible: true, caption: "Pending Qty", width: 100, },
             { dataField: "PurchaseUnit", visible: true, caption: "Unit", width: 80 },
             { dataField: "StockUnit", visible: false, caption: "Stock Unit", width: 40 },
             { dataField: "PurchaseDivision", visible: true, caption: "Purchase Division", width: 120 },
@@ -840,9 +780,6 @@ function SetPendingReceiptGrid(tt) {
             { dataField: "ReceiptQuantity", visible: false, caption: "ReceiptQuantity", width: 100 },
             { dataField: "FormulaPurchaseToStockUnit", visible: false, caption: "FormulaPurchaseToStockUnit", width: 100 },
             { dataField: "UnitDecimalPlaceStockUnit", visible: false, caption: "UnitDecimalPlaceStockUnit", width: 100 }
-            //{ dataField: "IsDisplay", visible: true, caption: "IsDisplay", width: 120 },
-
-            // { dataField: "ChargeApplyOnSheets", visible: true, caption: "ChargeApplyOnSheets", width: 120 },
         ]
     });
 }
@@ -852,7 +789,6 @@ function SetProcessedReceiptGrid(tt) {
     var grid1 = $("#gridreceiptlist").dxDataGrid('instance');
     grid1.clearSelection();
     $("#gridreceiptlist").dxDataGrid({
-        //keyExpr: "TransactionID",
         dataSource: tt,
         columnAutoWidth: true,
         showBorders: true,
@@ -860,7 +796,6 @@ function SetProcessedReceiptGrid(tt) {
         allowColumnReordering: true,
         allowColumnResizing: true,
         columnResizingMode: "widget",
-        //keyExpr: "TransactionID",
         sorting: {
             mode: "multiple"
         },
@@ -889,15 +824,7 @@ function SetProcessedReceiptGrid(tt) {
             fileName: "Receipt Note Vouchers",
             allowExportSelectedData: true
         },
-        editing: {
-            mode: "cell",
-            allowUpdating: false
-        },
         columns: [
-            { dataField: "TransactionID", visible: false, caption: "Transaction ID", width: 120 },
-            { dataField: "PurchaseTransactionID", visible: false, caption: "PurchaseTransactionID", width: 120 },
-            { dataField: "LedgerID", visible: false, caption: "LedgerID", width: 120 },
-            { dataField: "MaxVoucherNo", visible: true, caption: "Ref.Receipt No.", width: 120 },
             { dataField: "LedgerName", visible: true, caption: "Supplier Name", width: 180, fixed: true },
             { dataField: "ReceiptVoucherNo", visible: true, caption: "Receipt Note No.", width: 120 },
             { dataField: "ReceiptVoucherDate", visible: true, caption: "Receipt Note Date", width: 140, dataType: "date", format: "dd-MMM-yyyy", Mode: "DateRangeCalendar" },
@@ -916,7 +843,6 @@ function SetProcessedReceiptGrid(tt) {
             { dataField: "IsVoucherItemApproved", visible: false, caption: "IsVoucherItemApproved" }
         ],
         onSelectionChanged: function (selectedItems) {
-            receiptgridrow = "";
             receiptgridrow = selectedItems.selectedRowsData[0];
             var MakeObj = [];
             if (receiptgridrow !== "" && receiptgridrow !== undefined && receiptgridrow !== null) {
@@ -936,25 +862,15 @@ function SetPurchaseOrderGrid() {
         showRowLines: true,
         allowColumnReordering: true,
         wordWrapEnabled: true,
-        //keyExpr: "TransactionID",
         sorting: {
             mode: "none"
         },
-        //editing: {
-        //    mode: "cell",
-        //    allowUpdating: false
-        //},
         selection: {
             mode: "single"
         },
         scrolling: { mode: 'infinite' },
         rowAlternationEnabled: false,
         columns: [
-            { dataField: "TransactionID", visible: false, caption: "TransactionID" },
-            { dataField: "LedgerID", visible: false, caption: "LedgerID" },
-            { dataField: "ItemID", visible: false, caption: "ItemID" },
-            { dataField: "ItemGroupID", visible: false, caption: "ItemGroupID" },
-            { dataField: "ItemGroupNameID", visible: false, caption: "ItemGroupNameID" },
             { dataField: "PurchaseVoucherNo", visible: true, caption: "P.O. No.", width: 100 },
             { dataField: "PurchaseVoucherDate", visible: true, caption: "P.O. Date", width: 80 },
             { dataField: "ItemCode", visible: true, caption: "Item Code", width: 60 },
@@ -997,23 +913,13 @@ function SetPurchaseOrderGrid() {
             { dataField: "FormulaStockToPurchaseUnit", visible: false, caption: "FormulaStockToPurchaseUnit" },
             { dataField: "UnitDecimalPlacePurchaseUnit", visible: false, caption: "UnitDecimalPlacePurchaseUnit" }
         ],
-        //customizeColumns: function (columns) {
-        //    columns[0].width = 120;
-        //    columns[1].width = 150;
-        //},
         height: function () {
             return window.innerHeight / 4;
         },
         onRowPrepared: function (e) {
-            if (e.rowType === "header") {
-                e.rowElement.css('background', '#509EBC');
-                e.rowElement.css('color', 'white');
-                e.rowElement.css('font-weight', 'bold');
-            }
-            e.rowElement.css('fontSize', '11px');
+            setDataGridRowCss(e);
         },
         onSelectionChanged: function (selectedItems) {
-            purchaseorderrow = "";
             purchaseorderrow = selectedItems.selectedRowsData[0];
         },
         onContentReady: function (e) {
@@ -1025,11 +931,9 @@ function SetPurchaseOrderGrid() {
         dataSource: [],
         allowColumnReordering: true,
         allowColumnResizing: true,
-        //columnAutoWidth: true,
         showBorders: true,
         showRowLines: true,
         columnResizingMode: "widget",
-        //keyExpr: "TransactionID",
         sorting: {
             mode: "none"
         },
@@ -1041,10 +945,6 @@ function SetPurchaseOrderGrid() {
         scrolling: { mode: 'infinite' },
         rowAlternationEnabled: false,
         columns: [
-            { dataField: "TransactionID", visible: false, caption: "PurchaseTransactionID", width: 120 },
-            { dataField: "LedgerID", visible: false, caption: "LedgerID", width: 120 },
-            { dataField: "ItemID", visible: false, caption: "ItemID", width: 120 },
-            { dataField: "ItemGroupID", visible: false, caption: "ItemGroupID", width: 120 },
             { dataField: "PurchaseVoucherDate", visible: false, caption: "P.O. Date", width: 120 },
             { dataField: "PurchaseOrderQuantity", visible: false, caption: "P.O.Qty", width: 120 },
             { dataField: "PurchaseUnit", visible: false, caption: "Purchase Unit", width: 120 },
@@ -1147,12 +1047,7 @@ function SetPurchaseOrderGrid() {
 
         },
         onRowPrepared: function (e) {
-            if (e.rowType === "header") {
-                e.rowElement.css('background', '#509EBC');
-                e.rowElement.css('color', 'white');
-                e.rowElement.css('font-weight', 'bold');
-            }
-            e.rowElement.css('fontSize', '11px');
+            setDataGridRowCss(e);
         },
         onRowRemoved: function (e) {
             var dataGrid = $("#GridReceiptBatchDetails").dxDataGrid('instance');
@@ -1387,39 +1282,8 @@ function SetPurchaseOrderGrid() {
                     $("#GridReceiptBatchDetails").dxDataGrid({
                         dataSource: newData
                     });
-
-                    //x.addRow();
-                    //x.cellValue(0, 'TransactionID', e.key.TransactionID);
-                    //x.cellValue(0, 'LedgerID', e.key.LedgerID);
-                    //x.cellValue(0, 'ItemID', e.key.ItemID);
-                    //x.cellValue(0, 'ItemGroupID', e.key.ItemGroupID);
-                    //x.cellValue(0, 'PurchaseVoucherNo', e.key.PurchaseVoucherNo);
-                    //x.cellValue(0, 'PurchaseVoucherDate', e.key.PurchaseVoucherDate);
-                    //x.cellValue(0, 'ItemCode', e.key.ItemCode);
-                    //x.cellValue(0, 'ItemName', e.key.ItemName);
-                    //x.cellValue(0, 'PurchaseOrderQuantity', e.key.PurchaseOrderQuantity);
-                    //x.cellValue(0, 'PurchaseUnit', e.key.PurchaseUnit);
-                    //x.cellValue(0, 'StockUnit', e.key.StockUnit);
-                    //x.cellValue(0, 'Warehouse', "");
-                    //x.cellValue(0, 'Bin', "");
-                    //x.cellValue(0, 'PurchaseTolerance', e.key.PurchaseTolerance);
-                    //x.cellValue(0, 'WtPerPacking', e.key.WtPerPacking);
-                    //x.cellValue(0, 'UnitPerPacking', e.key.UnitPerPacking);
-                    //x.cellValue(0, 'ConversionFactor', e.key.ConversionFactor);
-                    //x.cellValue(0, 'WarehouseID', 0);
-                    //if (FlagEdit === false) {
-                    //    x.cellValue(0, 'BatchNo', ('_' + e.key.PurchaseVoucherNo + '_' + e.key.ItemID + '_' + (x.totalCount() + 1)));
-                    //} else {
-                    //    x.cellValue(0, 'BatchNo', (TransactionID + '_' + e.key.PurchaseVoucherNo + '_' + e.key.ItemID + '_' + (x.totalCount()+1)));
-                    //}
-                    //x.saveEditData();
-                    //x.refresh();
-                    //x.repaint();
                 }
             }
-
-            //}
-            //CheckQuantityTolerance(e.key.)
         },
         summary: {
             totalItems: [{
@@ -1505,7 +1369,6 @@ function refreshReceiver() {
             contentType: "application/json; charset=utf-8",
             dataType: "text",
             success: function (results) {
-
                 var res = results.replace(/\\/g, '');
                 res = res.replace(/"d":""/g, '');
                 res = res.replace(/""/g, '');
@@ -1533,44 +1396,6 @@ function refreshReceiver() {
     }
 
 }
-//refreshTransporter();
-//function refreshTransporter() {
-//    try {
-//        $.ajax({
-//            type: "POST",
-//            url: "WebServicePurchaseGRN.asmx/GetPurchaseSuppliersList",
-//            data: '{}',
-//            contentType: "application/json; charset=utf-8",
-//            dataType: "text",
-//            success: function (results) {
-//                
-//                var res = results.replace(/\\/g, '');
-//                res = res.replace(/"d":""/g, '');
-//                res = res.replace(/""/g, '');
-//                res = res.substr(1);
-//                res = res.slice(0, -1);
-//                var transporters = JSON.parse(res);
-
-//                $("#sel_Transporter").dxSelectBox({
-//                    items: transporters,
-//                    placeholder: "Select Transporter",
-//                    displayExpr: 'LedgerName',
-//                    valueExpr: 'LedgerID',
-//                    searchEnabled: true,
-//                    showClearButton: true,
-//                    onValueChanged: function (data) {
-//                        //alert(data.value);
-//                    },
-
-//                });
-//            },
-//        });
-
-//    } catch (e) {
-//        alert(e);
-//    }
-
-//}
 
 function RefreshWarehouse() {
     try {
@@ -1581,7 +1406,6 @@ function RefreshWarehouse() {
             contentType: "application/json; charset=utf-8",
             dataType: "text",
             success: function (results) {
-
                 var res = results.replace(/\\/g, '');
                 res = res.replace(/"d":""/g, '');
                 res = res.replace(/""/g, '');
@@ -1643,7 +1467,6 @@ $("#BtnSave").click(function () {
         }
         var dataGrid1 = $("#GridPurchaseOrders").dxDataGrid('instance');
         for (i = 0; i < dataGrid1.totalCount(); i++) {
-            //alert(dataGrid1.cellValue(i, "ItemID"));
             var result = $.grep(receiptBatchDetail, function (e) { return (e.ItemID === dataGrid1.cellValue(i, "ItemID") && e.PurchaseTransactionID === dataGrid1.cellValue(i, "TransactionID")); });
             if (result.length === 0) {
                 //Not found
@@ -1804,10 +1627,9 @@ $("#BtnSave").click(function () {
 });
 
 $("#BtnPrint").click(function () {
-    //var url = "PrintReceiptApproval.aspx?TI=" + TransactionID;
     var TxtGRNID = document.getElementById("TxtGRNID").value;
     if (TxtGRNID === "" || TxtGRNID === null || TxtGRNID === undefined) {
-        alert("Please select valid grn details to print..!");
+        swal("Please select valid grn details to print..!");
         return false;
     }
     if (ApprovedVoucher === "" || ApprovedVoucher === null || ApprovedVoucher === undefined || ApprovedVoucher === false) {
@@ -1819,10 +1641,9 @@ $("#BtnPrint").click(function () {
 });
 
 $("#BtnTransporterSlip").click(function () {
-    //var url = "PrintReceiptApproval.aspx?TI=" + TransactionID;
     var TxtGRNID = document.getElementById("TxtGRNID").value;
     if (TxtGRNID === "" || TxtGRNID === null || TxtGRNID === undefined) {
-        alert("Please select valid grn details to print..!");
+        swal("Please select valid grn details to print..!");
         return false;
     }
 
@@ -1834,7 +1655,7 @@ $("#BtnDelete").click(function () {
 
     var TxtGRNID = document.getElementById("TxtGRNID").value;
     if (TxtGRNID === "" || TxtGRNID === null || TxtGRNID === undefined) {
-        alert("Please Choose any row from below Grid..!");
+        swal("Please Choose any row from below Grid..!");
         return false;
     }
 

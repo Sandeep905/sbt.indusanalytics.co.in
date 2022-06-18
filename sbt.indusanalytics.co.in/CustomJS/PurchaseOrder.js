@@ -447,12 +447,7 @@ $("#ScheduleGrid").dxDataGrid({
         });
     },
     onRowPrepared: function (e) {
-        if (e.rowType === "header") {
-            e.rowElement.css('background', '#509EBC');
-            e.rowElement.css('color', 'white');
-            e.rowElement.css('font-weight', 'bold');
-        }
-        e.rowElement.css('fontSize', '11px');
+        setDataGridRowCss(e);
     },
     columns: [{ dataField: "id", visible: false, caption: "Seq.No", width: 120 },
     { dataField: "ItemID", visible: false, caption: "ItemID", width: 120 },
@@ -1112,12 +1107,7 @@ $("#POGridPending").dxDataGrid({
         allowExportSelectedData: true
     },
     onRowPrepared: function (e) {
-        if (e.rowType === "header") {
-            e.rowElement.css('background', '#509EBC');
-            e.rowElement.css('color', 'white');
-            e.rowElement.css('font-weight', 'bold');
-        }
-        e.rowElement.css('fontSize', '11px');
+        setDataGridRowCss(e);
     },
     onSelectionChanged: function (clickedIndentCell) {
         GetPendingData = clickedIndentCell.selectedRowsData;
@@ -1213,13 +1203,7 @@ $("#POGridProcess").dxDataGrid({
         allowExportSelectedData: true
     },
     onRowPrepared: function (e) {
-        if (e.rowType === "header") {
-            e.rowElement.css('background', '#509EBC');
-            e.rowElement.css('color', 'white');
-            e.rowElement.css('font-weight', 'bold');
-        }
-        e.rowElement.css('fontSize', '11px');
-
+        setDataGridRowCss(e);
         if (e.rowType === "data") {
             if (e.data.VoucherItemApproved === false && e.data.VoucherCancelled === false) {
                 e.rowElement.addClass('approvalpending');
@@ -2727,12 +2711,7 @@ $("#OverFlowGrid").dxDataGrid({
         text: 'Data is loading...'
     },
     onRowPrepared: function (e) {
-        if (e.rowType === "header") {
-            e.rowElement.css('background', '#509EBC');
-            e.rowElement.css('color', 'white');
-            e.rowElement.css('font-weight', 'bold');
-        }
-        e.rowElement.css('fontSize', '11px');
+        setDataGridRowCss(e);
     },
     onSelectionChanged: function (selectedItems) {
         Groupdata = selectedItems.selectedRowsData;
@@ -3377,12 +3356,7 @@ function fillGridSchedule(DistinctArray) {
             });
         },
         onRowPrepared: function (e) {
-            if (e.rowType === "header") {
-                e.rowElement.css('background', '#509EBC');
-                e.rowElement.css('color', 'white');
-                e.rowElement.css('font-weight', 'bold');
-            }
-            e.rowElement.css('fontSize', '11px');
+            setDataGridRowCss(e);
         },
         columns: [{ dataField: "id", visible: false, caption: "Seq.No" },
         { dataField: "ItemID", visible: false, caption: "ItemID" },
@@ -3513,12 +3487,7 @@ function fillChargesGrid() {
                     allowUpdating: true
                 },
                 onRowPrepared: function (e) {
-                    if (e.rowType === "header") {
-                        e.rowElement.css('background', '#509EBC');
-                        e.rowElement.css('color', 'white');
-                        e.rowElement.css('font-weight', 'bold');
-                    }
-                    e.rowElement.css('fontSize', '11px');
+                    setDataGridRowCss(e);
                 },
                 onEditingStart: function (e) {
                     if (e.data.InAmount === true || e.data.InAmount === 1) {
@@ -3679,12 +3648,7 @@ function fillPayTermsGrid() {
             allowUpdating: true
         },
         onRowPrepared: function (e) {
-            if (e.rowType === "header") {
-                e.rowElement.css('background', '#509EBC');
-                e.rowElement.css('color', 'white');
-                e.rowElement.css('font-weight', 'bold');
-            }
-            e.rowElement.css('fontSize', '11px');
+            setDataGridRowCss(e);
         },
         columns: [{ dataField: "TermsID", visible: false, caption: "TermsID" },
         { dataField: "Terms", visible: true, caption: "Terms" }
@@ -3784,12 +3748,7 @@ function fillOtherHeadsGrid(OtherHead) {
             }
         },
         onRowPrepared: function (e) {
-            if (e.rowType === "header") {
-                e.rowElement.css('background', '#509EBC');
-                e.rowElement.css('color', 'white');
-                e.rowElement.css('font-weight', 'bold');
-            }
-            e.rowElement.css('fontSize', '11px');
+            setDataGridRowCss(e);
         },
         columns: [{ dataField: "HeadID", visible: false, caption: "HeadID" },
         { dataField: "RateType", visible: false, caption: "RateType" },
@@ -3904,7 +3863,6 @@ $("#BtnSave").click(function () {
     if (GblGSTApplicable === true) {
 
         if (ChargesGrid.length <= 0) {
-            //swal("Error!", "Please add Item in given below Grid..", "");
             DevExpress.ui.notify("Please add tax ledger..!", "error", 1000);
             return false;
         }
@@ -3916,9 +3874,6 @@ $("#BtnSave").click(function () {
         var SupplierStateTin = document.getElementById("LblSupplierStateTin").innerHTML;
         results = 0;
         if (Number(SupplierStateTin) === Number(GblCompanyStateTin)) {
-            //var GridTaxType = ChargesGrid[c].TaxType;
-            //var TaxRatePer = ChargesGrid[c].TaxRatePer;
-            //var GSTLedgerType = ChargesGrid[c].GSTLedgerType;
             results = $.grep(ChargesGrid, function (e) { return e.GSTLedgerType === "Integrated Tax"; });
             if (results.length > 0) {
                 DevExpress.ui.notify("You can't add integrated GST tax ledger..!", "error", 1000);

@@ -4,7 +4,11 @@ function uploadFileProduction(productionType) {
     var fd = new FormData();
     fd.append('UserAttchedFiles', $('#file')[0].files[0]);
     let Url = 'WebService_StartJob.asmx/UploadFileProductionStart'
-    if (productionType === "Update") 'WebService_UpdateJob.asmx/UploadFileProductionUpdate'
+    if (productionType === "Update") {
+        Url = 'WebService_UpdateJob.asmx/UploadFileProductionUpdate';
+    } else if (productionType === "Product") {
+        Url = 'WebServiceProductMaster.asmx/UploadProductImageFile';
+    }
     $.ajax({
         url: Url,
         data: fd,
@@ -14,6 +18,7 @@ function uploadFileProduction(productionType) {
         type: 'POST',
         success: function (fd) {
             console.log(fd);
+            if (productionType === "Update") { window.location = "StartJob.aspx"; } else { window.location = "UpdateJob.aspx"; }
         }
     });
 }

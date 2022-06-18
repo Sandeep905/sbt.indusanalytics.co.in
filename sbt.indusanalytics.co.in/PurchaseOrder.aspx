@@ -25,9 +25,7 @@
                             <div id="RadioButtonPO"></div>
                         </div>
                         <div id="DivCretbtn" class="col-lg-2 col-md-2 col-sm-2 col-xs-4 padding-0 margin-0">
-                            <a id="CreatePOButton" href='#' class="iconButton" style="margin-top: 1px; margin-left: 4px;">
-                                <i class="fa fa-plus fa-2x fa-fw" style="font-size: 14px;"></i>&nbsp Create P.O.
-                            </a>
+                            <input type="button" name="CreatePOButton" id="CreatePOButton" class="btn btn-primary" value="Create" />
                         </div>
 
                         <div id="DivEdit" class="col-lg-9 col-md-12 col-sm-12 col-xs-12 padding-0 margin-0">
@@ -39,17 +37,11 @@
                                 <label class="font-11 m-b-0" for="CHKPODetail">Detail</label>
                             </div>
                             <div class="col-lg-2 col-md-2 col-sm-2 col-xs-8">
-                                <a id="RefreshPOButton" href='#' class="iconButton">
-                                    <i class="fa fa-refresh fa-2x fa-fw" style="font-size: 14px;"></i>&nbsp Refresh
-                                </a>
+                                <input type="button" name="RefreshPOButton" id="RefreshPOButton" class="btn btn-secondary" value="Refresh" />
                             </div>
                             <div class="col-lg-2 col-md-3 col-sm-4 col-xs-12 padding-0 margin-0">
-                                <a id="EditPOButton" href='#' class="iconButton" style="margin-top: 1px; margin-left: 4px;">
-                                    <i class="fa fa-edit fa-2x fa-fw" style="font-size: 14px;"></i>&nbsp Edit
-                                </a>
-                                <a id="DeletePOButton" href='#' class="iconButton" style="margin-top: 1px; margin-left: 4px;">
-                                    <img src="images/MasterDelete.png" style="height: 16px; width: 25px; float: left; margin-top: 0px" />&nbsp Delete
-                                </a>
+                                <input type="button" name="EditPOButton" id="EditPOButton" class="btn btn-info" value="Edit" />
+                                <input type="button" name="DeletePOButton" id="DeletePOButton" class="btn btn-danger" value="Delete" />
                             </div>
                         </div>
                     </div>
@@ -240,11 +232,11 @@
                     </div>
                 </div>
                 <div id="btnDiv" class="modal-footer" style="border-top: 1px solid #42909A;">
-                    <button type="button" id="BtnNew" class="btn btn-link waves-effect" style="margin-top: -1em; color: none">New</button>
-                    <button type="button" id="BtnSave" class="btn btn-link waves-effect" style="margin-top: -1em">Save</button>
-                    <button type="button" id="BtnSaveAS" class="btn btn-link waves-effect" style="margin-top: -1em; display: none" disabled="disabled">Save As</button>
-                    <button type="button" id="POPrintButton" class="btn btn-link waves-effect" style="margin-top: -1em; color: none" disabled="disabled">Print</button>
-                    <button type="button" id="BtnDeletePopUp" class="btn btn-link waves-effect" style="margin-top: -1em">Delete</button>
+                    <button type="button" id="BtnNew" class="btn btn-link waves-effect" style="color: none">New</button>
+                    <button type="button" id="BtnSave" class="btn btn-success waves-effect">Save</button>
+                    <button type="button" id="BtnSaveAS" class="btn btn-info waves-effect" style="display: none" disabled="disabled">Save As</button>
+                    <button type="button" id="POPrintButton" class="btn btn-default waves-effect" style="color: none" disabled="disabled">Print</button>
+                    <button type="button" id="BtnDeletePopUp" class="btn btn-danger waves-effect">Delete</button>
                 </div>
             </div>
         </div>
@@ -267,14 +259,9 @@
                         <div id="FieldCntainerRowNext" class="row clearfix">
                             <div class="tab-content">
                                 <div role="tabpanel" class="tab-pane animated fadeInRight active" id="ReqGridNext">
-                                    <div class="DialogBoxCustom" style="float: left; background-color: #fff; width: auto; padding-left: 0px; padding-bottom: 0px; padding-right: 0px; margin-top: 0px; border-radius: 4px; text-align: left">
-                                        <a id="BtnRefreshList" href='#' class="iconButton" style="margin-top: 0px; margin-right: 0px; margin-left: 0px; padding-left: 0px; padding-right: 10px; float: left" title="Refresh Item List">
-                                            <i class="fa fa-refresh fa-2x fa-fw" style="font-size: 14px;"></i>&nbsp&nbsp Refresh 
-                                        </a>
-
-                                        <a id="BtnCreateNewItem" href='#' class="iconButton" style="margin-top: 0px; margin-right: 0px; margin-left: 20px; padding-left: 0px; padding-right: 10px; float: left" title="Create New Item Master">
-                                            <i class="fa fa-plus fa-2x fa-fw" style="font-size: 14px;"></i>&nbsp&nbsp Create New Item 
-                                        </a>
+                                    <div class="col-lg-3 col-md-3 col-sm-4 col-xs-12" >
+                                        <input type="button" name="BtnRefreshList" id="BtnRefreshList" class="btn btn-primary" value="Refresh" />
+                                        <input type="button" name="BtnCreateNewItem" id="BtnCreateNewItem" class="btn btn-default" value="Create New Item" />
                                     </div>
                                     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                                         <div id="OverFlowGrid"></div>
@@ -285,8 +272,8 @@
                     </div>
                 </div>
                 <div id="btnDivNext" class="modal-footer" style="border-top: 1px solid #42909A;">
-                    <button type="button" id="BtnNext" class="btn btn-link waves-effect" style="margin-top: -1em">Next</button>
-                    <button type="button" class="btn btn-link waves-effect" data-dismiss="modal" style="margin-top: -1em">Close</button>
+                    <button type="button" id="BtnNext" class="btn btn-link waves-effect">Next</button>
+                    <button type="button" class="btn btn-link waves-effect" data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -349,7 +336,7 @@
                     </div>
                 </div>
                 <div id="btnDivSchedule" class="modal-footer" style="border-top: 1px solid #42909A;">
-                    <button type="button" class="btn btn-link waves-effect" data-dismiss="modal" style="margin-top: -1em">Apply Schedule</button>
+                    <button type="button" class="btn btn-link waves-effect" data-dismiss="modal">Apply Schedule</button>
                 </div>
             </div>
             <%--</div>--%>
@@ -381,7 +368,7 @@
                     </div>
                 </div>
                 <div id="btnDivHeads" class="modal-footer" style="border-top: 1px solid #42909A;">
-                    <button type="button" class="btn btn-link waves-effect" data-dismiss="modal" style="margin-top: -1em">Ok</button>
+                    <button type="button" class="btn btn-link waves-effect" data-dismiss="modal">Ok</button>
                 </div>
             </div>
         </div>
@@ -404,7 +391,7 @@
                             <div class="tab-content">
                                 <div role="tabpanel" class="tab-pane animated fadeInRight active" id="ReqGridProductHSN">
                                     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                                        <button type="button" id="BtnOpenProductHSNPopUp" class="btn btn-link waves-effect" data-dismiss="modal" style="margin-top: -1em; display: none">OpenProductHSNPopUp</button>
+                                        <button type="button" id="BtnOpenProductHSNPopUp" class="btn btn-link waves-effect" data-dismiss="modal" style="display: none">OpenProductHSNPopUp</button>
                                         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                                             <div id="ProductHSNGrid"></div>
                                         </div>
@@ -415,7 +402,7 @@
                     </div>
                 </div>
                 <div id="btnDivProductHSN" class="modal-footer" style="border-top: 1px solid #42909A;">
-                    <button type="button" id="BtnProductHSN" class="btn btn-link waves-effect" data-dismiss="modal" style="margin-top: -1em">Apply Group</button>
+                    <button type="button" id="BtnProductHSN" class="btn btn-link waves-effect" data-dismiss="modal">Apply Group</button>
                 </div>
             </div>
         </div>

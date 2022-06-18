@@ -292,19 +292,19 @@
                         <div id="btnDiv" class="modal-footer" style="border-top: 1px solid #42909A;">
                             <div id="btnLogoutDiv" style="height: auto; width: 100%; float: left; display: block;">
                                 <div style="width: 45%; margin-left: 5%; float: left">
-                                    <asp:LinkButton ID="Button1" runat="server" class="square_btn" Style="float: left; text-decoration: none; cursor: pointer">YES</asp:LinkButton>
+                                    <asp:LinkButton ID="Button1" runat="server" class="square_btn btn-primary" Style="float: left; text-decoration: none; cursor: pointer">YES</asp:LinkButton>
                                 </div>
                                 <div style="width: 45%; margin-right: 5%; float: left">
-                                    <a class="square_btn" onclick="ResetSession();" data-dismiss="modal" style="float: right; text-decoration: none; cursor: pointer">NO</a>
+                                    <a class="square_btn btn-primary" onclick="ResetSession();" data-dismiss="modal" style="float: right; text-decoration: none; cursor: pointer">NO</a>
                                 </div>
                             </div>
 
                             <div id="btnsessionDiv" style="height: auto; width: 100%; float: left; padding-bottom: 10px; display: none;">
                                 <div style="width: 45%; margin-left: 5%; float: left">
-                                    <button type="button" class="square_btn" data-dismiss="modal" style="float: left; text-decoration: none; cursor: pointer">Close</button>
+                                    <button type="button" class="square_btn btn-primary" data-dismiss="modal" style="float: left; text-decoration: none; cursor: pointer">Close</button>
                                 </div>
                                 <div style="width: 45%; margin-right: 5%; float: left">
-                                    <button type="button" onclick="ResetSession();" class="square_btn" style="float: right; text-decoration: none; cursor: pointer">Ok</button>
+                                    <button type="button" onclick="ResetSession();" class="square_btn btn-primary" style="float: right; text-decoration: none; cursor: pointer">Ok</button>
                                 </div>
                             </div>
                         </div>

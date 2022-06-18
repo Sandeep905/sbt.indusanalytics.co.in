@@ -70,18 +70,19 @@ $("#JobCardGridGrid").dxDataGrid({
     height: function () {
         return window.innerHeight / 4;
     },
-    columns: [{ dataField: "JobCardContentNo", visible: true, caption: "Job Content No" },
-    { dataField: "LedgerName", visible: true, caption: "Ledger Name", width: 150, hidingPriority: 1 },
+    columns: [{ dataField: "JobCardContentNo", caption: "Job Content No" },
+    { dataField: "LedgerName", caption: "Ledger Name", width: 150, hidingPriority: 1 },
     { dataField: "JobBookingNo", visible: false, caption: "Job Card No", width: 100 },
-    { dataField: "BookingDate", visible: true, caption: "Booking Date", width: 100, hidingPriority: 2 },
-    { dataField: "JobName", visible: true, caption: "Job Name", width: 200, hidingPriority: 8 },
-    { dataField: "ContentName", visible: true, caption: "Content Name", width: 150, hidingPriority: 3 },
-    { dataField: "OrderQuantity", visible: true, caption: "Order Qty", width: 100, hidingPriority: 4 },
-    { dataField: "PONo", visible: true, caption: "PO No", width: 100, hidingPriority: 6 },
-    { dataField: "PODate", visible: true, caption: "PO Date", width: 80, hidingPriority: 5 },
-    { dataField: "ProductCode", visible: true, caption: "Product Code", width: 100, hidingPriority: 7 },
-    { dataField: "IsClose", visible: true, caption: "Job Close", width: 100, hidingPriority: 9 },
-    { dataField: "OrderBookingNo", visible: true, caption: "Order Booking No", width: 100, hidingPriority: 0 }],
+    { dataField: "BookingDate", caption: "Booking Date", width: 100, hidingPriority: 2 },
+    { dataField: "JobName", caption: "Job Name", width: 200, hidingPriority: 8 },
+    { dataField: "ContentName", caption: "Content Name", width: 150, hidingPriority: 3 },
+    { dataField: "OrderQuantity", caption: "Order Qty", width: 100, hidingPriority: 4 },
+    { dataField: "PONo", caption: "PO No", width: 100, hidingPriority: 6 },
+    { dataField: "PODate", caption: "PO Date", width: 80, hidingPriority: 5 },
+    { dataField: "ProductCode", caption: "Product Code", width: 100, hidingPriority: 7 },
+    { dataField: "IsClose", caption: "Job Close", width: 100, hidingPriority: 9 },
+    { dataField: "OrderBookingNo", caption: "Order Booking No", width: 100, hidingPriority: 0 }
+    ],
     onRowPrepared: function (e) {
         if (e.rowType === "header") {
             e.rowElement.css('background', '#509EBC');
@@ -140,6 +141,7 @@ $("#JobCardGridGrid").dxDataGrid({
 
 $("#JobStatusGrid").dxDataGrid({
     dataSource: JobStatusGridData,
+    keyExpr: 'MachineID',
     showBorders: true,
     showRowLines: true,
     allowSorting: true,
@@ -202,35 +204,45 @@ $("#JobStatusGrid").dxDataGrid({
         document.getElementById("TxtJobStatusGridID").value = GetJobStatusGridSelectedData[0].ProcessID;
     },
     columns: [
-        { dataField: "SN", visible: true, caption: "S No.", allowSorting: false, hidingPriority: 12 },
-        { dataField: "MachineName", visible: true, caption: "Machine Name", width: 120, allowSorting: false, hidingPriority: 11 },
-        { dataField: "EmployeeName", visible: true, caption: "Operator Name", width: 120, allowSorting: false, hidingPriority: 10 },
-        { dataField: "JobCardFormNo", visible: true, caption: "JC Form No", allowSorting: false },
-        { dataField: "RefNo", visible: true, width: 50, caption: "Ref Form No" },
-        { dataField: "ProcessName", visible: true, caption: "Process Name", allowSorting: false },
-        { dataField: "RateFactor", visible: true, caption: "Rate Factor", allowSorting: false },
-        { dataField: "FromTime", visible: true, caption: "From Time", allowSorting: false, hidingPriority: 9 },
-        { dataField: "ToTime", visible: true, caption: "To Time", allowSorting: false, hidingPriority: 8 },
-        { dataField: "ReceivedQuantity", visible: true, caption: "Received Qty", allowSorting: false },
-        { dataField: "ProductionQuantity", visible: true, caption: "Produce Qty", allowSorting: false },
-        { dataField: "Conversionvalue", visible: true, caption: "No Of Steps", allowSorting: false, hidingPriority: 1 },
-        { dataField: "ReadyQuantity", visible: true, caption: "Ready Qty", allowSorting: false },
-        { dataField: "WastageQuantity", visible: true, caption: "Wastage Qty", allowSorting: false, hidingPriority: 7 },
-        { dataField: "SuspenseQuantity", visible: true, caption: "Suspense Qty", allowSorting: false, hidingPriority: 6 },
-        { dataField: "Status", visible: true, caption: "Status", allowSorting: false, hidingPriority: 13 },
+        { dataField: "SN", caption: "S No.", allowSorting: false, hidingPriority: 12 },
+        { dataField: "MachineName", caption: "Machine Name", width: 120, allowSorting: false, hidingPriority: 11 },
+        { dataField: "EmployeeName", caption: "Operator Name", width: 120, allowSorting: false, hidingPriority: 10 },
+        { dataField: "JobCardFormNo", caption: "JC Form No", allowSorting: false },
+        { dataField: "RefNo", width: 50, caption: "Ref Form No" },
+        { dataField: "ProcessName", caption: "Process Name", allowSorting: false },
+        { dataField: "RateFactor", caption: "Rate Factor", allowSorting: false },
+        { dataField: "FromTime", caption: "From Time", allowSorting: false, hidingPriority: 9 },
+        { dataField: "ToTime", caption: "To Time", allowSorting: false, hidingPriority: 8 },
+        { dataField: "ReceivedQuantity", caption: "Received Qty", allowSorting: false },
+        { dataField: "ProductionQuantity", caption: "Produce Qty", allowSorting: false },
+        { dataField: "Conversionvalue", caption: "No Of Steps", allowSorting: false, hidingPriority: 1 },
+        { dataField: "ReadyQuantity", caption: "Ready Qty", allowSorting: false },
+        { dataField: "WastageQuantity", caption: "Wastage Qty", allowSorting: false, hidingPriority: 7 },
+        { dataField: "SuspenseQuantity", caption: "Suspense Qty", allowSorting: false, hidingPriority: 6 },
+        { dataField: "Status", caption: "Status", allowSorting: false, hidingPriority: 13 },
         { dataField: "ProductionRemark", visible: false, caption: "Production Remark", allowSorting: false, hidingPriority: 5 },
         { dataField: "WastageRemark", visible: false, caption: "Wastage Remark", allowSorting: false, hidingPriority: 4 },
         { dataField: "SuspenseRemark", visible: false, caption: "Suspense Remark", allowSorting: false, hidingPriority: 3 },
         { dataField: "Shift", visible: false, caption: "Shift", allowSorting: false, hidingPriority: 2 },
-        { dataField: "UserName", visible: true, caption: "Supervisor", allowSorting: false, hidingPriority: 0 }
-    ],
-    onCellPrepared(e) {
-        if (e.rowType !== "data" && e.columnIndex !== 0) return;
-        if (e.columnIndex === 4) {
-            e.cellElement.css('background-color', '#ff9600');
-            e.cellElement.css('color', 'white');
+        { dataField: "UserName", caption: "Supervisor", allowSorting: false, hidingPriority: 0 },
+        {
+            dataField: "AttachedFileName", width: 100,
+            allowFiltering: false,
+            allowSorting: false,
+            cellTemplate(container, options) {
+                $('<div>')
+                    .append($('<img>', { src: options.value }))
+                    .appendTo(container);
+            },
         }
-    }
+    ],
+    //onCellPrepared(e) {
+    //    if (e.rowType !== "data" && e.columnIndex !== 0) return;
+    //    if (e.columnIndex === 4) {
+    //        e.cellElement.css('background-color', '#ff9600');
+    //        e.cellElement.css('color', 'white');
+    //    }
+    //}
 });
 
 function DrawStatus() {
@@ -306,7 +318,7 @@ $("#ScheduleGrid").dxDataGrid({
         e.rowElement.css('fontSize', '11px');
     },
     columns: [
-        { dataField: "SN", visible: true, width: 60, caption: "S.No" },
+        { dataField: "SN", width: 60, caption: "S.No" },
         { dataField: "ProcessName", caption: "Process Name" },
         { dataField: "RateFactor", caption: "Rate Factor" },
         { dataField: "JobCardFormNo", caption: "JC Form No" },
@@ -317,9 +329,9 @@ $("#ScheduleGrid").dxDataGrid({
         { dataField: "WastageQuantity", caption: "Wastage Qty" },
         { dataField: "SuspenseQuantity", caption: "Suspense Qty" },
         { dataField: "ScheduledMachine", caption: "Scheduled Machine" },
-        { dataField: "Speed", visible: true, caption: "Speed" },
+        { dataField: "Speed", caption: "Speed" },
         { dataField: "TimeToBeTaken", visible: false, caption: "Time To Be Taken" },
-        { dataField: "Status", visible: true, width: 100, caption: "Status" }
+        { dataField: "Status", width: 100, caption: "Status" }
     ]
 });
 
@@ -349,7 +361,7 @@ $("#ProductionDetailsGrid").dxDataGrid({
         e.rowElement.css('fontSize', '11px');
     },
     columns: [
-        { dataField: "SN", visible: true, width: 60, caption: "S.No" },
+        { dataField: "SN", width: 60, caption: "S.No" },
         { dataField: "ContentName", caption: "Content Name" },
         { dataField: "ProcessName", caption: "Process Name" },
         { dataField: "RateFactor", caption: "Rate Factor" },
@@ -359,14 +371,14 @@ $("#ProductionDetailsGrid").dxDataGrid({
         { dataField: "MachineName", caption: "Machine Name" },
         { dataField: "LedgerName", caption: "Client Name" },
         {
-            dataField: "FromTime", visible: true, width: 100, caption: "From Time",
+            dataField: "FromTime", width: 100, caption: "From Time",
             dataType: "date", format: "dd-MMM-yyyy HH:mm:ss",
             calculateCellValue: function (e) {
                 return new Date(parseInt(e.FromTime.substr(6)));
             }
         },
         {
-            dataField: "ToTime", visible: true, width: 100, caption: "To Time",
+            dataField: "ToTime", width: 100, caption: "To Time",
             dataType: "date", format: "dd-MMM-yyyy HH:mm:ss",
             calculateCellValue: function (e) {
                 return new Date(parseInt(e.ToTime.substr(6)));
@@ -377,9 +389,9 @@ $("#ProductionDetailsGrid").dxDataGrid({
         { dataField: "WastageQuantity", caption: "Wastage Qty" },
         { dataField: "SuspenseQuantity", caption: "Suspense Qty" },
         { dataField: "ScheduledMachine", caption: "Scheduled Machine" },
-        { dataField: "Speed", visible: true, caption: "Speed" },
+        { dataField: "Speed", caption: "Speed" },
         { dataField: "TimeToBeTaken", visible: false, caption: "Time To Be Taken" },
-        { dataField: "Status", visible: true, width: 100, caption: "Status" }
+        { dataField: "Status", width: 100, caption: "Status" }
     ]
 });
 

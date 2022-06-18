@@ -57,7 +57,7 @@ Partial Class MasterPage_Main
 
                 Dim DT As New DataTable
                 Dim ModuleID As Integer
-                If currentPageName <> "Home.aspx" Then
+                If currentPageName <> "Home.aspx" And Request.Url.ToString().Contains("localhost") = False Then
                     str = "Select Isnull(CanView,'False') As Action,MM.ModuleID,MM.ModuleDisplayName From UserModuleAuthentication As A Inner Join ModuleMaster As MM On MM.ModuleID=A.ModuleID And MM.CompanyID=A.CompanyID Where Isnull(A.IsDeletedTransaction,0)=0 And A.UserID=" & UserId & " And MM.ModuleName='" & currentPageName & "' And A.CompanyID=" & CompanyId
                     db.FillDataTable(DT, str)
 
@@ -67,7 +67,7 @@ Partial Class MasterPage_Main
                         '    ScriptManager.RegisterStartupScript(Me, Me.GetType(), "Close_Window", "window.close();", True)
                         'End If
 
-                        If DT.Rows(0)("Action") = False And Request.Url.ToString().Contains("localhost") = False Then
+                        If DT.Rows(0)("Action") = False Then
                             Response.Redirect(previousPageName)
                         End If
                         Page.Title = DT.Rows(0)("ModuleDisplayName")

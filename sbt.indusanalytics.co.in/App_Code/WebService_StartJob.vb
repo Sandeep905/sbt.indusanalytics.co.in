@@ -525,7 +525,7 @@ Public Class WebService_StartJob
 
     End Function
 
-    <WebMethod>
+    <WebMethod(EnableSession:=True)>
     Public Function UploadFileProductionStart() As String
         Dim httpPostedFile = HttpContext.Current.Request.Files("UserAttchedFiles")
         Try
