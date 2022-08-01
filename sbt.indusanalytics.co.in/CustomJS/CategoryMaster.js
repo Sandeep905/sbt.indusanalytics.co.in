@@ -97,7 +97,28 @@ let GridProcessAllocation = $("#GridProcessAllocation").dxDataGrid({
         else {
             $("#ProcessId").text("");
         }
-    }
+    },
+    onCellClick: function (e) {
+        if (e.rowType !== "data") return;
+
+        if (e.columnIndex == 0) {
+            e.data.IsDefaultProcess = false;
+        }
+        if (e.column.dataField === "IsDefaultProcess") {
+            var arr = e.component.getSelectedRowsData()
+            if (arr.length > 0) {
+                if ($.grep(arr, function (er) {
+                    return er.ProcessID === e.key;
+                }).length === 0) {
+                    e.data.IsDefaultProcess = false;
+                }
+            } else {
+                e.data.IsDefaultProcess = false
+            }
+
+        }
+        e.component.refresh();
+    },
 }).dxDataGrid('instance');
 
 
@@ -650,7 +671,9 @@ function ContentGridGrid() {
             else {
                 $("#ContentId").text("");
             }
-        }
+        },
+
+
     });
 }
 

@@ -2238,12 +2238,12 @@ function GetCategorizedProcess(CategoryID, ContName) {
             var RES1 = JSON.parse(res.toString());
             //ObjDefaultProcess = RES1;
             if (RES1.length > 0) {
-                $("#GridOperation").dxDataGrid({ dataSource: { store: { type: "array", data: RES1, key: "ProcessID" } } });
+                $("#GridOperation").dxDataGrid({ dataSource: { store: { type: "array", data: $.grep(RES1, function (e) { return e.IsDefaultProcess === false || e.IsDefaultProcess === 0; }), key: "ProcessID" } } });
             } else {
                 document.getElementById("LbliFrame").innerHTML = "reloadprocess";
                 $("#btnCloseiFrame").click();
             }
-            ObjDefaultProcess = $.grep(RES1, function (e) { return e.IsDefaultProcess === true || e.IsDefaultProcess === 0; });
+            ObjDefaultProcess = $.grep(RES1, function (e) { return e.IsDefaultProcess === true || e.IsDefaultProcess === 1; });
         },
         error: function errorFunc(jqXHR) {
             // alert(jqXHR.message);
@@ -2266,7 +2266,7 @@ function ShowOperationGrid(dataSource, slabNames) {
         columnResizingMode: "widget",
         columnAutoWidth: true,
         sorting: { mode: 'multiple' },
-        columns: [{ dataField: "ProcessName" },
+        columns: [{ dataField: "ProcessName", caption: "Suggested Process" },
         {
             dataField: "Rate", width: 50
             //format: {
@@ -2361,6 +2361,10 @@ function ShowOperationGrid(dataSource, slabNames) {
                     DevExpress.ui.notify("Process added..!", "success", 1000);
                     //clickedCell.component.clearFilter();
 
+                    // TO REMOVE FROM THIS GRID
+                    clickedCell.component._options.editing.texts.confirmDeleteMessage = "";
+                    clickedCell.component.deleteRow(clickedCell.rowIndex);
+
                     if (GblPlanValues.PlanID === undefined) return;
                     var dataGridPlan = $('#GridOperationDetails').dxDataGrid('instance');
                     //var selectedPlanRows = dataGrid.getSelectedRowsData();
@@ -2379,14 +2383,16 @@ function ShowOperationGrid(dataSource, slabNames) {
                     newdata.Remarks = '';
 
                     clonedItem = $.extend({}, newdata, { PlanID: GblPlanValues.PlanID });
-                    dataGridPlan._options.dataSource.store.splice(dataGridPlan.totalCount(), 0, clonedItem);
+                    dataGridPlan._options.dataSource.store.data.splice(dataGridPlan.totalCount(), 0, clonedItem);
                     dataGridPlan.refresh(true);
 
                     DevExpress.ui.notify("Process added in selected plan..!", "success", 1000);
 
+
                     //call after some time for summary of amount in operations
                     window.setTimeout(function () {
                         var grid = $("#GridOperationDetails").dxDataGrid('instance');
+
                         grid.refresh();
                         CalculateFinalAmt();
                     }, 1000);
@@ -2476,7 +2482,7 @@ $("#GridOperationAllocated").dxDataGrid({
     columnAutoWidth: true,
     allowColumnResizing: true,
     sorting: { mode: 'none' },
-    columns: [{ dataField: "ProcessName" },
+    columns: [{ dataField: "ProcessName",caption:"Default Process" },
     {
         dataField: "Rate"
         //format: {
@@ -2504,6 +2510,17 @@ $("#GridOperationAllocated").dxDataGrid({
         }
         if (clickedCell.column.caption === "Delete") {
             try {
+                var dataGrid = $('#GridOperation').dxDataGrid('instance');
+                var newdata = [];
+                newdata.ProcessID = clickedCell.data.ProcessID;
+                newdata.ProcessName = clickedCell.data.ProcessName;
+                newdata.Rate = Number(clickedCell.data.Rate).toFixed(3);
+                newdata.RateFactor = clickedCell.data.RateFactor;
+
+                var clonedItem = $.extend({}, newdata);
+                dataGrid._options.dataSource.store.data.splice(dataGrid.totalCount(), 0, clonedItem);
+                dataGrid.refresh(true);
+
                 clickedCell.component._options.editing.texts.confirmDeleteMessage = "";
                 clickedCell.component.deleteRow(clickedCell.rowIndex);
                 //clickedCell.component.refresh(true);
@@ -2514,10 +2531,10 @@ $("#GridOperationAllocated").dxDataGrid({
                 }
 
                 if (GblPlanValues.PlanID === undefined) return;
-                var dataGrid = $('#GridOperationDetails').dxDataGrid('instance');
+                var dataGridc = $('#GridOperationDetails').dxDataGrid('instance');
 
-                dataGrid._options.editing.texts.confirmDeleteMessage = "";
-                dataGrid.deleteRow(clickedCell.rowIndex);
+                dataGridc._options.editing.texts.confirmDeleteMessage = "";
+                dataGridc.deleteRow(clickedCell.rowIndex);
 
                 DevExpress.ui.notify("Process removed in selected plan..!", "error", 1000);
             } catch (e) {

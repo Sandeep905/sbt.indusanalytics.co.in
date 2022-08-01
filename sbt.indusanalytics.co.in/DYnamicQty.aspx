@@ -316,7 +316,7 @@
                                         <input title="Special back color" type='text' id='PlanSpeBColor' placeholder='Spe.Back' class='forTextBox' style="float: left; width: 47%; margin: .2%" maxlength="3" onchange="numericValidation(this)" />
                                         <b class="font-12">Printing Style</b><br />
                                         <div id="PlanPrintingStyle" style="float: left; width: 95.5%; margin: .1%; margin-top: 2px;"></div>
-                                        <div id="PlanPlateType" class="advancedOptions" style="float: left;display:none; width: 95.5%; margin: .1%; margin-top: 2px;"></div>
+                                        <div id="PlanPlateType" class="advancedOptions" style="float: left; display: none; width: 95.5%; margin: .1%; margin-top: 2px;"></div>
                                     </div>
                                     <b class='advanced btn btn-link font-12'>Advance Options</b>
                                     <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 advancedOptions">
@@ -370,7 +370,6 @@
                                     <div id="ChkPaperByClient"></div>
                                     <div>
                                         <i class="fa fa-plus btn btn-link font-12 padding-0 reloadprocess btnnewmaster">Create New Process</i>
-                                        <i class="fa fa-list-ul btn btn-link font-12 padding-0 showprocess">Suggested Process</i>
                                     </div>
                                 </div>
                                 <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 advancedOptions">
@@ -384,7 +383,7 @@
                                 </div>
                             </div>
 
-                            <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 padding-0 margin-0 showprocessoptions" style="padding-right: 0px; padding-left: 2px">
+                            <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 padding-0 margin-0" style="padding-right: 0px; padding-left: 2px">
                                 <div id="GridOperation"></div>
                                 <textarea id="OperId" style="display: none"></textarea>
                             </div>
@@ -1005,7 +1004,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- The Modal for Job Size Template-->
     <div class="modal fade" id="modaljobsizetemplate" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-lg" role="document">

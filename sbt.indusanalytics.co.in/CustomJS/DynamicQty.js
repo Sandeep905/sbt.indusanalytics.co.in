@@ -1707,15 +1707,6 @@ $('.advanced').click(function () {
     }
 });
 
-$('.showprocess').click(function () {
-    if ($('.showprocessoptions').is(':hidden')) {
-        $('.showprocessoptions').show();
-        $('.showprocess').text("Hide Suggestion");
-    } else {
-        $('.showprocessoptions').hide();
-        $('.showprocess').text("Suggested Process");
-    }
-});
 
 $("#BtnKeyLine").click(function () {
     var ObjData = {};
