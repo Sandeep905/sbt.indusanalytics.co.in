@@ -26,11 +26,7 @@ $("#PGHMShowListGrid").dxDataGrid({
         text: 'Data is loading...'
     },
     onRowPrepared: function (e) {
-        if (e.rowType === "header") {
-            e.rowElement.css('background', '#42909A');
-            e.rowElement.css('color', 'white');
-        }
-        e.rowElement.css('fontSize', '11px');
+        setDataGridRowCss(e);
     },
     onSelectionChanged: function (Showlist) {
         sholistData = [];
