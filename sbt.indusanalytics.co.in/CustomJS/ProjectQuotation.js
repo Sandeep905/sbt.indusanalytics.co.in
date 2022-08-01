@@ -138,17 +138,17 @@ $("#gridProductList").dxDataGrid({
                 displayExpr: "ProductName",
                 valueExpr: "ProductCatalogID",
             },
-            editorOptions: {
-                itemTemplate(itemData, itemIndex, itemElement) {
-                    if (itemData != null) {
-                        const imageContainer = $('<span>').addClass('status-icon middle').appendTo(itemElement);
-                        $('<img style="width:50px">').attr('src', `${checkIfRemoteFileExists(itemData.ProductImagePath)}`).appendTo(imageContainer);
-                        $('<span>').addClass('middle').text(itemData.ProductName).appendTo(itemElement);
-                    } else {
-                        $('<span>').text('(All)').appendTo(itemElement);
-                    }
-                },
-            },
+            //editorOptions: {
+            //    itemTemplate(itemData, itemIndex, itemElement) {
+            //        if (itemData != null) {
+            //            const imageContainer = $('<span>').addClass('status-icon middle').appendTo(itemElement);
+            //            //$('<img style="width:50px">').attr('src', `${checkIfRemoteFileExists(itemData.ProductImagePath)}`).appendTo(imageContainer);
+            //            $('<span>').addClass('middle').text(itemData.ProductName).appendTo(itemElement);
+            //        } else {
+            //            $('<span>').text('(All)').appendTo(itemElement);
+            //        }
+            //    },
+            //},
 
             width: 180, validationRules: [{ type: "required", message: "Product name is required" }],
             setCellValue: function (rowData, value) {
@@ -159,6 +159,7 @@ $("#gridProductList").dxDataGrid({
                     rowData.ProductDescription = result[0].ProductDescription;
                     rowData.ProductName = result[0].ProductName;
                     rowData.ProcessIDStr = result[0].ProcessIDStr;
+                    rowData.ProductHSNID = result[0].ProductHSNID;
                     //rowData.ProductImagePath = result[0].ProductImagePath;
                 } else {
                     rowData.ProductCatalogCode = "";
@@ -243,7 +244,7 @@ $("#gridProductList").dxDataGrid({
         },
         { dataField: "Rate", caption: "Rate", allowEditing: false, dataType: "number", /*validationRules: [{ type: "required", message: "Rate is required" }]*/ },
         {
-            dataField: "HSNCode", caption: "HSN Code", allowEditing: true,
+            dataField: "ProductHSNID", caption: "HSN Code", allowEditing: true,
             lookup: {
                 dataSource: ObjProductHSNGrp,
                 displayExpr: "HSNCode",
