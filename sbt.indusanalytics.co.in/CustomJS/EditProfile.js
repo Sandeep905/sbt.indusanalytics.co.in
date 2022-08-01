@@ -423,20 +423,16 @@ var gridObj = $("#SupportSystemGrid").dxDataGrid({
 
                 if (checkValue === true && rowIndex === 0) {
                     for (var A = 0; A < rowCountData; A++) {
-                        InsVal = gridinstance.cellValue(0, GetColIndexValue);
-                        var CheckCanView = gridinstance.cellValue(A, "CanView");
+                        InsVal = gridinstance._options.dataSource[0][GetColCaption];
+                        var CheckCanView = gridinstance._options.dataSource[A].CanView;
                         if (CheckCanView === false) {
                             InsVal = false;
                         }
-                        if (CheckCanView !== undefined) {
-                            if (CheckCanView === true) {
-                                gridinstance._options.dataSource[A][GetColCaption] = InsVal;
-                            }
+                        if (CheckCanView !== undefined && CheckCanView === true) {
+                            gridinstance._options.dataSource[A][GetColCaption] = InsVal;
                         }
                     }
                 }
-
-
             }
         }
     }

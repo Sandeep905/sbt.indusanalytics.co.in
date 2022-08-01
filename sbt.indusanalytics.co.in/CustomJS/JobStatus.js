@@ -231,7 +231,7 @@ $("#JobStatusGrid").dxDataGrid({
             allowSorting: false,
             cellTemplate(container, options) {
                 $('<div>')
-                    .append($('<img>', { src: options.value }))
+                    .append($('<img>', { src: options.value }).attr('height', "120"))
                     .appendTo(container);
             },
         }

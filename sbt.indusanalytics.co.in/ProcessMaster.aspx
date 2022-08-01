@@ -41,7 +41,7 @@
                         <div style="-webkit-box-shadow: 0 1px 5px rgba(0, 0, 0, 0.3); -moz-box-shadow: 0 1px 5px rgba(0, 0, 0, 0.3); -ms-box-shadow: 0 1px 5px rgba(0, 0, 0, 0.3); box-shadow: 0 1px 5px rgba(0, 0, 0, 0.3);">
                             <ul id="ProcessTabDiv" class="nav nav-tabs tab-col-red" role="tablist" style="color: green; border: none">
                                 <li role='presentation' class="active"><a id="AnchorProcessMasterFieldCreation" href="#ProcessMasterFieldCreation" data-toggle='tab' style='background-color: none;'>Process Detail</a></li>
-                                <li role='presentation' class='hidden'><a id="AnchorProcessMasterSlab" href="#ProcessMasterSlab" data-toggle='tab' style='background-color: none;'>Slab</a></li>
+                                <li role='presentation' ><a id="AnchorProcessMasterSlab" href="#ProcessMasterSlab" data-toggle='tab' style='background-color: none;'>Slab</a></li>
                                 <li role='presentation'><a id="AnchorProcessMasterMachineAllocation" href="#ProcessMasterMachineAllocation" data-toggle='tab' style='background-color: none;'>Machine Allocation</a></li>
                                 <%--<li role='presentation'><a id="AnchorProcessMasterContentAllocation" href="#ProcessMasterContentAllocation" data-toggle='tab' style='background-color: none;'>Content Allocation</a></li>--%>
                                 <%--<li role='presentation'><a id="AnchorProcessMasterMaterial" href="#ProcessMasterMaterial" data-toggle='tab' style='background-color: none;'>Material Allocation</a></li>--%>
@@ -169,7 +169,7 @@
                                 </div>
                             </div>
 
-                            <div role="tabpanel" class="tab-pane animated fadeInRight hidden" id="ProcessMasterSlab">
+                            <div role="tabpanel" class="tab-pane animated fadeInRight" id="ProcessMasterSlab">
                                 <%--<label class="font-12">Slab Qty.</label>--%>
                                 <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12">
                                     <label class="font-11">Sheet From</label>
@@ -201,12 +201,9 @@
                                     <input id="txtMinCharge" type="number" onchange="ZipCodeNumeric(this)" class="forTextBox" min="0" />
                                     <div style="float: left; width: 100%"><strong id="ValStrtxtMinCharge" style="color: red; font-size: 10px; display: none"></strong></div>
                                 </div>
-                                <div class="col-lg-1 col-md-1 col-sm-1 col-xs-12">
-                                    <br />
-                                    <a id="btnAddColumn" href='#' class="btn DialogBoxCustom iconButton" style="color: white; height: 28px; width: 68px;">
-                                        <img src="images/NewClient.png" style="height: 20px; width: 25px;" />
-                                        Add
-                                    </a>
+                                <div class="col-lg-1 col-md-1 col-sm-4 col-xs-12">
+                                    <br class="hidden-xs hidden-sm"/>
+                                    <input type="button" name="btnAddColumn" value="Add Slab" class="btn btn-primary" id="btnAddColumn"  />
                                 </div>
                                 <%--<input id="txtAddColumn" type="text" class="forTextBox" placeholder="Enter Slab Factor Name" style="float: right; width: 200px" />--%>
 

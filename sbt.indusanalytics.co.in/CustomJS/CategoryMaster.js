@@ -26,69 +26,80 @@ function GblProcessMaster() {
             res = res.substr(1);
             res = res.slice(0, -1);
 
-            processgrid = [];
             processgrid = JSON.parse(res);
 
-            AllocationProcessGrid();
+            $("#GridProcessAllocation").dxDataGrid({
+                dataSource: {
+                    store: {
+                        type: "array",
+                        key: "ProcessID",
+                        data: processgrid
+                    }
+                }
+            });
         }
     });
 }
 
-function AllocationProcessGrid() {
-    $("#GridProcessAllocation").dxDataGrid({
-        // dataSource: MachiGrid,
-        dataSource: {
-            store: {
-                type: "array",
-                key: "ProcessID",
-                data: processgrid
-            }
-        },
-        sorting: {
-            mode: "none"
-        },
-        paging: false,
-        showBorders: true,
-        showRowLines: true,
-        selection: { mode: "multiple", showCheckBoxesMode: "always" },
-        height: function () {
-            return window.innerHeight / 1.3;
-        },
-        filterRow: {
-            visible: true, applyFilter: "auto"
-        },
-        scrolling: {
-            mode: 'virtual'
-        },
-        loadPanel: {
-            enabled: true,
-            height: 90,
-            width: 200,
-            text: 'Data is loading...'
-        },
-        onRowPrepared: function (e) {
-            setDataGridRowCss(e);
-        },
-        columns: [
-            { dataField: "ProcessID", visible: false, caption: "ProcessID", width: 300 },
-            { dataField: "ProcessName", visible: true, caption: "Process Name" },
-            { dataField: "TypeofCharges", visible: true, caption: "TypeofCharges" }
-        ],
-        selectedRowKeys: Objid,
-        onSelectionChanged: function (selectedItems) {
-            var data = selectedItems.selectedRowsData;
-            if (data.length > 0) {
-                $("#ProcessId").text(
-                    $.map(data, function (value) {
-                        return value.ProcessID;    //alert(value.ProcessId);
-                    }).join(','));
-            }
-            else {
-                $("#ProcessId").text("");
-            }
+let GridProcessAllocation = $("#GridProcessAllocation").dxDataGrid({
+    dataSource: {
+        store: {
+            type: "array",
+            key: "ProcessID",
+            data: []
         }
-    });
-}
+    },
+    sorting: {
+        mode: "none"
+    },
+    paging: false,
+    showBorders: true,
+    showRowLines: true,
+    allowColumnResizing: true,
+    columnResizingMode: "widget",
+    selection: { mode: "multiple", showCheckBoxesMode: "always" },
+    height: function () {
+        return window.innerHeight / 1.4;
+    },
+    filterRow: {
+        visible: true, applyFilter: "auto"
+    },
+    scrolling: {
+        mode: 'virtual'
+    },
+    editing: {
+        mode: 'cell',
+        allowUpdating: true
+    },
+    loadPanel: {
+        enabled: true,
+        height: 90,
+        width: 200,
+        text: 'Data is loading...'
+    },
+    onRowPrepared: function (e) {
+        setDataGridRowCss(e);
+    },
+    columns: [
+        { dataField: "IsDefaultProcess", dataType: "boolean", caption: "Is Default", allowEditing: true, width: 80 },
+        { dataField: "ProcessName", visible: true, caption: "Process Name", allowEditing: false },
+        { dataField: "TypeofCharges", visible: true, caption: "TypeofCharges", allowEditing: false }
+    ],
+    selectedRowKeys: Objid,
+    onSelectionChanged: function (selectedItems) {
+        var data = selectedItems.selectedRowsData;
+        if (data.length > 0) {
+            $("#ProcessId").text(
+                $.map(data, function (value) {
+                    return value.ProcessID;    //alert(value.ProcessId);
+                }).join(','));
+        }
+        else {
+            $("#ProcessId").text("");
+        }
+    }
+}).dxDataGrid('instance');
+
 
 FillGrid();
 function FillGrid() {
@@ -253,7 +264,7 @@ $("#EditButton").click(function () {
     }
     //////////////////
 
-    AllocationProcessGrid();
+    $("#GridProcessAllocation").dxDataGrid({ dataSource: { store: { type: "array", key: "ProcessID", data: processgrid } } });
     ContentGridGrid();
 
     if (selectedCategoryRows[0].CategoryName === "" && selectedCategoryRows[0].Orientation === "") {
@@ -405,6 +416,8 @@ function SaveBtnFun() {
     }
     //////
 
+    var GridOperation = GridProcessAllocation._options.dataSource.store.data;
+
     var SplitGridRow = GridRow.split(',');
     if (GridRowContent !== "") {
         var SplitGridRowContent = GridRowContent.split(',');
@@ -420,6 +433,9 @@ function SaveBtnFun() {
                         OperationProcessAllocationDetailRecord = {};
                         OperationProcessAllocationDetailRecord.ProcessID = SplitGridRow[m];
                         OperationProcessAllocationDetailRecord.ContentID = SplitGridRowContent[cm];
+
+                        let ObjDefaultProcess = $.grep(GridOperation, function (e) { return e.ProcessID === Number(SplitGridRow[m]); });
+                        OperationProcessAllocationDetailRecord.IsDefaultProcess = ObjDefaultProcess[0].IsDefaultProcess;
 
                         jsonObjectsProcessAllocationDetailRecord.push(OperationProcessAllocationDetailRecord);
                     }
@@ -548,9 +564,7 @@ function SaveBtnFun() {
 
 $("#BtnNew").click(function () {
     document.getElementById("CategoryName").value = "";
-    $("#SelectBoxOrientation").dxSelectBox({
-        value: ''
-    });
+    $("#SelectBoxOrientation").dxSelectBox({ value: null });
     document.getElementById("TxtCategoryID").value = "";
 
     document.getElementById("BtnDeletePopUp").disabled = true;
@@ -575,11 +589,10 @@ function GblContent() {
         contentType: "application/json; charset=utf-8",
         dataType: "text",
         success: function (results) {
-            //console.debug(results);
             var res = results.replace(/\\/g, '');
             res = res.replace(/"d":""/g, '');
             res = res.replace(/""/g, '');
-            res = res.replace(/u0027u0027/g, "''");
+            res = res.replace(/u0027/g, "'");
             res = res.substr(1);
             res = res.slice(0, -1);
             //$("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
@@ -607,7 +620,7 @@ function ContentGridGrid() {
         selection: { mode: "single" },
         filterRow: { visible: true, applyFilter: "auto" },
         height: function () {
-            return window.innerHeight / 1.3;
+            return window.innerHeight / 1.4;
         },
         scrolling: { mode: 'virtual' },
         loadPanel: {
@@ -658,17 +671,24 @@ function getContentWiseProcess(ContID) {
             var res = results.replace(/\\/g, '');
             res = res.replace(/"d":""/g, '');
             res = res.replace(/""/g, '');
-            res = res.replace(/u0027u0027/g, "''");
+            res = res.replace(/u0027/g, "'");
             res = res.substr(1);
             res = res.slice(0, -1);
             Objid = [];
             var selectMIDSplitElse = JSON.parse(res);
-            for (var sp in selectMIDSplitElse) {
-                Objid.push(selectMIDSplitElse[sp].ProcessID);
+            var GridOperation = GridProcessAllocation._options.dataSource.store.data;
+
+            for (var i = 0; i < GridOperation.length; i++) {
+                GridProcessAllocation._options.dataSource.store.data[i].IsDefaultProcess = 0;
+                for (var sp in selectMIDSplitElse) {
+                    Objid.push(selectMIDSplitElse[sp].ProcessID);
+                    if (Number(selectMIDSplitElse[sp].ProcessID) === Number(GridOperation[i].ProcessID)) {
+                        GridProcessAllocation._options.dataSource.store.data[i].IsDefaultProcess = selectMIDSplitElse[sp].IsDefaultProcess;
+                    }
+                }
             }
-            $("#GridProcessAllocation").dxDataGrid({
-                selectedRowKeys: Objid
-            });
+            GridProcessAllocation.refresh();
+            $("#GridProcessAllocation").dxDataGrid({ selectedRowKeys: Objid });
         },
         error: function errorFunc(jqXHR) {
             // alert(jqXHR);

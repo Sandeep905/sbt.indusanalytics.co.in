@@ -1,14 +1,11 @@
 ﻿Imports System.Web
 Imports System.Web.Services
-Imports System.Web.Services.Protocols
 Imports System.Data
 Imports System.Data.SqlClient
 Imports System.Web.Script.Services
 Imports System.Web.Script.Serialization
 Imports Connection
 Imports System.Web.Configuration
-
-Imports Microsoft.VisualBasic
 Imports System.Configuration
 Imports Newtonsoft.Json
 
@@ -240,6 +237,31 @@ Public Class WebService_LedgerMaster
         Return KeyField
     End Function
     ''----------------------------Close Master  Save Data  ------------------------------------------
+
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function SaveAPMachineRateSlabs(ByVal machineSlabs As Object) As String
+        Dim KeyField = ""
+        Try
+            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+            GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
+            Dim LedgerID = machineSlabs(0)("LedgerID")
+            Dim AddColName = "CreatedDate,UserID,CompanyID,CreatedBy"
+            Dim AddColValue = "Getdate(),'" & GBLUserID & "'," & GBLCompanyID & "," & GBLUserID
+            db.ExecuteNonSQLQuery("Update VendorWiseMachineSlabMaster Set IsDeletedTransaction=1 WHERE CompanyID=" & GBLCompanyID & " And MachineID=" & machineSlabs(0)("MachineID") & " And LedgerID=" & LedgerID)
+            KeyField = db.InsertDatatableToDatabase(machineSlabs, "VendorWiseMachineSlabMaster", AddColName, AddColValue)
+            If IsNumeric(KeyField) = False Then
+                db.ExecuteNonSQLQuery("Delete from VendorWiseMachineSlabMaster WHERE IsDeletedTransaction=0 And CompanyID=" & GBLCompanyID & " And MachineID=" & machineSlabs(0)("MachineID") & " And LedgerID=" & LedgerID)
+                db.ExecuteNonSQLQuery("Update VendorWiseMachineSlabMaster Set IsDeletedTransaction=0 WHERE IsDeletedTransaction=1 And CompanyID=" & GBLCompanyID & " And MachineID=" & machineSlabs(0)("MachineID") & " And LedgerID=" & LedgerID)
+                Return "Error in slabs :- " & KeyField
+            End If
+            db.ExecuteNonSQLQuery("Delete from VendorWiseMachineSlabMaster WHERE IsDeletedTransaction=1 And CompanyID=" & GBLCompanyID & " And MachineID=" & machineSlabs(0)("MachineID") & " And LedgerID=" & LedgerID)
+            KeyField = "Success"
+        Catch ex As Exception
+            Return "Error: " & ex.Message
+        End Try
+        Return KeyField
+    End Function
 
     ''----------------------------Open Master  Update Data  ------------------------------------------
     <WebMethod(EnableSession:=True)>
@@ -750,6 +772,27 @@ Public Class WebService_LedgerMaster
         str = "Select Distinct LedgerID AS VendorID,LedgerName As VendorName From LedgerMaster Where LedgerGroupID IN(Select LedgerGroupID From LedgerGroupMaster Where IsDeletedTransaction=0 And CompanyID=" & GBLCompanyID & " And   LedgerGroupNameID IN(25)) AND CompanyID=" & GBLCompanyID & " AND IsDeletedTransaction=0 " & VendorID & " Order By VendorName"
 
         db.FillDataTable(dataTable, str)
+        data.Message = ConvertDataTableTojSonString(dataTable)
+        Return js.Serialize(data.Message)
+    End Function
+
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function ExistSlab(ByVal Machineid As String, ByVal VendorID As Integer) As String
+
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+
+        str = " SELECT DISTINCT PKSlabID, MachineID,LedgerID,  SheetRangeFrom, SheetRangeTo, Rate, PlateCharges, PSPlateCharges, CTCPPlateCharges, Wastage, SpecialColorFrontCharges, SpecialColorBackCharges, NULLIF (PaperGroup, '') AS PaperGroup, MaxPlanW AS SizeW, MaxPlanL AS SizeL, MinCharges FROM VendorWiseMachineSlabMaster " &
+                " WHERE (CompanyID = " & GBLCompanyID & ") AND (MachineID = " & Machineid & ") AND (LedgerID = " & VendorID & ") AND (ISNULL(IsDeletedTransaction, 0) <> 1) " &
+                " Order By PaperGroup,SheetRangeFrom ,SheetRangeTo "
+        db.FillDataTable(dataTable, str)
+
+        If dataTable.Rows.Count = 0 Then
+            str = "SELECT DISTINCT PKSlabID, MachineID,LedgerID,SheetRangeFrom, SheetRangeTo, Rate, PlateCharges, PSPlateCharges, CTCPPlateCharges, Wastage, SpecialColorFrontCharges, SpecialColorBackCharges, NULLIF (PaperGroup, '') AS PaperGroup, MaxPlanW AS SizeW,  MaxPlanL AS SizeL, MinCharges FROM MachineSlabMaster " &
+                    " WHERE (CompanyID = " & GBLCompanyID & ") AND (MachineID = " & Machineid & ") AND (ISNULL(IsDeletedTransaction, 0) <> 1) "
+            db.FillDataTable(dataTable, str)
+        End If
+
         data.Message = ConvertDataTableTojSonString(dataTable)
         Return js.Serialize(data.Message)
     End Function

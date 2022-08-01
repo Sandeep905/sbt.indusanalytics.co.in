@@ -13,11 +13,12 @@ Partial Class MasterPageMIS
         Dim CompanyID As String = Convert.ToString(Session("CompanyID"))
 
         If UserId = "" Then
-            Session.Remove("UserID")
-            Response.ClearHeaders()
-            Response.AddHeader("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate")
-            Response.AddHeader("Pragma", "no-cache")
-            Response.Redirect("Login.aspx")
+            ReadCookie()
+            'Session.Remove("UserID")
+            'Response.ClearHeaders()
+            'Response.AddHeader("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate")
+            'Response.AddHeader("Pragma", "no-cache")
+            'Response.Redirect("Login.aspx")
         Else
             CompanyName.InnerText = lblCompanyName
             CompanyName.Title = lblCompanyName
@@ -77,6 +78,24 @@ Partial Class MasterPageMIS
             Response.Write(ex.Message)
         End Try
         Response.Redirect("~/Login.aspx")
+    End Sub
+    Protected Sub ReadCookie()
+        'Fetch the Cookie using its Key.
+        Dim nameCookie As HttpCookie = Request.Cookies("StrgSessionState")
+
+        'If Cookie exists fetch its value.
+        Try
+            Session("UserName") = nameCookie.Item("UserName").ToString()
+            Session("CompanyID") = nameCookie.Item("CompanyID").ToString()
+            Session("VendorID") = nameCookie.Item("VendorID").ToString()
+            Session("UserID") = nameCookie.Item("UserID").ToString()
+            Session("FYear") = nameCookie.Item("FYear").ToString()
+            Session("Version") = nameCookie.Item("Version").ToString()
+            Session("CompanyName") = nameCookie.Item("CompanyName").ToString()
+            Session("ReportFYear") = nameCookie.Item("ReportFYear").ToString()
+        Catch ex As Exception
+            Response.Redirect("Login.aspx")
+        End Try
     End Sub
 
 End Class

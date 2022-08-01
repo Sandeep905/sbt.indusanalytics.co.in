@@ -197,7 +197,7 @@ Public Class WebServicePlanWindow
             str = Convert.ToString(HttpContext.Current.Session("Version"))
 
             If str = "New" Then
-                str = "SELECT DISTINCT PM.ProcessID, REPLACE(NULLIF (PM.ProcessName, ''), '""', '') AS ProcessName, ROUND(ISNULL(NULLIF (PM.Rate, ''), 0), 4) AS Rate, '' AS RateFactor,CPA.ID " &
+                str = "SELECT DISTINCT PM.ProcessID,CPA.IsDefaultProcess, REPLACE(NULLIF (PM.ProcessName, ''), '""', '') AS ProcessName, ROUND(ISNULL(NULLIF (PM.Rate, ''), 0), 4) AS Rate, '' AS RateFactor,CPA.ID " &
                       " FROM ProcessMaster AS PM Inner Join CategoryWiseProcessAllocation As CPA On CPA.ProcessID=PM.ProcessID And CPA.CompanyID=PM.CompanyID And Isnull(CPA.IsDeletedTransaction,0)=0 Inner Join CategoryContentAllocationMaster As PCM On PCM.CategoryID=CPA.CategoryID And PCM.ContentID=CPA.ContentID And CPA.CompanyID=PCM.CompanyID And Isnull(PCM.IsDeletedTransaction,0)=0 Inner Join ContentMaster As CM On CM.ContentID=PCM.ContentID And CM.CompanyID=CPA.CompanyID WHERE (ISNULL(PM.IsDeletedTransaction, 0) = 0) AND (PM.CompanyID = " & GBLCompanyID & " ) And CPA.CategoryID=" & CategoryID & " And CM.ContentName='" & ContName & "' ORDER BY CPA.ID"
                 db.FillDataTable(dataTable, str)
             Else
@@ -222,11 +222,11 @@ Public Class WebServicePlanWindow
         str = Convert.ToString(HttpContext.Current.Session("Version"))
 
         If str = "New" Then
-            str = "SELECT DISTINCT PM.ProcessID, REPLACE(NULLIF (ProcessName, ''), '""', '') AS ProcessName, NULLIF (PrePress, '') AS PrePress, NULLIF (TypeofCharges, '') AS TypeofCharges, NULLIF (SizeToBeConsidered, '') AS SizeToBeConsidered, ROUND(ISNULL(NULLIF (Rate, ''), 0), 4) AS Rate, NULLIF (MinimumCharges, '') AS MinimumCharges, NULLIF (SetupCharges, '') AS SetupCharges, NULLIF (IsDisplay, '') AS IsDisplay, REPLACE(NULLIF (ChargeApplyOnSheets, ''), '""', '') AS ChargeApplyOnSheets, REPLACE(NULLIF (DisplayProcessName, ''), '""', '') AS DisplayProcessName, 0 AS Amount, '' AS RateFactor, '' AS AddRow " &
+            str = "SELECT DISTINCT 0 As IsDefaultProcess,PM.ProcessID, REPLACE(NULLIF (ProcessName, ''), '""', '') AS ProcessName, NULLIF (PrePress, '') AS PrePress, NULLIF (TypeofCharges, '') AS TypeofCharges, NULLIF (SizeToBeConsidered, '') AS SizeToBeConsidered, ROUND(ISNULL(NULLIF (Rate, ''), 0), 4) AS Rate, NULLIF (MinimumCharges, '') AS MinimumCharges, NULLIF (SetupCharges, '') AS SetupCharges, NULLIF (IsDisplay, '') AS IsDisplay, REPLACE(NULLIF (ChargeApplyOnSheets, ''), '""', '') AS ChargeApplyOnSheets, REPLACE(NULLIF (DisplayProcessName, ''), '""', '') AS DisplayProcessName, 0 AS Amount, '' AS RateFactor, '' AS AddRow " &
                 "FROM ProcessMaster AS PM Inner Join CategoryWiseProcessAllocation As CPA On CPA.ProcessID=PM.ProcessID And CPA.CompanyID=PM.CompanyID WHERE (ISNULL(PM.IsDeletedTransaction, 0) = 0) AND (PM.CompanyID = " & GBLCompanyID & " ) And CPA.CategoryID=" & CategoryID & "  ORDER BY ProcessName"
             db.FillDataTable(dataTable, str)
             If dataTable.Rows.Count <= 0 Then
-                str = " Select Distinct ProcessID, Replace(Nullif(ProcessName,''),'""','') as ProcessName, Nullif(PrePress,'') as PrePress, Nullif(TypeofCharges,'') as TypeofCharges, Nullif(SizeToBeConsidered,'') as SizeToBeConsidered, Round(Isnull(Nullif(Rate,''),0),4) As Rate,Nullif(MinimumCharges,'') as MinimumCharges, Nullif(SetupCharges,'') as SetupCharges, " &
+                str = " Select Distinct 0 As IsDefaultProcess,ProcessID, Replace(Nullif(ProcessName,''),'""','') as ProcessName, Nullif(PrePress,'') as PrePress, Nullif(TypeofCharges,'') as TypeofCharges, Nullif(SizeToBeConsidered,'') as SizeToBeConsidered, Round(Isnull(Nullif(Rate,''),0),4) As Rate,Nullif(MinimumCharges,'') as MinimumCharges, Nullif(SetupCharges,'') as SetupCharges, " &
                    "Nullif(IsDisplay,'') as IsDisplay, Replace(Nullif(ChargeApplyOnSheets,''),'""','') As ChargeApplyOnSheets, Replace( Nullif(DisplayProcessName,''),'""','') as DisplayProcessName,0 As Amount,'' As RateFactor,'' As AddRow From ProcessMaster WHERE Isnull(IsDeletedTransaction,0)=0 And /*(ProcessID NOT IN (0, - 5, - 1)) And*/ CompanyId = " & GBLCompanyID & "  Order By ProcessName Asc  "
                 dataTable.Clear()
                 db.FillDataTable(dataTable, str)
@@ -597,7 +597,7 @@ Public Class WebServicePlanWindow
             db.FillDataTable(DTBooking, str)
             If DTBooking.Rows.Count <= 0 Then Return "error code:404"
 
-            str = "SELECT MachineID, MachineName, Gripper, GripperSide, MachineColors, PaperID, PaperSize, CutSize, CutL, CutW, UpsL, UpsW, TotalUps, BalPiece, BalSide, WasteArea, WastePerc, WastageKg, GrainDirection, PlateQty, PlateRate, PlateAmount, MakeReadyWastageSheet, ActualSheets, WastageSheets, TotalPaperWeightInKg, FullSheets, PaperRate, PaperAmount, PrintingImpressions, ImpressionsToBeCharged, PrintingRate, PrintingAmount, TotalMakeReadies, MakeReadyRate, MakeReadyAmount, FinalQuantity, TotalColors, TotalAmount, CutLH, CutHL, PrintingStyle, PrintingChargesType, ExpectedExecutionTime, TotalExecutionTime, MainPaperName, PlanType, PaperRateType, DieCutSize, InterlockStyle, NoOfSets, GrantAmount, Packing, UnitPerPacking, RoundofImpressionsWith, SpeColorFCharges, SpeColorBCharges, SpeColorFAmt, SpeColorBAmt, OpAmt, PlanID, PlanContQty, PlanContentType, PlanContName, SequenceNo, Nullif(ContentSizeValues,'') As ContentSizeValues, CoatingCharges, CoatingAmount, PaperGroup FROM JobBookingContents As JBC Inner Join JobBooking AS JB On JB.BookingID=JBC.BookingID  And Isnull(JB.IsDeletedTransaction,0)=0 And Isnull(JBC.IsDeletedTransaction,0)=0 WHERE (JB.BookingID = " & BookingID & ") /*And Isnull(JB.IsCancelled,0)=0*/ And Isnull(JB.IsEstimate,0)=1 And JB.QuoteType ='Job Costing' And Isnull(ContentSizeValues,'')<>'' And JB.CompanyID=" & GBLCompanyID
+            str = "SELECT MachineID, MachineName, Gripper, GripperSide, MachineColors, PaperID, PaperSize, CutSize, CutL, CutW, UpsL, UpsW, TotalUps, BalPiece, BalSide, WasteArea, WastePerc, WastageKg, GrainDirection, PlateQty, PlateRate, PlateAmount, MakeReadyWastageSheet, ActualSheets, WastageSheets, TotalPaperWeightInKg, FullSheets, PaperRate, PaperAmount, PrintingImpressions, ImpressionsToBeCharged, PrintingRate, PrintingAmount, TotalMakeReadies, MakeReadyRate, MakeReadyAmount, FinalQuantity, TotalColors, TotalAmount, CutLH, CutHL, PrintingStyle, PrintingChargesType, ExpectedExecutionTime, TotalExecutionTime, MainPaperName, PlanType, PaperRateType, DieCutSize, InterlockStyle, NoOfSets, GrantAmount, Packing, UnitPerPacking, RoundofImpressionsWith, SpeColorFCharges, SpeColorBCharges, SpeColorFAmt, SpeColorBAmt, OpAmt, PlanID, PlanContQty, PlanContentType, PlanContName, SequenceNo, Nullif(ContentSizeValues,'') As ContentSizeValues, CoatingCharges, CoatingAmount, PaperGroup,VendorID,Nullif(VendorName,'') VendorName FROM JobBookingContents As JBC Inner Join JobBooking AS JB On JB.BookingID=JBC.BookingID  And Isnull(JB.IsDeletedTransaction,0)=0 And Isnull(JBC.IsDeletedTransaction,0)=0 WHERE (JB.BookingID = " & BookingID & ") /*And Isnull(JB.IsCancelled,0)=0*/ And Isnull(JB.IsEstimate,0)=1 And JB.QuoteType ='Job Costing' And Isnull(ContentSizeValues,'')<>'' And JB.CompanyID=" & GBLCompanyID
             db.FillDataTable(DTContent, str)
 
             str = "SELECT PlanContQty, TaxPercentage, MiscPercentage, ProfitPercentage, DiscountPercentage, TotalCost, MiscCost, ProfitCost, DiscountAmount, TaxAmount, GrandTotalCost, UnitCost, UnitCost1000, JBC.FinalCost,Isnull(JBC.ShipperCost,0) As ShipperCost,Isnull(JBC.QuotedCost,0) As QuotedCost FROM JobBookingCostings  As JBC Inner Join JobBooking AS JB On JB.BookingID=JBC.BookingID WHERE (JB.BookingID = " & BookingID & ") /*And Isnull(JB.IsCancelled,0)=0*/ And Isnull(JB.IsEstimate,0)=1 And JB.QuoteType ='Job Costing' And Isnull(JB.IsDeletedTransaction,0)=0 And Isnull(JBC.IsDeletedTransaction,0)=0 And JB.CompanyID=" & GBLCompanyID
@@ -901,6 +901,20 @@ Public Class WebServicePlanWindow
 
     End Function
 
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function GetJobSizeTemplate() As String
+        Try
+
+            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+            str = "SELECT Distinct JobSizeTemplateName, JobHeight, JobLength, JobWidth, OverlapFlap, BottomFlap, OpenFlap, TongueHeight, Pages, Ups, Leaves FROM JobSizeTemplate"
+            db.FillDataTable(dataTable, str)
+            data.Message = db.ConvertDataTableTojSonString(dataTable)
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
 
     <WebMethod(EnableSession:=True)>
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>

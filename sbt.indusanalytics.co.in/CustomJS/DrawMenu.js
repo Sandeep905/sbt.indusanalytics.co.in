@@ -16,16 +16,18 @@ $.ajax({
         var CreateSubUL = "";
         var CreateSubLI = "";
         var AddNextSubMenu = "";
+        let ModuleName = "";
 
         for (var N = 0; N < SubMenu.length; N++) {
             if (SubMenu[N].NumberOfChild > 1) {
                 let found = checkforModuleName(SubMenu[N].ModuleHeadName);
-                if (found === false) {
+                if (ModuleName !== SubMenu[N].ModuleHeadName) {
                     AddNextSubMenu = SubMenu[N].ModuleHeadName.replace(/ /g, '-');
                     CreateSubLI = '<li class="nav-item has-treeview"><a href="#" class="nav-link"><p>' + SubMenu[N].ModuleHeadName + '<i class="right fa fa-angle-left"></i><span class="badge badge-info right"></span></p></a><ul class="nav nav-treeview" id="submenu-' + AddNextSubMenu + '"></ul></li>';
                     $("#DynamicMenuDiv").append(CreateSubLI);
                     CreateSubUL = '<li class="nav-item"><a href="' + SubMenu[N].ModuleName + '" class="nav-link"><i class="fa fa-circle-o nav-icon"></i><p>' + SubMenu[N].ModuleDisplayName + '</p></a></li>';
                     $('#submenu-' + AddNextSubMenu).append(CreateSubUL);
+                    ModuleName = SubMenu[N].ModuleHeadName;
                 }
                 else {
                     CreateSubUL = '<li class="nav-item"><a href="' + SubMenu[N].ModuleName + '" class="nav-link"><i class="fa fa-circle-o nav-icon"></i><p>' + SubMenu[N].ModuleDisplayName + '</p></a></li>';

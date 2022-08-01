@@ -142,6 +142,46 @@ var toolTip = $("#tooltip").dxTooltip({
 
 $.ajax({
     type: "POST",
+    url: "WebServicePlanWindow.asmx/GetJobSizeTemplate",
+    data: '{}',
+    contentType: "application/json; charset=utf-8",
+    dataType: "text",
+    success: function (results) {
+        var res = results.replace(/\\/g, '');
+        res = res.replace(/"d":""/g, '');
+        res = res.replace(/""/g, '');
+        res = res.substr(1);
+        res = res.slice(0, -1);
+        var RES1 = JSON.parse(res);
+
+        $("#SelJobSizeTemplate").dxSelectBox({
+            dataSource: RES1,
+            placeholder: "Select Template",
+            showClearButton: true,
+            searchEnabled: true,
+            displayExpr: 'JobSizeTemplateName',
+            valueExpr: 'JobSizeTemplateName',
+            onValueChanged: function (data) {
+                if (!data) return;
+                var sizeType = data.value;
+                var result = $.grep(data.component._dataSource._store._array, function (ex) { return ex.JobSizeTemplateName === sizeType; });
+                if (result.length === 1) {
+                    $('#planJob_Size input').each(function () {
+                        if (this.type === "text" && this.style.display === "block") {
+                            let sizename = this.id.replace('Size', 'Job');
+                            if (sizename === "JobWidth") sizename = "JobHeight";
+                            this.value = result[0][sizename];
+                        }
+                    });
+                }
+            }
+        });
+
+    }
+});
+
+$.ajax({
+    type: "POST",
     url: "WebServicePlanWindow.asmx/GetCoating",
     data: '{}',
     contentType: "application/json; charset=utf-8",
@@ -301,12 +341,19 @@ $.ajax({
         var RES1 = JSON.parse(res);
 
         $("#SbHSNGroups").dxSelectBox({
-            items: RES1,
+            dataSource: RES1,
             placeholder: "Select...",
-            displayExpr: "ProductHSNName",
+            displayExpr: "HSNCode",
             valueExpr: "ProductHSNID",
             searchEnabled: true,
-            showClearButton: true
+            showClearButton: true,
+            onValueChanged: function (e) {
+                var result = $.grep(e.component._dataSource._store._array, function (ex) { return ex.ProductHSNID === e.value; });
+                if (result.length === 1) {
+                    document.getElementById("FinalTaxPer0").value = result[0].GSTTaxPercentage;
+                    onChangeUpdatePer("FinalTaxPer0");
+                }
+            }
         }).dxValidator({
             validationRules: [{ type: 'required', message: 'Product HSN Group is required' }]
         });
@@ -1134,7 +1181,7 @@ function ShowShirinReport(gridData) {
         //paging: { pageSize: 4 },
         selection: { mode: "single" }, //columnHidingEnabled: true,
         columnAutoWidth: true,
-        columns: [/*{ dataField: "VendorName", width: 120, caption: "Associate Partner" },*/ {
+        columns: [{ dataField: "VendorName", width: 120, caption: "Associate Partner" }, {
             dataField: "MachineName", width: 150,
             cellTemplate: function (container, options) {
                 $('<a>').addClass('btn padding-0 font-11').text(options.data.MachineName)
@@ -2189,7 +2236,14 @@ function GetCategorizedProcess(CategoryID, ContName) {
             res = res.substr(1);
             res = res.slice(0, -1);
             var RES1 = JSON.parse(res.toString());
-            ObjDefaultProcess = RES1;
+            //ObjDefaultProcess = RES1;
+            if (RES1.length > 0) {
+                $("#GridOperation").dxDataGrid({ dataSource: { store: { type: "array", data: RES1, key: "ProcessID" } } });
+            } else {
+                document.getElementById("LbliFrame").innerHTML = "reloadprocess";
+                $("#btnCloseiFrame").click();
+            }
+            ObjDefaultProcess = $.grep(RES1, function (e) { return e.IsDefaultProcess === true || e.IsDefaultProcess === 0; });
         },
         error: function errorFunc(jqXHR) {
             // alert(jqXHR.message);

@@ -228,9 +228,9 @@
 
                                         <strong id="ValStrTxtCostPerHour" style="color: red; font-size: 12px; display: none"></strong>
                                     </div>
-                                    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+                                    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12 hidden">
                                         <label class="font-11">Associate Partner</label>
-                                        <div id="SelectBoxVendor"></div>
+                                        <div id="SelectBoxVendor" class="hidden"></div>
                                         <strong id="ValStrSelectBoxVendor" style="color: red; font-size: 12px; display: none"></strong>
                                     </div>
 

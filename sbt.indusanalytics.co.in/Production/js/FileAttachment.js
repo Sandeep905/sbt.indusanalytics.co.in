@@ -18,7 +18,11 @@ function uploadFileProduction(productionType) {
         type: 'POST',
         success: function (fd) {
             console.log(fd);
-            if (productionType === "Update") { window.location = "StartJob.aspx"; } else { window.location = "UpdateJob.aspx"; }
+            if (productionType === "Update") {
+                window.location = "StartJob.aspx";
+            } else if (productionType === "Start") {
+                window.location = "UpdateJob.aspx";
+            } else { location.reload(); }
         }
     });
 }

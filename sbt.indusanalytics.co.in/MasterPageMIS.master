@@ -437,6 +437,20 @@
             return str;
 
         }
+
+        function setDataGridRowCss(e) {
+            if (e.rowType === "header") {
+                e.rowElement.css('background', '#0a5696');
+                e.rowElement.css('color', 'white');
+                e.rowElement.css('font-weight', 'bold');
+                e.rowElement.css('text-align', 'left');
+            } else if (e.rowType === "totalFooter") {
+                e.rowElement.css('background', '#ccf5ff');
+                e.rowElement.css('color', 'white');
+                e.rowElement.css('font-weight', 'bold');
+            }
+            e.rowElement.css('fontSize', '11px');
+        }
     </script>
 
 </body>

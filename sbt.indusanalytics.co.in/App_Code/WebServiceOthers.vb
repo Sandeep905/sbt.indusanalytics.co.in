@@ -606,7 +606,7 @@ Public Class WebServiceOthers
         Try
             CompanyId = Convert.ToString(HttpContext.Current.Session("CompanyId"))
 
-            Str = "Select ProductHSNID,ProductHSNName,ProductCategory,GSTTaxPercentage,CGSTTaxPercentage,SGSTTaxPercentage,IGSTTaxPercentage From ProductHSNMaster Where CompanyID=" & CompanyId & " AND ProductCategory='" & Category & "' Order By ProductHSNName"
+            Str = "Select ProductHSNID,HSNCode,ProductHSNName,ProductCategory,GSTTaxPercentage,CGSTTaxPercentage,SGSTTaxPercentage,IGSTTaxPercentage From ProductHSNMaster Where IsDeletedTransaction=0 And CompanyID=" & CompanyId & " AND ProductCategory='" & Category & "' Order By ProductHSNName"
             db.FillDataTable(dataTable, Str)
             data.Message = db.ConvertDataTableTojSonString(dataTable)
             Return js.Serialize(data.Message)

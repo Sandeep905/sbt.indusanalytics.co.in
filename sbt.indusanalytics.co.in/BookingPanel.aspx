@@ -8,36 +8,22 @@
             <div class="dialogboxContainerMainMAster">
                 <div class="DialogBoxCustom" style="float: left; background-color: #fff; padding-left: 0px; padding-bottom: 2px">
                     <div id="ButtonDiv" style="height: auto;">
-                        <a id="PrintButton" href='#' class="iconButton" style="margin-top: 1px; margin-left: 2px;">
-                            <img src="images/NewClient.png" style="height: 20px; width: 25px; float: left; margin-top: 0px" />
-                            &nbsp Print
-                        </a>
-                        <a id="PrintCostingButton" href='#' class="iconButton" style="margin-top: 1px; margin-left: 2px; display: block">
-                            <img src="images/NewClient.png" style="height: 20px; width: 25px; float: left; margin-top: 0px" />
-                            &nbsp Detail Costing
-                        </a>
-                        <div id="DivSendToUser" style="display: none; margin-bottom: 0px;" class="col-lg-2 col-md-2 col-sm-4 col-xs-12">
+                        <div class="col-lg-2 col-md-2 col-sm-4 col-xs-12">
+                            <input type="button" class="btn btn-primary" value="Print" id="PrintButton" />
+                            <input type="button" class="btn btn-secondary" value="Detail Costing" id="PrintCostingButton" />
+                        </div>
+                        <div id="DivSendToUser" style="display: none;" class="col-lg-2 col-md-2 col-sm-4 col-xs-12">
                             <div id="SelectBoxSendToUser"></div>
                         </div>
-                        <a id="BtnSendForInternalApproval" href='#' class="iconButton" style="margin-top: 1px; margin-left: 2px; display: none">
-                            <img src="images/Select.png" style="height: 20px; width: 25px; float: left; margin-top: 0px" />
-                            &nbsp Send For Internal Approval
-                        </a>
-                        <a id="BtnDisInternalApproval" href='#' class="iconButton" style="margin-top: 1px; margin-left: 2px; display: none">
-                            <img src="images/Select.png" style="height: 20px; width: 25px; float: left; margin-top: 0px;" />
-                            &nbsp Unsend For Internal Approval
-                        </a>
-                        <a id="BtnSendForApproval" href='#' class="iconButton" style="margin-top: 1px; margin-left: 2px; display: none">
-                            <img src="images/Select.png" style="height: 20px; width: 25px; float: left; margin-top: 0px" />
-                            &nbsp Send For Approval
-                        </a>
-                        <a id="BtnDisApproval" href='#' class="iconButton" style="margin-top: 1px; margin-left: 2px; display: none">
-                            <img src="images/Select.png" style="height: 20px; width: 25px; float: left; margin-top: 0px;" />
-                            &nbsp Unsend For Approval
-                        </a>
+                        <div class="col-lg-2 col-md-2 col-sm-4 col-xs-12">
+                            <input type="button" class="btn btn-info" style="display: none;" value="Send For Internal Approval" id="BtnSendForInternalApproval" />
+                            <input type="button" class="btn btn-danger" style="display: none;" value="Unsend For Internal Approval" id="BtnDisInternalApproval" />
+                            <input type="button" class="btn btn-info" style="display: none;" value="Send For Approval" id="BtnSendForApproval" />
+                            <input type="button" class="btn btn-danger" style="display: none;" value="Unsend For Approval" id="BtnDisApproval" />
+                        </div>
                     </div>
                     <strong id="MasterDisplayName" class="MasterDisplayName" style="float: right; color: #42909A">Quote Panel</strong>
-                    
+
                     <a title="Comments" id="BtnNotification" class="iconButton" style="float: right">
                         <i class="fa fa-bell fa-2x fa-fw" style="font-size: 14px;"></i>
                     </a>

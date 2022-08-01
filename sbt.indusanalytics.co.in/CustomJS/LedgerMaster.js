@@ -972,6 +972,11 @@ function FillGrid() {
                         $("#btnMachineAllo").addClass("hidden");
                     }
 
+                    if (masterID == 8) { //ASSOCIATE PARTNER
+                        $("#btnApMachineAllo").removeClass("hidden");
+                    } else {
+                        $("#btnApMachineAllo").addClass("hidden");
+                    }
                     //Create Dril Down Of Masters
                     document.getElementById("TabDiv").innerHTML = "";
 
@@ -1849,6 +1854,69 @@ $("#ConcernPersonBtnDeletePopUp").click(function () {
 
 var Objid = [];
 
+$("#btnApMachineAllo").click(function () {
+    var txtGetGridRow = Number(document.getElementById("txtGetGridRow").value);
+    if (txtGetGridRow <= 0 || txtGetGridRow === null) {
+        swal("", "Please select associate partner from the given below list..");
+        return false;
+    }
+
+    $.ajax({
+        type: "POST",
+        url: "WebService_LedgerMaster.asmx/VendorMachineGrid",
+        data: '{VendorID:0}',
+        contentType: "application/json; charset=utf-8",
+        dataType: "text",
+        success: function (results) {
+            var res = results.replace(/\\/g, '');
+            res = res.replace(/"d":""/g, '');
+            res = res.replace(/""/g, '');
+            res = res.replace(/u0026/g, '&');
+            res = res.replace(/:,/g, ':null,');
+            res = res.replace(/:}/g, ':null}');
+            res = res.substr(1);
+            res = res.slice(0, -1);
+            var DM = JSON.parse(res);
+
+            $("#selMachine").dxSelectBox({
+                items: DM,
+                placeholder: "Select..",
+                displayExpr: 'MachineName',
+                valueExpr: 'MachineID',
+                searchEnabled: true,
+                showClearButton: true,
+                onValueChanged: function (data) {
+                    $("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
+                    $.ajax({
+                        type: "POST",
+                        url: "WebService_LedgerMaster.asmx/ExistSlab",
+                        data: '{Machineid:' + JSON.stringify(data.value) + ',VendorID:' + JSON.stringify(txtGetGridRow) + '}',
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "text",
+                        success: function (results) {
+                            var res = results.replace(/\\/g, '');
+                            res = res.replace(/"d":""/g, '');
+                            res = res.replace(/""/g, '');
+                            res = res.replace(/u0026/g, '&');
+                            res = res.replace(/:,/g, ':null,');
+                            res = res.replace(/:}/g, ':null}');
+                            res = res.substr(1);
+                            res = res.slice(0, -1);
+
+                            $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+                            Slabgrid(JSON.parse(res));
+                        }
+                    });
+
+                }
+            });
+        }
+    });
+
+    document.getElementById("btnApMachineAllo").setAttribute("data-toggle", "modal");
+    document.getElementById("btnApMachineAllo").setAttribute("data-target", "#APMachineAllocationModal");
+});
+
 $("#btnMachineAllo").click(function () {
     document.getElementById("MachineAllocationBtnDeletePopUp").disabled = true;
 
@@ -1944,7 +2012,6 @@ function GblMachine(VendorID) {
 }
 
 function MachineGrid(MachiGrid) {
-    //alert(Objid);
     $("#GridMachineAllocation").dxDataGrid({
         // dataSource: MachiGrid,
         dataSource: {
@@ -1993,6 +2060,128 @@ function MachineGrid(MachiGrid) {
                 $("#MachineId").text("");
             }
         }
+    });
+}
+
+function Slabgrid(existslab) {
+    $("#GridMachineSlab").dxDataGrid({
+        dataSource: existslab,
+        showBorders: true,
+        paging: {
+            enabled: false
+        },
+        showRowLines: true,
+        sorting: {
+            mode: "none"
+        },
+        filterRow: { visible: true, applyFilter: "auto" },
+        editing: {
+            mode: "cell",
+            allowDeleting: true,
+            allowAdding: true,
+            allowUpdating: true
+        },
+        height: function () {
+            return window.innerHeight / 1.4;
+        },
+        onRowPrepared: function (e) {
+            setDataGridRowCss(e);
+        },
+        columns: [
+            {
+                dataField: "PaperGroup", visible: true, caption: "Paper Group", width: 200,
+                validationRules: [{ type: "required" }, {
+                    type: "required",
+                    message: 'Paper Group is Required'
+                }]
+            },
+            {
+                dataField: "SizeW", visible: true, caption: "Size W", width: 100,
+                validationRules: [{ type: "required" }, {
+                    type: "numeric",
+                    message: 'You must enter only numeric value..!'
+                }]
+            },
+            {
+                dataField: "SizeL", visible: true, caption: "Size L", width: 80,
+                validationRules: [{
+                    type: "required"
+                }, {
+                    type: "numeric",
+                    message: 'You must enter only numeric value..!'
+                }]
+            },
+            {
+                dataField: "SheetRangeFrom", visible: true, caption: "Sheet From", width: 100,
+                validationRules: [{ type: "required" }, {
+                    type: "numeric",
+                    message: 'You must enter only numeric value..!'
+                }]
+            },
+            {
+                dataField: "SheetRangeTo", visible: true, caption: "Sheet To", width: 80,
+                validationRules: [{ type: "required" }, {
+                    type: "numeric",
+                    message: 'You must enter only numeric value..!'
+                }]
+            },
+            {
+                dataField: "MinCharges", visible: true, caption: "Min Charges", width: 80,
+                validationRules: [{ type: "required" }, {
+                    type: "numeric",
+                    message: 'You must enter only numeric value..!'
+                }]
+            },
+            {
+                dataField: "Rate", visible: true, caption: "Rate", width: 100,
+                validationRules: [{ type: "required" }, {
+                    type: "numeric",
+                    message: 'You must enter only numeric OR decimal value..!'
+                }]
+            },
+            {
+                dataField: "PlateCharges", visible: true, caption: "CTP", width: 80,
+                validationRules: [{ type: "required" }, {
+                    type: "numeric",
+                    message: 'You must enter only numeric value..!'
+                }]
+            },
+            {
+                dataField: "PSPlateCharges", visible: true, caption: "PS", width: 80,
+                validationRules: [{ type: "required" }, {
+                    type: "numeric",
+                    message: 'You must enter only numeric value..!'
+                }]
+            },
+            {
+                dataField: "CTCPPlateCharges", visible: true, caption: "CTCP", width: 80,
+                validationRules: [{ type: "required" }, {
+                    type: "numeric",
+                    message: 'You must enter only numeric value..!'
+                }]
+            },
+            {
+                dataField: "Wastage", visible: true, caption: "Wastage", width: 100,
+                validationRules: [{ type: "required" }, {
+                    type: "numeric",
+                    message: 'You must enter only numeric value..!'
+                }]
+            },
+            {
+                dataField: "SpecialColorFrontCharges", visible: true, caption: "SP.Color F", width: 80,
+                validationRules: [{ type: "required" }, {
+                    type: "numeric",
+                    message: 'You must enter only numeric value..!'
+                }]
+            },
+            {
+                dataField: "SpecialColorBackCharges", visible: true, caption: "SP.Color B", width: 80,
+                validationRules: [{ type: "required" }, {
+                    type: "numeric",
+                    message: 'You must enter only numeric value..!'
+                }]
+            }
+        ]
     });
 }
 
@@ -2092,6 +2281,79 @@ $("#MachineAllocationBtnSave").click(function () {
                     $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
                     swal("Error!", "Please try after some time..", "");
                     alert(jqXHR);
+                }
+            });
+        });
+});
+
+$("#BtnSaveAPMachineAllocation").click(function () {
+    var machineid = $("#selMachine").dxSelectBox("instance").option('value');
+    if (machineid === "" || machineid <= 0 || machineid === null) {
+        swal("Please select machine..");
+        return false;
+    }
+    var txtGetGridRow = Number(document.getElementById("txtGetGridRow").value);
+    if (txtGetGridRow <= 0 || txtGetGridRow === null) {
+        swal("", "Please select associate partner from the given below list..");
+        return false;
+    }
+
+    var ObjPrintingRateSetting = [];
+    var PrintingRate = {};
+
+    var PrintingRateSetting = $('#GridMachineSlab').dxDataGrid('instance');
+    for (var i = 0; i < PrintingRateSetting._options.dataSource.length; i++) {
+        PrintingRate = {};
+        PrintingRate.MachineID = machineid;
+        PrintingRate.LedgerID = txtGetGridRow;
+        PrintingRate.PaperGroup = PrintingRateSetting._options.dataSource[i].PaperGroup;
+        PrintingRate.MaxPlanW = Number(PrintingRateSetting._options.dataSource[i].SizeW);
+        PrintingRate.MaxPlanL = Number(PrintingRateSetting._options.dataSource[i].SizeL);
+
+        PrintingRate.SheetRangeFrom = Number(PrintingRateSetting._options.dataSource[i].SheetRangeFrom);
+        PrintingRate.SheetRangeTo = Number(PrintingRateSetting._options.dataSource[i].SheetRangeTo);
+        PrintingRate.Rate = parseFloat(PrintingRateSetting._options.dataSource[i].Rate).toFixed(3);
+        PrintingRate.PlateCharges = parseFloat(PrintingRateSetting._options.dataSource[i].PlateCharges).toFixed(2);
+        PrintingRate.MinCharges = Number(PrintingRateSetting._options.dataSource[i].MinCharges);
+        PrintingRate.PSPlateCharges = Number(PrintingRateSetting._options.dataSource[i].PSPlateCharges);
+        PrintingRate.CTCPPlateCharges = Number(PrintingRateSetting._options.dataSource[i].CTCPPlateCharges);
+        PrintingRate.Wastage = Number(PrintingRateSetting._options.dataSource[i].Wastage);
+        PrintingRate.SpecialColorFrontCharges = parseFloat(PrintingRateSetting._options.dataSource[i].SpecialColorFrontCharges).toFixed(2);
+        PrintingRate.SpecialColorBackCharges = parseFloat(PrintingRateSetting._options.dataSource[i].SpecialColorBackCharges).toFixed(2);
+        PrintingRate.SlabID = i + 1;
+        ObjPrintingRateSetting.push(PrintingRate);
+    }
+
+    swal({
+        title: "Saving Slabs.....?",
+        text: "Do you want to continue to save?",
+        type: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#DD6B55",
+        confirmButtonText: "Yes, Save it !",
+        closeOnConfirm: true
+    },
+        function () {
+            $("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
+
+            $.ajax({
+                type: "POST",
+                url: "WebService_LedgerMaster.asmx/SaveAPMachineRateSlabs",
+                data: '{machineSlabs:' + JSON.stringify(ObjPrintingRateSetting) + '}',
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (results) {
+                    $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+                    if (results.d === "Success") {
+                        swal("Saved!", "Your data saved", "success");
+                        $("#selMachine").dxSelectBox({ value: null });
+                    } else {
+                        swal("Not Saved!", results.d, "error");
+                    }
+                },
+                error: function errorFunc(jqXHR) {
+                    $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+                    swal("Error!", "Please try after some time..", "");
                 }
             });
         });
@@ -2579,4 +2841,34 @@ function GetExistSpareGrpString(SupplierID) {
             }
         }
     });
+}
+
+function getCountryStateByPincode(pincode) {
+    //if (pincode.length < 6) return;
+    var CountryCode = $("#Country").dxSelectBox("instance").option('value');
+    //if (CountryCode === null) CountryCode = "IN";
+    const url = "http://api.worldpostallocations.com/pincode?postalcode=" + pincode + "&countrycode=" + CountryCode;
+    $("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
+    try {
+        $.getJSON(url, function (data) {
+            console.log(data);
+            let values = data.result;
+            if (data.status === true) {
+                //$("#Country").dxSelectBox({ value: values[0].country, disabled: true });
+                var Stateitems = $("#State").dxSelectBox("instance").option('items');
+                Stateitems.push({ State: values[0].state, A: values[0].state });
+                $("#State").dxSelectBox({ item: Stateitems, value: values[0].state, disabled: true });
+                $("#City").dxSelectBox({ items: values, displayExpr: "postalLocation", valueExpr: "postalLocation", value: values[0].postalLocation });
+                $("#District").dxSelectBox({ value: values[0].province });
+            } else {
+                //$("#Country").dxSelectBox({ value: null, disabled: false });
+                $("#State").dxSelectBox({ value: null, disabled: false });
+                $("#City").dxSelectBox({ value: null });
+                $("#District").dxSelectBox({ value: null });
+            }
+        });
+    } catch (e) {
+        console.log(e);
+    } finally { $("#LoadIndicator").dxLoadPanel("instance").option("visible", false); }
+
 }

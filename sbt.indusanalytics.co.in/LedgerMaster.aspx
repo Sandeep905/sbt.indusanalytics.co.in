@@ -15,7 +15,8 @@
                     <button type="button" id="DeleteButton" class="btn btn-danger btn-sm waves-effect">Delete</button>
                     <button type="button" id="ShowListButton" class="btn btn-secondary btn-sm waves-effect">Show List</button>
                     <button type="button" id="btnConvertToConsignee" class="btn btn-secondary btn-sm waves-effect hidden">Save As Consignee</button>
-                    <button type="button" id="btnMachineAllo" class="btn btn-secondary btn-sm waves-effect hidden">Machine Allocation</button>
+                    <button type="button" id="btnMachineAllo" class="btn btn-secondary btn-sm waves-effect">Machine Allocation</button>
+                    <button type="button" id="btnApMachineAllo" class="btn btn-primary btn-sm waves-effect hidden">AP Machine Allocation</button>
                     <button type="button" id="btnItemGroupAllo" class="btn btn-secondary btn-sm waves-effect hidden">Item Group Allocation</button>
                     <button type="button" id="btnTabModel" class="btn btn-dark waves-effect hidden">View Details</button>
                     <b id="MasterID" hidden style="display: none"></b><b id="MasterName" style="display: none"></b>
@@ -110,6 +111,36 @@
         </div>
     </div>
 
+    <%--AP MachineAllocation Model PopUp (Edit update delete) --%>
+    <div class="modal col-lg-7 modal-m-l-15 fade" id="APMachineAllocationModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content" style="border-radius: 4px; padding-bottom: .5em; padding-right: 0px">
+                <div class="DialogBoxCustom" style="float: left; border-top-left-radius: 4px; border-top-right-radius: 4px;">
+                    <strong>Associate Machine Allocation</strong>
+                    <a href="javascript:void(0);" class="iconRightDbox btn-danger" data-dismiss="modal">
+                        <span data-dismiss="modal" style="font-weight: 900; margin-right: 8px">X</span>
+                    </a>
+                </div>
+
+                <div class="modal-body" style="position: initial; padding-right: 0px">
+                    <div class="tab-content" style="margin-bottom: 0em">
+                        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                            <label>Machine Name</label>
+                            <div id="selMachine"></div>
+                        </div>
+
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                            <div id="GridMachineSlab"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid #42909A;">
+                    <button type="button" id="BtnSaveAPMachineAllocation" class="btn btn-success waves-effect">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <%--MachineAllocation Model PopUp (Edit update delete) --%>
     <div class="modal col-lg-7 modal-m-l-15 fade" id="MachineAllocationModal" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-lg" role="document">

@@ -670,18 +670,18 @@ function SaveBtnMachinee() {
     else {
         document.getElementById("ValStrUnderDepartment").style.display = "none";
     }
-
-    if (SelectBoxVendorID === null || SelectBoxVendorID === 0) {
-        swal("", "Please select associate partner..");
-        document.getElementById("ValStrSelectBoxVendor").style.fontSize = "10px";
-        document.getElementById("ValStrSelectBoxVendor").style.display = "block";
-        document.getElementById("ValStrSelectBoxVendor").innerHTML = 'This field should not be empty..Associate Partner';
-        return false;
+    if ($("#SelectBoxVendor").hasClass("hidden") === false) {
+        if (SelectBoxVendorID === null || SelectBoxVendorID === 0) {
+            swal("", "Please select associate partner..");
+            document.getElementById("ValStrSelectBoxVendor").style.fontSize = "10px";
+            document.getElementById("ValStrSelectBoxVendor").style.display = "block";
+            document.getElementById("ValStrSelectBoxVendor").innerHTML = 'This field should not be empty..Associate Partner';
+            return false;
+        }
+        else {
+            document.getElementById("ValStrSelectBoxVendor").style.display = "none";
+        }
     }
-    else {
-        document.getElementById("ValStrSelectBoxVendor").style.display = "none";
-    }
-
     if (UnderDepartment === 100) {
         if (MachineType === null || MachineType === "") {
             alert("Please select..Machine Type");

@@ -41,7 +41,7 @@ function onContentClick(ele) {
             x[dx].style.border = '1px solid black';
         }
 
-        document.getElementById(ele.id).style.border = '3px solid #42909A';
+        document.getElementById(ele.id).style.border = '3px solid #0a5696';
         document.getElementById("Txt_Content_Name").value = ele.title;
         document.getElementById("PlanContentType").value = ele.id;
         document.getElementById("Txt_ContentImgSrc").value = $(ele).find('img').attr('src');

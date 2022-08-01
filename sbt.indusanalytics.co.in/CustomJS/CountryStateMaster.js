@@ -338,7 +338,6 @@ $.ajax({
     contentType: "application/json; charset=utf-8",
     dataType: "text",
     success: function (results) {
-        //console.debug(results);
         var res = results.replace(/\\/g, '');
         res = res.replace(/"d":""/g, '');
         res = res.replace(/""/g, '');
@@ -445,5 +444,4 @@ $.ajax({
         });
     }
 });
-
 

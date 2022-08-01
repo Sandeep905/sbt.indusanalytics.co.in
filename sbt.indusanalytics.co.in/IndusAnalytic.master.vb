@@ -7,10 +7,7 @@ Partial Class IndusAnalytic
     Dim db As New DBConnection
 
     Private Sub form1_Load(sender As Object, e As EventArgs) Handles form1.Load
-        Dim lblCompanyName As String = Convert.ToString(Session("CompanyName"))
         Dim UserId As String = Convert.ToString(Session("UserID"))
-        Dim UserName As String = Convert.ToString(Session("UserName"))
-        Dim CompanyId As String = Convert.ToString(Session("CompanyId"))
 
         If UserId = "" Then
             ReadCookie()
@@ -20,6 +17,10 @@ Partial Class IndusAnalytic
             'Response.AddHeader("Pragma", "no-cache")
             'Response.Redirect("Login.aspx")
         Else
+            Dim UserName As String = Convert.ToString(Session("UserName"))
+            Dim CompanyId As String = Convert.ToString(Session("CompanyId"))
+            Dim lblCompanyName As String = Convert.ToString(Session("CompanyName"))
+
             CompanyName.InnerText = lblCompanyName
             CompanyName.Title = lblCompanyName
             UName.InnerText = UserName

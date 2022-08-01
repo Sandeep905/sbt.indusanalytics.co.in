@@ -13,6 +13,10 @@
     z-index: 11 !important;
 }
 
+.contentiFrame {
+    margin-top: 55px !important;
+    margin-left: 0px !important;
+}
 
 .Bookingsidenav {
     height: 100%;
@@ -23,7 +27,7 @@
     background-color: #fff;
     overflow-x: hidden;
     transition: 0.5s;
-    padding-top: 45px;
+    margin-top: 45px;
     left: 30px;
     color: black;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -36,7 +40,8 @@
         font-size: 36px;
         margin-left: 50px;
     }
-     .Bookingsidenav a {
+
+    .Bookingsidenav a {
         text-decoration: none;
         font-size: 14px;
         color: #42909A;

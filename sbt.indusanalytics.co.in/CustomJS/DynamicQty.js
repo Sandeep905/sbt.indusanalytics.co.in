@@ -35,7 +35,7 @@ $("#Add_Quantity_Button").click(function () {
         finalCostTfooterHeader = "";
         if (ColumnCunt < 1) {
             // blankQty = "<td style='min-width:17em;'><div style='float:left;height:auto;width:100%'><div style='float:left;height:auto;width:50%;border-right:2px solid #eee'><b style='text-align:left;margin-left:1em'>Content</b> <img src='images/aero_down.png' class='firstcolumn'/>   </div><div style='float:left;height:auto;width:50%'><b style='text-align:left;margin-left:1em'>Quantity</b><img src='images/aero_forword.png' class='firstcolumn'/></div>      </div></td>";
-            blankQty = "<td style='min-width:14em;width:14em'><div style='float:left;height:auto;width:14em'><div style='float:left;height:auto;width:50%;border-right:2px solid #eee;padding-right:1em;'><b style='text-align:left;margin-left:0em'>Content</b> <i title='Content Direction' id='Content_Direction' class='fa fa-arrow-circle-down fa-2x' style='float: right; position: relative; color: cadetblue; justify-content:center;margin-top: -5px;'></i></div><div style='float:left;height:auto;width:50%;padding-right:0em;'><b style='text-align:left;margin-left:1em'>Quantity</b> <i title='Qty Direction' id='Qty_Direction' class='fa fa-arrow-circle-right fa-2x' style='float: right; position: relative; color: cadetblue;margin-top: -5px;'></i> </div>      </div></td>";
+            blankQty = "<td style='min-width:14em;width:14em'><div style='float:left;height:auto;width:14em'><div style='float:left;height:auto;width:50%;border-right:2px solid #eee;padding-right:1em;'><b style='text-align:left;margin-left:0em'>Content</b> <i title='Content Direction' id='Content_Direction' class='fa fa-arrow-circle-down fa-2x' style='float: right; position: relative; color: #0a5696; justify-content:center;margin-top: -5px;'></i></div><div style='float:left;height:auto;width:50%;padding-right:0em;'><b style='text-align:left;margin-left:1em'>Quantity</b> <i title='Qty Direction' id='Qty_Direction' class='fa fa-arrow-circle-right fa-2x' style='float: right; position: relative; color: #0a5696;margin-top: -5px;'></i> </div>      </div></td>";
 
             finalCostTfooterHeader = '<td style="min-width:14em;width:14em"><div style="float: left; padding: 2px; width: 100%;border-bottom:1px solid #eee;min-width:14em;width:14em"><b>Total Cost:₹ </b></div><div style="float:left; padding:2px; width:100%;border-bottom:1px solid #eee"><b>Misc. Cost:(%) </b><input class="finalizeTextBox" style="float:right;width:5em;" type="number" min="0" id="FinalMiscPer' + ColumnCunt + '" onchange="onChangeUpdatePer(this.id)" /></div><div style="float: left; padding: 2px; width: 100%;border-bottom:1px solid #eee"><b>Shipping Cost </b></div><div style="float: left; padding: 2px; width: 100%;border-bottom:1px solid #eee"><b>Profit :(%)</b><input class="finalizeTextBox" style="float:right;width:5em;" type="number" min="0" id="FinalPftPer' + ColumnCunt + '" onchange="onChangeUpdatePer(this.id)" /></div><div style="float: left; padding: 2px; width: 100%;border-bottom:1px solid #eee"><b>Disc. Cost:(%) </b><input class="finalizeTextBox" style="float:right;width:5em;" type="number" max="0" id="FinalDiscPer' + ColumnCunt + '" onchange="onChangeUpdatePer(this.id)" /></div><div style="float: left; padding: 2px; width: 100%;border-bottom:1px solid #eee"><b>Tax Cost:(%) </b><input class="finalizeTextBox" style="float:right;width:5em;" type="number" min="0" id="FinalTaxPer' + ColumnCunt + '" onchange="onChangeUpdatePer(this.id)" /></div><div class="finalize" id="lblGrandTotalCost" onclick="setFinalCostType(this)"><b>Grand Total:₹ </b></div><div class="finalize" id="lblUnitCost" onclick="setFinalCostType(this)"><b>Unit Cost:₹ </b></div><div class="finalize" id="lblUnitThCost" onclick="setFinalCostType(this)"><b style="float:left;">Unit Cost/1000:₹ </b></div><div style="float: left;background-color:green;color:whitesmoke;padding: 3px; width: 100%;border-bottom:1px solid #eee"><b>Final Cost:₹ </b></div><div style="float: left;background-color:green;color:whitesmoke;padding: 3px; width: 100%;border-bottom:1px solid #eee"><b>Quoted Cost: </b></div></td>';
             ColumnCunt = ColumnCunt + 1;
@@ -1696,7 +1696,7 @@ function CheckDuplicateContName(ContName) {
     return false;
 }
 
-//Advance options selection hide and show using class
+//Advance options selection hide and show using class pKp
 $('.advanced').click(function () {
     if ($('.advancedOptions').is(':hidden')) {
         $('.advancedOptions').show();
@@ -1704,6 +1704,16 @@ $('.advanced').click(function () {
     } else {
         $('.advancedOptions').hide();
         $('.advanced').text("Advance Options");
+    }
+});
+
+$('.showprocess').click(function () {
+    if ($('.showprocessoptions').is(':hidden')) {
+        $('.showprocessoptions').show();
+        $('.showprocess').text("Hide Suggestion");
+    } else {
+        $('.showprocessoptions').hide();
+        $('.showprocess').text("Suggested Process");
     }
 });
 

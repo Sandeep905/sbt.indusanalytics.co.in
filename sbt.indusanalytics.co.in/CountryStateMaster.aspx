@@ -8,20 +8,11 @@
             <div class="dialogboxContainerMainMAster">
                 <div class="DialogBoxCustom" style="float: left; background-color: #fff; padding-left: 0px; padding-bottom: 2px">
                     <div id="ButtonDiv" style="height: auto;">
-                        <a id="CreateButton" href='#' class="iconButton" style="margin-top: 1px; margin-left: 2px">
-                            <img src="images/NewClient.png" style="height: 20px; width: 25px; float: left; margin-top: 0px;" />
-                            &nbsp Create
-                        </a>
-                        <a id="EditButton" href='#' class="iconButton" style="margin-top: 1px; margin-left: 2px;">
-                            <img src="images/Edit.png" style="height: 20px; width: 25px; float: left; margin-top: 0px" />
-                            &nbsp Edit
-                        </a>
-                        <a id="DeleteButton" href='#' class="iconButton" style="margin-top: 1px; margin-left: 2px;">
-                            <img src="images/MasterDelete.png" style="height: 20px; width: 25px; float: left; margin-top: 0px" />
-                            &nbsp Delete
-                        </a>
+                        <input type="button" name="btnCreate" class="btn btn-primary" value="Create" id="CreateButton" />
+                        <input type="button" name="EditButton" class="btn btn-secondary" value="Edit" id="EditButton" />
+                        <input type="button" name="DeleteButton" class="btn btn-danger" value="Delete" id="DeleteButton" />                        
                     </div>
-                    <strong  class="MasterDisplayName" style="float: right; color: #42909A">Country State Master</strong>
+                    <strong class="MasterDisplayName" style="float: right; color: #42909A">Country State Master</strong>
                 </div>
 
                 <div class="ContainerBoxCustom" style="float: left;">

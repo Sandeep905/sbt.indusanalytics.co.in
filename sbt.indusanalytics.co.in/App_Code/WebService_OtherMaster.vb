@@ -63,13 +63,10 @@ Public Class WebService_OtherMaster
     <WebMethod(EnableSession:=True)>
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function GetCategory() As String
-        Context.Response.Clear()
-        Context.Response.ContentType = "application/json"
 
         GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
-        GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
 
-        str = "Select distinct isnull(CategoryID,0) as CategoryID ,nullif(CategoryName,'') as  CategoryName,nullif(Orientation,'') as Orientation , nullif(ProcessIDString,'') as  ProcessIDString,nullif(ContentsIDString ,'') As ContentsIDString from CategoryMaster where CompanyID=" & GBLCompanyID & " and Isnull(IsDeletedTransaction,0)<>1  order by CategoryID desc "
+        str = "Select Distinct CategoryID ,CategoryName,nullif(Orientation,'') as Orientation , nullif(ProcessIDString,'') as  ProcessIDString,nullif(ContentsIDString ,'') As ContentsIDString from CategoryMaster where CompanyID=" & GBLCompanyID & " and Isnull(IsDeletedTransaction,0)<>1  order by CategoryID desc "
         db.FillDataTable(dataTable, str)
         data.Message = ConvertDataTableTojSonString(dataTable)
         Return js.Serialize(data.Message)
@@ -204,7 +201,7 @@ Public Class WebService_OtherMaster
     Function GetContentWiseProcess(ByVal ContID As Integer, ByVal CategoryID As Integer) As String
         Try
             GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
-            str = "Select ProcessID From CategoryWiseProcessAllocation Where CategoryID=" & CategoryID & " And ContentID=" & ContID & " And CompanyID=" & GBLCompanyID & " And ISNULL(IsDeletedTransaction,0)=0"
+            str = "Select ProcessID,IsDefaultProcess From CategoryWiseProcessAllocation Where CategoryID=" & CategoryID & " And ContentID=" & ContID & " And CompanyID=" & GBLCompanyID & " And ISNULL(IsDeletedTransaction,0)=0"
             db.FillDataTable(dataTable, str)
             data.Message = ConvertDataTableTojSonString(dataTable)
             Return js.Serialize(data.Message)
@@ -853,7 +850,7 @@ Public Class WebService_OtherMaster
         ' and DepartmentID='" & UnderGroupID & "' remove Pradeep
         GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
 
-        str = "Select nullif(ProcessID,'') As ProcessID, nullif(ProcessName,'') As ProcessName, nullif(TypeofCharges,'') As TypeofCharges from ProcessMaster Where CompanyID=" & GBLCompanyID & "" &
+        str = "Select 0 IsDefaultProcess, nullif(ProcessID,'') As ProcessID, nullif(ProcessName,'') As ProcessName, nullif(TypeofCharges,'') As TypeofCharges from ProcessMaster Where CompanyID=" & GBLCompanyID & "" &
                 "And Isnull(IsDeletedTransaction,0)<>1 Order By ProcessName"
         db.FillDataTable(dataTable, str)
         data.Message = ConvertDataTableTojSonString(dataTable)

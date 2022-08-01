@@ -64,6 +64,9 @@
             display: none;
         }
 
+        .showprocessoptions {
+            display: none;
+        }
         /* width */
         ::-webkit-scrollbar {
             width: 7px;
@@ -306,10 +309,10 @@
                                         <div id="SbCategory" style="float: left; width: 100%; height: auto;"></div>
                                     </div>
                                 </div>
-                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 hidden">
+                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                                     <div style="height: 3em;">
                                         <b class="font-12">HSN Group</b><br />
-                                        <div id="SbHSNGroups" style="float: left; width: 100%; height: auto;" class="hidden"></div>
+                                        <div id="SbHSNGroups" style="float: left; width: 100%; height: auto;"></div>
                                     </div>
                                 </div>
                                 <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 hidden">

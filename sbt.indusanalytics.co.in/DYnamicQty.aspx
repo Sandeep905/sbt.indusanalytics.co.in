@@ -115,7 +115,7 @@
 
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="Server">
-	<div id="tooltip">
+    <div id="tooltip">
         <p id="tooltipText"></p>
     </div>
     <div class="row clearfix" style="padding: 0px; margin: 0px">
@@ -241,7 +241,7 @@
                                 <div class="col-xs-12 col-sm-12 col-md-3 col-lg-3 padding-0 margin-0">
                                     <div class="col-xs-12 col-sm-5 col-md-5 col-lg-5">
                                         <div class='content_div' style='height: auto; text-align: center'>
-                                            <img id="PlanContImg" style='height: 8em; width: 8em; left: 0' onmouseover='Planshow(this);' onmouseout='Planhide(this);' />
+                                            <img src="#" id="PlanContImg" style='height: 8em; width: 8em; left: 0' onmouseover='Planshow(this);' onmouseout='Planhide(this);' />
                                             <b id="PlanContName" style='display: none; border: 1px dashed; background-color: azure'></b>
                                             <textarea rows="3" cols="3" class="forTextBox" id="TxtPlanContName"></textarea>
                                             <b id="ContentOrientation" style='display: none'></b>
@@ -249,6 +249,7 @@
                                     </div>
                                     <div id="planJob_Size" class="col-xs-12 col-sm-7 col-md-7 col-lg-7">
                                         <b class="font-12" style="width: auto;">Job Size</b><br />
+                                        <div id="SelJobSizeTemplate"></div>
                                         <div style="width: auto;">
                                             <input type='text' id='JobFoldedH' oninput="onInputChangeFolds(this);" name="FH" placeholder='Folded H' class='forTextBox' style="float: left; width: 40%; margin: .2em; display: none;" onchange="myvalidation(this)" />
                                             <input type='text' id='JobFoldedL' oninput="onInputChangeFolds(this);" name="FL" placeholder='Folded L' class='forTextBox' style="float: left; width: 40%; margin: .2em; display: none;" onchange="myvalidation(this)" />
@@ -308,14 +309,14 @@
 
                                 <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 padding-0 margin-0">
                                     <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
-                                        <b class="font-12">Printing Details</b><br />
+                                        <b class="font-12">Printing Color Details</b><br />
                                         <input title="Front color" type='text' id='PlanFColor' placeholder='Front' class='forTextBox' style="float: left; width: 47%; margin: .2%" maxlength="3" onchange="PrintStyle(this)" />
                                         <input title="Back color" type='text' id='PlanBColor' placeholder='Back' class='forTextBox' style="float: left; width: 47%; margin: .2%" maxlength="3" onchange="PrintStyle(this)" />
                                         <input title="Special front color" type='text' id='PlanSpeFColor' placeholder='Spe.Front' class='forTextBox' style="float: left; width: 47%; margin: .2%" maxlength="3" onchange="numericValidation(this)" />
                                         <input title="Special back color" type='text' id='PlanSpeBColor' placeholder='Spe.Back' class='forTextBox' style="float: left; width: 47%; margin: .2%" maxlength="3" onchange="numericValidation(this)" />
                                         <b class="font-12">Printing Style</b><br />
                                         <div id="PlanPrintingStyle" style="float: left; width: 95.5%; margin: .1%; margin-top: 2px;"></div>
-                                        <div id="PlanPlateType" style="float: left; width: 95.5%; margin: .1%; margin-top: 2px;"></div>
+                                        <div id="PlanPlateType" class="advancedOptions" style="float: left;display:none; width: 95.5%; margin: .1%; margin-top: 2px;"></div>
                                     </div>
                                     <b class='advanced btn btn-link font-12'>Advance Options</b>
                                     <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 advancedOptions">
@@ -367,7 +368,10 @@
                                     <div id="ChkPlanInStandardSizePaper"></div>
                                     <div id="ChkPlanInSpecialSizePaper"></div>
                                     <div id="ChkPaperByClient"></div>
-                                    <div><i class="fa fa-plus btn btn-link font-12 padding-0 reloadprocess btnnewmaster">Add New Process</i></div>
+                                    <div>
+                                        <i class="fa fa-plus btn btn-link font-12 padding-0 reloadprocess btnnewmaster">Create New Process</i>
+                                        <i class="fa fa-list-ul btn btn-link font-12 padding-0 showprocess">Suggested Process</i>
+                                    </div>
                                 </div>
                                 <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4 advancedOptions">
                                     <div class="col-xs-12 col-sm-2 col-md-2 col-lg-2">
@@ -380,7 +384,7 @@
                                 </div>
                             </div>
 
-                            <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 padding-0 margin-0" style="padding-right: 0px; padding-left: 2px">
+                            <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 padding-0 margin-0 showprocessoptions" style="padding-right: 0px; padding-left: 2px">
                                 <div id="GridOperation"></div>
                                 <textarea id="OperId" style="display: none"></textarea>
                             </div>
@@ -997,6 +1001,26 @@
                 <label id="LbliFrame" hidden></label>
                 <div class="modal-body" style="position: initial; padding-right: 0px; padding-left: 6px; padding-right: 6px;">
                     <iframe id="iFrameMasters" style="width: 100%;"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- The Modal for Job Size Template-->
+    <div class="modal fade" id="modaljobsizetemplate" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content" style="border-radius: 4px; padding-bottom: 0em; padding-right: 0px; padding-left: 1px;">
+                <div class="DialogBoxCustom" style="float: left; border-top-left-radius: 4px; border-top-right-radius: 4px;">
+                    <strong>Size Template</strong>
+                    <a href="javascript:void(0);" class="iconRightDbox btn-danger" data-dismiss="modal">
+                        <span data-dismiss="modal" style="font-weight: 900; margin-right: 8px">X</span>
+                    </a>
+                </div>
+                <div class="modal-body">
+                    <div id="GridJobSizeTemplate"></div>
+                </div>
+                <div class="modal-footer" style="margin-top: 0em; border-top: 1px solid #42909A;">
+                    <button type="button" id="BtnApplySize" class="btn btn-link waves-effect">Apply</button>
                 </div>
             </div>
         </div>

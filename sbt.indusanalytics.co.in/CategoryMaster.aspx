@@ -37,50 +37,50 @@
                 </div>
 
                 <div class="modal-body">
-                    <div class="row clearfix">
+                    <%--<div class="row clearfix">
                         <ul class="nav nav-tabs tab-col-red m-b-5" role="tablist" style="color: green; border: none;">
                             <li role='presentation' class="active"><a id="AnchorFieldCntainerRow" href="#ProcessMasterFieldCreation" data-toggle='tab' style='background-color: none;'>Category Field</a></li>
                             <li role='presentation'><a id="AnchorProcessMasterContentAllocation" href="#ProcessMasterContentAllocation" data-toggle='tab' style='background-color: none;'>Content Allocation</a></li>
                             <li role='presentation'><a id="AnchorProcessMasterProcessAllocation" href="#ProcessMasterProcessAllocation" data-toggle='tab' style='background-color: none;'>Process Allocation</a></li>
                         </ul>
-                    </div>
+                    </div>--%>
                     <div id="FieldCntainerRow" class="row clearfix">
                         <div class="tab-content">
                             <div role="tabpanel" class="tab-pane animated fadeInRight active" id="ProcessMasterFieldCreation">
                                 <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
                                     <b class="font-11">Category Name</b>
                                     <input id="CategoryName" type="text" class="forTextBox" />
-                                    <div style="min-height: 20px; float: left; width: 100%"><strong id="ValStrCategoryName" style="color: red; font-size: 12px; display: none"></strong></div>
+                                    <div><strong id="ValStrCategoryName" style="color: red; font-size: 12px; display: none"></strong></div>
                                 </div>
                                 <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
                                     <b class="font-11">Orientation</b>
                                     <div id="SelectBoxOrientation"></div>
-                                    <div style="float: left; width: 100%"><strong id="ValStrSelectBoxOrientation" style="color: red; font-size: 12px; display: none"></strong></div>
-                                </div>
-                            </div>
-
-                            <div role="tabpanel" class="tab-pane animated fadeInRight" id="ProcessMasterContentAllocation">
-                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-                                    <b class="font-11">All Contents</b>
-                                    <div id="GridContents"></div>
+                                    <div><strong id="ValStrSelectBoxOrientation" style="color: red; font-size: 12px; display: none"></strong></div>
                                 </div>
                                 <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
                                     <b class="font-11">Allocated Contents</b>
                                     <div id="GridContentAllocation"></div>
                                     <textarea id="ContentId" style="display: none;">null</textarea>
                                 </div>
-                            </div>
-
-                            <div role="tabpanel" class="tab-pane animated fadeInRight" id="ProcessMasterProcessAllocation">
                                 <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-                                    <b class="font-11">All Process</b>
-                                    <div id="GridProcess"></div>
-                                </div>
-                                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-                                    <b class="font-11">Allocated Process</b>
+                                    <b class="font-11">Content Allocated Process</b>
                                     <div id="GridProcessAllocation"></div>
                                     <textarea id="ProcessId" style="display: none;">null</textarea>
                                 </div>
+                            </div>
+
+                            <div role="tabpanel" class="tab-pane animated fadeInRight" id="ProcessMasterContentAllocation">
+                                <%--<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                    <b class="font-11">All Contents</b>
+                                    <div id="GridContents"></div>
+                                </div>--%>
+                            </div>
+
+                            <div role="tabpanel" class="tab-pane animated fadeInRight" id="ProcessMasterProcessAllocation">
+                                <%--<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                    <b class="font-11">All Process</b>
+                                    <div id="GridProcess"></div>
+                                </div>--%>
                             </div>
                         </div>
                     </div>

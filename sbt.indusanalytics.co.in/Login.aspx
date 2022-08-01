@@ -40,7 +40,7 @@
                             <i class="fa fa-user"></i>
                         </span>
                         <div class="form-line">
-                            <input type="text" id="txt_user" runat="server" class="form-control" name="username" placeholder="Username" required autofocus>
+                            <input type="text" id="txt_user" runat="server" class="form-control" name="username" placeholder="Mobile Or Email" required autofocus>
                         </div>
                     </div>
                     <div class="input-group">
@@ -57,14 +57,14 @@
                             <label for="rememberme">Remember Me</label>
                         </div>
                         <div class="col-xs-4">
-                            <asp:Button ID="btnlogin" runat="server" class="btn btn-block bg-medium-blue waves-effect" Text="Sign in" />
+                            <asp:Button ID="btnlogin" runat="server" class="btn btn-primary bg-medium-blue waves-effect" Text="Sign in" />
                         </div>
                     </div>
                     <div class="row">
-                            <div class="col-xs-12 align-left">
-                                <label runat="server" class="text-danger" id="validateMsg" visible="false"></label>
-                            </div>
+                        <div class="col-xs-12 align-left">
+                            <label runat="server" class="text-danger" id="validateMsg" visible="false"></label>
                         </div>
+                    </div>
                     <div class="row m-t-15 m-b--20">
                         <div class="col-xs-6">
                             <a href="VendorRegistration.aspx">Register Now!</a>
@@ -76,7 +76,7 @@
                 </form>
             </div>
         </div>
-        <div class="logo">
+        <div class="logo hidden">
             <small>@Indus Analytics</small>
         </div>
     </div>

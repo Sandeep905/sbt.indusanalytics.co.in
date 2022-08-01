@@ -30,7 +30,7 @@ Public Class Api_shiring_service
     Dim Gbl_UPS_L, Gbl_UPS_H, Gbl_Job_Pages, Gbl_Job_Ups As Long
     Dim Gbl_Flat_Wastage_Value, Gbl_Job_Trimming_TB, Gbl_Job_Trimming_LR As Double
     Dim Gbl_Striping_LR, Gbl_Striping_TB, Gbl_ColorStrip As Double
-    Dim Gbl_DT_plan, DT_Printing_Slabs, DT_Client_Printing_Slabs, Gbl_DT_Search_In_Machine As New DataTable
+    Dim Gbl_DT_plan, DT_Printing_Slabs, DT_Client_Printing_Slabs, Gbl_DT_Search_In_Machine, DT_Vendor_Printing_Slabs As New DataTable
     Dim Gbl_DT_Paper, Gbl_DT_Machine, Gbl_DT_Operation As New DataTable
     Dim Gbl_Paper_Rate, Gbl_Paper_H, Gbl_Paper_L, Gbl_Paper_TrimmingLR, Gbl_Paper_TrimmingTB As Double
     Dim Gbl_Paper_GSM As Integer
@@ -102,9 +102,11 @@ Public Class Api_shiring_service
             ElseIf k = "Online_Coated_Rates" Then
                 str = "SELECT MachineID, SheetRangeFrom, SheetRangeTo, CoatingName, Rate From MachineOnlineCoatingRates Where CompanyId = " & CompanyID & TempVendorID & "  Order By MachineID, SheetRangeFrom, SheetRangeTo"
             ElseIf k = "Client_Printing_Slabs" Then
-                str = "SELECT MachineID, SheetRangeFrom, SheetRangeTo, Wastage, Rate, PlateCharges, PSPlateCharges, CTCPPlateCharges, FlatRate, FlatWastageSheets, ApplyAsFixedCharge, MinimumSheet, ChargesType, RoundofImpressionsWith, BasicPrintingCharges From ClientMachineCostSettings Where LedgerID = " & Gbl_Ledger_ID & "  And CompanyId = " & CompanyID & " " & IIf(MachineIDFilter = "", "", MachineIDFilter) & TempVendorID & " Order By MachineID, SheetRangeFrom, SheetRangeTo "   '' Order By Machine_ID, SheetRangeFrom, SheetRangeTo"           
+                str = "SELECT MachineID, SheetRangeFrom, SheetRangeTo, Wastage, Rate, PlateCharges, PSPlateCharges, CTCPPlateCharges, FlatRate, FlatWastageSheets, ApplyAsFixedCharge, MinimumSheet, ChargesType, RoundofImpressionsWith, BasicPrintingCharges From ClientMachineCostSettings Where LedgerID = " & Gbl_Ledger_ID & "  And CompanyId = " & CompanyID & " " & IIf(MachineIDFilter = "", "", MachineIDFilter) & " Order By MachineID, SheetRangeFrom, SheetRangeTo "   '' Order By Machine_ID, SheetRangeFrom, SheetRangeTo"           
             ElseIf k = "Printing_Slabs" Then
                 str = "Select MachineID, SheetRangeFrom, SheetRangeTo, Wastage, Rate, PlateCharges, PSPlateCharges, CTCPPlateCharges,CoatingCharges, SpecialColorFrontCharges, SpecialColorBackCharges, FlatRate, FlatWastageSheets, ApplyAsFixedCharge,PaperGroup,MaxPlanL,MaxPlanW,MinCharges From MachineSlabMaster  Where CompanyId = " & CompanyID & "  " & IIf(MachineIDFilter = "", "", MachineIDFilter) & "  Order By (MaxPlanL * MaxPlanW) ASC "
+            ElseIf k = "Vendor_Printing_Slabs" Then
+                str = "Select MachineID, SheetRangeFrom, SheetRangeTo, Wastage, Rate, PlateCharges, PSPlateCharges, CTCPPlateCharges,CoatingCharges, SpecialColorFrontCharges, SpecialColorBackCharges, FlatRate, FlatWastageSheets, ApplyAsFixedCharge,PaperGroup,MaxPlanL,MaxPlanW,MinCharges,LedgerID From VendorWiseMachineSlabMaster Where CompanyId = " & CompanyID & "  " & IIf(MachineIDFilter = "", "", MachineIDFilter) & TempVendorID.Replace("VendorID", "LedgerID") & " Order By (MaxPlanL * MaxPlanW) ASC "
             ElseIf k = "Planning_Machines" Then
                 str = "SELECT MachineId, MachineName, Isnull(MaxLength,0) as MaxLength, Isnull(MaxWidth,0) as MaxWidth, Isnull(MinLength,0) As MinLength, Isnull(MinWidth,0) As MinWidth, Isnull(MaxPrintL,0) As MaxPrintL, Isnull(MaxPrintW,0) As MaxPrintW, Isnull(MinPrintL,0) As MinPrintL, Isnull(MinPrintW,0) As MinPrintW,  Isnull(Colors,0) As Colors,Isnull(MachineType,'') As MachineType,Isnull(ChargesType,'') As ChargesType, Isnull(Gripper,0) As Gripper, Isnull(IsPerfectaMachine,0) AS IsPerfectaMachine, Isnull(RoundofImpressionsWith,0) As RoundofImpressionsWith, MachineType, Isnull(BasicPrintingCharges,0) As BasicPrintingCharges, Isnull(MachineSpeed,0) As MachineSpeed, Isnull(MakeReadyTime,0) As MakeReadyTime, JobChangeOverTime, WastageType, WastageCalculationOn,Isnull(IsSpecialMachine ,0) As IsSpecialMachine FROM MachineMaster Where /*DepartmentID=0 AND*/ Isnull(IsDeletedTransaction,0)=0 And (MachineType In ('Sheetfed Offset', 'Digital') Or Isnull(IsPlanningMachine,0)=1 ) /*AND (Isnull(Colors,0) >= " & Gbl_Front_Color & ")*/ And CompanyId = " & CompanyID & " " & MachineIDFilter & TempVendorID & " Union SELECT MachineId, MachineName, Isnull(MaxLength,0) as MaxLength, Isnull(MaxWidth,0) as MaxWidth, Isnull(MinLength,0) As MinLength, Isnull(MinWidth,0) As MinWidth, Isnull(MaxPrintL,0) As MaxPrintL, Isnull(MaxPrintW,0) As MaxPrintW, Isnull(MinPrintL,0) As MinPrintL, Isnull(MinPrintW,0) As MinPrintW, Isnull(Colors,0) As Colors,Isnull(MachineType,'') As MachineType,Isnull(ChargesType,'') As ChargesType, Isnull(Gripper,0) As Gripper, Isnull(IsPerfectaMachine,0) As IsPerfectaMachine, Isnull(RoundofImpressionsWith,0) As RoundofImpressionsWith, MachineType, Isnull(BasicPrintingCharges,0) As BasicPrintingCharges, Isnull(MachineSpeed,0) As MachineSpeed, Isnull(MakeReadyTime,0) As MakeReadyTime , JobChangeOverTime, WastageType, WastageCalculationOn,Isnull(IsSpecialMachine,0) As IsSpecialMachine FROM MachineMaster Where Isnull(IsDeletedTransaction,0)=0 And DepartmentID=100 AND (MachineType ='Web Offset') /*AND (Isnull(Colors,0) >= " & Gbl_Front_Color & ")*/ And CompanyId = " & CompanyID & "  " & MachineIDFilter & TempVendorID
             ElseIf k = "Slitting_Machine" Then
@@ -312,13 +314,13 @@ Public Class Api_shiring_service
             str = "Select Distinct LedgerID AS VendorID,LedgerName As VendorName From LedgerMaster Where LedgerGroupID IN(Select LedgerGroupID From LedgerGroupMaster Where IsDeletedTransaction=0 And CompanyID=" & CompanyID & " And   LedgerGroupNameID IN(25)) AND IsDeletedTransaction=0 AND CompanyID=" & CompanyID & " And City In(Select City From LedgerMaster Where IsDeletedTransaction=0 And CompanyID=" & CompanyID & " And LedgerID=" & LedgerID & ") " & TempVendorID & " Order By VendorName"
             db.FillDataTable(DTVendorList, str)
             For i = 0 To DTVendorList.Rows.Count - 1
-                GblVendorID = DTVendorList.Rows(0)("VendorID")
-                GblVendorName = DTVendorList.Rows(0)("VendorName")
+                GblVendorID = DTVendorList.Rows(i)("VendorID")
+                GblVendorName = DTVendorList.Rows(i)("VendorName")
                 LoadAllGrids()
-                If Gbl_DT_Machine.Rows.Count <= 0 Then
-                    planErrors = "Machine not found in the database, Plan in total colors is " & Gbl_Front_Color + Gbl_Back_Color & "..! Please check total colors of machine"
-                    Return planErrors
-                End If
+                'If Gbl_DT_Machine.Rows.Count <= 0 Then
+                '    planErrors = "Machine not found in the database, Plan in total colors is " & Gbl_Front_Color + Gbl_Back_Color & "..! Please check total colors of machine"
+                '    Return planErrors
+                'End If
                 If Gbl_Printing_Style = "Choose Best" Then
                     Gbl_Printing_Style = "Work & Turn"
                     Plan_Job_Pre()
@@ -549,6 +551,9 @@ Public Class Api_shiring_service
 
         k = "Printing_Slabs"
         DT_Printing_Slabs = GetDataTable()
+
+        k = "Vendor_Printing_Slabs"
+        DT_Vendor_Printing_Slabs = GetDataTable()
 
         k = "Search_In_Machine_Selection"
         Gbl_DT_Search_In_Machine = GetDataTable()
@@ -8167,6 +8172,7 @@ NextReel:
                             Coating_Charges = IIf(IsDBNull(.Rows(i)(8)), 0, .Rows(i)(8))
                             Special_Color_Front_Charges = IIf(IsDBNull(.Rows(i)(9)), 0, .Rows(i)(9))
                             Special_Color_Back_Charges = IIf(IsDBNull(.Rows(i)(10)), 0, .Rows(i)(10))
+                            Basic_Printing_Charges = IIf(IsDBNull(.Rows(i)("MinCharges")), 0, .Rows(i)("MinCharges"))
                             Search_In_Machine_Slabs = True
                             Exit Function
                         End If
@@ -8366,6 +8372,19 @@ NextReel:
                 End If
             End If
 
+            If DT_Vendor_Printing_Slabs.Rows.Count > 0 Then
+                Dim row1 As DataRow = DT_Vendor_Printing_Slabs.Select("LedgerID = " & GblVendorID & "").FirstOrDefault()
+                If Not row1 Is Nothing Then
+                    If IIf(IsDBNull(row1("SheetRangeTo")), 0, row1("SheetRangeTo")) > 0 Then
+                        Printing_Amount = FnCalVendorWiseRates_(Impression_To_Be_Charged, Minimum_Sheets, Printing_Charges, Printing_Charges_Type, Basic_Printing_Charges, Roundof_Impressions_With, No_Of_sets, Front_Color, Back_Color, Printing_Style, Machine_ID)
+                        If Printing_Amount > 0 Then
+                            Calculate_Printing_Charges = Printing_Amount
+                            Printing_Charges = SlabPrintingChargeN
+                        End If
+                    End If
+                End If
+            End If
+
         Catch ex As Exception
             Calculate_Printing_Charges = Printing_Amount
         End Try
@@ -8447,6 +8466,19 @@ NextReel:
                 If Not row1 Is Nothing And Not row2 Is Nothing Then
                     If IIf(IsDBNull(row1("SheetRangeTo")), 0, row1("SheetRangeTo")) > 0 Then
                         Printing_Amount = FnCalGroupWiseRates_(Impression_To_Be_Charged, Minimum_Sheets, Printing_Charges, Printing_Charges_Type, Basic_Printing_Charges, Roundof_Impressions_With, No_Of_sets, Front_Color, Back_Color, Printing_Style, Machine_ID)
+                        If Printing_Amount > 0 Then
+                            Calculate_Book_Printing_Charges = Printing_Amount
+                            Printing_Charges = SlabPrintingChargeN
+                        End If
+                    End If
+                End If
+            End If
+
+            If DT_Vendor_Printing_Slabs.Rows.Count > 0 Then
+                Dim row1 As DataRow = DT_Vendor_Printing_Slabs.Select("LedgerID = " & GblVendorID & "").FirstOrDefault()
+                If row1 IsNot Nothing Then
+                    If IIf(IsDBNull(row1("SheetRangeTo")), 0, row1("SheetRangeTo")) > 0 Then
+                        Printing_Amount = FnCalVendorWiseRates_(Impression_To_Be_Charged, Minimum_Sheets, Printing_Charges, Printing_Charges_Type, Basic_Printing_Charges, Roundof_Impressions_With, No_Of_sets, Front_Color, Back_Color, Printing_Style, Machine_ID)
                         If Printing_Amount > 0 Then
                             Calculate_Book_Printing_Charges = Printing_Amount
                             Printing_Charges = SlabPrintingChargeN
@@ -8642,6 +8674,179 @@ NextReel:
         Catch ex As Exception
             planErrors = ex.Message
             FnCalGroupWiseRates_ = 0
+        End Try
+    End Function
+
+    Private Function FnCalVendorWiseRates_(ByVal Impression_To_Be_Charged As Long, ByVal Minimum_Sheets As Long, ByVal Printing_Charges As Double, ByVal Printing_Charges_Type As String, ByVal Basic_Printing_Charges As Double, ByVal Roundof_Impressions_With As Long, ByVal No_Of_Sets As Long, ByVal Front_Color As Long, ByVal Back_Color As Long, ByVal Printing_Style As String, ByVal Machine_ID As Integer) As Double
+        Try
+
+            Dim Min_Charges As Long = 0
+            Dim Printing_Amount_N As Long = 0
+            SlabPrintingChargeN = 0
+            Dim Slab_Max_N As Long = 0
+            'Dim Act_Imp_To_Charge_N As Long
+
+            Dim Total_Colors_Main As Long = 0
+            If Printing_Style = "Single Side" Or Printing_Style = "Work & Turn" Or Printing_Style = "Work & Tumble" Then
+                If Front_Color >= Back_Color Then
+                    Total_Colors_Main = Front_Color
+                Else
+                    Total_Colors_Main = Back_Color
+                End If
+            ElseIf Printing_Style = "Front & Back" Or Printing_Style = "FB-Perfection" Then
+                Total_Colors_Main = Front_Color + Back_Color
+            End If
+
+            Dim dataViewItems As DataView = DT_Vendor_Printing_Slabs.DefaultView
+            Dim DTSlabs As New DataTable
+            dataViewItems.RowFilter = "MachineID = " & Machine_ID
+            dataViewItems.RowFilter = "LedgerID = " & GblVendorID
+
+            DTSlabs = DT_Vendor_Printing_Slabs.Copy()
+            DTSlabs.Clear()
+
+            For I = 0 To dataViewItems.Count - 1
+                DTSlabs.ImportRow(dataViewItems.Item(I).Row)
+            Next I
+
+            With DTSlabs
+                Dim row1 As DataRow = DTSlabs.Select("MachineID = " & Machine_ID & " And LedgerID = " & GblVendorID).FirstOrDefault()
+                If row1 IsNot Nothing Then
+                    For i = 0 To .Rows.Count - 1
+                        If Machine_ID = Val(.Rows(i)(0)) Then
+                            If IIf(IsDBNull(.Rows(i)("SheetRangeFrom")), 0, .Rows(i)("SheetRangeFrom")) <= Impression_To_Be_Charged And IIf(IsDBNull(.Rows(i)("SheetRangeTo")), 0, .Rows(i)("SheetRangeTo")) >= Impression_To_Be_Charged And (IIf(IsDBNull(.Rows(i)("LedgerID")), 0, .Rows(i)("LedgerID")) = GblVendorID) Then
+                                'If (Gbl_Sheet_L <= IIf(IsDBNull(.Rows(i)("MaxPlanL")), 0, .Rows(i)("MaxPlanL")) And Gbl_Sheet_W <= IIf(IsDBNull(.Rows(i)("MaxPlanW")), 0, .Rows(i)("MaxPlanW"))) Or (Gbl_Sheet_L <= IIf(IsDBNull(.Rows(i)("MaxPlanW")), 0, .Rows(i)("MaxPlanW")) And Gbl_Sheet_W <= IIf(IsDBNull(.Rows(i)("MaxPlanL")), 0, .Rows(i)("MaxPlanL"))) Then
+                                SlabPrintingChargeN = IIf(IsDBNull(.Rows(i)("Rate")), 0, .Rows(i)("Rate"))
+                                If IIf(IsDBNull(.Rows(i)("MinCharges")), 0, .Rows(i)("MinCharges")) > 0 Then
+                                    Min_Charges = IIf(IsDBNull(.Rows(i)("MinCharges")), 0, .Rows(i)("MinCharges"))
+                                    Slab_Max_N = IIf(IsDBNull(.Rows(i)("SheetRangeTo")), 0, .Rows(i)("SheetRangeTo"))
+                                End If
+                                Exit For
+                                'End If
+                            End If
+                        End If
+                    Next
+                Else
+                    Min_Charges = 0
+                End If
+            End With
+
+            If Printing_Charges_Type = "Impressions" Then
+                If Min_Charges = 0 And SlabPrintingChargeN > 0 Then
+                    If Impression_To_Be_Charged > Slab_Max_N Then
+                        Printing_Amount_N = Math.Round((Impression_To_Be_Charged * SlabPrintingChargeN), 2) * No_Of_Sets
+                    Else
+                        Printing_Amount_N = Math.Round((Slab_Max_N * SlabPrintingChargeN), 2) * No_Of_Sets
+                    End If
+                Else
+                    If Impression_To_Be_Charged > Slab_Max_N Then
+                        Printing_Amount_N = Math.Round(((Impression_To_Be_Charged - Slab_Max_N) * SlabPrintingChargeN) + Min_Charges, 2) * No_Of_Sets
+                    Else
+                        Printing_Amount_N = Min_Charges
+                    End If
+                End If
+            ElseIf Printing_Charges_Type = "Impressions/" & Roundof_Impressions_With Then
+                If Min_Charges = 0 And SlabPrintingChargeN > 0 Then
+                    If Impression_To_Be_Charged > Slab_Max_N Then
+                        Printing_Amount_N = Math.Round((Impression_To_Be_Charged * (SlabPrintingChargeN / Roundof_Impressions_With)), 2) * No_Of_Sets
+                    Else
+                        Printing_Amount_N = Math.Round((Slab_Max_N * (SlabPrintingChargeN / Roundof_Impressions_With)), 2) * No_Of_Sets
+                    End If
+                Else
+                    If Impression_To_Be_Charged > Slab_Max_N Then
+                        Printing_Amount_N = Math.Round(((Impression_To_Be_Charged - Slab_Max_N) * (SlabPrintingChargeN / Roundof_Impressions_With)) + Min_Charges, 2) * No_Of_Sets
+                    Else
+                        Printing_Amount_N = Min_Charges
+                    End If
+                End If
+            ElseIf Printing_Charges_Type = "Impressions/Color" Then
+                If Printing_Style = "Front & Back" Or Printing_Style = "FB-Perfection" Then
+                    If Min_Charges = 0 And SlabPrintingChargeN > 0 Then
+                        If Impression_To_Be_Charged > Slab_Max_N Then
+                            Printing_Amount_N = Math.Round(((SlabPrintingChargeN * Front_Color)), 2) + Math.Round(((SlabPrintingChargeN * Back_Color)), 2)
+                        Else
+                            Printing_Amount_N = Math.Round(((SlabPrintingChargeN * Front_Color)), 2) + Math.Round(((SlabPrintingChargeN * Back_Color)), 2)
+                        End If
+                    Else
+                        If Impression_To_Be_Charged > Slab_Max_N Then
+                            Printing_Amount_N = Math.Round(((SlabPrintingChargeN * Front_Color)) + Min_Charges, 2) + Math.Round(((SlabPrintingChargeN * Back_Color)) + Min_Charges, 2)
+                        Else
+                            Printing_Amount_N = Min_Charges
+                        End If
+                    End If
+                Else
+                    If Min_Charges = 0 And SlabPrintingChargeN > 0 Then
+                        If Impression_To_Be_Charged > Slab_Max_N Then
+                            Printing_Amount_N = Math.Round(((SlabPrintingChargeN * Total_Colors_Main)), 2) * No_Of_Sets
+                        Else
+                            Printing_Amount_N = Math.Round(((Slab_Max_N * Total_Colors_Main)), 2) * No_Of_Sets
+                        End If
+                    Else
+                        If Impression_To_Be_Charged > Slab_Max_N Then
+                            Printing_Amount_N = Math.Round(((SlabPrintingChargeN * Total_Colors_Main) + Min_Charges), 2) * No_Of_Sets
+                        Else
+                            Printing_Amount_N = Min_Charges
+                        End If
+                    End If
+                End If
+
+            ElseIf Printing_Charges_Type = "Impressions/" & Roundof_Impressions_With & "/Color" Then
+                If Printing_Style = "Front & Back" Or Printing_Style = "FB-Perfection" Then
+                    If Back_Color = 0 Then
+                        If Min_Charges = 0 And SlabPrintingChargeN > 0 Then
+                            If Impression_To_Be_Charged > Slab_Max_N Then
+                                Printing_Amount_N = Math.Round(((Impression_To_Be_Charged * (SlabPrintingChargeN / Roundof_Impressions_With) * Front_Color)) * (No_Of_Sets), 2) + Math.Round(((Impression_To_Be_Charged * (SlabPrintingChargeN / Roundof_Impressions_With) * Back_Color)) * (No_Of_Sets), 2)
+                            Else
+                                Printing_Amount_N = Math.Round(((Slab_Max_N * (SlabPrintingChargeN / Roundof_Impressions_With) * Front_Color)) * (No_Of_Sets), 2) + Math.Round(((Slab_Max_N * (SlabPrintingChargeN / Roundof_Impressions_With) * Back_Color)) * (No_Of_Sets), 2)
+                            End If
+                        Else
+                            If Impression_To_Be_Charged > Slab_Max_N Then
+                                Printing_Amount_N = Math.Round((((Impression_To_Be_Charged - Slab_Max_N) * (SlabPrintingChargeN / Roundof_Impressions_With) * Front_Color) + Min_Charges) * (No_Of_Sets), 2) + Math.Round((((Impression_To_Be_Charged - Slab_Max_N) * (SlabPrintingChargeN / Roundof_Impressions_With) * Back_Color) + Min_Charges) * (No_Of_Sets), 2)
+                            Else
+                                Printing_Amount_N = Min_Charges * No_Of_Sets
+                            End If
+                        End If
+                    Else
+                        If Min_Charges = 0 And SlabPrintingChargeN > 0 Then
+                            If Impression_To_Be_Charged > Slab_Max_N Then
+                                Printing_Amount_N = Math.Round(((Impression_To_Be_Charged * (SlabPrintingChargeN / Roundof_Impressions_With) * Front_Color)) * (No_Of_Sets / 2), 2) + Math.Round(((Impression_To_Be_Charged * (SlabPrintingChargeN / Roundof_Impressions_With) * Back_Color)) * (No_Of_Sets / 2), 2)
+                            Else
+                                Printing_Amount_N = Math.Round(((Slab_Max_N * (SlabPrintingChargeN / Roundof_Impressions_With) * Front_Color)) * (No_Of_Sets / 2), 2) + Math.Round(((Slab_Max_N * (SlabPrintingChargeN / Roundof_Impressions_With) * Back_Color)) * (No_Of_Sets / 2), 2)
+                            End If
+                        Else
+                            'If Gbl_UPS_L * Gbl_UPS_H = 4 Then
+                            '    Gbl_UPS_L = Gbl_UPS_L '''''only for debug cases
+                            'End If
+                            If Impression_To_Be_Charged > Slab_Max_N Then
+                                Printing_Amount_N = Math.Round((((Impression_To_Be_Charged - Slab_Max_N) * (SlabPrintingChargeN / Roundof_Impressions_With) * Front_Color) + Min_Charges) * (No_Of_Sets / 2), 2) + Math.Round((((Impression_To_Be_Charged - Slab_Max_N) * (SlabPrintingChargeN / Roundof_Impressions_With) * Back_Color) + Min_Charges) * (No_Of_Sets / 2), 2)
+                            Else
+                                Printing_Amount_N = Min_Charges * No_Of_Sets
+                            End If
+                        End If
+                    End If
+                Else
+                    If Min_Charges = 0 And SlabPrintingChargeN > 0 Then
+                        If Impression_To_Be_Charged > Slab_Max_N Then
+                            Printing_Amount_N = Math.Round(((Impression_To_Be_Charged * (SlabPrintingChargeN / Roundof_Impressions_With) * Total_Colors_Main)), 2) * No_Of_Sets
+                        Else
+                            Printing_Amount_N = Math.Round(((Slab_Max_N * (SlabPrintingChargeN / Roundof_Impressions_With) * Total_Colors_Main)), 2) * No_Of_Sets
+                        End If
+                    Else
+                        If Impression_To_Be_Charged > Slab_Max_N Then
+                            Printing_Amount_N = Math.Round((((Impression_To_Be_Charged - Slab_Max_N) * (SlabPrintingChargeN / Roundof_Impressions_With) * Total_Colors_Main) + Min_Charges), 2) * No_Of_Sets
+                        Else
+                            Printing_Amount_N = Min_Charges
+                        End If
+                    End If
+                End If
+
+            End If
+
+            FnCalVendorWiseRates_ = Printing_Amount_N
+
+        Catch ex As Exception
+            planErrors = ex.Message
+            FnCalVendorWiseRates_ = 0
         End Try
     End Function
 
