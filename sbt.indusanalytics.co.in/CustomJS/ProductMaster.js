@@ -32,6 +32,7 @@ $("#SelCategory").dxSelectBox({
         if (data.value !== null) {
 
             $.ajax({
+                async: false,
                 type: 'POST',
                 url: "WebServicePlanWindow.asmx/LoadOperations",
                 dataType: 'json',
@@ -126,7 +127,8 @@ $("#gridProductConfig").dxDataGrid({
         },
         { dataField: "ParameterDisplayName", caption: "Display Name", validationRules: [{ type: "required", message: "Parameter display name is required" }] },
         { dataField: "ParameterDefaultValue", caption: "Default Values", validationRules: [{ type: "required", message: "Parameter default value is required" }] },
-        { dataField: "ProductFormula", caption: "Formula" }
+        { dataField: "ProductFormula", caption: "Formula" },
+        { dataField: "IsDisplayParameter", caption: "Display In Enquiry", dataType: "boolean", allowEditing: true }
     ],
     editing: {
         mode: "cell",
@@ -175,7 +177,9 @@ $("#gridOperation").dxDataGrid({                  //// GridOperation  gridopr
     sorting: { mode: 'multiple' },
     selection: { mode: "multiple", allowSelectAll: false },
     editing: { mode: "cell", allowUpdating: true },
-    columns: [{ dataField: "IsDefaultProcess", caption: "Is Default", dataType: "boolean", allowEditing: true }, { dataField: "ProcessName", allowEditing: false },
+    columns: [{ dataField: "IsDefaultProcess", caption: "Is Default", dataType: "boolean", allowEditing: true },
+    { dataField: "IsDisplayInEnquiry", caption: "Display In Enquiry", dataType: "boolean", allowEditing: true },
+    { dataField: "ProcessName", allowEditing: false },
     { dataField: "Rate", width: 50, allowEditing: false },
     { dataField: "TypeofCharges", allowEditing: false },
     { dataField: "SizeToBeConsidered", caption: "Size Cons", width: 80, allowEditing: false },
@@ -204,7 +208,42 @@ $("#gridOperation").dxDataGrid({                  //// GridOperation  gridopr
                     return value.ProcessID;
                 }).join(','));
         }
-    }
+    },
+    onCellClick: function (e) {
+        if (e.rowType !== "data") return;
+
+        if (e.columnIndex == 0) {
+            e.data.IsDefaultProcess = false;
+            e.data.IsDisplayInEnquiry = false;
+        }
+        if (e.column.dataField === "IsDefaultProcess") {
+            var arr = e.component.getSelectedRowsData()
+            if (arr.length > 0) {
+                if ($.grep(arr, function (er) {
+                    return er.ProcessID === e.key;
+                }).length === 0) {
+                    e.data.IsDefaultProcess = false;
+                }
+            } else {
+                e.data.IsDefaultProcess = false
+            }
+
+        }
+        if (e.column.dataField === "IsDisplayInEnquiry") {
+            var arr = e.component.getSelectedRowsData()
+            if (arr.length > 0) {
+                if ($.grep(arr, function (er) {
+                    return er.ProcessID === e.key;
+                }).length === 0) {
+                    e.data.IsDisplayInEnquiry = false;
+                }
+            } else {
+                e.data.IsDisplayInEnquiry = false
+            }
+
+        }
+        e.component.refresh();
+    },
 });
 
 let VendorData = [];
@@ -470,11 +509,15 @@ $("#BtnSave").click(function () {
     ObjMainDetail.Remark = TxtRemark;
     ObjMainDetail.ProcessIDStr = $("#OperId").text();
     ObjMainDetail.DefaultProcessStr = "";
+    ObjMainDetail.DisplayProcessStr = "";
 
     var GridOperation = $('#gridOperation').dxDataGrid('instance')._options.dataSource.store.data;
     for (var i = 0; i < GridOperation.length; i++) {
         if (GridOperation[i].IsDefaultProcess === true) {
             ObjMainDetail.DefaultProcessStr += Number(GridOperation[i].ProcessID) + ",";
+        }
+        if (GridOperation[i].IsDisplayInEnquiry === true) {
+            ObjMainDetail.DisplayProcessStr += Number(GridOperation[i].ProcessID) + ",";
         }
     }
 
@@ -516,6 +559,12 @@ $("#BtnSave").click(function () {
         objProConfig.ParameterDisplayName = gridProductConfig._options.dataSource[i].ParameterDisplayName;
         objProConfig.ParameterDefaultValue = gridProductConfig._options.dataSource[i].ParameterDefaultValue;
         objProConfig.ProductFormula = gridProductConfig._options.dataSource[i].ProductFormula;
+        if (gridProductConfig._options.dataSource[i].IsDisplayParameter == true) {
+            objProConfig.IsDisplayParameter = true;
+        } else {
+            objProConfig.IsDisplayParameter = false;
+        }
+        
         if (objProConfig.ParameterName === "" || objProConfig.ParameterName === undefined) {
             DevExpress.ui.notify("Please enter parameter name..!", "warning", 1000);
             return;
@@ -675,18 +724,27 @@ $("#BtnEdit").click(function () {
     }
 
     var GridOperation = $('#gridOperation').dxDataGrid('instance')._options.dataSource.store.data;
-    if (selectedDataShowList[0].DefaultProcessStr !== "" && selectedDataShowList[0].DefaultProcessStr !== null) {
+    if ((selectedDataShowList[0].DefaultProcessStr !== "" && selectedDataShowList[0].DefaultProcessStr !== null) || (selectedDataShowList[0].DisplayProcessStr !== "" && selectedDataShowList[0].DisplayProcessStr !== null)) {
         //for (var j = 0; j < op.length; i++) {
         for (var i = 0; i < GridOperation.length; i++) {
             if (selectedDataShowList[0].DefaultProcessStr.includes(GridOperation[i].ProcessID) === true) {
                 GridOperation[i].IsDefaultProcess = 1;
-            } else
+            } else {
                 GridOperation[i].IsDefaultProcess = 0;
+            }
+
+            if (selectedDataShowList[0].DisplayProcessStr.includes(GridOperation[i].ProcessID) === true) {
+                GridOperation[i].IsDisplayInEnquiry = 1;
+            } else {
+                GridOperation[i].IsDisplayInEnquiry = 0;
+            }
+                
         }
         //}
     } else {
         for (var i = 0; i < GridOperation.length; i++) {
             GridOperation[i].IsDefaultProcess = 0;
+            GridOperation[i].IsDisplayInEnquiry = 0;
         }
     }
 

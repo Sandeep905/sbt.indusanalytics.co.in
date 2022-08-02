@@ -228,7 +228,7 @@ Public Class WebServiceProductMaster
     Public Function GetProductConfigData(ByVal productId As Integer) As String
         Try
 
-            str = "SELECT ProductConfigID, ProductCatalogID, SequenceNo, ParameterName, ParameterDisplayName, ParameterDefaultValue, ProductFormula,null ParameterValue FROM ProductConfigurationMaster Where IsDeletedTransaction=0 And ProductCatalogID=" & productId & " And CompanyID = " & GBLCompanyID
+            str = "SELECT ProductConfigID, ProductCatalogID, SequenceNo, ParameterName, ParameterDisplayName, ParameterDefaultValue, ProductFormula,null ParameterValue,Isnull(IsDisplayParameter,0) AS IsDisplayParameter FROM ProductConfigurationMaster Where IsDeletedTransaction=0 And ProductCatalogID=" & productId & " And CompanyID = " & GBLCompanyID
             db.FillDataTable(dataTable, str)
             data.Message = db.ConvertDataTableTojSonString(dataTable)
             Return js.Serialize(data.Message)
@@ -242,7 +242,7 @@ Public Class WebServiceProductMaster
     Public Function GetProductMasterList() As String
         Try
 
-            str = "SELECT PCM.ProductCatalogID,'Files/ProductFiles/'+PCM.ProductImagePath ProductImagePath, PCM.ProductCatalogCode,PCM.ProcessIDStr,PCM.DefaultProcessStr, PCM.ProductName,PCM.ProductHSNID,Isnull(PCM.Remark,'') Remark, PCM.ProductDescription, PCM.ReferenceProductCode,PCM.CategoryID, CM.CategoryName, PHM.ProductHSNName " &
+            str = "SELECT PCM.ProductCatalogID,'Files/ProductFiles/'+PCM.ProductImagePath ProductImagePath, PCM.ProductCatalogCode,PCM.ProcessIDStr,PCM.DefaultProcessStr,PCM.DisplayProcessStr, PCM.ProductName,PCM.ProductHSNID,Isnull(PCM.Remark,'') Remark, PCM.ProductDescription, PCM.ReferenceProductCode,PCM.CategoryID, CM.CategoryName, PHM.ProductHSNName " &
                     " From ProductCatalogMaster As PCM INNER Join ProductHSNMaster As PHM On PHM.ProductHSNID = PCM.ProductHSNID And PCM.CompanyID = PHM.CompanyID" &
                     " INNER JOIN CategoryMaster AS CM ON CM.CategoryID = PCM.CategoryID And PCM.CompanyID =CM.CompanyID" &
                     " Where PCM.IsDeletedTransaction=0 And PCM.CompanyID = " & GBLCompanyID
