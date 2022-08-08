@@ -465,6 +465,7 @@ $("#BtnSave").click(function () {
     var TxtProductDesc = document.getElementById("TxtProductDesc").value.trim();
     var TxtReferenceProductCode = document.getElementById("TxtRefProductCode").value.trim();
     var TxtRemark = document.getElementById("TxtRemark").value.trim();
+    var IsOffsetProduct = document.getElementById("IsOffsetProduct").checked;
     let ProductID = Number(document.getElementById("ProductID").value);
 
     //$("#SelCatalogType").dxValidator('instance').validate();
@@ -510,6 +511,7 @@ $("#BtnSave").click(function () {
     ObjMainDetail.ProcessIDStr = $("#OperId").text();
     ObjMainDetail.DefaultProcessStr = "";
     ObjMainDetail.DisplayProcessStr = "";
+    ObjMainDetail.IsOffsetProduct = IsOffsetProduct;
 
     var GridOperation = $('#gridOperation').dxDataGrid('instance')._options.dataSource.store.data;
     for (var i = 0; i < GridOperation.length; i++) {
@@ -713,6 +715,7 @@ $("#BtnEdit").click(function () {
     document.getElementById("TxtRefProductCode").value = selectedDataShowList[0].ReferenceProductCode;
     document.getElementById("TxtProductDesc").value = selectedDataShowList[0].ProductDescription;
     document.getElementById("TxtRemark").value = selectedDataShowList[0].Remark;
+    document.getElementById("IsOffsetProduct").checked = selectedDataShowList[0].IsOffsetProduct;
 
     let OprIds = [];
     if (selectedDataShowList[0].ProcessIDStr !== "" && selectedDataShowList[0].ProcessIDStr !== null) {

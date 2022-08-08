@@ -242,7 +242,7 @@ Public Class WebServiceProductMaster
     Public Function GetProductMasterList() As String
         Try
 
-            str = "SELECT PCM.ProductCatalogID,'Files/ProductFiles/'+PCM.ProductImagePath ProductImagePath, PCM.ProductCatalogCode,PCM.ProcessIDStr,PCM.DefaultProcessStr,PCM.DisplayProcessStr, PCM.ProductName,PCM.ProductHSNID,Isnull(PCM.Remark,'') Remark, PCM.ProductDescription, PCM.ReferenceProductCode,PCM.CategoryID, CM.CategoryName, PHM.ProductHSNName " &
+            str = "SELECT PCM.ProductCatalogID,'Files/ProductFiles/'+PCM.ProductImagePath ProductImagePath, PCM.ProductCatalogCode,PCM.ProcessIDStr,PCM.DefaultProcessStr,PCM.DisplayProcessStr, PCM.ProductName,PCM.ProductHSNID,Isnull(PCM.Remark,'') Remark, PCM.ProductDescription, PCM.ReferenceProductCode,PCM.CategoryID, CM.CategoryName, PHM.ProductHSNName,PCM.IsOffsetProduct " &
                     " From ProductCatalogMaster As PCM INNER Join ProductHSNMaster As PHM On PHM.ProductHSNID = PCM.ProductHSNID And PCM.CompanyID = PHM.CompanyID" &
                     " INNER JOIN CategoryMaster AS CM ON CM.CategoryID = PCM.CategoryID And PCM.CompanyID =CM.CompanyID" &
                     " Where PCM.IsDeletedTransaction=0 And PCM.CompanyID = " & GBLCompanyID

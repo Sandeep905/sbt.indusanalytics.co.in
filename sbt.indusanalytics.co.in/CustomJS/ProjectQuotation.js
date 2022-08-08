@@ -1,5 +1,7 @@
 ﻿let ProductCatalogID = 0;
+let CategoryID = 0;
 let OprData = [];
+var SelectedProductData = [];
 $("#LoadIndicator").dxLoadPanel({
     shadingColor: "rgba(0,0,0,0.4)",
     indicatorSrc: "images/Indus logo.png",
@@ -122,6 +124,7 @@ $("#gridProductList").dxDataGrid({
                 valueExpr: "CategoryID"
             }, validationRules: [{ type: "required", message: "Product category is required" }], width: 150,
             setCellValue: function (rowData, value) {
+                CategoryID = value;
                 rowData.CategoryID = value;
                 rowData.ProductCatalogID = null;
             }
@@ -153,6 +156,8 @@ $("#gridProductList").dxDataGrid({
             width: 180, validationRules: [{ type: "required", message: "Product name is required" }],
             setCellValue: function (rowData, value) {
                 rowData.ProductCatalogID = value;
+                rowData.Rate = 0;
+                rowData.Amount = 0;
                 var result = $.grep(ProductMasterList, function (ex) { return ex.ProductCatalogID === value; });
                 if (result.length === 1) {
                     rowData.ProductCatalogCode = result[0].ProductCatalogCode;
@@ -160,6 +165,12 @@ $("#gridProductList").dxDataGrid({
                     rowData.ProductName = result[0].ProductName;
                     rowData.ProcessIDStr = result[0].ProcessIDStr;
                     rowData.ProductHSNID = result[0].ProductHSNID;
+                    rowData.IsOffsetProduct = result[0].IsOffsetProduct;
+                    var result = $.grep(ObjProductHSNGrp, function (ex) { return ex.ProductHSNID === rowData.ProductHSNID; });
+                    if (result.length === 1) {
+                        rowData.GSTTaxPercentage = result[0].GSTTaxPercentage;
+                    } else
+                        rowData.GSTTaxPercentage = 0;
                     //rowData.ProductImagePath = result[0].ProductImagePath;
                 } else {
                     rowData.ProductCatalogCode = "";
@@ -167,6 +178,8 @@ $("#gridProductList").dxDataGrid({
                     rowData.ProductName = "";
                     //rowData.ProductImagePath = "";
                     rowData.ProcessIDStr = "";
+                    rowData.ProductHSNID = 0;
+                    rowData.IsOffsetProduct = 0;
                 }
             }
         },
@@ -191,6 +204,7 @@ $("#gridProductList").dxDataGrid({
                     .text("Click me to plan")
                     .on('dxclick', function () {
                         if (options.data.Quantity === undefined || Number(options.data.Quantity) <= 0) return;
+                        SelectedProductData = options.data;
                         document.getElementById("TxtProductName").value = options.data.ProductName;
                         document.getElementById("TxtPlanQty").value = options.data.Quantity;
                         const City = document.getElementById("TxtClientCity").value;
@@ -229,7 +243,7 @@ $("#gridProductList").dxDataGrid({
                             GetProductConfig(ProductCatalogID);
                         }
 
-                        if (options.data.ProductName === null || options.data.ProductName === undefined || options.data.ProductName === "") {
+                        if (options.data.IsOffsetProduct === true) {
                             document.getElementById("iFrameMasters").src = "DynamicQty.aspx";
                             document.getElementById("iFrameMasters").style.height = window.innerHeight / 1.1 + "px";
                             this.setAttribute("data-toggle", "modal");
@@ -242,15 +256,7 @@ $("#gridProductList").dxDataGrid({
                     .appendTo(container);
             },
         },
-        { dataField: "Rate", caption: "Rate", allowEditing: false, dataType: "number", /*validationRules: [{ type: "required", message: "Rate is required" }]*/ },
-        {
-            dataField: "ProductHSNID", caption: "HSN Code", allowEditing: true,
-            lookup: {
-                dataSource: ObjProductHSNGrp,
-                displayExpr: "HSNCode",
-                valueExpr: "ProductHSNID"
-            }
-        },
+        { dataField: "Rate", caption: "Cost", allowEditing: false, dataType: "number", /*validationRules: [{ type: "required", message: "Rate is required" }]*/ },
         {
             dataField: "RateType", caption: "Rate Type", allowEditing: true,
             lookup: {
@@ -259,6 +265,23 @@ $("#gridProductList").dxDataGrid({
                 valueExpr: "RateType"
             },// validationRules: [{ type: "required", message: "Rate type is required" }]
         },
+        {
+            dataField: "ProductHSNID", caption: "HSN Code", allowEditing: true,
+            lookup: {
+                dataSource: ObjProductHSNGrp,
+                displayExpr: "HSNCode",
+                valueExpr: "ProductHSNID"
+            },
+            setCellValue: function (rowData, value) {
+                rowData.ProductHSNID = value;
+                var result = $.grep(ObjProductHSNGrp, function (ex) { return ex.ProductHSNID === value; });
+                if (result.length === 1) {
+                    rowData.GSTTaxPercentage = result[0].GSTTaxPercentage;
+                } else
+                    rowData.GSTTaxPercentage = 0;
+            }
+        },
+        { dataField: "GSTTaxPercentage", caption: "GST Tax", allowEditing: false, dataType: "number" },
         { dataField: "Amount", caption: "Amount", allowEditing: false, dataType: "number" },
         { dataField: "VendorID", allowEditing: false, visible: false },
         { dataField: "VendorName", caption: "Associate Name", allowEditing: false, visible: false },
@@ -957,26 +980,62 @@ function checkIfRemoteFileExists(urlp) {
 };
 
 $('#iFrameMasters').load(function () {
+    $("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
     $('#iFrameMasters').contents().find('#Customleftsidebar2').hide();
     $('#iFrameMasters').contents().find('#myTopnav').hide();
     $('#iFrameMasters').contents().find('input[name=BtnFinalize]').hide();
-    $('#iFrameMasters').contents().find('#Add_Quantity_Button').hide();
     $('#iFrameMasters').contents().find('.Bookingsidenav').hide();
+    $('#iFrameMasters').contents().find('#Add_Quantity_Button').hide();
     $('#iFrameMasters').contents().find('#Quotation_Finalize').click();
 
-    $('#iFrameMasters').contents().find('#BookPlanButton').click();
+    let CategoryName = $.grep(CategoryData, function (ex) { return ex.CategoryID === CategoryID });
+    if (CategoryName[0].CategoryName.toUpperCase().includes("BOOK")) {
+        $('#iFrameMasters').contents().find('#BookQuantity').val(document.getElementById("TxtPlanQty").value);
+        $('#iFrameMasters').contents().find('#CalenderPlanButton').hide();
+        $('#iFrameMasters').contents().find('#BookPlanButton').click();
+    } else if (CategoryName[0].CategoryName.toUpperCase().includes("CALENDAR")) {
+        $('#iFrameMasters').contents().find('#CalenderQuantity').val(document.getElementById("TxtPlanQty").value);
+        $('#iFrameMasters').contents().find('#BookPlanButton').hide();
+        $('#iFrameMasters').contents().find('#CalenderPlanButton').click();
+    } else {
+        $('#iFrameMasters').contents().find('#Add_Quantity_Button').click();
+        $('#iFrameMasters').contents().find("#txtqty1").val(document.getElementById("TxtPlanQty").value);
+        $('#iFrameMasters').contents().find('#BookPlanButton').hide();
+        $('#iFrameMasters').contents().find('#CalenderPlanButton').hide();
+    }
+
+    $('#iFrameMasters').contents().find("#txtqty1").prop('disabled', true);
     $('#iFrameMasters').contents().find('.content').addClass('contentiFrame');
-    $('#iFrameMasters').contents().find('#BookQuantity').val(document.getElementById("TxtPlanQty").value);
+    $('#iFrameMasters').contents().find('#FinalTaxPer1').val(SelectedProductData.GSTTaxPercentage);
 
     $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
 });
 
 $("#btnApplyQuote").click(function () {
     var iframe = document.getElementById("iFrameMasters");
-    var FinalQuotedCost1 = iframe.contentWindow.document.getElementById("FinalQuotedCost1").value;
-    var FinalAmount = iframe.contentWindow.document.getElementById("FinalGrandTotalCost1").value;
+    var FinalQuotedCost1 = Number(iframe.contentWindow.document.getElementById("FinalQuotedCost1").value);
+    var FinalAmount = Number(iframe.contentWindow.document.getElementById("FinalGrandTotalCost1").innerHTML);
 
-    options.data.Rate = FinalQuotedCost1;
-    options.data.Amount = FinalAmount;
+    SelectedProductData.Rate = FinalQuotedCost1;
+    SelectedProductData.Amount = FinalAmount;
+
+    var gridProductData = $('#gridProductList').dxDataGrid('instance');
+
+    for (var i = 0; i < gridProductData._options.dataSource.length; i++) {
+        if (gridProductData._options.dataSource[i].ProductCatalogID === ProductCatalogID && gridProductData._options.dataSource[i].Quantity === Number(document.getElementById("TxtPlanQty").value)) {
+            gridProductData._options.dataSource[i].Rate = FinalQuotedCost1;
+            gridProductData._options.dataSource[i].RateType = "Per Unit";
+            gridProductData._options.dataSource[i].Amount = Number(FinalAmount);
+
+            gridProductData._options.dataSource[i].FinalAmount = Number(FinalAmount);;
+            gridProductData._options.dataSource[i].RequiredQuantity = gridProductData._options.dataSource[i].Quantity;
+            gridProductData._options.dataSource[i].VendorRate = FinalQuotedCost1;
+            gridProductData.refresh();
+            break;
+        }
+    }
+
+    //iframe.contentWindow.document.getElementById("BtnSaveQuotation").click();
+
     document.getElementById("btnApplyQuote").setAttribute("data-dismiss", "modal");
 });

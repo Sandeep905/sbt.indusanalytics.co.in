@@ -27,6 +27,11 @@
                 <b class="font-11">Product HSN</b>
                 <div id="SelProductHSN"></div>
             </div>
+            <div class="col-xs-12 col-sm-3 col-md-2 col-lg-2">
+                <br class="hidden-sm hidden-xs"/>
+                <input type="checkbox" name="IsOffsetProduct" value="" id="IsOffsetProduct" />
+                <label for="IsOffsetProduct" class="font-11">Is Offset Product</label>
+            </div>
             <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4">
                 <b class="font-11">Product Name</b>
                 <input type="text" id="TxtProductName" placeholder="Product Name" class="forTextBox" />

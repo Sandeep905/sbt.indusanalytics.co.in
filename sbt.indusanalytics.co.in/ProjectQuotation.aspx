@@ -39,7 +39,6 @@
                 <textarea id="TxtRemark" placeholder="Enter your remark here" class="forTextBox"></textarea>
             </div>
             <div class="modal-footer col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                <%--<button id="BtnNew" type="button" class="btn btn-default">New</button>--%>
                 <button id="BtnSave" type="button" class="btn btn-success">Save</button>
                 <input type="button" class="btn btn-primary" value="Show List" id="BtnShowList" onclick="setGridDisplay('none', 'block')" />
                 <input id="EstimateID" style="display: none" />
@@ -96,6 +95,7 @@
 
                 <div class="modal-footer" style="border-top: 1px solid #42909A;">
                     <%--<button type="button" id="BtnLinkToQuote" class="btn btn-secondary waves-effect">Link To Quote</button>--%>
+                    <button id="BtnPrint" type="button" class="btn btn-warning">Print</button>
                     <button type="button" id="BtnLoadFromList" class="btn btn-primary waves-effect hidden">Load</button>
                     <button id="BtnDelete" type="button" class="btn btn-danger">Delete</button>
                     <input type="button" value="Close" class="btn btn-secondary" onclick="setGridDisplay('block','none')" />
@@ -118,7 +118,7 @@
                         <iframe id="iFrameMasters" style="width: 100%;"></iframe>
                     </div>
                     <div class="modal-footer">
-                        <input type="button" name="btnApplyQuote" id="btnApplyQuote" class="btn btn-info" value="Apply Cost" />
+                        <input type="button" name="btnApplyQuote" id="btnApplyQuote" class="btn btn-info" value="Apply Final Cost" />
                     </div>
                 </div>
             </div>
