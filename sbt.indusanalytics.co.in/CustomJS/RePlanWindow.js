@@ -116,7 +116,7 @@ function LoadAllPlans(dataSource) {
         $("#SbCategory").dxSelectBox({ value: JobBooking.CategoryID });
         //$("#dxDateQuotation").dxDateBox({ value: JobBooking.CreatedDate });
         $("#SbConsigneeName").dxSelectBox({ value: JobBooking.ConsigneeID });
-        $("#SbHSNGroups").dxSelectBox({ value: JobBooking.ProductHSNID });
+
         $("#SbCurrency").dxSelectBox({ value: JobBooking.CurrencySymbol });
         document.getElementById("TxtCurrencyValue").value = JobBooking.ConversionValue;
         GblShipperID = JobBooking.ShipperID;
@@ -263,6 +263,7 @@ function LoadAllPlans(dataSource) {
             }
         }
 
+        $("#SbHSNGroups").dxSelectBox({ value: JobBooking.ProductHSNID });
         $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
     } catch (e) {
         $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);

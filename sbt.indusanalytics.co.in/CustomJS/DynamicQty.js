@@ -458,6 +458,7 @@ function allQuantity(qt) {
             document.getElementById('RightTabBar').style.width = "0px";
             document.getElementById('mySidenav').style.width = "0px";
             Bottompopup.style.height = "92.5%";
+            Bottompopup.style.display = "block";
             Bottomoverlay.style.display = 'block';
             //document.getElementById('L' + MergeStringNum).setAttribute("class", "active");
 

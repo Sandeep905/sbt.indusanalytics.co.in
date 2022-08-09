@@ -111,6 +111,13 @@
             /*padding-bottom: 92%;*/
             border: thin dotted darkgrey;
         }
+
+        .iframeBottomTabBar {
+            padding-right: 1px;
+            height: 100% !important;
+            margin-left: -31px;
+            display: none;
+        }
     </style>
 
 </asp:Content>

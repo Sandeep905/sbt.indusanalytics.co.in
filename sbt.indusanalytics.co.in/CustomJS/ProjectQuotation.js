@@ -980,7 +980,8 @@ function checkIfRemoteFileExists(urlp) {
 };
 
 $('#iFrameMasters').load(function () {
-    $("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
+    $('#iFrameMasters').contents().find('#BottomTabBar').addClass('iframeBottomTabBar');
+    l$("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
     $('#iFrameMasters').contents().find('#Customleftsidebar2').hide();
     $('#iFrameMasters').contents().find('#myTopnav').hide();
     $('#iFrameMasters').contents().find('input[name=BtnFinalize]').hide();
