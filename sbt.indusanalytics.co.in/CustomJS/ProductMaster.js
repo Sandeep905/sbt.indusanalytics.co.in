@@ -176,6 +176,13 @@ $("#gridOperation").dxDataGrid({                  //// GridOperation  gridopr
     columnAutoWidth: true,
     sorting: { mode: 'multiple' },
     selection: { mode: "multiple", allowSelectAll: false },
+    onCellPrepared: function (e) {
+        if (e.column.command == "select" && e.rowType === "header") {
+            e.cellElement.prepend("Suggestion");
+            e.cellElement.css("display", "flex");
+            e.cellElement.css("flex-direction", "column");
+        }
+    },
     editing: { mode: "cell", allowUpdating: true },
     columns: [{ dataField: "IsDefaultProcess", caption: "Is Default", dataType: "boolean", allowEditing: true },
     { dataField: "IsDisplayInEnquiry", caption: "Display In Enquiry", dataType: "boolean", allowEditing: true },
@@ -566,7 +573,7 @@ $("#BtnSave").click(function () {
         } else {
             objProConfig.IsDisplayParameter = false;
         }
-        
+
         if (objProConfig.ParameterName === "" || objProConfig.ParameterName === undefined) {
             DevExpress.ui.notify("Please enter parameter name..!", "warning", 1000);
             return;
@@ -741,7 +748,7 @@ $("#BtnEdit").click(function () {
             } else {
                 GridOperation[i].IsDisplayInEnquiry = 0;
             }
-                
+
         }
         //}
     } else {
