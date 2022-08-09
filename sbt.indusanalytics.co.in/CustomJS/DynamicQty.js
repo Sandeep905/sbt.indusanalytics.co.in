@@ -888,6 +888,7 @@ function Bottombar(Bottom) {
 function closeBottomTabBar() {
     var optabID = document.getElementById('displayStatusBottom').innerHTML;
     document.getElementById("BottomTabBar").style.height = "0";
+    document.getElementById("BottomTabBar").style.display = "none";
     if ((document.getElementById('RightTabBar').style.width === "" || document.getElementById('RightTabBar').style.width === "0px") && (document.getElementById('mySidenav').style.width === "" || document.getElementById('mySidenav').style.width === "0px")) {
         document.getElementById('MYbackgroundOverlay').style.display = 'none';
     }

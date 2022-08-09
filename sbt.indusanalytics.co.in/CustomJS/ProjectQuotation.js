@@ -819,13 +819,24 @@ $("#BtnSave").click(function () {
     ObjMainDetail.FreightAmount = TxtFreightAmount;
     ObjMain.push(ObjMainDetail);
 
-
+    let SbProductHSNID = 0;
+    let QuotedCost = 0;
+    let TypeOfCost = "";
+    let PlanQty = 0;
     for (var i = 0; i < gridProductList._options.dataSource.length; i++) {
         gridProductData = {};
         if (Number(gridProductList._options.dataSource[i].Rate) >= 0 && Number(gridProductList._options.dataSource[i].Amount) >= 0) {
             gridProductData.VendorID = gridProductList._options.dataSource[i].VendorID;
             gridProductData.ProductCatalogID = gridProductList._options.dataSource[i].ProductCatalogID;
+            gridProductData.ProductHSNID = gridProductList._options.dataSource[i].ProductHSNID;
 
+            if (gridProductList._options.dataSource[i].IsOffsetProduct === true) {
+                SbProductHSNID = gridProductList._options.dataSource[i].ProductHSNID;
+                QuotedCost = gridProductList._options.dataSource[i].Rate;
+                PlanQty = gridProductList._options.dataSource[i].Quantity;
+                CategoryID = gridProductList._options.dataSource[i].CategoryID;
+                TypeOfCost = gridProductList._options.dataSource[i].RateType;
+            }
             gridProductData.Rate = gridProductList._options.dataSource[i].VendorRate;
             gridProductData.RateType = gridProductList._options.dataSource[i].RateType;
             gridProductData.Amount = gridProductList._options.dataSource[i].Amount;
@@ -845,6 +856,27 @@ $("#BtnSave").click(function () {
         swal("Please plan the product first..");
         return;
     }
+
+    /**
+     * Offset Products Quotation Data
+     **/
+
+    var TblBooking = [];
+    var ObjBooking = {};
+    ObjBooking.JobName = TxtProjectName;
+    ObjBooking.LedgerID = SelClientID;
+    ObjBooking.CategoryID = CategoryID;
+    ObjBooking.Remark = TxtRemark;
+    ObjBooking.IsEstimate = 1;
+    ObjBooking.OrderQuantity = PlanQty;
+    ObjBooking.TypeOfCost = TypeOfCost;
+    ObjBooking.FinalCost = QuotedCost;
+    ObjBooking.QuotedCost = QuotedCost;
+    ObjBooking.ProductHSNID = SbProductHSNID;
+    ObjBooking.CurrencySymbol = "INR";
+    ObjBooking.ConversionValue = 1;
+    TblBooking.push(ObjBooking);
+
     swal({
         title: "Project Quotation Saving...",
         text: 'Are you sure to save?',
@@ -981,7 +1013,7 @@ function checkIfRemoteFileExists(urlp) {
 
 $('#iFrameMasters').load(function () {
     $('#iFrameMasters').contents().find('#BottomTabBar').addClass('iframeBottomTabBar');
-    l$("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
+    $("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
     $('#iFrameMasters').contents().find('#Customleftsidebar2').hide();
     $('#iFrameMasters').contents().find('#myTopnav').hide();
     $('#iFrameMasters').contents().find('input[name=BtnFinalize]').hide();
@@ -1037,6 +1069,232 @@ $("#btnApplyQuote").click(function () {
     }
 
     //iframe.contentWindow.document.getElementById("BtnSaveQuotation").click();
-
+    OpenIdb();
     document.getElementById("btnApplyQuote").setAttribute("data-dismiss", "modal");
 });
+
+let db;
+function OpenIdb() {
+    ////Not support? Go in the corner and pout.
+    var openRequest = window.indexedDB.open("localstore", 1);
+
+    openRequest.onupgradeneeded = function (e) {
+        var thisDB = e.target.result;
+        //console.log("running onupgradeneeded");
+    };
+    openRequest.onsuccess = function (e) {
+        console.log("running onsuccess IndexedDB");
+        db = e.target.result;
+        readAllSelectedPlans();
+    };
+    openRequest.onerror = function (e) {
+        console.log("onerror!");
+        console.dir(e);
+    };
+}
+
+var TblPlanning = [], TblOperations = [], TblContentForms = [];
+function readAllSelectedPlans() {
+    try {
+        //$("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
+        //var FlgPlan = false, FlgOpr = false, FlgBook = false;
+        var objectStore = db.transaction("TableSelectedPlan").objectStore("TableSelectedPlan");
+
+        objectStore.openCursor().onsuccess = function (event) {
+            var cursor = event.target.result;
+            if (cursor) {
+                TblPlanning.push(cursor.value);
+
+                cursor.continue();
+            } else {
+                //alert("No more entries!");
+                FlgPlan = true;
+
+                /**
+                 * Fetch all Job Contents Forms data **/
+                var objectJobForms = db.transaction("JobContentsForms").objectStore("JobContentsForms");
+                objectJobForms.openCursor().onsuccess = function (event) {
+                    var curForms = event.target.result;
+                    var FormsData = {};
+                    if (curForms) {
+                        for (var val = 0; val < curForms.value.length; val++) {
+                            //if (curForms.value.PlanContentType === cursor.value.PlanContentType && Number(curForms.value.PlanContQty) === Number(cursor.value.PlanContQty) && cursor.value.PlanContName === curForms.value.PlanContName) {
+                            FormsData = {};
+                            FormsData = curForms.value[val];
+                            FormsData.PlanContQty = curForms.value.PlanContQty;
+                            FormsData.PlanContentType = curForms.value.PlanContentType;
+                            FormsData.PlanContName = curForms.value.PlanContName;
+                            TblContentForms.push(FormsData);
+                            //}
+                        }
+                        curForms.continue();
+                    } else {
+                        //alert("No more entries!");
+                        FlgBook = true;
+                        //Fetch all operations data
+                        var objectJobOperation = db.transaction("JobOperation").objectStore("JobOperation");
+                        objectJobOperation.openCursor().onsuccess = function (event) {
+                            var curOper = event.target.result;
+                            var operData = {};
+                            if (curOper) {
+                                //if (curOper.value.PlanContentType === cursor.value.PlanContentType && Number(curOper.value.PlanContQty) === Number(cursor.value.PlanContQty) && cursor.value.PlanContName === curOper.value.PlanContName) {
+                                var TransID = 1;
+                                for (var val = 0; val < curOper.value.length; val++) {
+                                    operData = {};
+                                    //operData = curOper.value[val];
+                                    operData.PlanContQty = curOper.value.PlanContQty;
+                                    operData.PlanContentType = curOper.value.PlanContentType;
+                                    operData.PlanContName = curOper.value.PlanContName;
+
+                                    operData.SequenceNo = TransID;
+                                    operData.ProcessID = Number(curOper.value[val].ProcessID);
+                                    operData.SizeL = Number(curOper.value[val].SizeL);
+                                    operData.SizeW = Number(curOper.value[val].SizeW);
+                                    operData.NoOfPass = Number(curOper.value[val].NoOfPass);
+                                    operData.Quantity = Number(curOper.value[val].Quantity);
+                                    operData.Rate = Number(curOper.value[val].Rate).toFixed(3);
+                                    operData.Ups = Number(curOper.value[val].Ups);
+                                    operData.Amount = Number(curOper.value[val].Amount);
+                                    operData.Remarks = curOper.value[val].Remarks;
+                                    operData.PlanID = Number(curOper.value[val].PlanID);
+                                    operData.RateFactor = curOper.value[val].RateFactor;
+                                    operData.IsDisplay = Number(curOper.value[val].IsDisplay); ///added on 16-10-19
+
+                                    TransID = TransID + 1;
+                                    TblOperations.push(operData);
+                                }
+                                // }
+                                curOper.continue();
+                            } else {
+                                //alert("No more entries!");
+                                //FlgOpr = true;
+                                //if (FlgPlan === true && FlgOpr === true && FlgBook === true) {
+                                //    callSaveQuote(TblPlanning, TblOperations, TblContentForms);
+                                //}
+                            }
+                        };
+                    }
+                };
+            }
+        };
+    } catch (e) {
+        $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+        console.log(e);
+    }
+}
+
+function callSaveQuote(TblPlanning, TblOperations, TblContentForms) {
+
+    if (TblPlanning.length <= 0) {
+        DevExpress.ui.notify("No data for save..!", "error", 100);
+        return;
+    }
+    var TblBooking = [];
+    var ObjBooking = {};
+    ObjBooking.JobName = JobName;
+    ObjBooking.LedgerID = LedgerId;
+    ObjBooking.ProductCode = ArtWorkCode;
+    ObjBooking.ExpectedCompletionDays = Number(document.getElementById("expectedDays").value);
+    ObjBooking.CategoryID = CategoryId;
+    ObjBooking.Remark = Remark;
+    ObjBooking.BookingRemark = TaQuoteDetails;
+    ObjBooking.IsEstimate = 1;
+    ObjBooking.ClientName = ClientName;
+    ObjBooking.OrderQuantity = TblPlanning[0].PlanContQty;
+    ObjBooking.TypeOfCost = TypeOfCost;
+    ObjBooking.FinalCost = FinalCost;
+    ObjBooking.QuotedCost = QuotedCost;
+    ObjBooking.QuoteType = "Job Costing";
+    ObjBooking.ConsigneeID = SbConsigneeID;
+    ObjBooking.ProductHSNID = SbProductHSNID;
+    ObjBooking.CurrencySymbol = SbCurrency;
+    ObjBooking.ConversionValue = CurrencyValue;
+    ObjBooking.ParentBookingID = ParentBookingID;
+    ObjBooking.ShipperID = GblShipperID;
+
+    TblBooking.push(ObjBooking);
+
+    var jsonObjectsCosting = [];
+    var Costing = {};
+    //var PTablecells = document.getElementById("PlanTable").getElementsByTagName("tbody")[0].rows[0].cells;
+    var PTablecrow = document.getElementById("PlanTable").getElementsByTagName("tbody")[0].rows[0];
+    for (var t = 1; t < PTablecrow.cells.length; t++) {
+        if (Number(document.getElementById("txtqty" + t).value) > 0 && Number(document.getElementById("FinalUnitCost" + t).innerHTML) > 0) {
+            Costing = {};
+            Costing.MiscPercentage = Number(document.getElementById("FinalMiscPer" + t).value);
+            Costing.ProfitPercentage = Number(document.getElementById("FinalPftPer" + t).value);
+            Costing.DiscountPercentage = Number(document.getElementById("FinalDiscPer" + t).value);
+            Costing.TaxPercentage = Number(document.getElementById("FinalTaxPer" + t).value);
+
+            Costing.PlanContQty = Number(document.getElementById("txtqty" + t).value);
+            //Costing.PlanContentType = document.getElementById("contType" + t).innerHTML;
+            //Costing.PlanContName = document.getElementById("contName" + t).innerHTML;
+
+            Costing.ShipperCost = Number(document.getElementById("FinalShipperCost" + t).value);
+            Costing.MiscCost = parseFloat(document.getElementById("FinalMiscCost" + t).value);
+            Costing.ProfitCost = parseFloat(document.getElementById("FinalProfitCost" + t).value);
+            Costing.DiscountAmount = parseFloat(document.getElementById("FinalDisCost" + t).value);
+            Costing.TaxAmount = parseFloat(document.getElementById("FinalTaxCost" + t).value);
+            Costing.TotalCost = parseFloat(document.getElementById("FinaltotalCost" + t).innerHTML);
+
+            Costing.GrandTotalCost = parseFloat(document.getElementById("FinalGrandTotalCost" + t).innerHTML);
+            Costing.UnitCost = parseFloat(document.getElementById("FinalUnitCost" + t).innerHTML);
+            Costing.UnitCost1000 = parseFloat(document.getElementById("FinalUnitThCost" + t).innerHTML);
+
+            Costing.FinalCost = parseFloat(document.getElementById("FinalfinalCost" + t).value);
+            Costing.QuotedCost = parseFloat(document.getElementById("FinalQuotedCost" + t).value);
+            Costing.CurrencySymbol = SbCurrency;
+            Costing.ConversionValue = CurrencyValue;
+
+            jsonObjectsCosting.push(Costing);
+        }
+    }
+
+    var CostingData = JSON.stringify(jsonObjectsCosting);
+
+    var BookingNo = document.getElementById("QuotationNo").value;
+    var Quo_No = BookingNo.split('.');
+    BookingNo = Quo_No[0];
+
+    document.getElementById("BtnSaveQuotation").style.display = 'none';
+    $.ajax({
+        type: "POST",
+        url: "WebServicePlanWindow.asmx/saveQuotationData",
+        data: '{TblBooking:' + JSON.stringify(TblBooking) + ',TblPlanning:' + JSON.stringify(TblPlanning) + ',TblOperations:' + JSON.stringify(TblOperations) + '' +
+            ', TblContentForms: ' + JSON.stringify(TblContentForms) + ', CostingData: ' + CostingData + ', FlagSave: ' + JSON.stringify(false) + ', BookingNo: "",ObjShippers:[],ArrObjAttc:[]}',
+        contentType: "application/json; charset=utf-8",
+        dataType: "text",
+        success: function (results) {
+            var RES1 = JSON.parse(results);
+            var Title, Text, Type;
+            if (RES1.d.includes("Error:500")) {
+                document.getElementById("ContentOrientation").innerHTML = "";
+                Title = "Error in saving quotation..!, Please send this error to indus support team";
+                Text = RES1.d;
+                Type = "error";
+            } else if (RES1.d.includes("You are not authorized")) {
+                Title = "Access Denied..!";
+                Text = RES1.d;
+                Type = "warning";
+            } else {
+                Title = "Quotation Saved..!";
+                Text = "";
+                Type = "success";
+                DevExpress.ui.notify("Quotation Saved..!", "success", 1500);
+                BookingID = RES1.d;
+            }
+            swal(Title, Text, Type);
+            if (Type === "success") {
+                window.setTimeout(function () {
+                    window.location.href = window.location.href.split("?")[0].split("#")[0];
+                    window.location.href.reload(true);
+                }, 200);
+            } else {
+                document.getElementById("BtnSaveQuotation").style.display = 'block';
+            }
+        },
+        error: function (ex) {
+            console.log(ex);
+        }
+    });
+}
