@@ -450,6 +450,7 @@ async function saveMaterialsRequirement(InputValues) {
     }
 }
 
+let GblCategoryID = 0; ///for the case of iframe we need filtered contents process based on category. 
 /**
  * // reload job size values contents type or qty wise with the local store!
  * @param {Text} ContId as contents type Text
@@ -464,7 +465,8 @@ function readContentsSizeValues(ContId) {
         //var ChkPlanMaster = $("#ChkUseFirstPlanAsMaster").dxCheckBox('instance').option('value');
 
         var CategoryId = $("#SbCategory").dxSelectBox("instance").option('value');
-        if (CategoryId !== null) GetCategorizedProcess(CategoryId, ContId);
+        if (GblCategoryID > 0) { GetCategorizedProcess(GblCategoryID, ContId); }
+        else if (CategoryId !== null) { GetCategorizedProcess(CategoryId, ContId); }
 
         GblInputValues = {};
         OprIds = []; GblInputOpr = [];
