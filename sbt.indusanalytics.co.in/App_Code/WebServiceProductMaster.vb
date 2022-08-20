@@ -242,7 +242,7 @@ Public Class WebServiceProductMaster
     Public Function GetProductMasterList() As String
         Try
 
-            str = "SELECT PCM.ProductCatalogID,'Files/ProductFiles/'+PCM.ProductImagePath ProductImagePath, PCM.ProductCatalogCode,PCM.ProcessIDStr,PCM.DefaultProcessStr,PCM.DisplayProcessStr, PCM.ProductName,PCM.ProductHSNID,Isnull(PCM.Remark,'') Remark, PCM.ProductDescription, PCM.ReferenceProductCode,PCM.CategoryID, CM.CategoryName, PHM.ProductHSNName,PCM.IsOffsetProduct " &
+            str = "SELECT PCM.ContentID, PCM.ProductCatalogID,'Files/ProductFiles/'+PCM.ProductImagePath as ProductImagePath, PCM.ProductCatalogCode,PCM.ProcessIDStr,PCM.DefaultProcessStr,PCM.DisplayProcessStr, PCM.ProductName,PCM.ProductHSNID,Isnull(PCM.Remark,'') Remark, PCM.ProductDescription, PCM.ReferenceProductCode,PCM.CategoryID, CM.CategoryName, PHM.ProductHSNName,PCM.IsOffsetProduct " &
                     " From ProductCatalogMaster As PCM INNER Join ProductHSNMaster As PHM On PHM.ProductHSNID = PCM.ProductHSNID And PCM.CompanyID = PHM.CompanyID" &
                     " INNER JOIN CategoryMaster AS CM ON CM.CategoryID = PCM.CategoryID And PCM.CompanyID =CM.CompanyID" &
                     " Where PCM.IsDeletedTransaction=0 And PCM.CompanyID = " & GBLCompanyID
@@ -475,11 +475,11 @@ Public Class WebServiceProductMaster
 
             str = "SELECT PQ.ProductEstimateID, PQC.ProductEstimationContentID, PQ.LedgerID, LM.LedgerName,SLM.LedgerName AS SalesLedgerName ,PQ.SalesPersonID, PQ.Narration, PQ.EstimateNo, PQ.ProjectName, PQ.CreatedDate, PQ.IsApproved, PQ.ApprovedBy, PQC.Quantity, PQC.ProductCatalogID, PCM.ProductName,PQC.VendorID,VLM.LedgerName AS VednorName, PQC.Rate, PQC.Amount, PQC.ProcessCost, PQC.FinalAmount, PQC.UnitCost, PQC.RateType, PQC.ProcessIDStr,PQC.DefaultProcessStr,PQ.FreightAmount/*, PQC.ProductInputSizes*/ " &
                     "FROM  dbo.ProductQuotation AS PQ " &
-                    "INNER JOIN dbo.ProductQuotationContents AS PQC ON PQ.ProductEstimateID = PQC.ProductEstimateID AND PQ.CompanyID = PQC.CompanyID " &
-                    "INNER JOIN dbo.ProductCatalogMaster AS PCM ON PCM.ProductCatalogID = PQC.ProductCatalogID AND PQ.CompanyID = PQC.CompanyID " &
+                    "LEFT JOIN dbo.ProductQuotationContents AS PQC ON PQ.ProductEstimateID = PQC.ProductEstimateID AND PQ.CompanyID = PQC.CompanyID " &
+                    "LEFT JOIN dbo.ProductCatalogMaster AS PCM ON PCM.ProductCatalogID = PQC.ProductCatalogID AND PQ.CompanyID = PQC.CompanyID " &
                     "INNER JOIN LedgerMaster As LM On LM.LedgerID=PQ.LedgerID And LM.CompanyID = PQ.CompanyID " &
                     "INNER JOIN LedgerMaster As SLM On SLM.LedgerID=PQ.SalesPersonID And SLM.CompanyID = PQ.CompanyID " &
-                    "INNER JOIN LedgerMaster As VLM On VLM.LedgerID=PQC.VendorID And VLM.CompanyID = PQC.CompanyID Where PQ.IsDeletedTransaction=0 And PQ.CompanyID= " & GBLCompanyID
+                    "LEFT JOIN LedgerMaster As VLM On VLM.LedgerID=PQC.VendorID And VLM.CompanyID = PQC.CompanyID Where PQ.IsDeletedTransaction=0 And PQ.CompanyID= " & GBLCompanyID
             db.FillDataTable(dataTable, str)
             data.Message = db.ConvertDataTableTojSonString(dataTable)
             Return js.Serialize(data.Message)

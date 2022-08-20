@@ -241,6 +241,19 @@ Public Class WebServicePlanWindow
         Return js.Serialize(data.Message)
     End Function
 
+    '// Suggested Process
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function SuggestedOperations(ByVal processids As String) As String
+        Context.Response.Clear()
+        Context.Response.ContentType = "application/json"
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+        str = "Select ProcessID, REPLACE(NULLIF (ProcessName, ''), '""', '') AS ProcessName, NULLIF (PrePress, '') AS PrePress, NULLIF (TypeofCharges, '') AS TypeofCharges, NULLIF (SizeToBeConsidered, '') AS SizeToBeConsidered, ROUND(ISNULL(NULLIF (Rate, ''), 0), 4) AS Rate, NULLIF (MinimumCharges, '') AS MinimumCharges, NULLIF (SetupCharges, '') AS SetupCharges, NULLIF (IsDisplay, '') AS IsDisplay, REPLACE(NULLIF (ChargeApplyOnSheets, ''), '""', '') AS ChargeApplyOnSheets, REPLACE(NULLIF (DisplayProcessName, ''), '""', '') AS DisplayProcessName, 0 AS Amount, '' AS RateFactor FROM ProcessMaster where ProcessID in (" & processids & ")"
+        db.FillDataTable(dataTable, str)
+        data.Message = db.ConvertDataTableTojSonString(dataTable)
+        Return js.Serialize(data.Message)
+    End Function
+
     ''---------------------------- Plan Operations Slabs Name------------------------------------------
     <WebMethod(EnableSession:=True)>
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>

@@ -35,7 +35,7 @@ function getMasterColumns() {
         contentType: "application/json; charset=utf-8",
         dataType: "text",
         success: function (results) {
-//            console.debug(results);
+            //            console.debug(results);
             var res = results.replace(/\\/g, '');
             res = res.replace(/"d":""/g, '');
             res = res.replace(/""/g, '');
@@ -100,7 +100,7 @@ function SaveData() {
 
                 ArrIMDRecord.ParentFieldValue = colvalue;
                 ArrIMDRecord.FieldValue = colvalue;
-                
+
                 if (masterColumns[j].FieldName.trim() === "LedgerName") {
                     ObjDetailsData.LedgerName = colvalue;
                     ObjDetailsData.LedgerDescription = MasterName + ":" + colvalue;
@@ -122,7 +122,7 @@ function SaveData() {
                 type: "POST",
                 async: false,
                 url: "WebService_LedgerMaster.asmx/SaveData",
-                data: '{CostingDataLedgerMaster:' + JSON.stringify(ObjMainData) + ',CostingDataLedgerDetailMaster:' + JSON.stringify(ObjIMDRecord) + ',MasterName:' + JSON.stringify(MasterName) + ',ActiveLedger:' + JSON.stringify("True") + ',LedgerGroupID:' + JSON.stringify(MasterID) + '}',
+                data: '{CostingDataLedgerMaster:' + JSON.stringify(ObjMainData) + ',CostingDataLedgerDetailMaster:' + JSON.stringify(ObjIMDRecord) + ',MasterName:' + JSON.stringify(MasterName) + ',ActiveLedger:' + JSON.stringify("True") + ',LedgerGroupID:' + JSON.stringify(MasterID) + ',CostingDataSlab:' + JSON.stringify([]) + '}',
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 success: function (results) {
@@ -207,9 +207,11 @@ function ProcessExcel(data) {
 
     //Add the header cells.
     for (var j = 0; j < masterColumns.length; j++) {
-        var headerCell = document.createElement("TH");
-        headerCell.innerHTML = masterColumns[j].FieldName;
-        row.appendChild(headerCell);
+        if (masterColumns[j].FieldName != "") {
+            var headerCell = document.createElement("TH");
+            headerCell.innerHTML = masterColumns[j].FieldName;
+            row.appendChild(headerCell);
+        }
     }
     //for (var col in excelRows[0]) {
     //    var headerCell = document.createElement("TH");
@@ -234,14 +236,16 @@ function ProcessExcel(data) {
         //}
         try {
             for (j = 0; j < masterColumns.length; j++) {
-                var cell = row.insertCell(-1);
-                var colnam = masterColumns[j].FieldName;
-                var cellValue = excelRows[i][colnam];
-                if (cellValue === "-") cellValue = "";
-                cell.innerHTML = cellValue;
+                if (masterColumns[j].FieldName != "") {
+                    var cell = row.insertCell(-1);
+                    var colnam = masterColumns[j].FieldName;
+                    var cellValue = excelRows[i][colnam] === undefined ? '' : excelRows[i][colnam];
+                    if (cellValue === "-") cellValue = "";
+                    cell.innerHTML = cellValue;
+                }
             }
-            var cell1 = row.insertCell(-1);
-            cell1.innerHTML = excelRows[i]["LedgerName"];
+            //var cell1 = row.insertCell(-1);
+            //cell1.innerHTML = excelRows[i]["LedgerName"];
         } catch (e) {
             console.log(e);
         }

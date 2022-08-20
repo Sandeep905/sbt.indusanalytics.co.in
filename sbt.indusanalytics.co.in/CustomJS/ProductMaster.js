@@ -20,6 +20,49 @@ $("#SelCatalogType").dxSelectBox({
 }).dxValidator({
     validationRules: [{ type: 'required', message: 'Product catalog type is required' }]
 });
+$("#SelOrientations").dxSelectBox({
+    items: [],
+    placeholder: "Select Orientation",
+    searchEnabled: true,
+    showClearButton: true,
+    disabled: true
+
+})//    .dxValidator({
+//    validationRules: [{ type: 'required', message: 'Product catalog type is required' }]
+//});
+$.ajax({                //// Add All Active Contents
+    type: 'post',
+    url: 'WebServicePlanWindow.asmx/GetAllContents',
+    dataType: 'json',
+    contentType: "application/json; charset=utf-8",
+    data: {},
+    crossDomain: true,
+    success: function (results) {
+        var res = results.d.replace(/\\/g, '');
+        res = res.substr(1);
+        res = res.slice(0, -1);
+        //alert(res);
+        var RES1 = JSON.parse(res);
+        $("#SelOrientations").dxSelectBox({
+            items: RES1,
+            displayExpr: "ContentName",
+            valueExpr:"ContentID"
+        });
+    },
+    error: function errorFunc(jqXHR) {
+        // alert("not show");
+    }
+});
+function EnableOrientation() {
+    if (document.getElementById("IsOffsetProduct").checked != true)
+        $("#SelOrientations").dxSelectBox({
+            disabled: false
+        })
+    else
+        $("#SelOrientations").dxSelectBox({
+            disabled: true
+        })
+}
 
 $("#SelCategory").dxSelectBox({
     items: [],
@@ -468,6 +511,7 @@ $("#BtnSave").click(function () {
     //var SelCatalogType = $('#SelCatalogType').dxSelectBox('instance').option('value');
     var SelCategoryID = $('#SelCategory').dxSelectBox('instance').option('value');
     var SelProductHSNID = $('#SelProductHSN').dxSelectBox('instance').option('value');
+    var SelOrientations = $('#SelOrientations').dxSelectBox('instance').option('value');
     var TxtProductName = document.getElementById("TxtProductName").value.trim();
     var TxtProductDesc = document.getElementById("TxtProductDesc").value.trim();
     var TxtReferenceProductCode = document.getElementById("TxtRefProductCode").value.trim();
@@ -494,6 +538,15 @@ $("#BtnSave").click(function () {
         document.getElementById("TxtProductDesc").focus();
         return false;
     }
+    if (IsOffsetProduct === true) {
+        if (SelOrientations === "" || SelOrientations === null) {
+            DevExpress.ui.notify("Please select Orientation..!", "error", 2000);
+            $("#SelOrientations").dxValidator('instance').validate();
+            return false;
+        }
+    } else {
+        SelOrientations = 0;
+    }
     if ($('#file')[0].files.length === 0 && FlagEdit === false) {
         DevExpress.ui.notify("Please attach file to start this process ..!", "warning", 2000);
         return false;
@@ -519,6 +572,7 @@ $("#BtnSave").click(function () {
     ObjMainDetail.DefaultProcessStr = "";
     ObjMainDetail.DisplayProcessStr = "";
     ObjMainDetail.IsOffsetProduct = IsOffsetProduct;
+    ObjMainDetail.ContentID = SelOrientations;
 
     var GridOperation = $('#gridOperation').dxDataGrid('instance')._options.dataSource.store.data;
     for (var i = 0; i < GridOperation.length; i++) {

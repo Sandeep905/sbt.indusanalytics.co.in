@@ -6,7 +6,6 @@
     <div class="row clearfix" style="padding: 0px; margin: 0px; margin-right: -15px">
         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding: 0px; margin: 0px;">
             <div class="dialogboxContainerMainMAster">
-
                 <div class="DialogBoxCustom" style="float: left; background-color: #fff; padding-left: 0px; padding-bottom: 2px">
                     <div id="ButtonDiv" style="height: auto; padding-bottom: 2px">
                         <a id="SaveButton" href='#' class="iconButton" style="margin-top: 1px; margin-left: 2px;">

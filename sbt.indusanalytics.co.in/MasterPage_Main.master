@@ -156,7 +156,7 @@
             <a href="Home.aspx" runat="server" id="CompanyName" class="cut-text">Indus Analytics</a>
             <a href="#" class="iconCustom" id="Btn_Logut" style="cursor: pointer" title="Log Out"><i class="fa fa-sign-out fa-2x fa-fw" style="font-size: 14px;"></i></a>
             <ul class="header-dropdown m-r--5" style="margin-top: -1.2em;">
-<%--                <li id="LI_ChooseMaster" class="dropdown" style="position: initial;">
+                <%--                <li id="LI_ChooseMaster" class="dropdown" style="position: initial;">
                     <a id="hiddenBtn_ChooseMaster" href="javascript:void(0);" class="dropdown-toggle iconCustom" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="" title="Choose exist master">Choose Master
                     </a>
                     <ul class="dropdown-menu pull-right" id="MasterUL" style="background-color: none; overflow-y: auto; margin-bottom: 10px; max-height: 40em;">
@@ -236,12 +236,14 @@
         <%-- DevExpress Control Grid --%>
         <link type="text/css" href="CustomCSS/dx.common.css" rel="stylesheet" />
         <link type="text/css" href="CustomCSS/dx.light.css" rel="stylesheet" />
+     <%--   <link rel="stylesheet" type="text/css" href="https://cdn3.devexpress.com/jslib/21.2.7/css/dx.common.css" />
+        <link type="text/css" rel="stylesheet" href="https://cdn3.devexpress.com/jslib/21.2.7/css/dx.light.css">--%>
         <%--Use for Export data --%>
         <script src="js/jszip.js"></script>
-        <%--<script src="https://cdn3.devexpress.com/jslib/19.2.3/js/dx.all.js"></script>--%>
-        <script src="js/dx.all.19.2.3.js"></script>
+        <script src="https://cdn3.devexpress.com/jslib/19.2.3/js/dx.all.js"></script>            
+        <%--<script type="text/javascript" src="https://cdn3.devexpress.com/jslib/21.2.7/js/dx.all.js"></script>--%>
         <%-- DevExpress Control Grid --%>
-
+        <
 
         <section class="content" style="margin-left: 0px; padding-left: 0px; width: 100%">
             <div class="container-fluid" style="padding-right: 0px; padding-left: 0px">
@@ -484,7 +486,7 @@
             document.getElementById("btnLogoutDiv").style.display = "none";
             document.getElementById("btnsessionDiv").style.display = "block";
         });
-        
+
         var activeTab = window.location.pathname.split('/').slice(-1);
         if (activeTab == "Masters.aspx" || activeTab == "LedgerMaster.aspx") {
             $("#LI_ChooseFYear").addClass("hidden");

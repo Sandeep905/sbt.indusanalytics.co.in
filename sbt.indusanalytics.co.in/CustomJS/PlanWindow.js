@@ -170,7 +170,7 @@ $.ajax({
                         if (this.type === "text" && this.style.display === "block") {
                             let sizename = this.id.replace('Size', 'Job');
                             if (sizename === "JobWidth") sizename = "JobHeight";
-                            this.value = result[0][sizename];
+                            this.value = result[0][sizename] == undefined ? 0 : result[0][sizename];
                         }
                     });
                 }
@@ -393,7 +393,6 @@ $(".reloadprocess").click(function () {
                     var res = results.d.replace(/\\/g, '');
                     res = res.substr(1);
                     res = res.slice(0, -1);
-
                     ShowOperationGrid(JSON.parse(res.toString()), ProcessSlabs);
                 },
                 error: function errorFunc(jqXHR) {
@@ -463,13 +462,13 @@ $("#btnCloseiFrame").click(function () {
     $("." + classid).click();
 });
 
-$('#iFrameMasters').load(function () {
-    $('#iFrameMasters').contents().find('#Customleftsidebar1').hide();
-    $('#iFrameMasters').contents().find('#SelFYearList').hide();
-    $('#iFrameMasters').contents().find('#myTopnav').hide();
-    $('#iFrameMasters').contents().find('#CreateButton').click();
-    $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
-});
+//$('#iFrameMasters').load(function () {
+//    $('#iFrameMasters').contents().find('#Customleftsidebar1').hide();
+//    $('#iFrameMasters').contents().find('#SelFYearList').hide();
+//    $('#iFrameMasters').contents().find('#myTopnav').hide();
+//    $('#iFrameMasters').contents().find('#CreateButton').click();
+//    $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+//});
 
 function GetConsignee(CID) {
     $.ajax({
@@ -1138,6 +1137,7 @@ function ShowShirinReport(gridData) {
     document.getElementById("finalCost").value = 0;
     document.getElementById("finalUnitCost").value = 0;
 
+
     $("#ContentPlansList").dxDataGrid({
         dataSource: gridData.TblPlanning,
         keyExpr: "PlanID",
@@ -1181,7 +1181,7 @@ function ShowShirinReport(gridData) {
         //paging: { pageSize: 4 },
         selection: { mode: "single" }, //columnHidingEnabled: true,
         columnAutoWidth: true,
-        columns: [{ dataField: "VendorName", width: 120, caption: "Associate Partner" }, {
+        columns: [{ dataField: "VendorName", width: 120, caption: "Associate Partner", visible: false }, {
             dataField: "MachineName", width: 150,
             cellTemplate: function (container, options) {
                 $('<a>').addClass('btn padding-0 font-11').text(options.data.MachineName)
@@ -1228,18 +1228,18 @@ function ShowShirinReport(gridData) {
         //        displayFormat: "Total Plans: {0}"
         //    }]
         //},////₹
-        onCellHoverChanged: function (e) {
-            e.cellElement.mousemove(function () {
-                if (e.rowType === "data") {
-                    if (e.column.dataField === "PaperSize" || e.column.dataField === "CutSize") {
-                        var PL = e.displayValue.split("x");
+        //onCellHoverChanged: function (e) {
+        //    e.cellElement.mousemove(function () {
+        //        if (e.rowType === "data") {
+        //            if (e.column.dataField === "PaperSize" || e.column.dataField === "CutSize") {
+        //                var PL = e.displayValue.split("x");
 
-                        $('#tooltipText').text("Size in Inches : " + Number(Number(PL[0]) / 25.4).toFixed(2) + " x " + Number(Number(PL[1]) / 25.4).toFixed(2)).addClass('font-12').css('white-space', 'pre-wrap');
-                        toolTip.show(e.cellElement);
-                    }
-                }
-            });
-        },
+        //                $('#tooltipText').text("Size in Inches : " + Number(Number(PL[0]) / 25.4).toFixed(2) + " x " + Number(Number(PL[1]) / 25.4).toFixed(2)).addClass('font-12').css('white-space', 'pre-wrap');
+        //                toolTip.show(e.cellElement);
+        //            }
+        //        }
+        //    });
+        //},
         onContentReady: function (e) {
             if (!e.component.getSelectedRowKeys().length)
                 e.component.selectRowsByIndexes(0);
@@ -1249,6 +1249,7 @@ function ShowShirinReport(gridData) {
             ////selectedItems.component.expandRow(selectedItems.currentSelectedRowKeys[0]);
             document.getElementById("TabOperations").style.display = "block";
             document.getElementById("TabHeadsDetails").style.display = "block";
+
 
             var value = selectedItems.selectedRowsData[0];
             GblPlanValues = {};
@@ -1394,6 +1395,9 @@ function ShowShirinReport(gridData) {
                 aDataHeads.Rate = value.CoatingCharges;
                 aDataHeads.Amount = Number(value.CoatingAmount);
                 dataHeads.push(aDataHeads);
+            }
+            if (window.location.pathname.includes("ProjectQuotation.aspx") === true) {
+                onChangeCalcAmountp();
             }
             var GridHeadsDetails = $("#GridHeadsDetails").dxDataGrid({
                 dataSource: dataHeads,
@@ -2237,13 +2241,10 @@ function GetCategorizedProcess(CategoryID, ContName) {
             res = res.slice(0, -1);
             var RES1 = JSON.parse(res.toString());
             //ObjDefaultProcess = RES1;
-            if (RES1.length > 0) {
-                $("#GridOperation").dxDataGrid({ dataSource: { store: { type: "array", data: $.grep(RES1, function (e) { return e.IsDefaultProcess === false || e.IsDefaultProcess === 0; }), key: "ProcessID" } } });
-            } else {
-                document.getElementById("LbliFrame").innerHTML = "reloadprocess";
-                $("#btnCloseiFrame").click();
-            }
-            ObjDefaultProcess = $.grep(RES1, function (e) { return e.IsDefaultProcess === true || e.IsDefaultProcess === 1; });
+            //if (RES1.length > 0) {
+            //    $("#GridOperation").dxDataGrid({ dataSource: { store: { type: "array", data: $.grep(RES1, function (e) { return e.IsDefaultProcess === false || e.IsDefaultProcess === 0; }), key: "ProcessID" } } });
+            //}
+            //ObjDefaultProcess = $.grep(RES1, function (e) { return e.IsDefaultProcess === true || e.IsDefaultProcess === 1; });
         },
         error: function errorFunc(jqXHR) {
             // alert(jqXHR.message);
@@ -2252,6 +2253,7 @@ function GetCategorizedProcess(CategoryID, ContName) {
 }
 
 var OprIds = [];
+
 function ShowOperationGrid(dataSource, slabNames) {
     $("#GridOperation").dxDataGrid({                  //// GridOperation  gridopr
         dataSource: {
@@ -2482,7 +2484,7 @@ $("#GridOperationAllocated").dxDataGrid({
     columnAutoWidth: true,
     allowColumnResizing: true,
     sorting: { mode: 'none' },
-    columns: [{ dataField: "ProcessName",caption:"Default Process" },
+    columns: [{ dataField: "ProcessName", caption: "Default Process" },
     {
         dataField: "Rate"
         //format: {

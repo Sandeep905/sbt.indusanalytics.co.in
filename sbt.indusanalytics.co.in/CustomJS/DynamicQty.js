@@ -1046,7 +1046,7 @@ $(document).ready(function () {
     //});
 
     $('.forTextBox').keypress(function (event) {
-        if (this.id !== "JobName" && this.id !== "ArtWorkCode" && this.id !== "Txt_Content_Name" && this.id !== "TxtConsigneeName" && this.id !== "TxtCloneContent" && this.id !== "TxtCommentTitle") {
+        if (this.id !== "TxtProjectName" && this.id !== "JobName" && this.id !== "ArtWorkCode" && this.id !== "Txt_Content_Name" && this.id !== "TxtConsigneeName" && this.id !== "TxtCloneContent" && this.id !== "TxtCommentTitle") {
             if (this.type === "text" && event.which !== 13 && event.which !== 34 && event.which !== 39) {
                 return isNumber(event, this);
             }

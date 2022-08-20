@@ -61,7 +61,7 @@ function CreateObjectStore(thisDB) {
             Plan_Store = thisDB.createObjectStore("JobContents", { keyPath: "PlanContentName", autoIncrement: false });
         }
         if (!thisDB.objectStoreNames.contains("ContentsSizeValues")) {
-            Plan_Store = thisDB.createObjectStore("ContentsSizeValues", { keyPath: "Id", autoIncrement: true });
+            Plan_Store = thisDB.createObjectStore("ContentsSizeValues", { keyPath: "PlanContName", autoIncrement: true });
         }
         if (!thisDB.objectStoreNames.contains("ContentsOprations")) {
             Plan_Store = thisDB.createObjectStore("ContentsOprations", { keyPath: "Id", autoIncrement: true });
@@ -108,8 +108,8 @@ function saveContentsSizes(Save_Sizes) {
     }
 }
 
-function readContentsSizes(ContType) {
-    //    var transaction = db.transaction(["JobContentsSizes"]);
+function readContentsSizes(ContType, ContentName) {
+    //   var transaction = db.transaction(["JobContentsSizes"]);
     var objectStore = db.transaction(["JobContentsSizes"]).objectStore("JobContentsSizes");
     var request = objectStore.get(ContType);
 
@@ -168,7 +168,7 @@ function readContentsSizes(ContType) {
                     }
                 }
 
-                readContentsSizeValues(ContType);
+                readContentsSizeValues(ContType, ContentName);
             } catch (e) {
                 DevExpress.ui.notify(e.message, "error", 500);
             }
@@ -203,7 +203,7 @@ function readContentsSizes(ContType) {
                                     contSize[RES1[rs]] = RES1[rs];
                                 }
                                 saveContentsSizes(contSize);
-                                readContentsSizes(ContType);
+                                readContentsSizes(ContType, ContentName);
                             } catch (e) {
                                 console.log(e);
                                 $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
@@ -455,7 +455,7 @@ let GblCategoryID = 0; ///for the case of iframe we need filtered contents proce
  * // reload job size values contents type or qty wise with the local store!
  * @param {Text} ContId as contents type Text
  */
-function readContentsSizeValues(ContId) {
+function readContentsSizeValues(ContId, ContentName) {
     try {
         var flagReloaded = false;
         $("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
@@ -470,7 +470,7 @@ function readContentsSizeValues(ContId) {
 
         GblInputValues = {};
         OprIds = []; GblInputOpr = [];
-        $("#GridOperationAllocated").dxDataGrid({ dataSource: ObjDefaultProcess });
+        //$("#GridOperationAllocated").dxDataGrid({ dataSource: ObjDefaultProcess });
         for (var i = 0; i < ObjDefaultProcess.length; i++) {
             OprIds.push(ObjDefaultProcess[i].ProcessID);
         }
@@ -525,50 +525,64 @@ function readContentsSizeValues(ContId) {
         document.getElementById("PlanGripper").value = 0;
 
         var objectStore = db.transaction(["ContentsSizeValues"]).objectStore("ContentsSizeValues");
-        // var request = objectStore.get(ContId);        
+
         objectStore.openCursor().onsuccess = function (event) {
             var cursor = event.target.result;
 
             if (cursor) {
-                if (flagReloaded === false) {
-                    if (PlanContName === cursor.value["PlanContName"] && PlanContQty === Number(cursor.value["PlanContQty"]) && ContId === cursor.value["PlanContentType"]) {
-                        GblInputValues = cursor.value;
-                        reloadKeyValues();
-                        flagReloaded = true;
-                        return;
-                    } else if (document.getElementById("Plan" + GblPlanID).innerHTML.includes("Click Me to plan..") === true && PlanContName === cursor.value["PlanContName"] && /*ChkPlanMaster === true &&*/ ContId === cursor.value["PlanContentType"]) {
-                        //GblInputValues = cursor.value;                        
-                        //                        GblInputValues.Id = 0;
-                        for (var key in cursor.value) {
-                            if (cursor.value.hasOwnProperty(key)) {
-                                if (key !== "Id") {
-                                    GblInputValues[key] = cursor.value[key];
+                var request = objectStore.get(ContentName);
+                request.onsuccess = function (event) {
+                    if (request.result != undefined) {
+                        if (flagReloaded === false) {
+                            if (PlanContName === cursor.value["PlanContName"] && PlanContQty === Number(cursor.value["PlanContQty"]) && ContId === cursor.value["PlanContentType"]) {
+                                GblInputValues = cursor.value;
+                                reloadKeyValues();
+                                flagReloaded = true;
+                                return;
+                            } else {//if (document.getElementById("Plan" + GblPlanID).innerHTML.includes("Click Me to plan..") === true && PlanContName === cursor.value["PlanContName"] && /*ChkPlanMaster === true &&*/ ContId === cursor.value["PlanContentType"]) {
+                                //GblInputValues = cursor.value;                        
+                                //                        GblInputValues.Id = 0;
+                                for (var key in cursor.value) {
+                                    if (cursor.value.hasOwnProperty(key)) {
+                                        if (key !== "Id") {
+                                            GblInputValues[key] = cursor.value[key];
+                                        }
+                                    }
                                 }
+                                GblInputValues.PlanContQty = PlanContQty;
+                                reloadKeyValues();
+                                flagReloaded = true;
+                                return;
                             }
                         }
-                        GblInputValues.PlanContQty = PlanContQty;
-                        reloadKeyValues();
-                        flagReloaded = true;
-                        return;
+                        cursor.continue();
+                    }
+                    else {
+                        if (flagReloaded === false) {
+                            var data = [];
+                            data.TblPlanning = [];
+                            data.TblOperations = [];
+                            data.TblBookForms = [];
+                            ShowShirinReport(data);
+
+                            $("#PlanButtonHide").removeClass("fa fa-arrow-circle-down");
+                            $("#PlanButtonHide").addClass("fa fa-arrow-circle-up");
+                            $("#PlanSizeContainer").slideDown(800);
+                            $("#PlanContainer").slideUp(800);
+
+                            //if (document.getElementById("SizeHeight").style.display === "block") {
+                            //    document.getElementById("SizeHeight").focus();
+                            //} else if (document.getElementById("SizeLength").style.display === "block") {
+                            //    document.getElementById("SizeLength").focus();
+                            //} else {
+                            //    document.getElementById("SizeWidth").focus();
+                            //}
+                            $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+                        }
                     }
                 }
-                cursor.continue();
             }
             else {
-                //alert("No more entries!");
-
-                //$('#Body_windowPlanning input').each(function () {
-                //    if (this.id === "") return;
-                //    if (this.type === "text" || this.type === "number") {
-                //        if (this.id === "ItemPlanQuality" || this.id === "PlanPlateType" || this.id === "PlanPrintingStyle" || this.id === "ItemPlanGsm" || this.id === "ItemPlanMill" || this.id === "ItemPlanFinish" || this.id === "PlanWastageType" || this.id === "PlanPrintingGrain") {
-                //            var Eid = "#" + this.id;
-                //            $(Eid).dxSelectBox({
-                //                value: null
-                //            });
-                //        } else
-                //            document.getElementById(this.id).value = "";
-                //    }
-                //});
                 if (flagReloaded === false) {
                     var data = [];
                     data.TblPlanning = [];
@@ -595,6 +609,7 @@ function readContentsSizeValues(ContId) {
         objectStore.openCursor().onerror = function (ev) {
             console.log("Failed to reload contents input record. Error: " + ev.message);
         };
+
     } catch (e) {
         console.log(e);
         $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
@@ -904,8 +919,10 @@ function readSelectedPlan() {
                 /***
                  *In case of Use first plan as master, data load in GblPlanValues variable.
                  * */
-                if (document.getElementById("Plan" + GblPlanID).innerHTML.includes("Click Me to plan..") === true && cursor.value.PlanContName === PlanContName && ChkPlanMaster === true && cursor.value.PlanContentType === PlanContentType) {
-                    GblPlanValues = cursor.value;
+                if (window.location.pathname.includes('ProjectQuotation.aspx') === false) {
+                    if (document.getElementById("Plan" + GblPlanID).innerHTML.includes("Click Me to plan..") === true && cursor.value.PlanContName === PlanContName && ChkPlanMaster === true && cursor.value.PlanContentType === PlanContentType) {
+                        GblPlanValues = cursor.value;
+                    }
                 }
                 if (Number(cursor.value.PlanContQty) === PlanContQty && cursor.value.PlanContName === PlanContName && cursor.value.PlanContentType === PlanContentType) {
                     Save_Contents_Data.TblPlanning.push(cursor.value);
@@ -956,7 +973,8 @@ function readSelectedPlan() {
                 //alert("No more entries!");
 
                 if ((JL > 0 || JH > 0) && Save_Contents_Data.TblPlanning.length <= 0
-                    && document.getElementById("Plan" + GblPlanID).innerHTML.includes("Click Me to plan..") === true) {
+                    //&& document.getElementById("Plan" + GblPlanID).innerHTML.includes("Click Me to plan..") === true
+                ) {
                     if (ChkPlanMaster === true && GblPlanValues.ContentSizeValues !== undefined) {
                         masterPlan();
                     } else {
