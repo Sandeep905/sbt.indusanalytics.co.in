@@ -1285,14 +1285,14 @@ m:
             S2 = Trim(Mid(s, IIf(InStr(1, s, ".") = 0, Len(s) + 1, InStr(1, s, ".") + 1), Len(s)))
             If Val(S2) > 0 Then
                 If CurrencyCode = "INR" Then
-                    ReadNumber = StrConv(BeforeDecimal(Val(S1)), vbProperCase) + "Rupee and " + StrConv(BeforeDecimal(Val(S2)), vbProperCase) + " Paisa"
+                    ReadNumber = StrConv(BeforeDecimal(Val(S1)), vbProperCase) + "Rupee And " + StrConv(BeforeDecimal(Val(S2)), vbProperCase) + " Paisa"
                 Else
-                    ReadNumber = StrConv(BeforeDecimal(Val(S1)), vbProperCase) + " " + CurrencyHeadName + " and " + StrConv(BeforeDecimal(Val(S2)), vbProperCase) + " " + CurrencyChildName
+                    ReadNumber = StrConv(BeforeDecimal(Val(S1)), vbProperCase) + " " + CurrencyHeadName + " And " + StrConv(BeforeDecimal(Val(S2)), vbProperCase) + " " + CurrencyChildName
                 End If
 
             Else
                 If CurrencyCode = "INR" Then
-                    ReadNumber = StrConv(BeforeDecimal(Val(S1)), vbProperCase) + " Rupee" '+ BeforeDecimal(Val(S2)) + " paisa"
+                    ReadNumber = StrConv(BeforeDecimal(Val(S1)), vbProperCase) + " Rupee" + BeforeDecimal(Val(S2)) + " paisa"
                 Else
                     ReadNumber = StrConv(BeforeDecimal(Val(S1)), vbProperCase) + " " + CurrencyHeadName '+ BeforeDecimal(Val(S2)) + " paisa"
                 End If

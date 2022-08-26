@@ -1,9 +1,7 @@
-﻿
-Imports System.Data
+﻿Imports System.Data
 Imports System.Data.SqlClient
 Imports Connection
 Imports Microsoft.Reporting.WebForms
-Imports Newtonsoft.Json
 
 Partial Class ProjectQuotationReportViewer
     Inherits System.Web.UI.Page
@@ -23,26 +21,16 @@ Partial Class ProjectQuotationReportViewer
 
             ReportViewer1.LocalReport.DataSources.Add(dsMain)
 
-            Dim DTDetail As DataTable = GetDataTable("Select PCM.ProductName,/*PQC.ProductInputSizes*/ '' AS Specification,PQC.Quantity,PQC.Rate,PQC.Amount,PQC.FinalAmount AS TotalAmount,Isnull(PQ.FreightAmount,0) as FreightAmount,PQC.ProductHSNID as HSN,PHM.GSTTaxPercentage as GST from ProductQuotationContents as PQC inner join  ProductCatalogMaster as PCM on PCM.ProductCatalogID = PQC.ProductCatalogID inner Join ProductQuotation as PQ on PQ.ProductEstimateID = PQC.ProductEstimateID inner join ProductHSNMaster as PHM on PHM.ProductHSNID = PQC.ProductHSNID  where PQ.CompanyID = " & GBLCompanyID & " and PQ.ProductEstimateID = " & ID)
-            Dim table As DataTable = JsonConvert.DeserializeObject(Of DataTable)("")
-            Dim searchedValue = ""
-            If table IsNot Nothing Then
-                For i = 0 To table.Rows.Count - 1
-                    Dim ddt = GetDataTable("Select ParameterDisplayName from ProductConfigurationMaster  where ProductCatalogID =" & table.Rows(i)("ProductCatalogID") & " and IsDisplayParameter = 1 and IsDeletedTransaction = 0")
-                    For j = 1 To ddt.Rows.Count - 1
-                        Dim row As DataRow = table.Select("ParameterDisplayName = '" & ddt.Rows(j)("ParameterDisplayName").ToString() & "'").FirstOrDefault()
-                        If Not row Is Nothing Then
-                            searchedValue = row.Item("ParameterValue") & ","
-                        End If
-                    Next
+            Dim DTDetail As DataTable = GetDataTable("Select PCM.ProductName,PQC.Quantity,PQC.Rate,PQC.Amount,PQC.UnitCost,PQC.FinalAmount AS TotalAmount,Isnull(PQ.FreightAmount,0) as FreightAmount,PHM.HSNCode as HSN,Round(PQC.FinalAmount/100*PHM.GSTTaxPercentage,2) as GSTAMT,PHM.GSTTaxPercentage as GST from ProductQuotationContents as PQC inner join  ProductCatalogMaster as PCM on PCM.ProductCatalogID = PQC.ProductCatalogID inner Join ProductQuotation as PQ on PQ.ProductEstimateID = PQC.ProductEstimateID inner join ProductHSNMaster as PHM on PHM.ProductHSNID = PQC.ProductHSNID  where PQ.CompanyID = " & GBLCompanyID & " and PQ.ProductEstimateID = " & ID)
 
-                Next
-            End If
-
-            'DTDetail.Rows(0)("Specification") = searchedValue
+            Dim sum = New ReportParameter("TOTALINWORD", db.ReadNumber((DTDetail.Compute("Sum(TotalAmount)", "") + DTDetail.Compute("Sum(GSTAMT)", "") + DTDetail.Compute("Sum(FreightAmount)", "")).ToString(), "Rupees", "Paise", "INRs")) ' DTDetail.Compute("Sum(TotalAmount)", "").ToString()
+            Dim GST = New ReportParameter("GSTINWORD", db.ReadNumber(DTDetail.Compute("Sum(GSTAMT)", "").ToString(), "Rupees", "Paise", "INRs")) ' DTDetail.Compute("Sum(TotalAmount)", "").ToString()
 
             Dim dsDetail As ReportDataSource = New ReportDataSource("ProjectQuotationDetail", DTDetail)
+            ReportViewer1.LocalReport.SetParameters(sum)
+            ReportViewer1.LocalReport.SetParameters(GST)
             ReportViewer1.LocalReport.DataSources.Add(dsDetail)
+            ReportViewer1.LocalReport.Refresh()
 
         End If
     End Sub

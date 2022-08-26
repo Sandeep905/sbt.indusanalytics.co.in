@@ -1181,7 +1181,7 @@ function ShowShirinReport(gridData) {
         //paging: { pageSize: 4 },
         selection: { mode: "single" }, //columnHidingEnabled: true,
         columnAutoWidth: true,
-        columns: [{ dataField: "VendorName", width: 120, caption: "Associate Partner", visible: false }, {
+        columns: [{ dataField: "VendorName", width: 120, caption: "Associate Partner", visible: true }, {
             dataField: "MachineName", width: 150,
             cellTemplate: function (container, options) {
                 $('<a>').addClass('btn padding-0 font-11').text(options.data.MachineName)

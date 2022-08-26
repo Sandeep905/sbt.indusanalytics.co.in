@@ -66,7 +66,7 @@ Public Class WebService_OtherMaster
 
         GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
 
-        str = "Select Distinct CategoryID ,CategoryName,nullif(Orientation,'') as Orientation , nullif(ProcessIDString,'') as  ProcessIDString,nullif(ContentsIDString ,'') As ContentsIDString from CategoryMaster where CompanyID=" & GBLCompanyID & " and Isnull(IsDeletedTransaction,0)<>1  order by CategoryID desc "
+        str = "Select Distinct CategoryID ,nullif(BusinessCategory,'') as BusinessCategory,CategoryName,nullif(Orientation,'') as Orientation , nullif(ProcessIDString,'') as  ProcessIDString,nullif(ContentsIDString ,'') As ContentsIDString from CategoryMaster where CompanyID=" & GBLCompanyID & " and Isnull(IsDeletedTransaction,0)<>1  order by CategoryID desc "
         db.FillDataTable(dataTable, str)
         data.Message = ConvertDataTableTojSonString(dataTable)
         Return js.Serialize(data.Message)
@@ -87,7 +87,6 @@ Public Class WebService_OtherMaster
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
         'GBLUserName = Convert.ToString(HttpContext.Current.Session("UserName"))
         GBLFYear = Convert.ToString(HttpContext.Current.Session("FYear"))
-
         Try
 
             Dim dtExist As New DataTable
@@ -202,6 +201,18 @@ Public Class WebService_OtherMaster
         Try
             GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
             str = "Select ProcessID,IsDefaultProcess From CategoryWiseProcessAllocation Where CategoryID=" & CategoryID & " And ContentID=" & ContID & " And CompanyID=" & GBLCompanyID & " And ISNULL(IsDeletedTransaction,0)=0"
+            db.FillDataTable(dataTable, str)
+            data.Message = ConvertDataTableTojSonString(dataTable)
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
+    <WebMethod(EnableSession:=True)>
+    Function GetBusinessCategory() As String
+        Try
+            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+            str = "Select Distinct BusinessCategory From CategoryMaster Where BusinessCategory <> ''  And CompanyID=" & GBLCompanyID & " And ISNULL(IsDeletedTransaction,0)=0"
             db.FillDataTable(dataTable, str)
             data.Message = ConvertDataTableTojSonString(dataTable)
             Return js.Serialize(data.Message)

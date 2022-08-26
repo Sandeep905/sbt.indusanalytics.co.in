@@ -473,7 +473,7 @@ Public Class WebServiceProductMaster
     Public Function GetProjectQuotationList() As String
         Try
 
-            str = "SELECT PQ.ProductEstimateID, PQC.ProductEstimationContentID, PQ.LedgerID, LM.LedgerName,SLM.LedgerName AS SalesLedgerName ,PQ.SalesPersonID, PQ.Narration, PQ.EstimateNo, PQ.ProjectName, PQ.CreatedDate, PQ.IsApproved, PQ.ApprovedBy, PQC.Quantity, PQC.ProductCatalogID, PCM.ProductName,PQC.VendorID,VLM.LedgerName AS VednorName, PQC.Rate, PQC.Amount, PQC.ProcessCost, PQC.FinalAmount, PQC.UnitCost, PQC.RateType, PQC.ProcessIDStr,PQC.DefaultProcessStr,PQ.FreightAmount/*, PQC.ProductInputSizes*/ " &
+            str = "SELECT PQ.ProductEstimateID,isnull(PQ.BookingID,0) as BookingID, PQC.ProductEstimationContentID, PQ.LedgerID, LM.LedgerName,SLM.LedgerName AS SalesLedgerName ,PQ.SalesPersonID, PQ.Narration, PQ.EstimateNo, PQ.ProjectName, PQ.CreatedDate, PQ.IsApproved, PQ.ApprovedBy, PQC.Quantity, PQC.ProductCatalogID, PCM.ProductName,PQC.VendorID,VLM.LedgerName AS VednorName, PQC.Rate, PQC.Amount, PQC.ProcessCost, PQC.FinalAmount, PQC.UnitCost, PQC.RateType, PQC.ProcessIDStr,PQC.DefaultProcessStr,PQ.FreightAmount/*, PQC.ProductInputSizes*/ " &
                     "FROM  dbo.ProductQuotation AS PQ " &
                     "LEFT JOIN dbo.ProductQuotationContents AS PQC ON PQ.ProductEstimateID = PQC.ProductEstimateID AND PQ.CompanyID = PQC.CompanyID " &
                     "LEFT JOIN dbo.ProductCatalogMaster AS PCM ON PCM.ProductCatalogID = PQC.ProductCatalogID AND PQ.CompanyID = PQC.CompanyID " &
@@ -490,7 +490,7 @@ Public Class WebServiceProductMaster
 
     <WebMethod(EnableSession:=True)>
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
-    Public Function DeleteProjectQuotation(ByVal TxtPOID As Integer) As String
+    Public Function DeleteProjectQuotation(ByVal TxtPOID As Integer, ByVal TxtBKID As Integer) As String
 
         Dim KeyField As String
         Dim dtExist As New DataTable
@@ -504,9 +504,16 @@ Public Class WebServiceProductMaster
         End If
 
         Try
-
             str = "Update ProductQuotation Set DeletedBy='" & GBLUserID & "',DeletedDate=Getdate(),IsDeletedTransaction=1 WHERE CompanyID=" & GBLCompanyID & " And ProductEstimateID=" & TxtPOID
             str += ";Update ProductQuotationContents Set DeletedBy='" & GBLUserID & "',DeletedDate=Getdate(),IsDeletedTransaction=1 WHERE CompanyID=" & GBLCompanyID & " and ProductEstimateID=" & TxtPOID
+            If TxtBKID > 0 Then
+                str += ";Update JobBooking Set DeletedBy='" & GBLUserID & "',DeletedDate=Getdate(),IsDeletedTransaction=1 WHERE CompanyID=" & GBLCompanyID & " and BookingID=" & TxtBKID
+                str += ";Update JobBookingcontents Set DeletedBy='" & GBLUserID & "',DeletedDate=Getdate(),IsDeletedTransaction=1 WHERE CompanyID=" & GBLCompanyID & " and BookingID=" & TxtBKID
+                str += ";Update JobBookingProcess Set DeletedBy='" & GBLUserID & "',DeletedDate=Getdate(),IsDeletedTransaction=1 WHERE CompanyID=" & GBLCompanyID & " and BookingID=" & TxtBKID
+                str += ";Update JobBookingContentBookForms Set DeletedBy='" & GBLUserID & "',DeletedDate=Getdate(),IsDeletedTransaction=1 WHERE CompanyID=" & GBLCompanyID & " and BookingID=" & TxtBKID
+                str += ";Update JobBookingCostings Set DeletedBy='" & GBLUserID & "',DeletedDate=Getdate(),IsDeletedTransaction=1 WHERE CompanyID=" & GBLCompanyID & " and BookingID=" & TxtBKID
+                str += ";Update JobBookingAttachments Set DeletedBy='" & GBLUserID & "',DeletedDate=Getdate(),IsDeletedTransaction=1 WHERE CompanyID=" & GBLCompanyID & " and BookingID=" & TxtBKID
+            End If
             KeyField = db.ExecuteNonSQLQuery(str)
 
         Catch ex As Exception

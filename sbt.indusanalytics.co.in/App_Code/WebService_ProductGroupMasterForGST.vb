@@ -126,7 +126,9 @@ Public Class WebService_ProductGroupMasterForGST
                 AddColValue = "GETDATE()," & GBLUserID & "," & GBLCompanyID & ",'" & GBLFYear & "'," & GBLUserID
                 KeyField = db.InsertDatatableToDatabase(jsonObjectsRecordMain, TableName, AddColName, AddColValue)
             End If
-
+            If IsNumeric(KeyField) = True Then
+                KeyField = "Success"
+            End If
         Catch ex As Exception
             KeyField = "fail"
         End Try

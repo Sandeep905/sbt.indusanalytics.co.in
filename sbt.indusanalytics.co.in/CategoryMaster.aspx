@@ -57,6 +57,11 @@
                                     <div id="SelectBoxOrientation"></div>
                                     <div><strong id="ValStrSelectBoxOrientation" style="color: red; font-size: 12px; display: none"></strong></div>
                                 </div>
+                                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+                                    <b class="font-11">Business Category</b>
+                                    <div id="SelectBoxBusinessCategory"></div>
+                                    <div><strong id="ValStrSelectBoxBusinessCategory" style="color: red; font-size: 12px; display: none"></strong></div>
+                                </div>
                                 <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
                                     <b class="font-11">Allocated Contents</b>
                                     <div id="GridContentAllocation"></div>

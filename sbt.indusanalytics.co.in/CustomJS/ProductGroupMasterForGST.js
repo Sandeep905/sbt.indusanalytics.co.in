@@ -251,16 +251,16 @@ $("#BtnSave").click(function () {
     //}
 
 
-    if (SelUnderGroup === "" || SelUnderGroup === undefined || SelUnderGroup === null) {
-        DevExpress.ui.notify("Please Choose Under Group...!", "error", 1000);
-        text = "Please Choose Under Group.!";
-        document.getElementById("SelUnderGroup").focus();
-        document.getElementById("ValStrSelUnderGroup").style.display = "block";
-        document.getElementById("ValStrSelUnderGroup").innerHTML = text;
-        return false;
-    } else {
-        document.getElementById("ValStrSelUnderGroup").style.display = "none";
-    }
+    //if (SelUnderGroup === "" || SelUnderGroup === undefined || SelUnderGroup === null) {
+    //    DevExpress.ui.notify("Please Choose Under Group...!", "error", 1000);
+    //    text = "Please Choose Under Group.!";
+    //    document.getElementById("SelUnderGroup").focus();
+    //    document.getElementById("ValStrSelUnderGroup").style.display = "block";
+    //    document.getElementById("ValStrSelUnderGroup").innerHTML = text;
+    //    return false;
+    //} else {
+    //    document.getElementById("ValStrSelUnderGroup").style.display = "none";
+    //}
 
     if (SelProductType === "" || SelProductType === undefined || SelProductType === null) {
         DevExpress.ui.notify("Please Choose Product Type..!", "error", 1000);

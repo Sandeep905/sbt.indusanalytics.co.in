@@ -43,6 +43,7 @@
                 <button id="BtnSave" type="button" class="btn btn-success">Save</button>
                 <input type="button" class="btn btn-primary" value="Show List" id="BtnShowList" onclick="setGridDisplay('none', 'block')" />
                 <input id="EstimateID" style="display: none" />
+                <input id="BookingID" style="display: none" />
             </div>
         </div>
     </div>
@@ -106,7 +107,7 @@
     </div>
 
     <!-- The Modal for new masters-->
-  <%--  <div class="modal fade" id="ModaliFrame" tabindex="-1" role="dialog">
+    <%--  <div class="modal fade" id="ModaliFrame" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content" style="border-radius: 4px; padding-bottom: 0em; padding-right: 0px; padding-left: 1px;">
                 <div class="DialogBoxCustom" style="float: left; border-top-left-radius: 4px; border-top-right-radius: 4px;">
@@ -398,9 +399,9 @@
                         <b class="font-12">Unit Cost</b>
                         <input class="text-right forTextBox" disabled="disabled" type="text" name="finalUnitCost" title="Final Unit Cost" value="" id="finalUnitCost" />
                     </div>
-                    <div class="col-lg-3 col-md-3 col-sm-6 col-sm-6" style="display:none">
+                    <div class="col-lg-3 col-md-3 col-sm-6 col-sm-6" style="display: none">
                         <b class="font-12">Total Cost</b>
-                        <input class="text-right forTextBox" disabled="disabled" type="text" name="finalCost"  title="Final Cost" value="" id="finalCost" />
+                        <input class="text-right forTextBox" disabled="disabled" type="text" name="finalCost" title="Final Cost" value="" id="finalCost" />
                     </div>
                     <div class="col-lg-2 col-md-2 col-sm-6 col-sm-6">
                         <b class="font-12">Final Cost</b>
@@ -412,6 +413,34 @@
                 </div>
             </div>
             <%--</div>--%>
+        </div>
+    </div>
+    <!-- The Layout ZoomModal -->
+    <div class="modal fade" id="myModalZoom" tabindex="-1" role="dialog" style="padding: 0px; margin-top: 0px; margin-left: 0px">
+        <div class="modal-dialog modal-lg" role="document" style="">
+            <div class="modal-content" style="border-radius: 4px; padding-bottom: 0em; padding-right: 0px; width: 100%">
+                <div class="DialogBoxCustom" style="float: left; border-top-left-radius: 4px; border-top-right-radius: 4px;">
+                    <a href="javascript:void(0);" class="iconRightDbox btn-danger" data-dismiss="modal">
+                        <span data-dismiss="modal" style="font-weight: 900; margin-right: 8px">X</span>
+                    </a>
+                    <strong id="caption"></strong>
+                </div>
+
+                <div class="modal-body" style="position: initial; padding-right: 0px">
+                    <div class="rowcontents clearfix" style="padding: 20px; overflow: auto; height: 50em;">
+                        <div style="padding:5px">
+                            <button type="button" class="zoom-out">
+                                <span class="fa fa-minus"></span>
+                            </button>
+                            <button type="button" class="zoom-in">
+                                <span class="fa fa-plus"></span>
+                            </button>
+                        </div>
+                        <img src="images/Indus logo.png" id="Zoomedimg01" style="height: 50em;" class="bg-svg">
+                        <input type="button" id="PZoomBtn" style="display: none" />
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     <!-- The Modal Forms Details-->

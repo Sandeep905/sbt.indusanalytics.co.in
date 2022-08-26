@@ -3,6 +3,8 @@
 var sizeCons = ["2D", "3D", "BOOK"], processgrid = [], Objid = [];
 var GblStatus = "";
 
+
+var BusinessCategoryDataSource = [];
 $("#SelectBoxOrientation").dxSelectBox({
     items: sizeCons,
     placeholder: "Select --",
@@ -10,7 +12,49 @@ $("#SelectBoxOrientation").dxSelectBox({
     showClearButton: true
     //acceptCustomValue: true,
 });
-
+$("#SelectBoxBusinessCategory").dxSelectBox({
+    items: BusinessCategoryDataSource,
+    placeholder: "Select --",
+    valueExpr: "BusinessCategory",
+    displayExpr: "BusinessCategory",
+    searchEnabled: true,
+    showClearButton: true,
+    acceptCustomValue: true,
+    onCustomItemCreating(data) {
+        if (!data.text) {
+            data.customItem = null;
+            return;
+        }
+        const newItem = {
+            BusinessCategory: data.text
+        };
+        BusinessCategoryDataSource.push(newItem);
+        $("#SelectBoxBusinessCategory").dxSelectBox("getDataSource").reload();
+        data.customItem = newItem;
+    },
+});
+GetBusinessCategory();
+function GetBusinessCategory() {
+    $.ajax({
+        type: "POST",
+        url: "WebService_OtherMaster.asmx/GetBusinessCategory",
+        data: '{}',//UnderGroupID:' + JSON.stringify(UnderGroupID) + '
+        contentType: "application/json; charset=utf-8",
+        dataType: "text",
+        success: function (results) {
+            var res = results.replace(/\\/g, '');
+            res = res.replace(/"d":""/g, '');
+            res = res.replace(/""/g, '');
+            res = res.replace(/u0027/g, "'");
+            res = res.substr(1);
+            res = res.slice(0, -1);
+            BusinessCategoryDataSource = JSON.parse(res);
+            $("#SelectBoxBusinessCategory").dxSelectBox({
+                items: BusinessCategoryDataSource,
+            });
+        }
+    });
+}
 GblProcessMaster();
 function GblProcessMaster() {
     $.ajax({
@@ -258,6 +302,9 @@ $("#EditButton").click(function () {
     $("#SelectBoxOrientation").dxSelectBox({
         value: selectedCategoryRows[0].Orientation
     });
+    $("#SelectBoxBusinessCategory").dxSelectBox({
+        value: selectedCategoryRows[0].BusinessCategory
+    });
 
     Objid = [];
     var selectMID = selectedCategoryRows[0].ProcessIDString;//ProcessMasterGrid.cellValue(txtGetGridRow, 14);
@@ -358,10 +405,10 @@ $("#BtnSaveAS").click(function () {
 
 function SaveBtnFun() {
     var SelectBoxOrientation = $('#SelectBoxOrientation').dxSelectBox('instance').option('value');
+    var SelectBoxBusinessCategory = $('#SelectBoxBusinessCategory').dxSelectBox('instance').option('value');
     var CategoryName = document.getElementById("CategoryName").value.trim();
 
     if (CategoryName === "") {
-        alert("Please Enter Category Name");
         document.getElementById("CategoryName").focus();
         document.getElementById("ValStrCategoryName").style.fontSize = "10px";
         document.getElementById("ValStrCategoryName").style.display = "block";
@@ -373,7 +420,6 @@ function SaveBtnFun() {
     }
 
     if (SelectBoxOrientation === null || SelectBoxOrientation === "") {
-        alert("Please select..Orientation");
         document.getElementById("ValStrSelectBoxOrientation").style.fontSize = "10px";
         document.getElementById("ValStrSelectBoxOrientation").style.display = "block";
         document.getElementById("ValStrSelectBoxOrientation").innerHTML = 'This field should not be empty..Orientation';
@@ -381,6 +427,16 @@ function SaveBtnFun() {
     }
     else {
         document.getElementById("ValStrSelectBoxOrientation").style.display = "none";
+    }
+
+    if (SelectBoxBusinessCategory === null || SelectBoxBusinessCategory === "") {
+        document.getElementById("ValStrSelectBoxBusinessCategory").style.fontSize = "10px";
+        document.getElementById("ValStrSelectBoxBusinessCategory").style.display = "block";
+        document.getElementById("ValStrSelectBoxBusinessCategory").innerHTML = 'This field should not be empty..Business Category';
+        return false;
+    }
+    else {
+        document.getElementById("ValStrSelectBoxBusinessCategory").style.display = "none";
     }
 
 
@@ -424,9 +480,9 @@ function SaveBtnFun() {
             GridRow = "";
         }
         else {
-            GridRow = GridRowContent.replace(/"/g, '');
-            GridRow = GridRowContent.substr(1);
-            GridRow = GridRowContent.slice(0, -1);
+            GridRow = GridRow.replace(/"/g, '');
+            GridRow = GridRow.substr(1);
+            GridRow = GridRow.slice(0, -1);
         }
     }
     else if (txtMID === "" || txtMID === null || txtMID === undefined) {
@@ -470,13 +526,13 @@ function SaveBtnFun() {
         CostingDataProcessAllocation = JSON.stringify(jsonObjectsProcessAllocationDetailRecord);
         CostingDataContentAllocation = JSON.stringify(CostingDataContentAllocation);
     }
-    /////////   
 
     var jsonObjectsGroupMasterRecord = [];
     var OperationGroupMasterRecord = {};
 
     OperationGroupMasterRecord.CategoryName = CategoryName;
     OperationGroupMasterRecord.Orientation = SelectBoxOrientation;
+    OperationGroupMasterRecord.BusinessCategory = SelectBoxBusinessCategory;
     OperationGroupMasterRecord.ProcessIDString = GridRow;
     OperationGroupMasterRecord.ContentsIDString = GridRowContent;
 
@@ -562,7 +618,6 @@ function SaveBtnFun() {
                         res = res.replace(/}/g, '');
                         res = res.substr(1);
                         res = res.slice(0, -1);
-
                         document.getElementById("LOADER").style.display = "none";
                         if (res === "Success") {
                             swal("Saved!", "Your data saved", "success");
@@ -586,6 +641,7 @@ function SaveBtnFun() {
 $("#BtnNew").click(function () {
     document.getElementById("CategoryName").value = "";
     $("#SelectBoxOrientation").dxSelectBox({ value: null });
+    $("#SelectBoxBusinessCategory").dxSelectBox({ value: null });
     document.getElementById("TxtCategoryID").value = "";
 
     document.getElementById("BtnDeletePopUp").disabled = true;

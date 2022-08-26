@@ -46,7 +46,7 @@ $.ajax({                //// Add All Active Contents
         $("#SelOrientations").dxSelectBox({
             items: RES1,
             displayExpr: "ContentName",
-            valueExpr:"ContentID"
+            valueExpr: "ContentID"
         });
     },
     error: function errorFunc(jqXHR) {
@@ -642,15 +642,19 @@ $("#BtnSave").click(function () {
         } else
             objProductConfig.push(objProConfig);
     }
+    if (document.getElementById("IsOffsetProduct").checked != true) {
+        if (objProductConfig.length <= 0) {
+            DevExpress.ui.notify("Please enter product parameter..!", "warning", 1000);
+            return;
+        }
+        if (ProductFormula === "" || ProductFormula === null) {
+            DevExpress.ui.notify("Please enter product formula\n atleast in a single row..!", "warning", 1000);
+            return;
+        }
+    }
 
-    if (objProductConfig.length <= 0) {
-        DevExpress.ui.notify("Please enter product parameter..!", "warning", 1000);
-        return;
-    }
-    if (ProductFormula === "" || ProductFormula === null) {
-        DevExpress.ui.notify("Please enter product formula\n atleast in a single row..!", "warning", 1000);
-        return;
-    }
+
+
     //for (var i = 0; i < objProductConfig.length; i++) {
     //    if (ProductFormula.includes(objProductConfig[i].ParameterName) === false) {
     //        DevExpress.ui.notify("Entered product formula is not matched with the parameters..!", "warning", 1500);
@@ -680,6 +684,7 @@ $("#BtnSave").click(function () {
                         if (FlagEdit === false) uploadFileProduction("Product");
                         swal(FlagEdit === false ? "Saved!" : "Updated", "Your data saved successfully...", "success");
                         if (FlagEdit === true) location.reload();
+                        location.reload();
                     } else {
                         swal("Not Saved!", results.d, "error");
                     }

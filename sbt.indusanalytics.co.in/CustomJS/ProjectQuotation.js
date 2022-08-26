@@ -400,19 +400,13 @@ var grid = $("#gridProductList").dxDataGrid({
     ],
     editing: {
         mode: "popup",
-        //allowAdding: true,
-        allowUpdating: false,
+         allowUpdating: false,
         allowDeleting: true,
-        //newRowPosition: 'pageBottom',
-        //useIcons: true,
-        //confirmDelete: false,
-        //texts: { confirmDeleteMessage: "" }
         popup: {
             title: 'Product Requirement',
             showTitle: true,
             width: 500,
             height: 300,
-
         },
         form: {
             items: [{
@@ -467,7 +461,6 @@ var grid = $("#gridProductList").dxDataGrid({
             else
                 Fildata = ProductMasterList;
             e.editorOptions.dataSource = Fildata;
-
         }
         if (e.parentType == 'dataRow' && e.dataField == "Quantity") {
             e.editorOptions.min = 0;
@@ -632,6 +625,7 @@ $("#GridShowlist").dxDataGrid({
         document.getElementById("EstimateID").value = "";
         if (data.length > 0) {
             document.getElementById("EstimateID").value = data[0].ProductEstimateID;
+            document.getElementById("BookingID").value = data[0].BookingID;
         }
     }
 });
@@ -869,8 +863,6 @@ $("#BtnApplyPlan").click(function () {
             gridProductData._options.dataSource[i].Rate = SelectedPlanData[0].VendorRate;
             gridProductData._options.dataSource[i].RateType = "Per Square Feet";
             gridProductData._options.dataSource[i].Amount = SelectedPlanData[0].FinalAmount;
-
-            gridProductData._options.dataSource[i].VendorID = SelectedPlanData[0].VendorID;
             gridProductData._options.dataSource[i].VendorName = SelectedPlanData[0].VendorName;
             gridProductData._options.dataSource[i].City = SelectedPlanData[0].City;
             gridProductData._options.dataSource[i].FinalAmount = SelectedPlanData[0].FinalAmount;
@@ -1043,6 +1035,7 @@ $("#BtnShowList").click(function () {
 });
 $("#BtnDelete").click(function () {
     var EstimateID = Number(document.getElementById("EstimateID").value);
+    var BookingID = Number(document.getElementById("BookingID").value);
     if (EstimateID === null || EstimateID <= 0) {
         swal("Please select any record to delete..!");
         return false;
@@ -1061,7 +1054,7 @@ $("#BtnDelete").click(function () {
             $.ajax({
                 type: "POST",
                 url: "WebServiceProductMaster.asmx/DeleteProjectQuotation",
-                data: '{TxtPOID:' + EstimateID + '}',
+                data: '{TxtPOID:' + EstimateID + ',TxtBKID:' + BookingID + '}',
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 success: function (results) {
@@ -1238,21 +1231,21 @@ $("#btnApplyCostPQ").click(function () {
         var FinalMiscPer = Number(document.getElementById("FinalMiscPer").value);
         var FinalShipperCost = Number(document.getElementById("FinalShipperCost").value);
 
-        SelectedProductData.Rate = Number(document.getElementById('finalUnitCost').value);
-        SelectedProductData.Amount = FinalAmount;
-
         var gridProductData = $('#gridProductList').dxDataGrid('instance');
 
         for (var i = 0; i < gridProductData._options.dataSource.length; i++) {
             if (gridProductData._options.dataSource[i].ProductCatalogID === ProductCatalogID && gridProductData._options.dataSource[i].Quantity === Number(document.getElementById("TxtPlanQty").value)) {
-                gridProductData._options.dataSource[i].Rate = SelectedProductData.Rate;
+                gridProductData._options.dataSource[i].Rate = Number(document.getElementById('finalUnitCost').value);
                 gridProductData._options.dataSource[i].RateType = "Per Unit";
                 gridProductData._options.dataSource[i].Amount = Number(FinalAmount);
                 gridProductData._options.dataSource[i].MiscPer = Number(FinalMiscPer);
                 gridProductData._options.dataSource[i].ShippingCost = Number(FinalShipperCost);
                 gridProductData._options.dataSource[i].FinalAmount = Number(FinalQuotedCost1);;
                 gridProductData._options.dataSource[i].RequiredQuantity = gridProductData._options.dataSource[i].Quantity;
-                gridProductData._options.dataSource[i].VendorRate = FinalQuotedCost1;
+                gridProductData._options.dataSource[i].VendorRate = GblPlanValues.PrintingRate;
+                gridProductData._options.dataSource[i].UnitCost = Number(document.getElementById('finalUnitCost').value);
+                gridProductData._options.dataSource[i].VendorID = GblPlanValues.VendorID;
+                gridProductData._options.dataSource[i].VendorName = GblPlanValues.VendorName;
                 gridProductData.refresh();
                 break;
             }
