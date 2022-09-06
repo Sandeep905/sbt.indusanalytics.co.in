@@ -1,6 +1,6 @@
 ﻿"use strict";
 var BKID = 0, BKNo = "";
-
+var GBLContents = [];
 var statuses = ["Pending For Approval", "Internal Approved", "Rework"];
 $("#radioFilterOptions").dxRadioGroup({
     dataSource: statuses,
@@ -64,29 +64,21 @@ function refreshGrid(val) {
                     return false;
                 }
                 var RES1 = JSON.parse(res);
-                if (RES1.length < 1) {
+                if (RES1.Projects.length < 1) {
                     DevExpress.ui.notify("No data found..!", "warning", 1000);
                 }
-                var usercaption = "";
-                var columns;
-                if (val === 0) {
-                    usercaption = "Quote By";
-                } else if (val === 1) {
-                    usercaption = "Int.Approval By";
-                } else if (val === 2) {
-                    usercaption = "Rework By";
-                } else if (val === 3) {
-                    usercaption = "Cancelled By";
-                }
-                columns = [{ dataField: "ClientName", caption: "Client Name", width: 180 }, { dataField: "CategoryName", caption: "Category Name" },
-                { dataField: "JobName", caption: "Job Name", width: 200 }, { dataField: "BookingNo", caption: "Quote No" },
-                { dataField: "CreatedDate", caption: "Quote Date" }, { dataField: "OrderQuantity", caption: "Order Qty" },
-                { dataField: "QuotedCost", caption: "Quoted Cost" }, { dataField: "FinalCost", caption: "Cost" },
-                { dataField: "TypeOfCost", caption: "Unit" }, { dataField: "RemarkInternalApproved", caption: "Int.Approval Remak" }, { dataField: "Remark", caption: "Quote Remark" },
-                { dataField: "ReworkRemark", caption: "Rework Remark" }, { dataField: "UserName", caption: usercaption }, { dataField: "InternalApprovedDate", caption: "Approval Date" }, { dataField: "EnquiryID", caption: "Enquiry No", visible: false }];
-
+                var columns = [
+                    { dataField: "QuotationNo" },
+                    { dataField: "ProjectName" },
+                    { dataField: "ClientName" },
+                    { dataField: "SalesPerson" },
+                    { dataField: "FreightAmount" },
+                    { dataField: "Remark" },
+                    { dataField: "EstimateBy" },
+                ];
+                GBLContents = RES1.Contents;
                 $("#GridData").dxDataGrid({
-                    dataSource: RES1,
+                    dataSource: RES1.Projects,
                     columns: columns
                 });
             }
@@ -102,6 +94,7 @@ $("#GridData").dxDataGrid({
         fileName: "Quotes",
         allowExportSelectedData: true
     },
+    keyExpr: 'ProductEstimateID',
     allowColumnReordering: true,
     allowColumnResizing: true,
     showRowLines: true,
@@ -122,17 +115,52 @@ $("#GridData").dxDataGrid({
     onRowPrepared: function (e) {
         setDataGridRowCss(e);
     },
-    //columns: [{ dataField: "ClientName", caption: "Client Name", width: 180 }, { dataField: "CategoryName", caption: "Category Name" },
-    //{ dataField: "JobName", caption: "Job Name", width: 200 }, { dataField: "BookingNo", caption: "Quote No" },
-    //{ dataField: "CreatedDate", caption: "Quote Date", dataType: "date" }, { dataField: "OrderQuantity", caption: "Order Qty" },
-    //{ dataField: "UserName", caption: "Quote By" }, { dataField: "QuotedCost", caption: "Quoted Cost" }, { dataField: "FinalCost", caption: "Cost" },
-    //{ dataField: "TypeOfCost", caption: "Unit" }, { dataField: "InternalApprovedBy", caption: "Int.Approval By" }, { dataField: "RemarkInternalApproved", caption: "Int.Approval Remak" },
-    //{ dataField: "ReworkBy", caption: "Rework By" }, { dataField: "ReworkRemark", caption: "Rework Remark" }, { dataField: "EnquiryID", caption: "Enquiry No", visible: false }],
+    masterDetail: {
+        enabled: true,
+        template(container, options) {
+            const currentProjectData = options.data;
+
+            $('<div>')
+                .addClass('master-detail-caption')
+                .text(`${currentProjectData.ClientName} 's Products:`)
+                .appendTo(container);
+            $('<div>')
+                .dxDataGrid({
+                    columnAutoWidth: true,
+                    showBorders: true,
+                    columns: [
+                        { dataField: "ProductName" },
+                        { dataField: "CategoryName" },
+                        { dataField: "HSNCode" },
+                        { dataField: "Quantity" },
+                        { dataField: "Rate" },
+                        { dataField: "RateType" },
+                        { dataField: "UnitCost" },
+                        { dataField: "GSTPercantage" },
+                        { dataField: "GSTAmount" },
+                        { dataField: "MiscPercantage" },
+                        { dataField: "MiscAmount" },
+                        { dataField: "ShippingCost" },
+                        { dataField: "ProfitPer" },
+                        { dataField: "ProfitCost" },
+                        { dataField: "FinalAmount" },
+                        { dataField: "VendorName" }
+                    ],
+                    dataSource: new DevExpress.data.DataSource({
+                        store: new DevExpress.data.ArrayStore({
+                            //key: 'ID',
+                            data: GBLContents,
+                        }),
+                        filter: ['ProductEstimateID', '=', options.key],
+                    }),
+                }).appendTo(container);
+        },
+    },
     onSelectionChanged: function (selectedItems) {
         var data = selectedItems.selectedRowsData;
         if (data.length > 0) {
-            BKID = data[0].BookingID;
-            BKNo = data[0].BookingNo;
+            BKID = data[0].ProductEstimateID;
+            BKNo = data[0].QuotationNo;
         } else {
             BKID = 0; BKNo = "";
         }
@@ -192,7 +220,7 @@ $("#BtnUpdate").click(function () {
 
     if (radioFilterOptions === "Pending For Approval") {
         objArr.type = 0;
-    } else if (radioFilterOptions === "Intenal Approved") {
+    } else if (radioFilterOptions === "Internal Approved") {
         objArr.type = 1;
     } else if (radioFilterOptions === "Rework") {
         objArr.type = 2;
@@ -214,9 +242,10 @@ $("#BtnUpdate").click(function () {
                 var res = results.d.replace(/\\/g, '');
                 if (res === "Success") {
                     DevExpress.ui.notify(res, "success", 1500);
+                    location.reload();
                 } else
                     DevExpress.ui.notify(res, "warning", 1500);
-                location.reload();
+
             },
             error: function errorFunc(jqXHR) {
                 DevExpress.ui.notify("" + jqXHR.statusText + "", "error", 1000);

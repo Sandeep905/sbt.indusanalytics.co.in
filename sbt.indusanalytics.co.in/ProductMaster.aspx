@@ -28,11 +28,11 @@
                 <div id="SelProductHSN"></div>
             </div>
             <div class="col-xs-12 col-sm-3 col-md-2 col-lg-2">
-                <br class="hidden-sm hidden-xs"/>
-                <input type="checkbox" name="IsOffsetProduct" value="" id="IsOffsetProduct" />
-                <label for="IsOffsetProduct" onclick="EnableOrientation()" class="font-11">Is Offset Product</label>
+                <br class="hidden-sm hidden-xs" />
+                <input type="checkbox" name="IsOffsetProduct" value="" id="IsOffsetProduct"  onchange="EnableOrientation()" />
+                <label for="IsOffsetProduct" id="IsOffsetProductL" class="font-11">Is Offset Product</label>
             </div>
-              <div class="col-xs-12 col-sm-3 col-md-3 col-lg-2">
+            <div class="col-xs-12 col-sm-3 col-md-3 col-lg-2">
                 <b class="font-11">Orientation</b>
                 <div id="SelOrientations"></div>
             </div>
@@ -40,11 +40,15 @@
                 <b class="font-11">Product Name</b>
                 <input type="text" id="TxtProductName" placeholder="Product Name" class="forTextBox" />
             </div>
-            <div class="col-xs-12 col-sm-6 col-md-5 col-lg-6">
+            <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4">
                 <b class="font-11">Product Description</b>
                 <input id="TxtProductDesc" type="text" class="forTextBox" value="" placeholder="Product Description" title="Product Description" />
             </div>
-
+            <div class="col-xs-12 col-sm-3 col-md-2 col-lg-2">
+                <br class="hidden-sm hidden-xs" />
+                <input type="checkbox" name="IsUnitProduct" onchange="UnitWiseProduct()" value="" id="IsUnitProduct" />
+                <label for="IsUnitProduct"  id="IsUnitProductLable"   class="font-11">Per Unit Cost</label>
+            </div>
             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                 <input type="button" name="btnProductConfig" id="btnProductConfig" value="Product Configuration" class="btn btn-primary" />
                 <input type="button" name="btnVendorRateSetting" id="btnVendorRateSetting" value="Vendor Rates" class="btn btn-secondary" />
@@ -83,7 +87,7 @@
             <div class="modal-footer">
                 <button id="BtnEdit" type="button" class="btn btn-primary waves-effect">Edit</button>
                 <button id="BtnDelete" type="button" class="btn btn-danger">Delete</button>
-                <input type="button" value="Close" class="btn btn-secondary" onclick="setGridShowDisplay('block','none')" />
+                <input type="button" value="Close" class="btn btn-secondary" onclick="setGridShowDisplay('block', 'none')" />
             </div>
             <div role="tabpanel">
                 <div id="GridShowlist"></div>

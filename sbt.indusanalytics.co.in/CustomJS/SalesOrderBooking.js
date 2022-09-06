@@ -303,7 +303,7 @@ $("#SOBProductData").dxDataGrid({
     showRowLines: true,
     editing: {
         mode: "cell",
-        allowUpdating: true
+        allowUpdating: false
     },
     selection: { mode: 'single' },
     scrolling: { mode: 'infinite' },
@@ -311,23 +311,20 @@ $("#SOBProductData").dxDataGrid({
     rowAlternationEnabled: false,
     headerFilter: { visible: false },
     columns: [
-        { dataField: "LedgerName", caption: "Client Name", allowEditing: false }, { dataField: "JobName", caption: "Product Name", allowEditing: false }, { dataField: "ProductCode", allowEditing: false } , { dataField: "CategoryName", caption: "Category", allowEditing: false }, { dataField: "BookingNo", caption: "Quote No", allowEditing: false },
-        { dataField: "ProductMasterCode", allowEditing: false }, { dataField:  "ProductHSNName", allowEditing: false},
-        { dataField: "OrderQuantity", validationRules: [{ type: "required" }, { type: "numeric" }], caption: "Order Qty", allowEditing: true, fixedPosition: "right", fixed: true, width: 80 },
-        { dataField: "CurrencySymbol", caption: "Currency", visible: true, fixedPosition: "right", fixed: true, width: 70, allowEditing: false },
-        { dataField: "QuoteRate", caption: "Quote Rate", visible: true, fixedPosition: "right", fixed: true, width: 50, allowEditing: false },
-        { dataField: "ApprovedRate", caption: "Appr. Rate", visible: true, fixedPosition: "right", fixed: true, width: 50, allowEditing: false },
-        { dataField: "TotalAmount", visible: false, allowEditing: false },
-        {
-            dataField: "Add", caption: "", allowEditing: false, visible: true, fixedPosition: "right", fixed: true, width: 25,
-            cellTemplate: function (container, options) {
-                $('<div>').addClass('fa fa-plus dx-link').appendTo(container);
-            }
-        }],
-    customizeColumns: function (columns) {
-        columns[0].width = 120;
-        columns[1].width = 150;
-    },
+        { dataField: "QuotationNo" },
+        { dataField: "ProjectName" },
+        { dataField: "ClientName" },
+        { dataField: "SalesPerson" },
+        { dataField: "FreightAmount" },
+        { dataField: "MiscAmount" },
+        { dataField: "ShippingCost" },
+        { dataField: "GSTAmount" },
+        { dataField: "FinalAmount" },
+        { dataField: "ProfitCost" },
+        { dataField: "ApprovedCost" },
+        { dataField: "Remark" },
+        { dataField: "ApprovedBy" },
+    ],
     height: function () {
         return window.innerHeight / 2.5;
     },
@@ -338,70 +335,97 @@ $("#SOBProductData").dxDataGrid({
     //        e.cancel = true;
     //    }
     //},
-    onRowUpdated: function (e) {
-        if (e.data.OrderQuantity > 0) {
-            e.key.ApprovedRate = CalculateSlabrates(e.key.BookingID, Number(e.key.OrderQuantity), "AR");
-            e.key.QuoteRate = CalculateSlabrates(e.key.BookingID, Number(e.key.OrderQuantity), "QR");
-        } else {
-            e.key.ApprovedRate = 0;
-            e.key.QuoteRate = 0;
-        }
-        e.component.refresh();
-    },
-    onCellClick: function (clickedCell) {
-        if (clickedCell.rowType === undefined) return;
-        if (clickedCell.rowType === "header" || clickedCell.rowType === "filter") {
-            return false;
-        }
-        if (clickedCell.column.dataField === "Add") {
-            try {
-                clickedCell.component.saveEditData();
-                clickedCell.component.refresh();
-                if (clickedCell.data.OrderQuantity <= 0 || !clickedCell.data.OrderQuantity) {
-                    DevExpress.ui.notify("Please enter order quantity first..!", "warning", 1500);
-                    clickedCell.component.cellValue(clickedCell.row.rowIndex, "OrderQuantity", "");
-                    return false;
-                }
-                if (clickedCell.data.ApprovedRate <= 0 || !clickedCell.data.ApprovedRate) {
-                    DevExpress.ui.notify("Entered quantity is not a valid approved quantity..!", "warning", 1500);
-                    return false;
-                }
-                var dataGrid = $('#SOBProductAddedData').dxDataGrid('instance');
-                var result = $.grep(dataGrid._options.dataSource, function (e) { return e.BookingNo === clickedCell.data.BookingNo; });
-                if (result.length === 1) {
-                    // data found
-                    DevExpress.ui.notify("Product already added..!", "error", 500);
-                    return false;
-                }
+    //onRowUpdated: function (e) {
+    //    if (e.data.OrderQuantity > 0) {
+    //        e.key.ApprovedRate = CalculateSlabrates(e.key.BookingID, Number(e.key.OrderQuantity), "AR");
+    //        e.key.QuoteRate = CalculateSlabrates(e.key.BookingID, Number(e.key.OrderQuantity), "QR");
+    //    } else {
+    //        e.key.ApprovedRate = 0;
+    //        e.key.QuoteRate = 0;
+    //    }
+    //    e.component.refresh();
+    //},
+    //onCellClick: function (clickedCell) {
+    //    if (clickedCell.rowType === undefined) return;
+    //    if (clickedCell.rowType === "header" || clickedCell.rowType === "filter") {
+    //        return false;
+    //    }
+    //    if (clickedCell.column.dataField === "Add") {
+    //        try {
+    //            clickedCell.component.saveEditData();
+    //            clickedCell.component.refresh();
+    //            if (clickedCell.data.OrderQuantity <= 0 || !clickedCell.data.OrderQuantity) {
+    //                DevExpress.ui.notify("Please enter order quantity first..!", "warning", 1500);
+    //                clickedCell.component.cellValue(clickedCell.row.rowIndex, "OrderQuantity", "");
+    //                return false;
+    //            }
+    //            if (clickedCell.data.ApprovedRate <= 0 || !clickedCell.data.ApprovedRate) {
+    //                DevExpress.ui.notify("Entered quantity is not a valid approved quantity..!", "warning", 1500);
+    //                return false;
+    //            }
+    //            var dataGrid = $('#SOBProductAddedData').dxDataGrid('instance');
+    //            var result = $.grep(dataGrid._options.dataSource, function (e) { return e.BookingNo === clickedCell.data.BookingNo; });
+    //            if (result.length === 1) {
+    //                // data found
+    //                DevExpress.ui.notify("Product already added..!", "error", 500);
+    //                return false;
+    //            }
 
-                var newData = clickedCell.data;
-                newData.OrderQuantity = clickedCell.data.OrderQuantity;
-                newData.ApprovedRate = clickedCell.data.ApprovedRate; ///clickedCell.component._options.dataSource[clickedCell.rowIndex].ApprovedRate; 
-                newData.QuoteRate = clickedCell.data.QuoteRate;
-                newData.FinalCost = clickedCell.data.FinalCost;
-                newData.TotalAmount = clickedCell.data.TotalAmount;
-                newData.TypeOfCost = clickedCell.data.TypeOfCost;
-                newData.CGSTTaxAmount = 0;
-                newData.SGSTTaxAmount = 0;
-                newData.IGSTTaxAmount = 0;
+    //            var newData = clickedCell.data;
+    //            newData.OrderQuantity = clickedCell.data.OrderQuantity;
+    //            newData.ApprovedRate = clickedCell.data.ApprovedRate; ///clickedCell.component._options.dataSource[clickedCell.rowIndex].ApprovedRate; 
+    //            newData.QuoteRate = clickedCell.data.QuoteRate;
+    //            newData.FinalCost = clickedCell.data.FinalCost;
+    //            newData.TotalAmount = clickedCell.data.TotalAmount;
+    //            newData.TypeOfCost = clickedCell.data.TypeOfCost;
+    //            newData.CGSTTaxAmount = 0;
+    //            newData.SGSTTaxAmount = 0;
+    //            newData.IGSTTaxAmount = 0;
 
-                var clonedItem = $.extend({}, newData);
-                dataGrid._options.dataSource.splice(dataGrid.totalCount(), 0, clonedItem);
-                dataGrid.refresh(true);
+    //            var clonedItem = $.extend({}, newData);
+    //            dataGrid._options.dataSource.splice(dataGrid.totalCount(), 0, clonedItem);
+    //            dataGrid.refresh(true);
 
-                //dataGrid._events.preventDefault();
-                DevExpress.ui.notify("Product added..!", "success", 500);
-                clickedCell.component.clearFilter();
-                $("#SOBClientName").dxSelectBox({
-                    disabled: true
-                });
-            } catch (e) {
-                console.log(e);
-            }
-        }
-    },
+    //            //dataGrid._events.preventDefault();
+    //            DevExpress.ui.notify("Product added..!", "success", 500);
+    //            clickedCell.component.clearFilter();
+    //            $("#SOBClientName").dxSelectBox({
+    //                disabled: true
+    //            });
+    //        } catch (e) {
+    //            console.log(e);
+    //        }
+    //    }
+    //},
     onRowPrepared: function (e) {
         setDataGridRowCss(e);
+    },
+    onSelectionChanged: function (data) {
+        //data.selectedRowsData[0].ProductEstimateID
+
+        $.ajax({
+            type: "POST",
+            url: "WebServiceOthers.asmx/LoadProjectContents",
+            data: '{ProductEstimateID:' + data.selectedRowsData[0].ProductEstimateID + '}',//
+            contentType: "application/json; charset=utf-8",
+            dataType: 'json',
+            success: function (results) {
+                var res = results.d.replace(/\\/g, '');
+                res = res.replace(/"d":""/g, '');
+                res = res.replace(/"d":null/g, '');
+                res = res.replace(/u0026/g, '&');
+                res = res.substr(1);
+                res = res.slice(0, -1);
+                var RES1 = JSON.parse(res.toString());
+                $("#SOBProductAddedData").dxDataGrid({
+                    dataSource: RES1
+                });
+            },
+            error: function errorFunc(jqXHR) {
+                $("#image-indicator").dxLoadPanel("instance").option("visible", false);
+                alert(jqXHR.message);
+            }
+        });
     }
 });
 
@@ -412,18 +436,30 @@ $("#SOBProductAddedData").dxDataGrid({
     columnAutoWidth: true,
     showBorders: true,
     showRowLines: true,
-    editing: {
-        mode: "row",
-        allowDeleting: true
-    },
     scrolling: { mode: 'infinite' },
-    columns: [{ dataField: "LedgerName", caption: "Client Name" }, { dataField: "JobName", caption: "Product Name" }, "ProductCode", { dataField: "CategoryName", caption: "Category" }, { dataField: "BookingNo", caption: "Quote No" },
-        "ProductMasterCode", "ProductHSNName", { dataField: "OrderQuantity", caption: "Order Qty", visible: true, fixedPosition: "right", fixed: true, width: 100 }],
-    height: function () {
-        return window.innerHeight / 2.6;
-    },
+    columns: [
+        { dataField: "ProductName" },
+        { dataField: "CategoryName" },
+        { dataField: "HSNCode" },
+        { dataField: "Quantity" },
+        { dataField: "Rate" },
+        { dataField: "RateType" },
+        { dataField: "UnitCost" },
+        { dataField: "GSTPercantage" },
+        { dataField: "GSTAmount" },
+        { dataField: "MiscPercantage" },
+        { dataField: "MiscAmount" },
+        { dataField: "ShippingCost" },
+        { dataField: "ProfitPer" },
+        { dataField: "ProfitCost" },
+        { dataField: "FinalAmount" },
+        { dataField: "VendorName" }
+    ],
     onRowPrepared: function (e) {
         setDataGridRowCss(e);
+    },
+    height: function () {
+        return window.innerHeight / 2.7;
     },
     onRowRemoved: function (e) {
         if (e.component.totalCount() <= 0)
@@ -540,42 +576,38 @@ $("#GridOrdersList").dxDataGrid({
     selection: { mode: 'single' },
     showBorders: true,
     sorting: false,
-    editing: {
-        mode: 'cell',
-        allowUpdating: true
-    },
     showRowLines: true,
     scrolling: { mode: 'infinite' },
     height: function () {
         return window.innerHeight / 3;
     },
-    summary: {
-        recalculateWhileEditing: true,
-        totalItems: [{
-            format: "largeNumber",
-            showInColumn: "OrderQuantity",
-            column: "OrderQuantity",
-            summaryType: "sum",
-            displayFormat: "{0}",
-            alignByColumn: true
-        }, {
-            format: "fixedPoint",
-            precision: 2,
-            showInColumn: "TotalAmount",
-            column: "TotalAmount",
-            summaryType: "sum",
-            displayFormat: "₹{0}",
-            alignByColumn: true
-        }, {
-            format: "fixedPoint",
-            precision: 2,
-            showInColumn: "NetAmount",
-            column: "NetAmount",
-            summaryType: "sum",
-            displayFormat: "₹{0}",
-            alignByColumn: true
-        }]
-    },
+    //summary: {
+    //    recalculateWhileEditing: true,
+    //    totalItems: [{
+    //        format: "largeNumber",
+    //        showInColumn: "OrderQuantity",
+    //        column: "OrderQuantity",
+    //        summaryType: "sum",
+    //        displayFormat: "{0}",
+    //        alignByColumn: true
+    //    }, {
+    //        format: "fixedPoint",
+    //        precision: 2,
+    //        showInColumn: "TotalAmount",
+    //        column: "TotalAmount",
+    //        summaryType: "sum",
+    //        displayFormat: "₹{0}",
+    //        alignByColumn: true
+    //    }, {
+    //        format: "fixedPoint",
+    //        precision: 2,
+    //        showInColumn: "NetAmount",
+    //        column: "NetAmount",
+    //        summaryType: "sum",
+    //        displayFormat: "₹{0}",
+    //        alignByColumn: true
+    //    }]
+    //},
     //onEditingStart: function (e) {
     //    if (e.column.dataField === "ProductHSNID" || e.column.dataField === "OrderQuantity" || e.column.dataField === "FinalDeliveryDate" || e.column.dataField === "JobType" || e.column.dataField === "JobReference"
     //        || e.column.dataField === "JobPriority" || e.column.dataField === "PrePressRemark") {
@@ -583,88 +615,88 @@ $("#GridOrdersList").dxDataGrid({
     //    } else
     //        e.cancel = true;
     //},
-    onRowUpdated: function (e) {
-        //if (e.key.OrderQuantity > 0) {
-        var cost = 0;
-        if (e.key.ApprovedRate > 0) {
-            if (e.key.TypeOfCost.toUpperCase() === "PER UNIT" || e.key.TypeOfCost.toUpperCase() === "UNITCOST") {
-                cost = Number(e.key.OrderQuantity) * e.key.ApprovedRate;
-                e.key.TotalAmount = cost.toFixed(2);
-            } else if (e.key.TypeOfCost.toUpperCase() === "PER 1000" || e.key.TypeOfCost.toUpperCase() === "1000 UNIT" || e.key.TypeOfCost.toUpperCase() === "UNITTHCOST") {
-                cost = Number(Number(e.key.OrderQuantity) / 1000) * e.key.ApprovedRate;
-                e.key.TotalAmount = cost.toFixed(2);
-            } else if (e.key.TypeOfCost.toUpperCase() === "TOTAL") {
-                e.key.TotalAmount = e.key.ApprovedRate;
-            }
-        } else {
-            if (e.key.TypeOfCost.toUpperCase() === "PER UNIT" || e.key.TypeOfCost.toUpperCase() === "UNITCOST") {
-                cost = Number(e.key.OrderQuantity) * e.key.FinalCost;
-                e.key.TotalAmount = cost.toFixed(2);
-            } else if (e.key.TypeOfCost.toUpperCase() === "PER 1000" || e.key.TypeOfCost.toUpperCase() === "1000 UNIT" || e.key.TypeOfCost.toUpperCase() === "UNITTHCOST") {
-                cost = Number(Number(e.key.OrderQuantity) / 1000) * e.key.FinalCost;
-                e.key.TotalAmount = cost.toFixed(2);
-            } else if (e.key.TypeOfCost.toUpperCase() === "TOTAL") {
-                e.key.TotalAmount = e.key.FinalCost;
-            }
-        }
+    //onRowUpdated: function (e) {
+    //    //if (e.key.OrderQuantity > 0) {
+    //    var cost = 0;
+    //    if (e.key.ApprovedRate > 0) {
+    //        if (e.key.TypeOfCost.toUpperCase() === "PER UNIT" || e.key.TypeOfCost.toUpperCase() === "UNITCOST") {
+    //            cost = Number(e.key.OrderQuantity) * e.key.ApprovedRate;
+    //            e.key.TotalAmount = cost.toFixed(2);
+    //        } else if (e.key.TypeOfCost.toUpperCase() === "PER 1000" || e.key.TypeOfCost.toUpperCase() === "1000 UNIT" || e.key.TypeOfCost.toUpperCase() === "UNITTHCOST") {
+    //            cost = Number(Number(e.key.OrderQuantity) / 1000) * e.key.ApprovedRate;
+    //            e.key.TotalAmount = cost.toFixed(2);
+    //        } else if (e.key.TypeOfCost.toUpperCase() === "TOTAL") {
+    //            e.key.TotalAmount = e.key.ApprovedRate;
+    //        }
+    //    } else {
+    //        if (e.key.TypeOfCost.toUpperCase() === "PER UNIT" || e.key.TypeOfCost.toUpperCase() === "UNITCOST") {
+    //            cost = Number(e.key.OrderQuantity) * e.key.FinalCost;
+    //            e.key.TotalAmount = cost.toFixed(2);
+    //        } else if (e.key.TypeOfCost.toUpperCase() === "PER 1000" || e.key.TypeOfCost.toUpperCase() === "1000 UNIT" || e.key.TypeOfCost.toUpperCase() === "UNITTHCOST") {
+    //            cost = Number(Number(e.key.OrderQuantity) / 1000) * e.key.FinalCost;
+    //            e.key.TotalAmount = cost.toFixed(2);
+    //        } else if (e.key.TypeOfCost.toUpperCase() === "TOTAL") {
+    //            e.key.TotalAmount = e.key.FinalCost;
+    //        }
+    //    }
 
-        var HSNID = e.key.ProductHSNID;
-        var result = $.grep(ProductHSNGrp, function (ex) { return ex.ProductHSNID === HSNID; });
-        if (result.length === 1) {
-            if (e.key.ClientState !== e.key.CompanyState) {
-                e.key.IGSTTaxPercentage = result[0].IGSTTaxPercentage;
-                e.key.CGSTTaxPercentage = 0;
-                e.key.SGSTTaxPercentage = 0;
-            } else {
-                e.key.IGSTTaxPercentage = 0;
-                e.key.SGSTTaxPercentage = result[0].SGSTTaxPercentage;
-                e.key.CGSTTaxPercentage = result[0].CGSTTaxPercentage;
-            }
-            e.key.GSTTaxPercentage = result[0].GSTTaxPercentage;
-        }
-        e.key.IGSTTaxAmount = Number(Number(e.key.TotalAmount) * Number(e.key.IGSTTaxPercentage)) / 100;
-        e.key.CGSTTaxAmount = Number(Number(e.key.TotalAmount) * Number(e.key.CGSTTaxPercentage)) / 100;
-        e.key.SGSTTaxAmount = Number(Number(e.key.TotalAmount) * Number(e.key.SGSTTaxPercentage)) / 100;
-        var Amt = Number(cost) + Number(e.key.CGSTTaxAmount) + Number(e.key.SGSTTaxAmount) + Number(e.key.IGSTTaxAmount);
-        e.key.NetAmount = Amt.toFixed(2);
-        //}
-        e.component.refresh();
-        //alert('onRowUpdate');
-    },
+    //    var HSNID = e.key.ProductHSNID;
+    //    var result = $.grep(ProductHSNGrp, function (ex) { return ex.ProductHSNID === HSNID; });
+    //    if (result.length === 1) {
+    //        if (e.key.ClientState !== e.key.CompanyState) {
+    //            e.key.IGSTTaxPercentage = result[0].IGSTTaxPercentage;
+    //            e.key.CGSTTaxPercentage = 0;
+    //            e.key.SGSTTaxPercentage = 0;
+    //        } else {
+    //            e.key.IGSTTaxPercentage = 0;
+    //            e.key.SGSTTaxPercentage = result[0].SGSTTaxPercentage;
+    //            e.key.CGSTTaxPercentage = result[0].CGSTTaxPercentage;
+    //        }
+    //        e.key.GSTTaxPercentage = result[0].GSTTaxPercentage;
+    //    }
+    //    e.key.IGSTTaxAmount = Number(Number(e.key.TotalAmount) * Number(e.key.IGSTTaxPercentage)) / 100;
+    //    e.key.CGSTTaxAmount = Number(Number(e.key.TotalAmount) * Number(e.key.CGSTTaxPercentage)) / 100;
+    //    e.key.SGSTTaxAmount = Number(Number(e.key.TotalAmount) * Number(e.key.SGSTTaxPercentage)) / 100;
+    //    var Amt = Number(cost) + Number(e.key.CGSTTaxAmount) + Number(e.key.SGSTTaxAmount) + Number(e.key.IGSTTaxAmount);
+    //    e.key.NetAmount = Amt.toFixed(2);
+    //    //}
+    //    e.component.refresh();
+    //    //alert('onRowUpdate');
+    //},
     onRowPrepared: function (e) {
         setDataGridRowCss(e);
     },
-    onCellClick: function (e) {
-        if (e.row === undefined) return;
-        if (e.rowType === undefined) return;
+    //onCellClick: function (e) {
+    //    if (e.row === undefined) return;
+    //    if (e.rowType === undefined) return;
 
-        //GridOrdersListRowPO = e.row.rowIndex;
-        //GridOrdersListColPO = e.columnIndex;
-        scheduleGridBlank();
-        if (e.rowType === "data") {
+    //    //GridOrdersListRowPO = e.row.rowIndex;
+    //    //GridOrdersListColPO = e.columnIndex;
+    //    scheduleGridBlank();
+    //    if (e.rowType === "data") {
 
-            document.getElementById("SOBProductMasterNo").value = e.row.data.ProductMasterCode;
-            document.getElementById("SOBJobName").value = e.row.data.JobName;
+    //        document.getElementById("SOBProductMasterNo").value = e.row.data.ProductMasterCode;
+    //        document.getElementById("SOBJobName").value = e.row.data.JobName;
 
-            document.getElementById('SOBQuoteNo').value = e.row.data.BookingNo;
-            document.getElementById('SOBSchQuantity').value = e.row.data.OrderQuantity;
+    //        document.getElementById('SOBQuoteNo').value = e.row.data.BookingNo;
+    //        document.getElementById('SOBSchQuantity').value = e.row.data.OrderQuantity;
 
-            MaxProductCode = e.row.data.MaxPMCode;
-            ObjSchData = e.row.data;
-            reloadSchGrid();
-        } else {
-            ObjSchData = [];
-        }
-        //alert('oncellClick');
-    },
+    //        MaxProductCode = e.row.data.MaxPMCode;
+    //        ObjSchData = e.row.data;
+    //        reloadSchGrid();
+    //    } else {
+    //        ObjSchData = [];
+    //    }
+    //    //alert('oncellClick');
+    //},
     onSelectionChanged: function (data) {
         scheduleGridBlank();
         if (data) {
-            document.getElementById("SOBProductMasterNo").value = data.selectedRowsData[0].ProductMasterCode;
-            document.getElementById("SOBQuoteNo").value = data.selectedRowsData[0].BookingNo;
-            document.getElementById("SOBJobName").value = data.selectedRowsData[0].JobName;
-            document.getElementById('SOBSchQuantity').value = data.selectedRowsData[0].OrderQuantity;
-            MaxProductCode = data.selectedRowsData[0].MaxPMCode;
+            //document.getElementById("SOBProductMasterNo").value = data.selectedRowsData[0].ProductMasterCode;
+            //document.getElementById("SOBQuoteNo").value = data.selectedRowsData[0].QuotationNo;
+            document.getElementById("SOBJobName").value = data.selectedRowsData[0].ProductName;
+            document.getElementById('SOBSchQuantity').value = 0;
+            //MaxProductCode = data.selectedRowsData[0].MaxPMCode;
 
             ObjSchData = data.selectedRowsData[0];
             reloadSchGrid();
@@ -705,13 +737,20 @@ $("#SOBScheduleGrid").dxDataGrid({
     //height: function () {
     //    return window.innerHeight / 2.8;
     //},
-    columns: [{ dataField: "ProductMasterCode", caption: "PM Code" }, { dataField: "ApprovalNo", caption: "Approval Code" },
-    { dataField: "JobName", caption: "Job Name" }, { dataField: "ScheduleQuantity", caption: "Schedule Qty" },
-    {
-        dataField: "DeliveryDate", caption: "Delivery Date", dataType: "date",
-        format: "dd/MM/yyyy"
-    }, { dataField: "ConsigneeName", caption: "Consignee Name" }, { dataField: "ConsigneeID", visible: false }, { dataField: "TransporterID", visible: false },
-    { dataField: "Transporter" }, { dataField: "MaxProductMasterCode", visible: false }, { dataField: "BookingID", visible: false }],
+    columns: [
+
+        { dataField: "JobName", caption: "Job Name" },
+        { dataField: "ScheduleQuantity", caption: "Schedule Qty" },
+        {
+            dataField: "DeliveryDate", caption: "Delivery Date", dataType: "date",
+            format: "dd/MM/yyyy"
+        },
+        { dataField: "ConsigneeName", caption: "Consignee Name" },
+        { dataField: "ConsigneeID", visible: false },
+        { dataField: "TransporterID", visible: false },
+        { dataField: "Transporter" },
+        { dataField: "BookingID", visible: false }
+    ],
     onRowPrepared: function (e) {
         setDataGridRowCss(e);
     },
@@ -820,46 +859,46 @@ $("#BtnAddSchedule").click(function () {
         //    return false;
         //}
         var TtlSchQty = 0;
-        if (ObjSchData.ProductMasterCode !== "" || ObjSchData.BookingNo !== "") {
-            for (var i = 0; i < dataGrid._options.dataSource.length; i++) {
-                var CompDate = dataGrid.cellValue(i, 4);
-                if (CompDate !== "" || CompDate !== null || CompDate !== undefined) {
-                    var CompDateDay = CompDate.getDate();
-                    CompDate = (CompDateDay < 10 ? '0' : '') + CompDateDay + '/' + (CompDate.getMonth() + 1) + '/' + CompDate.getFullYear();
 
-                    if (DateDiff(DelDate, CompDate) === "Equal" && dataGrid._options.dataSource[i].ProductMasterCode === ObjSchData.ProductMasterCode
-                        && txtSchConsignee === dataGrid._options.dataSource[i].ConsigneeName) {
-                        alert("You have already made schedule for this date!");
-                        DevExpress.ui.notify("You have already made schedule for this date..!", "warning", 1500);
-                        document.getElementById('SOBDeliveryDate').style.borderColor = 'red';
-                        return false;
-                    }
-                    document.getElementById('SOBDeliveryDate').style.borderColor = '';
-                    TtlSchQty = TtlSchQty + Number(dataGrid._options.dataSource[i].ScheduleQuantity);
+        for (var i = 0; i < dataGrid._options.dataSource.length; i++) {
+            var CompDate = dataGrid.cellValue(i, 2);
+            if (CompDate !== "" || CompDate !== null || CompDate !== undefined) {
+                var CompDateDay = CompDate.getDate();
+                CompDate = (CompDateDay < 10 ? '0' : '') + CompDateDay + '/' + (CompDate.getMonth() + 1) + '/' + CompDate.getFullYear();
+
+                if (DateDiff(DelDate, CompDate) === "Equal"
+                    && txtSchConsignee === dataGrid._options.dataSource[i].ConsigneeName) {
+                    alert("You have already made schedule for this date!");
+                    DevExpress.ui.notify("You have already made schedule for this date..!", "warning", 1500);
+                    document.getElementById('SOBDeliveryDate').style.borderColor = 'red';
+                    return false;
                 }
+                document.getElementById('SOBDeliveryDate').style.borderColor = '';
+                TtlSchQty = TtlSchQty + Number(dataGrid._options.dataSource[i].Quantity);
             }
-            if (Number(ObjSchData.OrderQuantity) < Number(SchQty) + TtlSchQty) {
-                DevExpress.ui.notify("Can't add quantity more than order quantity..!", "warning", 1500);
-                return false;
-            }
-
-            var newdata = [];
-            newdata.ProductMasterCode = ObjSchData.ProductMasterCode;
-            newdata.ApprovalNo = ObjSchData.ApprovalNo;
-            newdata.JobName = ObjSchData.JobName;
-            newdata.ScheduleQuantity = Number(SchQty);
-            newdata.DeliveryDate = $("#SOBDeliveryDate").dxDateBox("instance").option('text');
-            newdata.ConsigneeName = txtSchConsignee; // $("#SOBConsignee").dxSelectBox("instance").option('text');
-            newdata.ConsigneeID = $("#SOBConsignee").dxSelectBox("instance").option('value');
-            newdata.TransporterID = $("#SOBTransporter").dxSelectBox("instance").option('value');
-            newdata.Transporter = $("#SOBTransporter").dxSelectBox("instance").option('text');
-            newdata.BookingID = ObjSchData.BookingID;
-
-            var clonedItem = $.extend({}, newdata);
-            dataGrid._options.dataSource.splice(dataGrid.totalCount(), 0, clonedItem);
-            dataGrid.refresh(true);
-            ObjSchDelivery.push(clonedItem);
         }
+        if (Number(ObjSchData.OrderQuantity) < Number(SchQty) + TtlSchQty) {
+            DevExpress.ui.notify("Can't add quantity more than order quantity..!", "warning", 1500);
+            return false;
+        }
+
+        var newdata = [];
+        //newdata.ProductMasterCode = ObjSchData.ProductMasterCode;
+        //newdata.ApprovalNo = ObjSchData.ApprovalNo;
+        newdata.JobName = ObjSchData.ProductName;
+        newdata.ScheduleQuantity = Number(SchQty);
+        newdata.DeliveryDate = $("#SOBDeliveryDate").dxDateBox("instance").option('text');
+        newdata.ConsigneeName = txtSchConsignee; // $("#SOBConsignee").dxSelectBox("instance").option('text');
+        newdata.ConsigneeID = $("#SOBConsignee").dxSelectBox("instance").option('value');
+        newdata.TransporterID = $("#SOBTransporter").dxSelectBox("instance").option('value');
+        newdata.Transporter = $("#SOBTransporter").dxSelectBox("instance").option('text');
+        newdata.BookingID = ObjSchData.BookingID;
+
+        var clonedItem = $.extend({}, newdata);
+        dataGrid._options.dataSource.splice(dataGrid.totalCount(), 0, clonedItem);
+        dataGrid.refresh(true);
+        ObjSchDelivery.push(clonedItem);
+
     } catch (e) {
         DevExpress.ui.notify(e, "error", 1000);
         alert(e);
@@ -1154,7 +1193,7 @@ $("#BtnCreateOrder").click(function () {
     $("#SOBProductAddedData").dxDataGrid({
         dataSource: []
     });
-    document.getElementById('SOBTxtPONo').value = "";    
+    document.getElementById('SOBTxtPONo').value = "";
 
     document.getElementById("FieldCntainerRow").style.display = 'block';
     document.getElementById("DetailedFieldCntainer").style.display = 'none';
@@ -1290,8 +1329,8 @@ $("#BtnSave").click(function () {
             return false;
         }
         var TxtTotalAmt = Number(document.getElementById("TxtTotalAmt").value);
-        if (TxtTotalAmt <= 0) return false;
-        if (GridSelectedProductsRow() === false) return false;
+        //if (TxtTotalAmt <= 0) return false;
+        //if (GridSelectedProductsRow() === false) return false;
         var SOBTxtNo = document.getElementById('SOBTxtNo').value.trim();
 
         var txtPONo = document.getElementById('SOBTxtPONo').value.trim();
@@ -1313,6 +1352,10 @@ $("#BtnSave").click(function () {
             return false;
         }
         document.getElementById('SOBSalesRep').style.borderColor = '';
+
+        /// by sndp temperory
+        DevExpress.ui.notify("Information Saved successfully!", "success", 1500);
+        return;
 
         if (SOBPrefix === "" || SOBPrefix === null) {
             alertMSG = "Please select job order prefix..!";
@@ -1379,7 +1422,7 @@ $("#BtnSave").click(function () {
         OrderBook.Remark = document.getElementById("SOBRemark").value;
         OrderBook.PODetail = document.getElementById("SOBDeliveryDetails").value.trim();
         OrderBook.SalesEmployeeId = SOBSalesRep;
-        
+
         NewOrderBook.push(OrderBook);
 
         for (var i = 0; i < grid._options.dataSource.length; i++) {
@@ -1397,23 +1440,23 @@ $("#BtnSave").click(function () {
                 SaveOrder.OrderBookingDetailsID = grid._options.dataSource[i].OrderBookingDetailsID;
             }
             //SaveOrder.OrderBookingNo = SOBTxtNo;
-            SaveOrder.BookingID = grid._options.dataSource[i].BookingID;
+            SaveOrder.BookingID = grid._options.dataSource[i].ProductEstimateID;
             SaveOrder.NewBookingID = SaveOrder.BookingID;
             if (BKIDS === "") {
-                BKIDS = grid._options.dataSource[i].BookingID;
+                BKIDS = grid._options.dataSource[i].ProductEstimateID;
             } else
-                BKIDS = BKIDS + ',' + grid._options.dataSource[i].BookingID;
+                BKIDS = BKIDS + ',' + grid._options.dataSource[i].ProductEstimateID;
 
             SaveOrder.OrderBookingDate = OrderDate;
             SaveOrder.LedgerID = GblClientID;
-            SaveOrder.JobName = grid._options.dataSource[i].JobName;
+            SaveOrder.JobName = grid._options.dataSource[i].ProductName;
             SaveOrder.CategoryID = grid._options.dataSource[i].CategoryID;
-            SaveOrder.OrderQuantity = grid._options.dataSource[i].OrderQuantity;
-            SaveOrder.ApproveQuantity = grid._options.dataSource[i].OrderQuantity;
-            SaveOrder.FinalCost = grid._options.dataSource[i].FinalCost;
-            SaveOrder.Rate = grid._options.dataSource[i].OrderRate;
-            SaveOrder.ChangeCost = grid._options.dataSource[i].ApprovedRate;
-            SaveOrder.RateType = grid._options.dataSource[i].TypeOfCost;
+            SaveOrder.OrderQuantity = grid._options.dataSource[i].Quantity;
+            SaveOrder.ApproveQuantity = 0//grid._options.dataSource[i].Quantity;
+            SaveOrder.FinalCost = 0// grid._options.dataSource[i].FinalCost;
+            SaveOrder.Rate = 0//grid._options.dataSource[i].OrderRate;
+            SaveOrder.ChangeCost = 0// grid._options.dataSource[i].ApprovedRate;
+            SaveOrder.RateType = 0// grid._options.dataSource[i].TypeOfCost;
             SaveOrder.PONo = txtPONo;
             SaveOrder.PODate = PODate;
 
@@ -1423,29 +1466,29 @@ $("#BtnSave").click(function () {
             //var MSplit = Number(DelDate[1]);
             //var date = new Date($('#SOBDate').dxDateBox('instance').option('value'));
 
-            SaveOrder.DeliveryDate = grid._options.dataSource[i].FinalDeliveryDate;
+            SaveOrder.DeliveryDate = 0//grid._options.dataSource[i].FinalDeliveryDate;
             SaveOrder.ProductionUnitID = 1;
-            SaveOrder.ProductCode = grid._options.dataSource[i].ProductCode;
-            SaveOrder.JobType = grid._options.dataSource[i].JobType;
+            SaveOrder.ProductCode = 0//grid._options.dataSource[i].ProductCode;
+            SaveOrder.JobType = 0 / grid._options.dataSource[i].JobType;
             //SaveOrder.ApprovalBy = sel_Approval;
             //SaveOrder.JobCoordinatorID = Sel_Job_Coordinator;
-            SaveOrder.JobPriority = grid._options.dataSource[i].JobPriority;
+            SaveOrder.JobPriority = 0// grid._options.dataSource[i].JobPriority;
             SaveOrder.BookingPrefix = SOBPrefix;
-            SaveOrder.BookingNo = grid._options.dataSource[i].BookingNo;
-            SaveOrder.ProductMasterCode = grid._options.dataSource[i].ProductMasterCode;
+            SaveOrder.BookingNo = 0//grid._options.dataSource[i].QuotationNo;
+            SaveOrder.ProductMasterCode = 0//grid._options.dataSource[i].ProductMasterCode;
 
             if (PMIDS === "" && grid._options.dataSource[i].ProductMasterCode !== "") {
                 PMIDS = '"' + grid._options.dataSource[i].ProductMasterCode + '"';
             } else if (grid._options.dataSource[i].ProductMasterCode !== "") {
-                PMIDS = PMIDS + ',' + '"' + grid._options.dataSource[i].ProductMasterCode + '"';
+                PMIDS = PMIDS + ',' + '"' + 0 /*grid._options.dataSource[i].ProductMasterCode*/ + '"';
             }
 
-            SaveOrder.ApprovalNo = grid._options.dataSource[i].ApprovalNo;
-            SaveOrder.ExpectedDeliveryDate = grid._options.dataSource[i].FinalDeliveryDate;
-            SaveOrder.PrePressRemark = grid._options.dataSource[i].PrePressRemark;
+            SaveOrder.ApprovalNo = 0// grid._options.dataSource[i].ApprovalNo;
+            SaveOrder.ExpectedDeliveryDate = 0// grid._options.dataSource[i].FinalDeliveryDate;
+            SaveOrder.PrePressRemark = 0//grid._options.dataSource[i].PrePressRemark;
             //SaveOrder.NewBookingNo = grid._options.dataSource[i].NewBookingNo;
-            SaveOrder.JobReference = grid._options.dataSource[i].JobReference;
-            SaveOrder.SalesEmployeeId = SOBSalesRep;
+            SaveOrder.JobReference = 0//grid._options.dataSource[i].JobReference;
+                SaveOrder.SalesEmployeeId = SOBSalesRep;
             SaveOrder.JobCoordinatorID = SOBSalesRep;
 
             //if (txtSchConsignee !== "") {
@@ -1617,30 +1660,29 @@ $("#BtnSave").click(function () {
 function reloadOrderList(data) {
     $("#GridOrdersList").dxDataGrid({
         dataSource: data,
-        columns: [{ dataField: "ProductCode", allowEditing: false, caption: "PC Code", width: 50 }, { dataField: "JobName", allowEditing: false, caption: "Product Name", width: 125 }, { dataField: "CategoryName", caption: "Category", width: 80, allowEditing: false },
-        { dataField: "ProductHSNID", caption: "Group Name", width: 100, validationRules: [{ type: "required" }], lookup: { dataSource: ProductHSNGrp, valueExpr: 'ProductHSNID', displayExpr: 'ProductHSNName' } },
-        { dataField: "OrderQuantity", caption: "Order Qty", width: 80, validationRules: [{ type: "required" }, { type: "numeric" }, { type: "range", min: 1, message: "Invalid order quantity" }] }, { dataField: "TypeOfCost", caption: "Rate Type", width: 80, allowEditing: false }, { dataField: "ApprovedRate", caption: "Appr.Cost", width: 50, allowEditing: false },
-        { dataField: "CurrencySymbol", caption: "Currency", visible: true, width: 70, allowEditing: false },
-        { dataField: "TotalAmount", width: 80, allowEditing: false }, { dataField: "GSTTaxPercentage", caption: "GST%", width: 40, allowEditing: false },
-        { dataField: "CGSTTaxPercentage", caption: "CGST %", width: 40, dataType: "numeric", visible: false, allowEditing: false },
-        { dataField: "SGSTTaxPercentage", caption: "SGST %", width: 40, dataType: "numeric", visible: false, allowEditing: false },
-        { dataField: "IGSTTaxPercentage", caption: "IGST %", width: 40, dataType: "numeric", visible: false, allowEditing: false },
-        { dataField: "CGSTTaxAmount", caption: "CGST", dataType: "numeric", width: 50, allowEditing: false }, { dataField: "SGSTTaxAmount", caption: "SGST", dataType: "numeric", width: 50, allowEditing: false },
-        { dataField: "IGSTTaxAmount", caption: "IGST", width: 50, dataType: "numeric", allowEditing: false },
-        { dataField: "NetAmount", width: 70, dataType: "numeric", allowEditing: false }, { dataField: "ExpectedDeliDate", width: 70, allowEditing: false, dataType: "date" },
-        {
-            dataField: "FinalDeliveryDate", width: 100, dataType: "date",
-            format: "dd-MMM-yyyy", allowEditing: true, validationRules: [{ type: "required", message: "Final date of delivery is required" },
-            { type: "range", min: new Date(), message: "Final date of delivery is not valid" }]
-        },
-        { dataField: "JobType", visible: true, width: 80, validationRules: [{ type: "required" }], lookup: { dataSource: JobType, valueExpr: 'JobType', displayExpr: 'JobType' } },
-        { dataField: "JobReference", visible: true, width: 100, validationRules: [{ type: "required" }], lookup: { dataSource: JobReference, valueExpr: 'JobReference', displayExpr: 'JobReference' } },
-        { dataField: "JobPriority", visible: true, width: 100, validationRules: [{ type: "required" }], lookup: { dataSource: JobPriority, valueExpr: 'JobPriority', displayExpr: 'JobPriority' } },
-        { dataField: "PrePressRemark", width: 100 }, { dataField: "BookingNo", caption: "Quote No", width: 50, allowEditing: false }, { dataField: "ProductMasterCode", caption: "PM Code", width: 60, allowEditing: false }],
+        columns: [
+            { dataField: "ProductName" },
+            { dataField: "CategoryName" },
+            { dataField: "HSNCode" },
+            { dataField: "HSNCode" },
+            { dataField: "Quantity" },
+            { dataField: "Rate" },
+            { dataField: "RateType" },
+            { dataField: "UnitCost" },
+            { dataField: "GSTPercantage" },
+            { dataField: "GSTAmount" },
+            { dataField: "MiscPercantage" },
+            { dataField: "MiscAmount" },
+            { dataField: "ShippingCost" },
+            { dataField: "ProfitPer" },
+            { dataField: "ProfitCost" },
+            { dataField: "FinalAmount" },
+            { dataField: "VendorName" }
+        ],
         onContentReady: function (e) {
-            document.getElementById("TxtTotalOrderQty").value = e.component.getTotalSummaryValue("OrderQuantity");
-            document.getElementById("TxtTotalAmt").value = e.component.getTotalSummaryValue("TotalAmount");
-            document.getElementById("TxtNetAmt").value = e.component.getTotalSummaryValue("NetAmount");
+            document.getElementById("TxtTotalOrderQty").value = 0//e.component.getTotalSummaryValue("Quantity");
+            document.getElementById("TxtTotalAmt").value = 0 //e.component.getTotalSummaryValue("FinalAmount");
+            document.getElementById("TxtNetAmt").value = 0// e.component.getTotalSummaryValue("FinalAmount");
         }
     });
 }

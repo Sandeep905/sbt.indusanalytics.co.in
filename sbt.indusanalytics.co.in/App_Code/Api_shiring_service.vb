@@ -97,9 +97,10 @@ Public Class Api_shiring_service
                 str = "SELECT DISTINCT IM.ItemID AS PaperID, IM.Quality, IM.GSM, IM.Manufecturer, IM.PackingType, IM.UnitPerPacking, IM.WtPerPacking, IM.EstimationRate, IM.Finish, 0 AS PaperTrimming,Round(IM.SizeW,2) As SizeW, Round(IM.SizeL,2) As SizeL, IM.Caliper, ISNULL(IM.IsStandardItem, 0) AS IsStandardItem, IM.ItemCode AS PaperCode, 0 AS IsBalancePiece, ISNULL(IM.EstimationUnit, '') AS EstimationUnit, IM.ItemName AS PaperName, IM.PaperGroup, IG.ItemGroupName, IM.PurchaseUnit " &
                         "FROM ItemMaster AS IM INNER JOIN ItemGroupMaster AS IG ON IG.ItemGroupID = IM.ItemGroupID AND IM.CompanyID = IG.CompanyID " & IIf(Gbl_Paper_Mill = "", "", "And IM.Manufecturer='" & Gbl_Paper_Mill & "'") & IIf(Gbl_Paper_Finish = "", " ", " And IM.Finish ='" & Gbl_Paper_Finish & "'") &
                         "Where IM.Quality='" & Gbl_Paper_Quality & "' And IM.GSM=" & Gbl_Paper_GSM & " And IM.CompanyID=" & CompanyID & TempVendorID & " " & IIf(ChkPlanInAvailableStock = True, " And Isnull(IM.PhysicalStock,0)>0 ", " ") & " And IG.IsDeletedTransaction=0 And IM.IsDeletedTransaction = 0 " & IIf(Check_Plan_In_Standard_Size = True, "  And IM.IsStandardItem=1 ", " ")
+            ElseIf k = "Search_In_Machine_Selection_Vendor" Then
+                str = "SELECT MM.MachineId, MM.MachineName, MM.MinimumSheet, MM.Colors, MM.MakeReadyCharges, MM.MakeReadyWastageSheet, MM.MachineType, MM.MakeReadyTime, ElectricConsumption, PrintingMargin, MachineSpeed, LabourCharges, ChargesType, RoundofImpressionsWith, IsPerfectaMachine, VMS.Rate as BasicPrintingCharges , JobChangeOverTime, OtherCharges, WastageType, WastageCalculationOn,IsSpecialMachine From MachineMaster as MM inner join VendorWiseMachineSlabMaster as VMS on MM.MachineId = VMS.MachineID and MM.CompanyID = VMS.CompanyID  Where MM.CompanyId = " & CompanyID & " and MM.IsDeletedTransaction = 0  Order By MM.MachineID"
             ElseIf k = "Search_In_Machine_Selection" Then
-                ' str = "SELECT MachineId, MachineName, MinimumSheet, Colors, MakeReadyCharges, MakeReadyWastageSheet, MachineType, MakeReadyTime, ElectricConsumption, PrintingMargin, MachineSpeed, LabourCharges, ChargesType, RoundofImpressionsWith, IsPerfectaMachine, BasicPrintingCharges , JobChangeOverTime, OtherCharges, WastageType, WastageCalculationOn,IsSpecialMachine From MachineMaster  Where CompanyId = " & CompanyID & " " & IIf(MachineIDFilter = "", "", MachineIDFilter) & TempVendorID & " Order By MachineID"
-                str = "SELECT MM.MachineId, MM.MachineName, MM.MinimumSheet, MM.Colors, MM.MakeReadyCharges, MM.MakeReadyWastageSheet, MM.MachineType, MM.MakeReadyTime, ElectricConsumption, PrintingMargin, MachineSpeed, LabourCharges, ChargesType, RoundofImpressionsWith, IsPerfectaMachine, VMS.Rate as BasicPrintingCharges , JobChangeOverTime, OtherCharges, WastageType, WastageCalculationOn,IsSpecialMachine From MachineMaster as MM inner join VendorWiseMachineSlabMaster as VMS on MM.MachineId = VMS.MachineID and MM.CompanyID = VMS.CompanyID  Where MM.CompanyId = " & CompanyID & "   Order By MM.MachineID"
+                str = "SELECT MachineId, MachineName, MinimumSheet, Colors, MakeReadyCharges, MakeReadyWastageSheet, MachineType, MakeReadyTime, ElectricConsumption, PrintingMargin, MachineSpeed, LabourCharges, ChargesType, RoundofImpressionsWith, IsPerfectaMachine, BasicPrintingCharges , JobChangeOverTime, OtherCharges, WastageType, WastageCalculationOn,IsSpecialMachine From MachineMaster  Where CompanyId = " & CompanyID & " " & IIf(MachineIDFilter = "", "", MachineIDFilter) & TempVendorID & " Order By MachineID"
             ElseIf k = "Online_Coated_Rates" Then
                 str = "SELECT MachineID, SheetRangeFrom, SheetRangeTo, CoatingName, Rate From MachineOnlineCoatingRates Where CompanyId = " & CompanyID & TempVendorID & "  Order By MachineID, SheetRangeFrom, SheetRangeTo"
             ElseIf k = "Client_Printing_Slabs" Then
@@ -320,10 +321,6 @@ Public Class Api_shiring_service
                 GblVendorID = DTVendorList.Rows(i)("VendorID")
                 GblVendorName = DTVendorList.Rows(i)("VendorName")
                 LoadAllGrids()
-                'If Gbl_DT_Machine.Rows.Count <= 0 Then
-                '    planErrors = "Machine not found in the database, Plan in total colors is " & Gbl_Front_Color + Gbl_Back_Color & "..! Please check total colors of machine"
-                '    Return planErrors
-                'End If
                 If Gbl_Printing_Style = "Choose Best" Then
                     Gbl_Printing_Style = "Work & Turn"
                     Plan_Job_Pre()
@@ -344,6 +341,10 @@ Public Class Api_shiring_service
                     planErrors = "Machine not found in the database, Plan in total colors is " & Gbl_Front_Color + Gbl_Back_Color & "..! Please check total colors of machine"
                     Return planErrors
                 End If
+                'If Gbl_DT_Search_In_Machine.Rows.Count <= 0 Then
+                '    planErrors = "Vendor Wise Machine Rate not found in the database"
+                '    Return planErrors
+                'End If
                 If Gbl_Printing_Style = "Choose Best" Then
                     Gbl_Printing_Style = "Work & Turn"
                     Plan_Job_Pre()
@@ -558,8 +559,14 @@ Public Class Api_shiring_service
         k = "Vendor_Printing_Slabs"
         DT_Vendor_Printing_Slabs = GetDataTable()
 
-        k = "Search_In_Machine_Selection"
+        k = "Search_In_Machine_Selection_Vendor"
         Gbl_DT_Search_In_Machine = GetDataTable()
+
+        'If vendor wise machine rartes is not available 
+        If Gbl_DT_Search_In_Machine.Rows.Count <= 0 Then
+            k = "Search_In_Machine_Selection"
+            Gbl_DT_Search_In_Machine = GetDataTable()
+        End If
 
         k = "Slitting_Machine"
         GblDTSlittingMachine = GetDataTable()

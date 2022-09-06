@@ -8,9 +8,9 @@
             <div class="dialogboxContainerMainMAster">
                 <div class="DialogBoxCustom" style="float: left; background-color: #fff; padding-left: 0px; padding-bottom: 2px">
                     <div id="ButtonDiv" style="height: auto;">
-                        <div class="col-lg-2 col-md-2 col-sm-4 col-xs-12">
+                        <div class="col-lg-2 col-md-2 col-sm-4 col-xs-12 hidden">
                             <input type="button" class="btn btn-primary" value="Print" id="PrintButton" />
-                            <input type="button" class="btn btn-secondary" value="Detail Costing" id="PrintCostingButton" />
+                            <input type="button" class="btn btn-secondary " value="Detail Costing" id="PrintCostingButton" />
                         </div>
                         <div id="DivSendToUser" style="display: none;" class="col-lg-2 col-md-2 col-sm-4 col-xs-12">
                             <div id="SelectBoxSendToUser"></div>
@@ -18,7 +18,7 @@
                         <div class="col-lg-2 col-md-2 col-sm-4 col-xs-12">
                             <input type="button" class="btn btn-info" style="display: none;" value="Send For Internal Approval" id="BtnSendForInternalApproval" />
                             <input type="button" class="btn btn-danger" style="display: none;" value="Unsend For Internal Approval" id="BtnDisInternalApproval" />
-                            <input type="button" class="btn btn-info" style="display: none;" value="Send For Approval" id="BtnSendForApproval" />
+                            <input type="button" class="btn btn-info" style="display: none;" value="Send For Price Approval" id="BtnSendForApproval" />
                             <input type="button" class="btn btn-danger" style="display: none;" value="Unsend For Approval" id="BtnDisApproval" />
                         </div>
                     </div>

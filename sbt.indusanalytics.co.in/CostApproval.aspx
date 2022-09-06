@@ -8,7 +8,7 @@
             <a title="Comments" id="BtnNotification" class="iconButton" style="float: right"><i class="fa fa-bell fa-2x fa-fw" style="font-size: 14px;"></i></a>
             <div id="image-indicator"></div>
             <input id="BtnLoadBooking" type="button" class="btn btn-primary" value="Load From Quotes" />
-            <input id="BtnShowListCostApp" type="button" class="btn btn-primary" value="Show List" />
+            <input id="BtnShowListCostApp" type="button" class="btn btn-primary hidden" value="Show List" />
             <input type="button" class="btn btn-danger waves-effect" onclick="showdetailsContainer()" value="Close"/>
             <div id="FieldCntainerRow" class="rowcontents clearfix tab-pane animated fadeInRight active">
                 <div class="col-xs-6 col-sm-3 col-md-2 col-lg-2">
@@ -40,7 +40,7 @@
                     <textarea id="txtRemark" placeholder="Enter your remark here" class="forTextBox"></textarea>
                 </div>
                 <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
-                    <button id="BtnRemoveQuantity" type="button" class="btn btn-info">Remove Qty</button>
+                    <button id="BtnRemoveQuantity" type="button" class="btn btn-info hidden">Remove Qty</button>
                     <button id="BtnSaveCostApp" type="button" class="btn btn-success">Save</button>
                     <button id="BtnDeleteCostApp" type="button" class="btn btn-danger">Delete</button>
                     <button id="BtnNewCostApp" type="button" class="btn btn-primary">New</button>

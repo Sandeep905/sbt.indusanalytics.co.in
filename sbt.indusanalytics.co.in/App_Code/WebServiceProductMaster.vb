@@ -242,10 +242,23 @@ Public Class WebServiceProductMaster
     Public Function GetProductMasterList() As String
         Try
 
-            str = "SELECT PCM.ContentID, PCM.ProductCatalogID,'Files/ProductFiles/'+PCM.ProductImagePath as ProductImagePath, PCM.ProductCatalogCode,PCM.ProcessIDStr,PCM.DefaultProcessStr,PCM.DisplayProcessStr, PCM.ProductName,PCM.ProductHSNID,Isnull(PCM.Remark,'') Remark, PCM.ProductDescription, PCM.ReferenceProductCode,PCM.CategoryID, CM.CategoryName, PHM.ProductHSNName,PCM.IsOffsetProduct " &
+            str = "SELECT PCM.ContentID,PCM.IsUnitProduct, PCM.ProductCatalogID,'Files/ProductFiles/'+PCM.ProductImagePath as ProductImagePath, PCM.ProductCatalogCode,PCM.ProcessIDStr,PCM.DefaultProcessStr,PCM.DisplayProcessStr, PCM.ProductName,PCM.ProductHSNID,Isnull(PCM.Remark,'') Remark, PCM.ProductDescription, PCM.ReferenceProductCode,PCM.CategoryID, CM.CategoryName, PHM.ProductHSNName,PCM.IsOffsetProduct " &
                     " From ProductCatalogMaster As PCM INNER Join ProductHSNMaster As PHM On PHM.ProductHSNID = PCM.ProductHSNID And PCM.CompanyID = PHM.CompanyID" &
                     " INNER JOIN CategoryMaster AS CM ON CM.CategoryID = PCM.CategoryID And PCM.CompanyID =CM.CompanyID" &
                     " Where PCM.IsDeletedTransaction=0 And PCM.CompanyID = " & GBLCompanyID
+            db.FillDataTable(dataTable, str)
+            data.Message = db.ConvertDataTableTojSonString(dataTable)
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function GetVendors() As String
+        Try
+
+            str = "Select LedgerID as VendorID,LedgerName as VendorName from LedgerMaster where LedgerGroupID = 8 and IsDeletedTransaction = 0 and CompanyID = " & GBLCompanyID
             db.FillDataTable(dataTable, str)
             data.Message = db.ConvertDataTableTojSonString(dataTable)
             Return js.Serialize(data.Message)

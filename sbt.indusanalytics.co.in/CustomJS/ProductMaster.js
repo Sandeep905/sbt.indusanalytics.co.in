@@ -54,14 +54,37 @@ $.ajax({                //// Add All Active Contents
     }
 });
 function EnableOrientation() {
-    if (document.getElementById("IsOffsetProduct").checked != true)
+    if (document.getElementById("IsOffsetProduct").checked != false) {
         $("#SelOrientations").dxSelectBox({
             disabled: false
-        })
-    else
+        });
+        document.getElementById("IsUnitProduct").checked = false;
+        document.getElementById("IsUnitProduct").disabled = true;
+    } else {
         $("#SelOrientations").dxSelectBox({
             disabled: true
-        })
+        });
+        document.getElementById("IsUnitProduct").disabled = false;
+
+    }
+}
+function UnitWiseProduct() {
+    if (document.getElementById("IsUnitProduct").checked != false) {
+        $("#SelOrientations").dxSelectBox({
+            value: -1,
+            disabled: true
+        });
+        document.getElementById("IsOffsetProduct").checked = false;
+        document.getElementById("IsOffsetProduct").disabled = true;
+        document.getElementById("gridProductConfig").style.pointerEvents = 'none';
+        document.getElementById("gridVendorRateSetting").style.pointerEvents = 'none';
+        document.getElementById("gridOperation").style.pointerEvents = 'none';
+    } else {
+        document.getElementById("IsOffsetProduct").disabled = false;
+        document.getElementById("gridProductConfig").style.pointerEvents = 'auto';
+        document.getElementById("gridVendorRateSetting").style.pointerEvents = 'auto';
+        document.getElementById("gridOperation").style.pointerEvents = 'auto';
+    }
 }
 
 $("#SelCategory").dxSelectBox({
@@ -517,6 +540,7 @@ $("#BtnSave").click(function () {
     var TxtReferenceProductCode = document.getElementById("TxtRefProductCode").value.trim();
     var TxtRemark = document.getElementById("TxtRemark").value.trim();
     var IsOffsetProduct = document.getElementById("IsOffsetProduct").checked;
+    var IsUnitProduct = document.getElementById("IsUnitProduct").checked;
     let ProductID = Number(document.getElementById("ProductID").value);
 
     //$("#SelCatalogType").dxValidator('instance').validate();
@@ -573,76 +597,80 @@ $("#BtnSave").click(function () {
     ObjMainDetail.DisplayProcessStr = "";
     ObjMainDetail.IsOffsetProduct = IsOffsetProduct;
     ObjMainDetail.ContentID = SelOrientations;
+    ObjMainDetail.IsUnitProduct = IsUnitProduct;
+    if (IsUnitProduct != true) {
+        var GridOperation = $('#gridOperation').dxDataGrid('instance')._options.dataSource.store.data;
+        for (var i = 0; i < GridOperation.length; i++) {
+            if (GridOperation[i].IsDefaultProcess === true) {
+                ObjMainDetail.DefaultProcessStr += Number(GridOperation[i].ProcessID) + ",";
+            }
+            if (GridOperation[i].IsDisplayInEnquiry === true) {
+                ObjMainDetail.DisplayProcessStr += Number(GridOperation[i].ProcessID) + ",";
+            }
+        }
 
-    var GridOperation = $('#gridOperation').dxDataGrid('instance')._options.dataSource.store.data;
-    for (var i = 0; i < GridOperation.length; i++) {
-        if (GridOperation[i].IsDefaultProcess === true) {
-            ObjMainDetail.DefaultProcessStr += Number(GridOperation[i].ProcessID) + ",";
+        ObjMain.push(ObjMainDetail);
+
+        var GridRateSetting = $('#gridVendorRateSetting').dxDataGrid('instance');
+        for (var i = 0; i < GridRateSetting._options.dataSource.length; i++) {
+            objVendor = {};
+            if (FlagEdit === true) {
+                objVendor.ProductCatalogID = ProductID;
+                objVendor.RateSettingID = GridRateSetting._options.dataSource[i].RateSettingID;
+            }
+            objVendor.SequenceNo = i + 1;
+            objVendor.VendorID = GridRateSetting._options.dataSource[i].VendorID;
+            objVendor.VendorRate = Number(GridRateSetting._options.dataSource[i].VendorRate);
+            if (objVendor.VendorID === "" || objVendor.VendorID <= 0) {
+                DevExpress.ui.notify("Please select vendor..!", "warning", 1000);
+                return;
+            }
+            if (objVendor.VendorRate === undefined || objVendor.VendorRate <= 0) {
+                DevExpress.ui.notify("Please select vendor rate..!", "warning", 1000);
+                return;
+            }
+            if (objVendor.RateSettingID === undefined && FlagEdit === true) {
+                objVendorsNew.push(objVendor);
+            } else
+                objVendors.push(objVendor);
         }
-        if (GridOperation[i].IsDisplayInEnquiry === true) {
-            ObjMainDetail.DisplayProcessStr += Number(GridOperation[i].ProcessID) + ",";
+
+        let ProductFormula = "";
+        for (var i = 0; i < gridProductConfig._options.dataSource.length; i++) {
+            objProConfig = {};
+            if (FlagEdit === true) {
+                objProConfig.ProductCatalogID = ProductID;
+                objProConfig.ProductConfigID = gridProductConfig._options.dataSource[i].ProductConfigID;
+            }
+            objProConfig.SequenceNo = i + 1;
+            objProConfig.ParameterName = gridProductConfig._options.dataSource[i].ParameterName;
+            objProConfig.ParameterDisplayName = gridProductConfig._options.dataSource[i].ParameterDisplayName;
+            objProConfig.ParameterDefaultValue = gridProductConfig._options.dataSource[i].ParameterDefaultValue;
+            objProConfig.ProductFormula = gridProductConfig._options.dataSource[i].ProductFormula;
+            if (gridProductConfig._options.dataSource[i].IsDisplayParameter == true) {
+                objProConfig.IsDisplayParameter = true;
+            } else {
+                objProConfig.IsDisplayParameter = false;
+            }
+
+            if (objProConfig.ParameterName === "" || objProConfig.ParameterName === undefined) {
+                DevExpress.ui.notify("Please enter parameter name..!", "warning", 1000);
+                return;
+            }
+
+            if (objProConfig.ProductFormula !== "" && objProConfig.ProductFormula !== null) {
+                ProductFormula = objProConfig.ProductFormula;
+            }
+
+            if (objProConfig.ProductConfigID === undefined && FlagEdit === true) {
+                objProductConfigNew.push(objProConfig);
+            } else
+                objProductConfig.push(objProConfig);
         }
+    } else {
+        ObjMain.push(ObjMainDetail);
     }
-
-    ObjMain.push(ObjMainDetail);
-
-    var GridRateSetting = $('#gridVendorRateSetting').dxDataGrid('instance');
-    for (var i = 0; i < GridRateSetting._options.dataSource.length; i++) {
-        objVendor = {};
-        if (FlagEdit === true) {
-            objVendor.ProductCatalogID = ProductID;
-            objVendor.RateSettingID = GridRateSetting._options.dataSource[i].RateSettingID;
-        }
-        objVendor.SequenceNo = i + 1;
-        objVendor.VendorID = GridRateSetting._options.dataSource[i].VendorID;
-        objVendor.VendorRate = Number(GridRateSetting._options.dataSource[i].VendorRate);
-        if (objVendor.VendorID === "" || objVendor.VendorID <= 0) {
-            DevExpress.ui.notify("Please select vendor..!", "warning", 1000);
-            return;
-        }
-        if (objVendor.VendorRate === undefined || objVendor.VendorRate <= 0) {
-            DevExpress.ui.notify("Please select vendor rate..!", "warning", 1000);
-            return;
-        }
-        if (objVendor.RateSettingID === undefined && FlagEdit === true) {
-            objVendorsNew.push(objVendor);
-        } else
-            objVendors.push(objVendor);
-    }
-
-    let ProductFormula = "";
-    for (var i = 0; i < gridProductConfig._options.dataSource.length; i++) {
-        objProConfig = {};
-        if (FlagEdit === true) {
-            objProConfig.ProductCatalogID = ProductID;
-            objProConfig.ProductConfigID = gridProductConfig._options.dataSource[i].ProductConfigID;
-        }
-        objProConfig.SequenceNo = i + 1;
-        objProConfig.ParameterName = gridProductConfig._options.dataSource[i].ParameterName;
-        objProConfig.ParameterDisplayName = gridProductConfig._options.dataSource[i].ParameterDisplayName;
-        objProConfig.ParameterDefaultValue = gridProductConfig._options.dataSource[i].ParameterDefaultValue;
-        objProConfig.ProductFormula = gridProductConfig._options.dataSource[i].ProductFormula;
-        if (gridProductConfig._options.dataSource[i].IsDisplayParameter == true) {
-            objProConfig.IsDisplayParameter = true;
-        } else {
-            objProConfig.IsDisplayParameter = false;
-        }
-
-        if (objProConfig.ParameterName === "" || objProConfig.ParameterName === undefined) {
-            DevExpress.ui.notify("Please enter parameter name..!", "warning", 1000);
-            return;
-        }
-
-        if (objProConfig.ProductFormula !== "" && objProConfig.ProductFormula !== null) {
-            ProductFormula = objProConfig.ProductFormula;
-        }
-
-        if (objProConfig.ProductConfigID === undefined && FlagEdit === true) {
-            objProductConfigNew.push(objProConfig);
-        } else
-            objProductConfig.push(objProConfig);
-    }
-    if (document.getElementById("IsOffsetProduct").checked != true) {
+    if (document.getElementById("IsOffsetProduct").checked != true && IsUnitProduct != true) {
         if (objProductConfig.length <= 0) {
             DevExpress.ui.notify("Please enter product parameter..!", "warning", 1000);
             return;
@@ -653,14 +681,6 @@ $("#BtnSave").click(function () {
         }
     }
 
-
-
-    //for (var i = 0; i < objProductConfig.length; i++) {
-    //    if (ProductFormula.includes(objProductConfig[i].ParameterName) === false) {
-    //        DevExpress.ui.notify("Entered product formula is not matched with the parameters..!", "warning", 1500);
-    //        return;
-    //    }
-    //}
     swal({
         title: "Product Saving...",
         text: 'Are you sure to save?',

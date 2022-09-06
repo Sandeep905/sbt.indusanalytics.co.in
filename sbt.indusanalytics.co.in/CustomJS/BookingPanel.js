@@ -1,6 +1,6 @@
 ﻿"use strict";
 var LedgerID = 0;
-
+var GBLContents = [];
 $("#LoadIndicator").dxLoadPanel({
     shadingColor: "rgba(0,0,0,0.4)",
     indicatorSrc: "images/Indus logo.png",
@@ -20,6 +20,7 @@ try {
     var showDetails = function (RES1) {
 
         $("#GridBooingPanel").dxDataGrid({
+            keyExpr: 'ProductEstimateID',
             dataSource: RES1,
             export: {
                 enabled: true,
@@ -90,6 +91,46 @@ try {
                         }
                     });
                 }
+            }, masterDetail: {
+                enabled: true,
+                template(container, options) {
+                    const currentProjectData = options.data;
+
+                    $('<div>')
+                        .addClass('master-detail-caption')
+                        .text(`${currentProjectData.ClientName} 's Products:`)
+                        .appendTo(container);
+                    $('<div>')
+                        .dxDataGrid({
+                            columnAutoWidth: true,
+                            showBorders: true,
+                            columns: [
+                                { dataField: "ProductName" },
+                                { dataField: "CategoryName" },
+                                { dataField: "HSNCode" },
+                                { dataField: "Quantity" },
+                                { dataField: "Rate" },
+                                { dataField: "RateType" },
+                                { dataField: "UnitCost" },
+                                { dataField: "GSTPercantage" },
+                                { dataField: "GSTAmount" },
+                                { dataField: "MiscPercantage" },
+                                { dataField: "MiscAmount" },
+                                { dataField: "ShippingCost" },
+                                { dataField: "ProfitPer" },
+                                { dataField: "ProfitCost" },
+                                { dataField: "FinalAmount" },
+                                { dataField: "VendorName" }
+                            ],
+                            dataSource: new DevExpress.data.DataSource({
+                                store: new DevExpress.data.ArrayStore({
+                                    //key: 'ID',
+                                    data: GBLContents,
+                                }),
+                                filter: ['ProductEstimateID', '=', options.key],
+                            }),
+                        }).appendTo(container);
+                },
             },
             onRowPrepared: function (e) {
                 setDataGridRowCss(e);
@@ -116,91 +157,91 @@ try {
                         e.rowElement.addClass('iscancelled');
                     }
 
-                    e.rowElement.mousemove(function () {
-                        if (e.data.ReworkRemark !== null && e.data.ReworkRemark !== "" || (e.data.RemarkInternalApproved !== null && e.data.RemarkInternalApproved !== "")) {
-                            $('#tooltipText').text("Rework Remark: '" + e.data.ReworkRemark + "',\nInternal Approval Remark: '" + e.data.RemarkInternalApproved + "'").addClass('font-12').css('white-space', 'pre');
-                            toolTip.show(e.rowElement);
-                        }
-                    });
+                    //e.rowElement.mousemove(function () {
+                    //    if (e.data.ReworkRemark !== null && e.data.ReworkRemark !== "" || (e.data.RemarkInternalApproved !== null && e.data.RemarkInternalApproved !== "")) {
+                    //        $('#tooltipText').text("Rework Remark: '" + e.data.ReworkRemark + "',\nInternal Approval Remark: '" + e.data.RemarkInternalApproved + "'").addClass('font-12').css('white-space', 'pre');
+                    //        toolTip.show(e.rowElement);
+                    //    }
+                    //});
                 }
             },
-            columns: [{ dataField: "ClientName", caption: "Client Name", width: 180 }, { dataField: "CategoryName", caption: "Category Name" },
-            { dataField: "JobName", caption: "Job Name", width: 200 }, { dataField: "BookingNo", caption: "Quote No" },
-            { dataField: "CreatedDate", caption: "Date" }, { dataField: "OrderQuantity", caption: "Order Qty" },
-            { dataField: "UserName", caption: "Quote By" }, { dataField: "QuotedCost", caption: "Quoted Cost" },
-            { dataField: "TypeOfCost", caption: "Unit" },
-            { dataField: "ProductCode", caption: "ArtWork Code" },
-            { dataField: "EnquiryID", caption: "Enquiry No", visible: false }, { dataField: "ApprovalSendTo", caption: "Approval Send To", visible: true },
-            { dataField: "InternalApprovedDate", caption: "IA Date" },
-            {
-                caption: "", fixedPosition: "right", fixed: true,
-                cellTemplate: function (container, options) {
-                    if (options.key.CommentCount > 0) {
-                        $('<div title="Quote Comments">').addClass('fa fa-bell customgridbtn dx-link').append('<span class="bg-deep-orange badge font-10">' + options.key.CommentCount + '</span>')
-                            .on('dxclick', function () {
-                                FnNotification(options.key.BookingID);
+            //columns: [{ dataField: "ClientName", caption: "Client Name", width: 180 }, { dataField: "CategoryName", caption: "Category Name" },
+            //{ dataField: "JobName", caption: "Job Name", width: 200 }, { dataField: "BookingNo", caption: "Quote No" },
+            //{ dataField: "CreatedDate", caption: "Date" }, { dataField: "OrderQuantity", caption: "Order Qty" },
+            //{ dataField: "UserName", caption: "Quote By" }, { dataField: "QuotedCost", caption: "Quoted Cost" },
+            //{ dataField: "TypeOfCost", caption: "Unit" },
+            //{ dataField: "ProductCode", caption: "ArtWork Code" },
+            //{ dataField: "EnquiryID", caption: "Enquiry No", visible: false }, { dataField: "ApprovalSendTo", caption: "Approval Send To", visible: true },
+            //{ dataField: "InternalApprovedDate", caption: "IA Date" },
+            //{
+            //    caption: "", fixedPosition: "right", fixed: true,
+            //    cellTemplate: function (container, options) {
+            //        if (options.key.CommentCount > 0) {
+            //            $('<div title="Quote Comments">').addClass('fa fa-bell customgridbtn dx-link').append('<span class="bg-deep-orange badge font-10">' + options.key.CommentCount + '</span>')
+            //                .on('dxclick', function () {
+            //                    FnNotification(options.key.BookingID);
 
-                                this.setAttribute("data-toggle", "modal");
-                                this.setAttribute("data-target", "#CommentModal");
-                            }).appendTo(container);
-                    }
+            //                    this.setAttribute("data-toggle", "modal");
+            //                    this.setAttribute("data-target", "#CommentModal");
+            //                }).appendTo(container);
+            //        }
 
-                }
-            },
-            {
-                caption: "", fixedPosition: "right", fixed: true,
-                cellTemplate: function (container, options) {
-                    $('<a title="Review Quote">').addClass('fa fa-eye dx-link')
-                        .on('dxclick', function () {
-                            QuotesLinkClick(options.key, "Review");
-                        }).appendTo(container);
-                }
-            }, {
-                caption: "", fixedPosition: "right", fixed: true,
-                cellTemplate: function (container, options) {
-                    $('<a title="Revise Quote">').addClass('fa fa-edit dx-link')
-                        //                        .text('Revise')
-                        .on('dxclick', function () {
-                            QuotesLinkClick(options.key, false);
-                        }).appendTo(container);
-                }
-            },
-            {
-                caption: "", fixedPosition: "right", fixed: true,
-                cellTemplate: function (container, options) {
-                    $('<a title="Clone Quote">').addClass('customgridbtn fa fa-copy dx-link')
-                        //.text('Clone')
-                        .on('dxclick', function () {
-                            QuotesLinkClick(options.key, true);
-                            //this.href = "DYnamicQty.aspx?BookingID=" + options.key.BookingID + "&FG=true";
-                        }).appendTo(container);
-                }
-            },
-            {
-                caption: "", fixedPosition: "right", fixed: true,
-                cellTemplate: function (container, options) {
-                    $('<a title="Print Quote">').addClass('fa fa-print dx-link customgridbtn')
-                        .on('dxclick', function () {
-                            if (options.key.BookingID <= 0 || options.key.IsInternalApproved === false) return;
-                            //var url = "Print_Quotation.aspx?BN=" + options.key.BookingID + "&BookingNo=" + encodeURIComponent(options.key.BookingNo);
-                            var url = "QuotePreview.aspx?BKID=" + options.key.BookingID;//ReportQuotation.aspx?BookingID
-                            window.open(url, "_blank", "location=yes,height=" + window.innerHeight + ",width=" + window.innerWidth + ",scrollbars=yes,status=no", true);
-                        }).appendTo(container);
+            //    }
+            //},
+            //{
+            //    caption: "", fixedPosition: "right", fixed: true,
+            //    cellTemplate: function (container, options) {
+            //        $('<a title="Review Quote">').addClass('fa fa-eye dx-link')
+            //            .on('dxclick', function () {
+            //                QuotesLinkClick(options.key, "Review");
+            //            }).appendTo(container);
+            //    }
+            //}, {
+            //    caption: "", fixedPosition: "right", fixed: true,
+            //    cellTemplate: function (container, options) {
+            //        $('<a title="Revise Quote">').addClass('fa fa-edit dx-link')
+            //            //                        .text('Revise')
+            //            .on('dxclick', function () {
+            //                QuotesLinkClick(options.key, false);
+            //            }).appendTo(container);
+            //    }
+            //},
+            //{
+            //    caption: "", fixedPosition: "right", fixed: true,
+            //    cellTemplate: function (container, options) {
+            //        $('<a title="Clone Quote">').addClass('customgridbtn fa fa-copy dx-link')
+            //            //.text('Clone')
+            //            .on('dxclick', function () {
+            //                QuotesLinkClick(options.key, true);
+            //                //this.href = "DYnamicQty.aspx?BookingID=" + options.key.BookingID + "&FG=true";
+            //            }).appendTo(container);
+            //    }
+            //},
+            //{
+            //    caption: "", fixedPosition: "right", fixed: true,
+            //    cellTemplate: function (container, options) {
+            //        $('<a title="Print Quote">').addClass('fa fa-print dx-link customgridbtn')
+            //            .on('dxclick', function () {
+            //                if (options.key.BookingID <= 0 || options.key.IsInternalApproved === false) return;
+            //                //var url = "Print_Quotation.aspx?BN=" + options.key.BookingID + "&BookingNo=" + encodeURIComponent(options.key.BookingNo);
+            //                var url = "QuotePreview.aspx?BKID=" + options.key.BookingID;//ReportQuotation.aspx?BookingID
+            //                window.open(url, "_blank", "location=yes,height=" + window.innerHeight + ",width=" + window.innerWidth + ",scrollbars=yes,status=no", true);
+            //            }).appendTo(container);
 
-                }
-            },
-                { dataField: "ReasonsofQuote", caption: "Reasons of Quote Failure", visible: false }, { dataField: "ReworkRemark", caption: "Rework Remark", visible: true, width: 200 },
-            { dataField: "RemarkInternalApproved", caption: "IA Remark", visible: true },
-            {
-                caption: "", fixedPosition: "right", fixed: true, width: 30,
-                cellTemplate: function (container, options) {
-                    $('<div title="Delete Quote" style="color:red;">').addClass('fa fa-trash customgridbtn dx-link')
-                        .on('dxclick', function () {
-                            deleteQuotationDetails(options.key);
-                        }).appendTo(container);
+            //    }
+            //},
+            //{ dataField: "ReasonsofQuote", caption: "Reasons of Quote Failure", visible: false }, { dataField: "ReworkRemark", caption: "Rework Remark", visible: true, width: 200 },
+            //{ dataField: "RemarkInternalApproved", caption: "IA Remark", visible: true },
+            //{
+            //    caption: "", fixedPosition: "right", fixed: true, width: 30,
+            //    cellTemplate: function (container, options) {
+            //        $('<div title="Delete Quote" style="color:red;">').addClass('fa fa-trash customgridbtn dx-link')
+            //            .on('dxclick', function () {
+            //                deleteQuotationDetails(options.key);
+            //            }).appendTo(container);
 
-                }
-            }],
+            //    }
+            //}],
             onSelectionChanged: function (selectedItems) {
                 var data = selectedItems.selectedRowsData;
                 var selOption = $("#selectStatus").dxRadioGroup('instance').option('value');
@@ -229,19 +270,19 @@ try {
                 } else {
                     $("#QuoteIDId").text(
                         $.map(data, function (value) {
-                            return value.BookingID;
+                            return value.ProductEstimateID;
                         }).join(','));
 
                     $("#BookingNo").text(
                         $.map(data, function (value) {
-                            return value.BookingNo;
+                            return value.QuotationNo;
                         }).join(','));
                 }
             }
             ////summary: {
             ////    totalItems: [{
             ////        showInColumn: "ClientName",
-            ////        column: "BookingID",
+            ////        column: "ProductEstimateID",
             ////        summaryType: "count"
             ////    }, {
             ////        showInColumn: "JobName",
@@ -355,24 +396,24 @@ try {
                 //dataGrid.clearFilter();
                 FilterSTR = data.value;
             } else if (data.value === "NewQuotes") {
-                FilterSTR = " And IsSendForInternalApproval=0 And IsInternalApproved=0 And IsCancelled=0 And IsRework=0 And IsApproved=0 ";
+                FilterSTR = " And PQ.IsSendForInternalApproval=0 And PQ.IsInternalApproved=0 And PQ.IsCancelled=0 And PQ.IsRework=0 And PQ.IsApproved=0 ";
                 document.getElementById("BtnSendForInternalApproval").style.display = "block";
                 document.getElementById("DivSendToUser").style.display = "block";
             } else if (data.value === "PendingForApproval") {
                 //dataGrid.filter(["IsInternalApproved", "=", false], "or", ["IsCancelled", "=", 0], "or", ["IsRework", "=", 0], "or", ["JobApproved", "=", 0]);
-                FilterSTR = " And IsSendForInternalApproval=1 And IsInternalApproved=0 And IsCancelled=0 And IsRework=0 And IsApproved=0 ";
+                FilterSTR = " And PQ.IsSendForInternalApproval=1 And IsInternalApproved=0 And PQ.IsCancelled=0 And PQ.IsRework=0 And PQ.IsApproved=0 ";
                 document.getElementById("BtnDisInternalApproval").style.display = "block";
             } else if (data.value === "IsInternalApproved") {
                 document.getElementById("BtnSendForApproval").style.display = "block";
                 //dataGrid.filter([data.value, "=", 1], "or", ["IsCancelled", "=", 0], "or", ["PendingForPriceApproval", "=", 0]);
-                FilterSTR = " And IsInternalApproved=1 And IsCancelled=0 And IsSendForPriceApproval=0 ";
+                FilterSTR = " And PQ.IsInternalApproved=1 And PQ.IsCancelled=0 And PQ.IsSendForPriceApproval=0 ";
             } else {
                 FilterSTR = " And " + data.value + "= 1 ";
                 //dataGrid.filter([data.value, "=", 1]);
             }
 
             if (data.value === "JobApproved") {
-                FilterSTR = " And IsApproved = 1 ";
+                FilterSTR = " And PQ.IsApproved = 1 ";
                 document.getElementById("BtnDisApproval").style.display = "block";
             }
 
@@ -390,8 +431,19 @@ try {
                     res = res.slice(0, -1);
                     var RES1 = JSON.parse(res);
                     $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+                    GBLContents = RES1.Contents;
                     $("#GridBooingPanel").dxDataGrid({
-                        dataSource: RES1
+                        dataSource: RES1.Projects,
+                        columns: [
+                            { dataField: "QuotationNo" },
+                            { dataField: "ProjectName" },
+                            { dataField: "ClientName" },
+                            { dataField: "SalesPerson" },
+                            { dataField: "FreightAmount" },
+                            { dataField: "Remark" },
+                            { dataField: "EstimateBy" },
+                        ],
+
                     });
                 },
                 error: function errorFunc(jqXHR) {
@@ -494,6 +546,40 @@ $("#BtnDisInternalApproval").click(function () {
         sendForIntApproval(bid, 0, 0);
     }
 });
+$("#BtnDisApproval").click(function () {
+    var bid = document.getElementById("QuoteIDId").value;
+    if (bid === "" || bid === null || bid === undefined) {
+        swal("Empty Selection", "Please select quote first...!", "warning");
+    }
+    else {
+        $("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
+        $.ajax({
+            type: "POST",
+            url: "WebServicePlanWindow.asmx/DisApproval",
+            data: '{BKID:' + JSON.stringify(bid) + '}',
+            contentType: "application/json; charset=utf-8",
+            dataType: 'text',
+            success: function (results) {
+                var res = results.replace(/"/g, '');
+                res = res.replace(/d:/g, '');
+                res = res.replace(/{/g, '');
+                res = res.replace(/}/g, '');
+                $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+                if (res === "Save") {
+                   
+                    swal("Status Updated..", "Selected quotes are successfully disapproved!", "success");
+                    location.reload();
+                } else {
+                    DevExpress.ui.notify("Something went wrong..!", "warning", 1500);
+                }
+            },
+            error: function errorFunc(jqXHR) {
+                //$("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+                alert(jqXHR.message);
+            }
+        });
+    }
+});
 
 //Internal Approval User Name List
 $.ajax({
@@ -558,7 +644,7 @@ function sendForIntApproval(bid, flg, SendTo) {
 }
 
 function deleteQuotationDetails(ObjBK) {
-    var BKID = ObjBK.BookingID;
+    var BKID = ObjBK.ProductEstimateID;
     if (BKID <= 0 || BKID === undefined) return;
     swal({
         title: "Delete Quote",
@@ -601,7 +687,7 @@ function deleteQuotationDetails(ObjBK) {
 }
 
 function QuotesLinkClick(rowData, Flag) {
-    var BKID = rowData.BookingID;
+    var BKID = rowData.ProductEstimateID;
 
     var Captitle = "";
     if (Flag === true) {

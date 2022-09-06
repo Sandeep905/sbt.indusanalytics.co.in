@@ -53,6 +53,22 @@ $("#SelSalesPerson").dxSelectBox({
     validationRules: [{ type: 'required', message: 'Sales person is required' }]
 });
 
+$("#Selvendor").dxSelectBox({
+    items: [],
+    placeholder: "Select --",
+    valueExpr: "VendorID",
+    displayExpr: "VendorName",
+    searchEnabled: true,
+    showClearButton: true,
+    onValueChanged: function (data) {
+        if (data.value !== null) {
+
+        }
+    }
+}).dxValidator({
+    validationRules: [{ type: 'required', message: 'Vendor name is required' }]
+});
+
 let CategoryData = [], ProductMasterList = [];
 $.ajax({
     type: 'POST',
@@ -258,6 +274,7 @@ var grid = $("#gridProductList").dxDataGrid({
                     rowData.ProcessIDStr = result[0].ProcessIDStr;
                     rowData.ProductHSNID = result[0].ProductHSNID;
                     rowData.IsOffsetProduct = result[0].IsOffsetProduct;
+                    rowData.IsUnitProduct = result[0].IsUnitProduct;
                     rowData.DefaultProcessStr = result[0].DefaultProcessStr;
                     var result = $.grep(ObjProductHSNGrp, function (ex) { return ex.ProductHSNID === rowData.ProductHSNID; });
                     if (result.length === 1) {
@@ -273,6 +290,7 @@ var grid = $("#gridProductList").dxDataGrid({
                     rowData.ProcessIDStr = "";
                     rowData.ProductHSNID = 0;
                     rowData.IsOffsetProduct = 0;
+                    rowData.IsUnitProduct = 0;
 
                 }
             }
@@ -300,10 +318,19 @@ var grid = $("#gridProductList").dxDataGrid({
                         if (options.data.Quantity === undefined || Number(options.data.Quantity) <= 0) return;
                         SelectedProductData = options.data;
                         document.getElementById("TxtProductName").value = options.data.ProductName;
+                        document.getElementById("TxtProductNameUnit").value = options.data.ProductName;
                         document.getElementById("TxtPlanQty").value = options.data.Quantity;
+                        document.getElementById("TxtPlanQtyUnit").value = options.data.Quantity;
                         document.getElementById("FinalTaxPer").value = options.data.GSTTaxPercentage;
+                        document.getElementById("FinalTaxPer1").value = options.data.GSTTaxPercentage;
+                        document.getElementById("FinalTaxPerUnit").value = options.data.GSTTaxPercentage;
+                        document.getElementById("FinalMiscPer1").value = Number(options.data.MiscPer);
                         document.getElementById("FinalMiscPer").value = Number(options.data.MiscPer);
+                        document.getElementById("FinalMiscPerUnit").value = Number(options.data.MiscPer);
                         document.getElementById("FinalShipperCost").value = Number(options.data.ShippingCost);
+                        document.getElementById("FinalShipperCost1").value = Number(options.data.ShippingCost);
+                        document.getElementById("FinalShipperCostUnit").value = Number(options.data.ShippingCost);
+                        document.getElementById("FinalTotal").value = Number(options.data.FinalAmount);
 
                         const City = document.getElementById("TxtClientCity").value;
                         if (City === "" | City === undefined) {
@@ -315,45 +342,40 @@ var grid = $("#gridProductList").dxDataGrid({
                         Defaultprocessids = options.data.DefaultProcessStr;
                         $("#gridContentPlansList").dxDataGrid({ dataSource: [] });
 
-                        //var filteredOprData = [];
-                        //if (options.data.ProcessIDStr !== undefined && options.data.ProcessIDStr !== null && options.data.ProcessIDStr !== "") {
-                        //    let pIds = options.data.ProcessIDStr.split(",");
-                        //    for (i = 0; i < OprDatap.length; i++) {
-                        //        for (j = 0; j < pIds.length; j++) {
-                        //            if (Number(pIds[j]) === OprDatap[i].ProcessID) { filteredOprData.push(OprDatap[i]); }
-                        //        }
-                        //    }
-                        //}
-                        //let OprIds = [];
-                        //let op = options.data.ProcessIDStr.split(",");
-                        //for (var i = 0; i < op.length; i++) {
-                        //    OprIds.push(op[i]);
-                        //}
+
                         loadProcess();
                         $("OperIdPQ").text(options.data.ProcessIDStr);
 
-                        //$("#gridOperation").dxDataGrid({ dataSource: filteredOprData });
 
                         //reload already created plan for the selected product
-                        if (options.data.VendorID > 0) {
+                        if (options.data.VendorID > 0 && options.data.IsOffsetProduct !== true && options.data.IsUnitProduct !== true) {
                             let plandata = [];
                             plandata.push(options.data);
                             $("#gridContentPlansList").dxDataGrid({ dataSource: plandata });
                             $("#gridProductConfig").dxDataGrid({ dataSource: JSON.parse(options.data.ProductInputSizes) });
                         } else {
-                            GetProductConfig(ProductCatalogID);
+                            if (options.data.IsUnitProduct !== true && options.data.IsOffsetProduct !== true)
+                                GetProductConfig(ProductCatalogID);
                         }
-                        //allQuantity(options.data.Quantity, "Rectangular")
+
                         if (options.data.IsOffsetProduct === true) {
-                            //document.getElementById("iFrameMasters").src = "DynamicQty.aspx";
-                            //document.getElementById("iFrameMasters").style.height = window.innerHeight / 1.1 + "px";
-                            //this.setAttribute("data-toggle", "modal");
-                            //this.setAttribute("data-target", "#ModaliFrame");
                             allQuantity(options.data.Quantity, $.grep(ProductMasterList, function (ex) { return ex.ProductCatalogID === options.data.ProductCatalogID; })[0].ProductName, $.grep(AllContents, function (ex) { return ex.ContentID === $.grep(ProductMasterList, function (ex) { return ex.ProductCatalogID === options.data.ProductCatalogID; })[0].ContentID; })[0].ContentName, $.grep(ProductMasterList, function (ex) { return ex.ProductCatalogID === options.data.ProductCatalogID; })[0].ProductImagePath)
                         } else {
+                            if (options.data.IsUnitProduct === true) {
+                                document.getElementById("VendorRate").value = Number(options.data.Rate);
+
+                                $("#Selvendor").dxSelectBox({
+                                    value: options.data.VendorID,
+                                })
+                                this.setAttribute("data-toggle", "modal");
+                                this.setAttribute("data-target", "#modalEstimateProductUnit");
+                                return;
+                            }
                             this.setAttribute("data-toggle", "modal");
                             this.setAttribute("data-target", "#modalEstimateProduct");
+                            onChangeCalcAmountFlex();
                         }
+
                     })
                     .appendTo(container);
             },
@@ -394,13 +416,15 @@ var grid = $("#gridProductList").dxDataGrid({
         { dataField: "ProcessCost", caption: "Operation Amount", allowEditing: false, visible: false },
         { dataField: "FinalAmount", caption: "Final Amount", allowEditing: false, visible: true },
         { dataField: "UnitCost", caption: "Unit Price", allowEditing: false, visible: false },
+        { dataField: "ProfitPer", caption: "Profit", allowEditing: false, visible: false },
+        { dataField: "ProfitCost", caption: "Profit", allowEditing: false, visible: true },
         { dataField: "ProcessIDStr", allowEditing: false, visible: false },
         { dataField: "BookingID", allowEditing: false, visible: false },
         { dataField: "DefaultProcessStr", allowEditing: false, visible: false }
     ],
     editing: {
         mode: "popup",
-         allowUpdating: false,
+        allowUpdating: false,
         allowDeleting: true,
         popup: {
             title: 'Product Requirement',
@@ -588,7 +612,8 @@ $("#gridContentPlansList").dxDataGrid({
     },
     onSelectionChanged: function (data) {
         if (data) {
-
+            document.getElementById('finalCost1').value = data.selectedRowsData[0].FinalAmount;
+            onChangeCalcAmountFlex();
         }
     }
 });
@@ -746,6 +771,22 @@ $.ajax({
         $("#SelSalesPerson").dxSelectBox({ dataSource: RES1 });
     }
 });
+$.ajax({
+    type: "POST",
+    url: "WebServiceProductMaster.asmx/GetVendors",
+    data: '{}',
+    contentType: "application/json; charset=utf-8",
+    dataType: "text",
+    success: function (results) {
+        var res = results.replace(/\\/g, '');
+        res = res.replace(/"d":""/g, '');
+        res = res.replace(/""/g, '');
+        res = res.substr(1);
+        res = res.slice(0, -1);
+        let RES1 = JSON.parse(res);
+        $("#Selvendor").dxSelectBox({ dataSource: RES1 });
+    }
+});
 function GetProductConfig(productId) {
     $.ajax({
         type: 'POST',
@@ -855,27 +896,46 @@ $("#BtnApplyPlan").click(function () {
         DevExpress.ui.notify("Please select vendor rate for the product..!", "warning", 2000);
         return;
     }
+    var FinalQuotedCost1 = Number(document.getElementById("FinalTotal").value);
+    var FinalAmount = Number(document.getElementById("FinalTotal").value);
+    var FinalMiscPer = Number(document.getElementById("FinalMiscPer1").value);
+    var FinalShipperCost = Number(document.getElementById("FinalShipperCost1").value);
     var gridProductData = $('#gridProductList').dxDataGrid('instance');
     var gridProductConfig = $('#gridProductConfig').dxDataGrid('instance')._options.dataSource;
+    var ProfitPer = Number(document.getElementById("ProfitPer1").value);
+    var ProfitCost = Number(document.getElementById("ProfitCost1").value);
+
 
     for (var i = 0; i < gridProductData._options.dataSource.length; i++) {
         if (gridProductData._options.dataSource[i].ProductCatalogID === ProductCatalogID && gridProductData._options.dataSource[i].Quantity === Number(document.getElementById("TxtPlanQty").value)) {
-            gridProductData._options.dataSource[i].Rate = SelectedPlanData[0].VendorRate;
+            gridProductData._options.dataSource[i].Rate = (FinalAmount / SelectedPlanData[0].RequiredQuantity).toFixed(2);
             gridProductData._options.dataSource[i].RateType = "Per Square Feet";
             gridProductData._options.dataSource[i].Amount = SelectedPlanData[0].FinalAmount;
             gridProductData._options.dataSource[i].VendorName = SelectedPlanData[0].VendorName;
+            gridProductData._options.dataSource[i].VendorID = SelectedPlanData[0].VendorID;
             gridProductData._options.dataSource[i].City = SelectedPlanData[0].City;
             gridProductData._options.dataSource[i].FinalAmount = SelectedPlanData[0].FinalAmount;
             gridProductData._options.dataSource[i].RequiredQuantity = SelectedPlanData[0].RequiredQuantity;
             gridProductData._options.dataSource[i].VendorRate = SelectedPlanData[0].VendorRate;
+            gridProductData._options.dataSource[i].ProfitPer = Number(ProfitPer);
+            gridProductData._options.dataSource[i].ProfitCost = Number(ProfitCost);
             gridProductData._options.dataSource[i].ProcessIDStr = $("OperIdPQ").text();
             gridProductData._options.dataSource[i].ProcessCost = SelectedPlanData[0].ProcessCost;
             gridProductData._options.dataSource[i].UnitCost = SelectedPlanData[0].UnitCost;
             gridProductData._options.dataSource[i].ProductInputSizes = JSON.stringify(gridProductConfig);
+            gridProductData._options.dataSource[i].Amount = Number(FinalAmount);
+            gridProductData._options.dataSource[i].MiscPer = Number(FinalMiscPer);
+            gridProductData._options.dataSource[i].ShippingCost = Number(FinalShipperCost);
+            gridProductData._options.dataSource[i].FinalAmount = Number(FinalQuotedCost1);;
             gridProductData.refresh();
             break;
         }
     }
+    document.getElementById("FinalTotal").value = 0
+    document.getElementById("FinalMiscPer1").value = 0
+    document.getElementById("FinalShipperCost1").value = 0
+    document.getElementById("ProfitPer1").value = 0
+    document.getElementById("FinalTaxPer1").value = 0
     document.getElementById("BtnApplyPlan").setAttribute("data-dismiss", "modal");
 });
 
@@ -956,6 +1016,7 @@ function FinalSave(BookingID) {
                 TypeOfCost = gridProductList._options.dataSource[i].RateType;
             }
             gridProductData.Rate = gridProductList._options.dataSource[i].VendorRate;
+            gridProductData.CategoryID = gridProductList._options.dataSource[i].CategoryID;;
             gridProductData.RateType = gridProductList._options.dataSource[i].RateType;
             gridProductData.Amount = gridProductList._options.dataSource[i].Amount;
 
@@ -966,6 +1027,13 @@ function FinalSave(BookingID) {
             gridProductData.ProcessCost = gridProductList._options.dataSource[i].ProcessCost;
             gridProductData.UnitCost = gridProductList._options.dataSource[i].UnitCost;
             gridProductData.ProductInputSizes = gridProductList._options.dataSource[i].ProductInputSizes;
+            gridProductData.MiscAmount = Number(gridProductList._options.dataSource[i].FinalAmount) / 100 * Number(gridProductList._options.dataSource[i].MiscPer);
+            gridProductData.GSTAmount = Number(gridProductList._options.dataSource[i].FinalAmount) / 100 * Number(gridProductList._options.dataSource[i].GSTTaxPercentage);
+            gridProductData.GSTPercantage = gridProductList._options.dataSource[i].GSTTaxPercentage;
+            gridProductData.ProfitPer = gridProductList._options.dataSource[i].ProfitPer;
+            gridProductData.ProfitCost = gridProductList._options.dataSource[i].ProfitCost;
+            gridProductData.MiscPercantage = gridProductList._options.dataSource[i].MiscPer;
+            gridProductData.ShippingCost = gridProductList._options.dataSource[i].ShippingCost;
 
             objProductConfig.push(gridProductData);
         }
@@ -1101,69 +1169,6 @@ function checkIfRemoteFileExists(urlp) {
     return urlp;
 };
 
-//$('#iFrameMasters').load(function () {
-//    $('#iFrameMasters').contents().find('#BottomTabBar').addClass('iframeBottomTabBar');
-//    $("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
-//    $('#iFrameMasters').contents().find('#Customleftsidebar2').hide();
-//    $('#iFrameMasters').contents().find('#myTopnav').hide();
-//    $('#iFrameMasters').contents().find('input[name=BtnFinalize]').hide();
-//    $('#iFrameMasters').contents().find('.Bookingsidenav').hide();
-//    $('#iFrameMasters').contents().find('#Add_Quantity_Button').hide();
-//    $('#iFrameMasters').contents().find('#Quotation_Finalize').click();
-
-//    let CategoryName = $.grep(CategoryData, function (ex) { return ex.CategoryID === CategoryID });
-//    if (CategoryName[0].CategoryName.toUpperCase().includes("BOOK")) {
-//        $('#iFrameMasters').contents().find('#BookQuantity').val(document.getElementById("TxtPlanQty").value);
-//        $('#iFrameMasters').contents().find('#CalenderPlanButton').hide();
-//        $('#iFrameMasters').contents().find('#BookPlanButton').click();
-//    } else if (CategoryName[0].CategoryName.toUpperCase().includes("CALENDAR")) {
-//        $('#iFrameMasters').contents().find('#CalenderQuantity').val(document.getElementById("TxtPlanQty").value);
-//        $('#iFrameMasters').contents().find('#BookPlanButton').hide();
-//        $('#iFrameMasters').contents().find('#CalenderPlanButton').click();
-//    } else {
-//        $('#iFrameMasters').contents().find('#Add_Quantity_Button').click();
-//        $('#iFrameMasters').contents().find("#txtqty1").val(document.getElementById("TxtPlanQty").value);
-//        $('#iFrameMasters').contents().find('#BookPlanButton').hide();
-//        $('#iFrameMasters').contents().find('#CalenderPlanButton').hide();
-//    }
-
-//    $('#iFrameMasters').contents().find("#txtqty1").prop('disabled', true);
-//    $('#iFrameMasters').contents().find('.content').addClass('contentiFrame');
-//    $('#iFrameMasters').contents().find('#FinalTaxPer1').val(SelectedProductData.GSTTaxPercentage);
-
-//    $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
-//});
-
-// For IFrame Btn - Offset Not in use
-$("#btnApplyQuote").click(function () {
-
-    var iframe = document.getElementById("iFrameMasters");
-    var FinalQuotedCost1 = Number(iframe.contentWindow.document.getElementById("FinalQuotedCost1").value);
-    var FinalAmount = Number(iframe.contentWindow.document.getElementById("FinalGrandTotalCost1").innerHTML);
-
-    SelectedProductData.Rate = FinalQuotedCost1;
-    SelectedProductData.Amount = FinalAmount;
-
-    var gridProductData = $('#gridProductList').dxDataGrid('instance');
-
-    for (var i = 0; i < gridProductData._options.dataSource.length; i++) {
-        if (gridProductData._options.dataSource[i].ProductCatalogID === ProductCatalogID && gridProductData._options.dataSource[i].Quantity === Number(document.getElementById("TxtPlanQty").value)) {
-            gridProductData._options.dataSource[i].Rate = FinalQuotedCost1;
-            gridProductData._options.dataSource[i].RateType = "Per Unit";
-            gridProductData._options.dataSource[i].Amount = Number(FinalAmount);
-
-            gridProductData._options.dataSource[i].FinalAmount = Number(FinalAmount);;
-            gridProductData._options.dataSource[i].RequiredQuantity = gridProductData._options.dataSource[i].Quantity;
-            gridProductData._options.dataSource[i].VendorRate = FinalQuotedCost1;
-            gridProductData.refresh();
-            break;
-        }
-    }
-
-    //iframe.contentWindow.document.getElementById("BtnSaveQuotation").click();
-    //OpenIdb();
-    document.getElementById("btnApplyQuote").setAttribute("data-dismiss", "modal");
-});
 
 function allQuantity(qty, ContentName, Orientation, ProductImagePath) {
     //alert(qt.id);
@@ -1172,8 +1177,6 @@ function allQuantity(qty, ContentName, Orientation, ProductImagePath) {
     Gbl_TDQty = qty;
     document.getElementById("PlanContQty").innerHTML = qty;
     document.getElementById("PlanContImg").src = ProductImagePath;
-
-
     var Bottompopup = document.getElementById('BottomTabBar');
     var Bottomoverlay = document.getElementById('MYbackgroundOverlay');
     document.getElementById('RightTabBar').style.width = "0px";
@@ -1230,6 +1233,8 @@ $("#btnApplyCostPQ").click(function () {
         var FinalAmount = Number(document.getElementById("finalquotatedCost").value);
         var FinalMiscPer = Number(document.getElementById("FinalMiscPer").value);
         var FinalShipperCost = Number(document.getElementById("FinalShipperCost").value);
+        var ProfitPer = Number(document.getElementById("ProfitPer").value);
+        var ProfitCost = Number(document.getElementById("ProfitCost").value);
 
         var gridProductData = $('#gridProductList').dxDataGrid('instance');
 
@@ -1240,7 +1245,9 @@ $("#btnApplyCostPQ").click(function () {
                 gridProductData._options.dataSource[i].Amount = Number(FinalAmount);
                 gridProductData._options.dataSource[i].MiscPer = Number(FinalMiscPer);
                 gridProductData._options.dataSource[i].ShippingCost = Number(FinalShipperCost);
-                gridProductData._options.dataSource[i].FinalAmount = Number(FinalQuotedCost1);;
+                gridProductData._options.dataSource[i].FinalAmount = Number(FinalQuotedCost1);
+                gridProductData._options.dataSource[i].ProfitPer = Number(ProfitPer);
+                gridProductData._options.dataSource[i].ProfitCost = Number(ProfitCost);
                 gridProductData._options.dataSource[i].RequiredQuantity = gridProductData._options.dataSource[i].Quantity;
                 gridProductData._options.dataSource[i].VendorRate = GblPlanValues.PrintingRate;
                 gridProductData._options.dataSource[i].UnitCost = Number(document.getElementById('finalUnitCost').value);
@@ -1275,22 +1282,67 @@ $("#btnApplyCostPQ").click(function () {
 
 
 
-function onChangeCalcAmountp() {
+function onChangeCalcAmountp(id) {
     try {
 
         var taxper = Number(document.getElementById('FinalTaxPer').value);
         var FinalShipperCost = Number(document.getElementById('FinalShipperCost').value);
         var FinalMiscPer = Number(document.getElementById('FinalMiscPer').value);
         var finalCost = Number(document.getElementById('finalCost').value);
+        var ProfitPer = Number(document.getElementById('ProfitPer').value);
+        var MiscCost = Number(document.getElementById('FinalMiscCost').value);
+        var ProfitCost = Number(document.getElementById('ProfitCost').value);
         var taxamt = finalCost * taxper / 100;
-        var Miscamt = finalCost * FinalMiscPer / 100;
 
+        if (id != undefined && id === 'FinalMiscCost') {
+            document.getElementById('FinalMiscPer').value = (MiscCost * 100 / (finalCost)).toFixed(2);
+        } else {
+            document.getElementById('FinalMiscCost').value = (finalCost * FinalMiscPer / 100).toFixed(2);
+        }
+
+
+        document.getElementById('finalquotatedCost').value = 0;
         document.getElementById('FinalTaxCost').value = taxamt.toFixed(2);
-        document.getElementById('FinalMiscCost').value = Miscamt.toFixed(2);
-        var totalfinal = (Number(finalCost) + Number(document.getElementById('FinalTaxCost').value) + Number(document.getElementById('FinalMiscCost').value) + Number(FinalShipperCost)).toFixed(3);
-        document.getElementById('finalquotatedCost').value = totalfinal;
+        var totalfinal = (Number(finalCost) + Number(document.getElementById('FinalTaxCost').value) + Number(document.getElementById('FinalMiscCost').value) + Number(FinalShipperCost)).toFixed(2);
+        if (id != undefined && id === 'ProfitCost') {
+            document.getElementById('ProfitPer').value = (ProfitCost * 100 / (totalfinal)).toFixed(2);
+        } else {
+            document.getElementById('ProfitCost').value = (totalfinal * ProfitPer / 100).toFixed(2);
+        }
+        document.getElementById('finalquotatedCost').value = (Number(totalfinal) + Number(document.getElementById('ProfitCost').value)).toFixed(2)
         document.getElementById('finalUnitCost').value = Number(totalfinal / Number(document.getElementById('TxtFinalQuantity').value)).toFixed(2);
 
+
+    } catch (e) {
+        alert(e);
+    }
+}
+function onChangeCalcAmountFlex(id) {
+    try {
+        var ProfitPer = Number(document.getElementById('ProfitPer1').value);
+        var taxper = Number(document.getElementById('FinalTaxPer1').value);
+        var FinalShipperCost = Number(document.getElementById('FinalShipperCost1').value);
+        var FinalMiscPer = Number(document.getElementById('FinalMiscPer1').value);
+        var finalCost = Number(document.getElementById('finalCost1').value);
+        var MiscCost = Number(document.getElementById('FinalMiscCost1').value);
+        var ProfitCost = Number(document.getElementById('ProfitCost1').value);
+        var taxamt = finalCost * taxper / 100;
+        if (id != undefined && id === 'FinalMiscCost1') {
+            document.getElementById('FinalMiscPer1').value = (MiscCost * 100 / (finalCost)).toFixed(2);
+        } else {
+            document.getElementById('FinalMiscCost1').value = (finalCost * FinalMiscPer / 100).toFixed(2);
+        }
+
+
+        document.getElementById('FinalTaxCost1').value = taxamt.toFixed(2);
+        //document.getElementById('FinalMiscCost1').value = Miscamt.toFixed(2);
+        var totalfinal = (Number(finalCost) + Number(document.getElementById('FinalTaxCost1').value) + Number(document.getElementById('FinalMiscCost1').value) + Number(FinalShipperCost)).toFixed(3);
+        if (id != undefined && id === 'ProfitCost1') {
+            document.getElementById('ProfitPer1').value = (ProfitCost * 100 / (totalfinal)).toFixed(2);
+        } else {
+            document.getElementById('ProfitCost1').value = (totalfinal * ProfitPer / 100).toFixed(2);
+        }
+        document.getElementById('FinalTotal').value = (Number(totalfinal) + Number(document.getElementById('ProfitCost1').value)).toFixed(2);
 
     } catch (e) {
         alert(e);
@@ -1527,4 +1579,119 @@ function callSaveQuote(TblPlanning, TblOperations, TblContentForms) {
 $('#BtnPrint').click(function () {
     var SelectedPlanData = $("#GridShowlist").dxDataGrid("instance").getSelectedRowsData();
     window.open("/ProjectQuotationReportViewer.aspx?t=" + SelectedPlanData[0].ProductEstimateID, '_blank')
+});
+
+function CalculateUnitCost(id) {
+    var QTY = Number(document.getElementById('TxtPlanQtyUnit').value);
+    var Rate = Number(document.getElementById('VendorRate').value);
+    var ProfitPer = Number(document.getElementById('ProfitPerUnit').value);
+    var taxper = Number(document.getElementById('FinalTaxPerUnit').value);
+    var FinalShipperCost = Number(document.getElementById('FinalShipperCostUnit').value);
+    var FinalMiscPer = Number(document.getElementById('FinalMiscPerUnit').value);
+    var MiscCost = Number(document.getElementById('FinalMiscCostUnit').value);
+    var ProfitCost = Number(document.getElementById('ProfitCostUnit').value);
+
+    document.getElementById('finalCostUnit').value = QTY * Rate;
+
+    var finalCost = Number(document.getElementById('finalCostUnit').value);
+
+    var taxamt = Number(finalCost * taxper / 100).toFixed(2);
+    document.getElementById('FinalTaxCostUnit').value = taxamt;
+
+    if (id != undefined && id === 'FinalMiscCostUnit') {
+        document.getElementById('FinalMiscPerUnit').value = (MiscCost * 100 / (finalCost)).toFixed(2);
+    } else {
+        document.getElementById('FinalMiscCostUnit').value = finalCost * FinalMiscPer / 100;
+    }
+
+    var totalfinal = (Number(document.getElementById('finalCostUnit').value) + Number(document.getElementById('FinalTaxCostUnit').value) + Number(document.getElementById('FinalMiscCostUnit').value) + Number(FinalShipperCost)).toFixed(2);
+
+    if (id != undefined && id === 'ProfitCostUnit') {
+        document.getElementById('ProfitPerUnit').value = (ProfitCost * 100 / (totalfinal)).toFixed(2);
+    } else {
+        document.getElementById('ProfitCostUnit').value = (totalfinal * ProfitPer / 100).toFixed(2);
+    }
+
+    document.getElementById('FinalTotalUnit').value = (Number(totalfinal) + Number(document.getElementById('ProfitCostUnit').value));
+    document.getElementById('FinalUnitCostUnit').value = (Number(document.getElementById('FinalTotalUnit').value) / QTY).toFixed(2);
+}
+
+$("#BtnApplyPlanUnit").click(function () {
+
+    var VendorID = $('#Selvendor').dxSelectBox('instance').option('value');
+    var VendorName = $('#Selvendor').dxSelectBox('instance').option('text');
+
+
+    if (VendorID === "" || VendorID === null) {
+        DevExpress.ui.notify("Please select Vendor..!", "error", 2000);
+        $("#Selvendor").dxValidator('instance').validate();
+        return false;
+    }
+
+    if (Number(document.getElementById("FinalTotalUnit").value) <= 0 || isNaN(document.getElementById("FinalTotalUnit").value)) {
+        swal({
+            title: "Empty or Invalid Cost?",
+            text: "Please enter rate",
+            type: "warning",
+            showCancelButton: false,
+            confirmButtonColor: "#DD6B55",
+            closeOnConfirm: true
+        }, function () {
+            return;
+        });
+        return;
+    }
+
+
+    try {
+        $("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
+
+        var FinalQuotedCost1 = Number(document.getElementById("FinalTotalUnit").value);
+        var FinalAmount = Number(document.getElementById("FinalTotalUnit").value);
+        var FinalMiscPer = Number(document.getElementById("FinalMiscPerUnit").value);
+        var FinalShipperCost = Number(document.getElementById("FinalShipperCostUnit").value);
+        var ProfitPer = Number(document.getElementById("ProfitPerUnit").value);
+        var ProfitCost = Number(document.getElementById("ProfitCostUnit").value);
+
+        var gridProductData = $('#gridProductList').dxDataGrid('instance');
+
+        for (var i = 0; i < gridProductData._options.dataSource.length; i++) {
+            if (gridProductData._options.dataSource[i].ProductCatalogID === ProductCatalogID && gridProductData._options.dataSource[i].Quantity === Number(document.getElementById("TxtPlanQtyUnit").value)) {
+                gridProductData._options.dataSource[i].Rate = Number(document.getElementById('FinalUnitCostUnit').value);
+                gridProductData._options.dataSource[i].RateType = "Per Unit";
+                gridProductData._options.dataSource[i].Amount = Number(FinalAmount);
+                gridProductData._options.dataSource[i].MiscPer = Number(FinalMiscPer);
+                gridProductData._options.dataSource[i].ShippingCost = Number(FinalShipperCost);
+                gridProductData._options.dataSource[i].FinalAmount = Number(FinalQuotedCost1);
+                gridProductData._options.dataSource[i].ProfitPer = Number(ProfitPer);
+                gridProductData._options.dataSource[i].ProfitCost = Number(ProfitCost);
+                gridProductData._options.dataSource[i].RequiredQuantity = Number(document.getElementById("TxtPlanQtyUnit").value);
+                gridProductData._options.dataSource[i].VendorRate = Number(document.getElementById('VendorRate').value);
+                gridProductData._options.dataSource[i].UnitCost = Number(document.getElementById('FinalUnitCostUnit').value);
+                gridProductData._options.dataSource[i].VendorID = VendorID;
+                gridProductData._options.dataSource[i].VendorName = VendorName;
+                gridProductData.refresh();
+                break;
+            }
+        }
+
+
+        closeBottomTabBar();
+
+        document.getElementById("FinalTotalUnit").value = 0;
+        document.getElementById("FinalMiscPerUnit").value = 0;
+        document.getElementById("FinalShipperCostUnit").value = 0;
+        document.getElementById("FinalTaxPerUnit").value = 0;
+        document.getElementById("ProfitPerUnit").value = 0;
+        $("#Selvendor").dxSelectBox({
+            value: -1,
+        })
+        $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+
+        document.getElementById("BtnApplyPlanUnit").setAttribute("data-dismiss", "modal");
+
+    } catch (e) {
+        console.log(e);
+        $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+    }
 });

@@ -3,7 +3,7 @@
 var GblBookingIDSelect, GblApprovalNo, GblTypeOfCost = "";
 var OBJ_Grid = [];
 var FlagEdit = false;
-
+var GBLContents = [];
 $("#image-indicator").dxLoadPanel({
     shadingColor: "rgba(0,0,0,0.4)",
     indicatorSrc: "images/Indus Logo.png",
@@ -26,7 +26,7 @@ $.ajax({
         var res = results.replace(/d":"/g, '');
         res = res.substr(1);
         res = res.slice(0, -1);
-       let RES1 = JSON.parse(res.toString());
+        let RES1 = JSON.parse(res.toString());
         GblApprovalNo = RES1;
         document.getElementById("APPNo").value = RES1;
     }
@@ -45,21 +45,30 @@ $("#BtnLoadBooking").click(function () {
         url: "WebServiceOthers.asmx/CostApprovalQuoteLoad",
         data: '{}',//BookingID:' + BookingID + '
         contentType: "application/json; charset=utf-8",
-        dataType: 'text',
+        dataType: 'JSON',
         success: function (results) {
-            var res = results.replace(/\\/g, '');
-            res = results.replace(/"{"d":null/g, '');
+            var res = results.d.replace(/\\/g, '');
             res = res.replace(/u0026/g, ' & ');
             res = res.substr(1);
             res = res.slice(0, -1);
-            res = res.replace(/\\/g, '');
             let RES1 = JSON.parse(res.toString());
-            const Gbl_Columns = ["ClientName", { dataField: "JobName", caption: "Job Name", width: 180 }, { dataField: "BookingNo", caption: "Quote No" }, { dataField: "JobDate", caption: "Quote Date" }, "ProductCode", "OrderQuantity",
-                { dataField: "UserName", caption: "Quoted By" }, "Remark", { dataField: "PhoneNo", visible: false }, { dataField: "Address", visible: false },
-                { dataField: "LedgerID", visible: false }, { dataField: "BookingID", visible: false }, { dataField: "BookingRemark", visible: false }];
-
+            const Gbl_Columns = [
+                { dataField: "QuotationNo" },
+                { dataField: "ProjectName" },
+                { dataField: "ClientName" },
+                { dataField: "SalesPerson" },
+                { dataField: "FreightAmount" },
+                { dataField: "MiscAmount" },
+                { dataField: "ShippingCost" },
+                { dataField: "GSTAmount" },
+                { dataField: "FinalAmount" },
+                { dataField: "ProfitCost" },
+                { dataField: "Remark" },
+                { dataField: "EstimateBy" },
+            ];
+            GBLContents = RES1.Contents;
             $("#GridLoadBooking").dxDataGrid({
-                dataSource: RES1,
+                dataSource: RES1.Projects,
                 columns: Gbl_Columns
             });
         },
@@ -76,9 +85,9 @@ $("#BtnLoadBooking").click(function () {
         }
         $("#image-indicator").dxLoadPanel("instance").option("visible", true);
         FlagEdit = false;
-        GblTypeOfCost = "";
-        GblBookingIDSelect = Number(OBJ_Grid[0].BookingID);
-        document.getElementById("BookingNo").value = Number(OBJ_Grid[0].BookingNo);
+        //GblTypeOfCost = "";
+        GblBookingIDSelect = Number(OBJ_Grid[0].ProductEstimateID);
+        document.getElementById("BookingNo").value = Number(OBJ_Grid[0].QuotationNo);
         Fill_Job_Details_Grid();
         Grid_Data_For_Approval_Window();
         //BtnLoad.setAttribute("data-dismiss", "modal");
@@ -141,6 +150,7 @@ $("#BtnShowListCostApp").click(function () {
 });
 
 $("#GridLoadBooking").dxDataGrid({
+    keyExpr: 'ProductEstimateID',
     dataSource: [],
     allowColumnReordering: true,
     allowColumnResizing: true,
@@ -153,6 +163,47 @@ $("#GridLoadBooking").dxDataGrid({
     rowAlternationEnabled: false,
     headerFilter: { visible: true },
     columns: [],
+    masterDetail: {
+        enabled: true,
+        template(container, options) {
+            const currentProjectData = options.data;
+
+            $('<div>')
+                .addClass('master-detail-caption')
+                .text(`${currentProjectData.ClientName} 's Products:`)
+                .appendTo(container);
+            $('<div>')
+                .dxDataGrid({
+                    columnAutoWidth: true,
+                    showBorders: true,
+                    columns: [
+                        { dataField: "ProductName" },
+                        { dataField: "CategoryName" },
+                        { dataField: "HSNCode" },
+                        { dataField: "Quantity" },
+                        { dataField: "Rate" },
+                        { dataField: "RateType" },
+                        { dataField: "UnitCost" },
+                        { dataField: "GSTPercantage" },
+                        { dataField: "GSTAmount" },
+                        { dataField: "MiscPercantage" },
+                        { dataField: "MiscAmount" },
+                        { dataField: "ShippingCost" },
+                        { dataField: "ProfitPer" },
+                        { dataField: "ProfitCost" },
+                        { dataField: "FinalAmount" },
+                        { dataField: "VendorName" }
+                    ],
+                    dataSource: new DevExpress.data.DataSource({
+                        store: new DevExpress.data.ArrayStore({
+                            //key: 'ID',
+                            data: GBLContents,
+                        }),
+                        filter: ['ProductEstimateID', '=', options.key],
+                    }),
+                }).appendTo(container);
+        },
+    },
     paging: {
         pageSize: 150
     },
@@ -187,23 +238,20 @@ $("#ApprovalDate").dxDateBox({
 function Fill_Job_Details_Grid() {
 
     var grid_Job = $('#GridJobDetails').dxDataGrid('instance');
-
     grid_Job.cellValue(0, 1, OBJ_Grid[0].ClientName);
-    grid_Job.cellValue(1, 1, OBJ_Grid[0].Address);
+    grid_Job.cellValue(1, 1, OBJ_Grid[0].Address1);
     grid_Job.cellValue(2, 1, OBJ_Grid[0].PhoneNo);
-    grid_Job.cellValue(3, 1, OBJ_Grid[0].JobName);
+    grid_Job.cellValue(3, 1, OBJ_Grid[0].ProjectName);
     grid_Job.cellValue(4, 1, OBJ_Grid[0].ProductCode);
-    grid_Job.cellValue(5, 1, OBJ_Grid[0].BookingNo);
+    grid_Job.cellValue(5, 1, OBJ_Grid[0].QuotationNo);
     grid_Job.cellValue(6, 1, OBJ_Grid[0].JobDate);
-    grid_Job.cellValue(7, 1, OBJ_Grid[0].OrderQuantity);
-    grid_Job.cellValue(8, 1, OBJ_Grid[0].BookingRemark);
-    grid_Job.cellValue(9, 1, OBJ_Grid[0].Remark);
+    grid_Job.cellValue(7, 1, OBJ_Grid[0].Remark);
 
     grid_Job.saveEditData();
 
-    document.getElementById("BookingID").value = OBJ_Grid[0].BookingID;
+    document.getElementById("BookingID").value = OBJ_Grid[0].ProductEstimateID;
     document.getElementById("LID").value = OBJ_Grid[0].LedgerID;
-    document.getElementById("CategoryID").value = OBJ_Grid[0].CategoryID;
+    //document.getElementById("CategoryID").value = OBJ_Grid[0].CategoryID;
 
     if (FlagEdit === true) {
         //GblApprovalNo = OBJ_Grid[0].ApprovalNo;
@@ -251,75 +299,87 @@ function Fill_Job_Details_Grid() {
 
 function Grid_Data_For_Approval_Window() {
 
-    var Flag = JSON.stringify(FlagEdit);
+    //var Flag = JSON.stringify(FlagEdit);
     var grid_Costing = $('#GridApprovalWindow').dxDataGrid('instance');
     var grdcnt = grid_Costing.columnCount();
     for (var j = 2; j <= grdcnt; j++) {
         grid_Costing.deleteColumn(j);
     }
+    grid_Costing.addColumn("Details");
+    grid_Costing.cellValue(0, 1, OBJ_Grid[0].FinalAmount);
+    grid_Costing.cellValue(1, 1, OBJ_Grid[0].MiscAmount);
+    grid_Costing.cellValue(2, 1, OBJ_Grid[0].ProfitCost);
+    grid_Costing.cellValue(3, 1, 0);
+    grid_Costing.cellValue(4, 1, JSON.stringify(OBJ_Grid[0].GSTAmount));
+    grid_Costing.cellValue(5, 1, OBJ_Grid[0].FinalAmount);
+    grid_Costing.cellValue(6, 1, OBJ_Grid[0].FinalAmount);
+    grid_Costing.cellValue(7, 1, OBJ_Grid[0].FinalAmount);
+    grid_Costing.saveEditData();
+    $("#image-indicator").dxLoadPanel("instance").option("visible", false);
+    grid_Costing.refresh();
 
-    $.ajax({
-        type: "POST",
-        url: 'WebServiceOthers.asmx/GridDataForApprovalWindow',
-        data: '{BookingID:' + GblBookingIDSelect + ',Flag:' + Flag + '}',
-        contentType: 'application/json; charset=utf-8',
-        dataType: 'text',
-        success: function (results) {
-            var res = results.replace(/\\/g, '');
-            res = res.replace(/"d":""/g, '');
-            res = res.replace(/"d":null/g, '');
-            res = res.substr(1);
-            res = res.slice(0, -3);
-            let Table_Costing_Data = JSON.parse(res.toString());
+    //$.ajax({
+    //    type: "POST",
+    //    url: 'WebServiceOthers.asmx/GridDataForApprovalWindow',
+    //    data: '{BookingID:' + GblBookingIDSelect + ',Flag:' + Flag + '}',
+    //    contentType: 'application/json; charset=utf-8',
+    //    dataType: 'text',
+    //    success: function (results) {
+    //        var res = results.replace(/\\/g, '');
+    //        res = res.replace(/"d":""/g, '');
+    //        res = res.replace(/"d":null/g, '');
+    //        res = res.substr(1);
+    //        res = res.slice(0, -3);
+    //        let Table_Costing_Data = JSON.parse(res.toString());
 
-            var sd = grid_Costing.columnCount();
-            for (var p = 2; p <= sd; p++) {
-                grid_Costing.deleteColumn(p);
-            }
-            if (Table_Costing_Data.length > 0) {
-                document.getElementById("TxtCurrency").value = Table_Costing_Data[0].CurrencySymbol;
-                document.getElementById("TxtCurrencyValue").value = Table_Costing_Data[0].ConversionValue;
-            }
-            for (var i = 0; i < Table_Costing_Data.length; i++) {
-                var Qty = JSON.stringify(Table_Costing_Data[i].Quantity);
-                grid_Costing.addColumn("" + Qty + "");
-                var k = 1 + i;
-                if (FlagEdit === false) {
-                    grid_Costing.cellValue(0, k, Table_Costing_Data[i].Total);
-                    grid_Costing.cellValue(1, k, Table_Costing_Data[i].MiscCost);
-                    grid_Costing.cellValue(2, k, Table_Costing_Data[i].Profit);
-                    grid_Costing.cellValue(3, k, Table_Costing_Data[i].DiscountAmount);
-                    grid_Costing.cellValue(4, k, Table_Costing_Data[i].TaxAmount);
-                    grid_Costing.cellValue(5, k, JSON.stringify(Table_Costing_Data[i].GrandTotal));
-                    grid_Costing.cellValue(6, k, Table_Costing_Data[i].UnitCost);
-                    grid_Costing.cellValue(7, k, Table_Costing_Data[i].UnitCost1000);
-                    grid_Costing.cellValue(8, k, Table_Costing_Data[i].FinalCost);
-                    grid_Costing.cellValue(9, k, Table_Costing_Data[i].QuotedCost);
-                    grid_Costing.cellValue(10, k, Table_Costing_Data[i].QuotedCost);
-                }
-                else {
-                    grid_Costing.cellValue(0, k, Table_Costing_Data[i].GrandTotal);
-                    grid_Costing.cellValue(1, k, Table_Costing_Data[i].MiscCost);
-                    grid_Costing.cellValue(2, k, Table_Costing_Data[i].Profit);
-                    grid_Costing.cellValue(3, k, Table_Costing_Data[i].DiscPercentage);
-                    grid_Costing.cellValue(4, k, Table_Costing_Data[i].TaxPercentage);
-                    grid_Costing.cellValue(5, k, JSON.stringify(Table_Costing_Data[i].GrandTotal));
-                    grid_Costing.cellValue(6, k, Table_Costing_Data[i].UnitCost);
-                    grid_Costing.cellValue(7, k, Table_Costing_Data[i].UnitCost1000);
-                    grid_Costing.cellValue(8, k, Table_Costing_Data[i].QuotedFinalCost);
-                    grid_Costing.cellValue(9, k, Table_Costing_Data[i].QuotedCost);
-                    grid_Costing.cellValue(10, k, Table_Costing_Data[i].FinalCost);
-                }
-            }
-            grid_Costing.saveEditData();
-            $("#image-indicator").dxLoadPanel("instance").option("visible", false);
-            grid_Costing.refresh();
-        },
-        error: function errorFunc(jqXHR) {
-            $("#image-indicator").dxLoadPanel("instance").option("visible", false);
-            alert(jqXHR.message);
-        }
-    });
+    //        var sd = grid_Costing.columnCount();
+    //        for (var p = 2; p <= sd; p++) {
+    //            grid_Costing.deleteColumn(p);
+    //        }
+    //        if (Table_Costing_Data.length > 0) {
+    //            document.getElementById("TxtCurrency").value = Table_Costing_Data[0].CurrencySymbol;
+    //            document.getElementById("TxtCurrencyValue").value = Table_Costing_Data[0].ConversionValue;
+    //        }
+    //        for (var i = 0; i < Table_Costing_Data.length; i++) {
+    //            var Qty = JSON.stringify(Table_Costing_Data[i].Quantity);
+    //            grid_Costing.addColumn("" + Qty + "");
+    //            var k = 1 + i;
+    //            if (FlagEdit === false) {
+    //                grid_Costing.cellValue(0, k, Table_Costing_Data[i].Total);
+    //                grid_Costing.cellValue(1, k, Table_Costing_Data[i].MiscCost);
+    //                grid_Costing.cellValue(2, k, Table_Costing_Data[i].Profit);
+    //                grid_Costing.cellValue(3, k, Table_Costing_Data[i].DiscountAmount);
+    //                grid_Costing.cellValue(4, k, Table_Costing_Data[i].TaxAmount);
+    //                grid_Costing.cellValue(5, k, JSON.stringify(Table_Costing_Data[i].GrandTotal));
+    //                grid_Costing.cellValue(6, k, Table_Costing_Data[i].UnitCost);
+    //                grid_Costing.cellValue(7, k, Table_Costing_Data[i].UnitCost1000);
+    //                grid_Costing.cellValue(8, k, Table_Costing_Data[i].FinalCost);
+    //                grid_Costing.cellValue(9, k, Table_Costing_Data[i].QuotedCost);
+    //                grid_Costing.cellValue(10, k, Table_Costing_Data[i].QuotedCost);
+    //            }
+    //            else {
+    //                grid_Costing.cellValue(0, k, Table_Costing_Data[i].GrandTotal);
+    //                grid_Costing.cellValue(1, k, Table_Costing_Data[i].MiscCost);
+    //                grid_Costing.cellValue(2, k, Table_Costing_Data[i].Profit);
+    //                grid_Costing.cellValue(3, k, Table_Costing_Data[i].DiscPercentage);
+    //                grid_Costing.cellValue(4, k, Table_Costing_Data[i].TaxPercentage);
+    //                grid_Costing.cellValue(5, k, JSON.stringify(Table_Costing_Data[i].GrandTotal));
+    //                grid_Costing.cellValue(6, k, Table_Costing_Data[i].UnitCost);
+    //                grid_Costing.cellValue(7, k, Table_Costing_Data[i].UnitCost1000);
+    //                grid_Costing.cellValue(8, k, Table_Costing_Data[i].QuotedFinalCost);
+    //                grid_Costing.cellValue(9, k, Table_Costing_Data[i].QuotedCost);
+    //                grid_Costing.cellValue(10, k, Table_Costing_Data[i].FinalCost);
+    //            }
+    //        }
+    //        grid_Costing.saveEditData();
+    //        $("#image-indicator").dxLoadPanel("instance").option("visible", false);
+    //        grid_Costing.refresh();
+    //    },
+    //    error: function errorFunc(jqXHR) {
+    //        $("#image-indicator").dxLoadPanel("instance").option("visible", false);
+    //        alert(jqXHR.message);
+    //    }
+    //});
 }
 var Row_No, Col_No;
 
@@ -327,9 +387,9 @@ var Row_No, Col_No;
 //{ "Quantity": "Discount % Cost" }, { "Quantity": "GST % Cost" }, { "Quantity": "Grand Total" },
 //{ "Quantity": "Unit Cost" }, { "Quantity": "Unit Cost/1000" }, { "Quantity": "Approved Price" }, { "Quantity": "Quoted Cost" }];
 
-var GridCostAmtData = [{ "Quantity": "Total Cost" }, { "Quantity": "Misc.Cost" }, { "Quantity": "Profit % Cost" },
-{ "Quantity": "Discount % Cost" }, { "Quantity": "GST % Cost" }, { "Quantity": "Grand Total" },
-{ "Quantity": "Unit Cost" }, { "Quantity": "Unit Cost/1000" }, { "Quantity": "Final Cost" }, { "Quantity": "Quoted Cost" }, { "Quantity": "Approved Price" }];
+var GridCostAmtData = [{ "Name": "Total Cost" }, { "Name": "Misc.Cost" }, { "Name": "Profit % Cost" },
+{ "Name": "Discount % Cost" }, { "Name": "GST Total" },
+{ "Name": "Final Cost" }, { "Name": "Quoted Cost" }, { "Name": "Approved Price" }];
 
 $("#GridApprovalWindow").dxDataGrid({
     dataSource: GridCostAmtData,
@@ -342,7 +402,7 @@ $("#GridApprovalWindow").dxDataGrid({
         mode: 'cell',
         allowUpdating: true
     },
-    columns: [{ dataField: "Quantity", fixedPosition: "left", fixed: true, width: 120 }],
+    columns: [{ dataField: "Name", fixedPosition: "left", fixed: true, width: 120 }],
     onCellPrepared: function (e) {
         if (e.rowType === "header") {
             e.cellElement.css('background', '#0a5696');
@@ -461,7 +521,7 @@ $("#GridApprovalWindow").dxDataGrid({
 });
 
 var Grid_Job_Data = [{ "Name": "Client Name" }, { "Name": "Mailing Address" }, { "Name": "Contact No" }, { "Name": "Job Name" }, { "Name": "Product Code" },
-{ "Name": "Quote No" }, { "Name": "Quote Date" }, { "Name": "Order Quantity" }, { "Name": "Booking Details" }, { "Name": "Remark" }];
+{ "Name": "Quote No" }, { "Name": "Quote Date" }, { "Name": "Remark" }];
 
 $("#GridJobDetails").dxDataGrid({
     dataSource: Grid_Job_Data,
@@ -546,7 +606,7 @@ $("#BtnSaveCostApp").click(function () {
 
     var Remark = document.getElementById("txtRemark").value.trim();
     var LID = document.getElementById("LID").value.trim();
-    var CategoryID = document.getElementById("CategoryID").value.trim();
+    //var CategoryID = document.getElementById("CategoryID").value.trim();
     var ApprovalDate = $("#ApprovalDate").dxDateBox("instance").option('value');
     var DivToDate = $("#DivToDate").dxDateBox("instance").option('value');
     var currencySymbol = document.getElementById("TxtCurrency").value.trim();
@@ -560,11 +620,11 @@ $("#BtnSaveCostApp").click(function () {
         return false;
     }
 
-    if (GblTypeOfCost === "") {
-        alert("Please select type of cost on click on unit cost or unit cost/1000");
-        DevExpress.ui.notify("Please select type of cost on click on unit cost or unit cost/1000", "warning", 1000);
-        return false;
-    }
+    //if (GblTypeOfCost === "") {
+    //    alert("Please select type of cost on click on unit cost or unit cost/1000");
+    //    DevExpress.ui.notify("Please select type of cost on click on unit cost or unit cost/1000", "warning", 1000);
+    //    return false;
+    //}
 
     var grid_Job = $('#GridJobDetails').dxDataGrid('instance');
     var GridApprovalWindow = $('#GridApprovalWindow').dxDataGrid('instance');
@@ -581,7 +641,7 @@ $("#BtnSaveCostApp").click(function () {
             Price_Approval.BookingNo = grid_Job.cellValue(5, 1);
             Price_Approval.Quantity = grid_Job.cellValue(7, 1);
             Price_Approval.LedgerID = LID;
-            Price_Approval.CategoryID = CategoryID;
+            Price_Approval.CategoryID = 0;
         } else if (FlagEdit === true) {
             for (var k = 0; k < GridShowList.totalCount(); k++) {
                 if (GridShowList._options.dataSource[k].ApprovalNo === document.getElementById("APPNo").value
@@ -596,18 +656,18 @@ $("#BtnSaveCostApp").click(function () {
         Price_Approval.PriceApprovedDate = ApprovalDate;
         Price_Approval.AppliedDateValidUpTo = DivToDate;
 
-        Price_Approval.OrderQuantity = GridApprovalWindow.columnOption(i).caption;
+        Price_Approval.OrderQuantity = 0;
         Price_Approval.TotalCost = GridApprovalWindow.cellValue(0, i);
         Price_Approval.MiscCost = GridApprovalWindow.cellValue(1, i);
         Price_Approval.ProfitCost = GridApprovalWindow.cellValue(2, i);
         Price_Approval.DiscountPercentage = GridApprovalWindow.cellValue(3, i);
-        Price_Approval.TaxPercentage = GridApprovalWindow.cellValue(4, i);
+        Price_Approval.TaxPercentage = 0;
         Price_Approval.GrandTotal = GridApprovalWindow.cellValue(5, i);
-        Price_Approval.UnitCost = GridApprovalWindow.cellValue(6, i);
-        Price_Approval.UnitCost1000 = GridApprovalWindow.cellValue(7, i);
-        Price_Approval.QuotedFinalCost = GridApprovalWindow.cellValue(8, i);
-        Price_Approval.QuotedCost = GridApprovalWindow.cellValue(9, i);
-        Price_Approval.finalCost = GridApprovalWindow.cellValue(10, i);
+        Price_Approval.UnitCost = 0;
+        Price_Approval.UnitCost1000 = 0;
+        Price_Approval.QuotedFinalCost = GridApprovalWindow.cellValue(6, i);
+        Price_Approval.QuotedCost = GridApprovalWindow.cellValue(7, i);
+        Price_Approval.finalCost = GridApprovalWindow.cellValue(7, i);
         Price_Approval.CurrencySymbol = currencySymbol;
         Price_Approval.ConversionValue = Number(conversionValue);
         Obj_Price_App.push(Price_Approval);

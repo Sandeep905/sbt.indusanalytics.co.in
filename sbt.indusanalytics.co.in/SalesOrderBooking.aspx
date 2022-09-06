@@ -70,17 +70,17 @@
                                 <div id="GridOrdersList" style="float: left; width: 100%; height: auto;"></div>
                             </div>
 
-                            <div class="col-xs-12 col-sm-2 col-md-2 col-lg-2">
+                            <div class="col-xs-12 col-sm-2 col-md-2 col-lg-2 hidden">
                                 <b class="font-11">PM. Code</b>
                                 <input class="forTextBox disabledbutton" type="text" name="SOBProductMasterNo" id="SOBProductMasterNo" readonly="readonly" value="" />
                             </div>
 
-                            <div class="col-xs-12 col-sm-2 col-md-2 col-lg-2">
+                            <div class="col-xs-12 col-sm-2 col-md-2 col-lg-2 hidden">
                                 <b class="font-11">Quote No</b>
                                 <input class="forTextBox disabledbutton" type="text" name="SOBQuoteNo" id="SOBQuoteNo" readonly="readonly" value="" />
                             </div>
 
-                            <div class="col-xs-12 col-sm-4 col-md-4 col-lg-4">
+                            <div class="col-xs-12 col-sm-4 col-md-2 col-lg-2">
                                 <b class="font-11">Job Name</b>
                                 <input class="forTextBox disabledbutton" type="text" name="JobName" id="SOBJobName" readonly="readonly" value="" />
                             </div>
@@ -96,20 +96,20 @@
                                 <div id="SOBDeliveryDate"></div>
                             </div>
 
-                            <div class="col-xs-12 col-sm-4 col-md-4 col-lg-4">
+                            <div class="col-xs-12 col-sm-4 col-md-3 col-lg-3">
                                 <b class="font-11">Consignee</b>
                                 <div id="SOBConsignee"></div>
                                 <input class="forTextBox" type="text" placeholder="Enter consignee manually" name="txtSchConsignee" id="txtSchConsignee" value="" />
                             </div>
 
-                            <div class="col-xs-12 col-sm-4 col-md-4 col-lg-4">
+                            <div class="col-xs-12 col-sm-4 col-md-2 col-lg-2">
                                 <b class="font-11">Transporter</b>
                                 <div id="SOBTransporter"></div>
                             </div>
 
-                            <div class="col-xs-12 col-sm-2 col-md-2 col-lg-2">
+                            <div class="col-xs-12 col-sm-2 col-md-1 col-lg-1">
                                 <br />
-                                <button type="button" class="btn btn-primary" id="BtnAddSchedule">Add</button>
+                                <button type="button" class="btn btn-primary" style="float: right" id="BtnAddSchedule">Add</button>
                             </div>
 
                             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
@@ -122,14 +122,14 @@
                                 <textarea style="width: 100%" id="SOBRemark"></textarea>
                             </div>
 
-                            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12" style="margin-top: .3em; float: left; margin-bottom: 5px; height: auto; padding: 0px; padding-left: 0px; padding-right: 13px; margin-bottom: 0em">
+                            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 hidden" style="margin-top: .3em; float: left; margin-bottom: 5px; height: auto; padding: 0px; padding-left: 0px; padding-right: 13px; margin-bottom: 0em">
                                 <div style="float: left; width: 100%; text-align: right">
                                     <label style="">Total Order Qty</label>
-                                    &nbsp;&nbsp;&nbsp;<input type="text" id="TxtTotalOrderQty" class="forTextBox disabledbutton" value="0" readonly="" style="text-align: right; width: 15em" /><br />
+                                    &nbsp;&nbsp;&nbsp;<input type="text" id="TxtTotalOrderQty" class="forTextBox disabledbutton hidden" value="0" readonly="" style="text-align: right; width: 15em" /><br />
                                     <label style="">Total Amount</label>
-                                    &nbsp;&nbsp;&nbsp;<input type="text" id="TxtTotalAmt" class="forTextBox disabledbutton" value="0" readonly="" style="text-align: right; width: 15em" /><br />
+                                    &nbsp;&nbsp;&nbsp;<input type="text" id="TxtTotalAmt" class="forTextBox disabledbutton hidden" value="0" readonly="" style="text-align: right; width: 15em" /><br />
                                     <label style="">Net Amount</label>
-                                    &nbsp;&nbsp;&nbsp;<input type="text" id="TxtNetAmt" class="forTextBox disabledbutton" value="0" readonly="" style="text-align: right; width: 15em" />
+                                    &nbsp;&nbsp;&nbsp;<input type="text" id="TxtNetAmt" class="forTextBox disabledbutton hidden" value="0" readonly="" style="text-align: right; width: 15em" />
                                 </div>
                             </div>
 
