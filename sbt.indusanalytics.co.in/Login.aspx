@@ -5,9 +5,9 @@
 <html>
 
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8">``
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-    <title>Sign In | Indus Analytics</title>
+    <title>Welcome To | Softberry</title>
     <!-- Favicon-->
     <link rel="icon" href="../../images/Indus logo.ico" type="image/x-icon">
 

@@ -247,7 +247,7 @@
 
         <section class="content" style="margin-left: 0px; padding-left: 0px; width: 100%">
             <div class="container-fluid" style="padding-right: 0px; padding-left: 0px">
-                <div class="card" style="margin-top: -55px; min-height: 0px; padding-left: 0px">
+                <div class="card" style="margin-top: -72px; min-height: 0px; padding-left: 0px">
                     <div class="body" style="padding-bottom: 3px; padding-left: 0px">
                         <%--<form id="form1" runat="server" style="margin-top: -1.5em;">--%>
                         <asp:ContentPlaceHolder ID="ContentPlaceHolder1" runat="server">

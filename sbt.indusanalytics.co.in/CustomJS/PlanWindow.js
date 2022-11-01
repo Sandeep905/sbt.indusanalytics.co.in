@@ -52,6 +52,7 @@ $("#FilterMachineFolds").dxRadioGroup({
     //},
     onValueChanged: function (data) {
         var dataGrid = $("#ContentPlansList").dxDataGrid('instance');
+        var dataGrid = $("#ContentPlansList").dxDataGrid('instance');
         dataGrid.clearFilter();
         if (data.value === "Machine Folds") {
             dataGrid.filter(["Folds", "=", 1]);
@@ -1307,9 +1308,10 @@ function ShowShirinReport(gridData) {
             Draw_Cut_Sheet(ContentType, value.InterlockStyle, ColorStrip, value.Gripper, value.GripperSide, value.CutSize, value.GrainDirection, value.PrintingStyle, JobTrimmingL, JobTrimmingR, JobTrimmingT, JobTrimmingB, StrippingMarginL, StrippingMarginR, StrippingMarginT, StrippingMarginB, PrintingMarginL, PrintingMarginR, PrintingMarginT, PrintingMarginB, JobL, JobH, JobW, JobOpenFlap, JobPastingFlap, JobBottomFlap, value.UpsL, value.UpsW, JobTongHeight);
 
             var finalcost = Number(value.GrantAmount);
-            document.getElementById("finalCost").value = finalcost.toFixed(3);
-            document.getElementById("finalUnitCost").value = finalcost / Number(document.getElementById("PlanContQty").innerHTML);
-            document.getElementById("finalUnitCost").value = Number(document.getElementById("finalUnitCost").value).toFixed(3);
+            // Variable *NetcostOffset* from ProjectQuotation.js
+            NetcostOffset = finalcost.toFixed(3);
+            //document.getElementById("finalUnitCost").value = finalcost / Number(document.getElementById("PlanContQty").innerHTML);
+            //document.getElementById("finalUnitCost").value = Number(document.getElementById("finalUnitCost").value).toFixed(3);
             document.getElementById("TxtFinalQuantity").value = Number(value.FinalQuantity);
 
             var PrintingImp = value.ImpressionsToBeCharged / value.NoOfSets; // value.NoOfSets;
@@ -1581,8 +1583,8 @@ function ShowShirinReport(gridData) {
                     var finalcost = Number(rowData.OpAmt) + Number(rowData.TotalAmount);
                     value.GrantAmount = finalcost.toFixed(3);
                     document.getElementById("finalCost").value = finalcost.toFixed(3);
-                    document.getElementById("finalUnitCost").value = finalcost.toFixed(3) / Number(document.getElementById("PlanContQty").innerHTML);
-                    document.getElementById("finalUnitCost").value = Number(document.getElementById("finalUnitCost").value).toFixed(3);
+                    //document.getElementById("finalUnitCost").value = finalcost.toFixed(3) / Number(document.getElementById("PlanContQty").innerHTML);
+                    //document.getElementById("finalUnitCost").value = Number(document.getElementById("finalUnitCost").value).toFixed(3);
 
                     drawChartCost(e.component._controllers.data._dataSource._items);
                 },
@@ -1990,8 +1992,8 @@ function ShowShirinReport(gridData) {
                     var finalcost = Number(value.OpAmt) + Number(value.TotalAmount);
                     value.GrantAmount = finalcost.toFixed(3);
                     document.getElementById("finalCost").value = finalcost.toFixed(3);
-                    document.getElementById("finalUnitCost").value = finalcost.toFixed(3) / Number(document.getElementById("PlanContQty").innerHTML);
-                    document.getElementById("finalUnitCost").value = Number(document.getElementById("finalUnitCost").value).toFixed(3);
+                    //document.getElementById("finalUnitCost").value = finalcost.toFixed(3) / Number(document.getElementById("PlanContQty").innerHTML);
+                    //document.getElementById("finalUnitCost").value = Number(document.getElementById("finalUnitCost").value).toFixed(3);
                 },
                 summary: {
                     totalItems: [{
@@ -2846,7 +2848,7 @@ function callSaveQuote(TblPlanning, TblOperations, TblContentForms) {
 
     var CostingData = JSON.stringify(jsonObjectsCosting);
 
-    var BookingNo = document.getElementById("QuotationNo").value;
+    var BookingNo = document.getElementById("TxtQuoteNo").value;
     var Quo_No = BookingNo.split('.');
     BookingNo = Quo_No[0];
 
@@ -3133,8 +3135,8 @@ function CalculateFinalAmt() {
     var finalcost = Number(GblPlanValues.OpAmt) + Number(GblPlanValues.TotalAmount);
     GblPlanValues.GrantAmount = finalcost.toFixed(3);
     document.getElementById("finalCost").value = finalcost.toFixed(3);
-    document.getElementById("finalUnitCost").value = finalcost.toFixed(3) / Number(document.getElementById("PlanContQty").innerHTML);
-    document.getElementById("finalUnitCost").value = Number(document.getElementById("finalUnitCost").value).toFixed(3);
+    //document.getElementById("finalUnitCost").value = finalcost.toFixed(3) / Number(document.getElementById("PlanContQty").innerHTML);
+    //document.getElementById("finalUnitCost").value = Number(document.getElementById("finalUnitCost").value).toFixed(3);
 }
 
 function getItemStockDetails(ItmID) {

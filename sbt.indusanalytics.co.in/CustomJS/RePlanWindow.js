@@ -18,33 +18,221 @@ $(function () {
     if (queryString["BookingID"] !== null && queryString["BookingID"] !== undefined) {
         BookingID = Number(queryString["BookingID"]);
         if (BookingID <= 0) return;
+
+        document.getElementById('BtnLoadFromEnquiry').style.display = 'none';
         ParentBookingID = BookingID;
-        if (!db) { window.setTimeout(function () { GetAllPlans(); }, 1000); } else { GetAllPlans(); }
+        if (!db) {
+            window.setTimeout(function () {
+                GetItems();
+            }, 1000);
+        } else {
+            GetItems();
+        }
         if (queryString["FG"] !== null && queryString["FG"] !== undefined) {
             if (queryString["FG"] === "Copy" || queryString["FG"] === true || queryString["FG"] === "true") {
                 FlagSave = true;
-                GetQuoationNo(0);
+
             } else if (queryString["FG"] === "Review") {
-                document.getElementById("BtnSaveQuotation").style.display = "none";
+                document.getElementById("BtnSave").style.display = "none";
+                document.getElementById("BtnShowList").style.display = "none";
             } else {
                 FlagSave = false;
             }
         }
     } else {
         FlagSave = true;
-        GetQuoationNo(0);
+
     }
 });
 
-function GetAllPlans() {
+//######## New Developement by sndp 9-sep-2022 for Project Quotation for softberry 
+
+function GetItems() {
     try {
         $("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
         $.ajax({                ////Quotation Reload
             type: 'post',
+            url: 'WebServicePlanWindow.asmx/LoadPlanProject',
+            dataType: 'text',
+            contentType: "application/json; charset=utf-8",
+            data: '{ProjectEstimateID:' + BookingID + '}',
+            crossDomain: true,
+            success: function (results) {
+                var res = results.replace(/\\/g, '');
+                res = res.replace(/"d":""/g, '');
+                res = res.replace(/""/g, '');
+                res = res.replace(/":,/g, '":null,');
+                res = res.replace(/":}/g, '":null}');
+                res = res.replace(/u0026/g, '&');
+                res = res.substr(1);
+                res = res.slice(0, -1);
+                if (res.includes("error code:404")) {
+                    $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+                    DevExpress.ui.notify("Data not found", "error", 1000);
+                    return;
+                }
+                var RES1 = JSON.parse(res);
+
+                $("#SelClient").dxSelectBox({
+                    value: RES1.Projects[0].LedgerID
+                });
+                $("#SelSalesPerson").dxSelectBox({
+                    value: RES1.Projects[0].SalesPersonID
+                });
+                document.getElementById('TxtProjectName').value = RES1.Projects[0].ProjectName;
+                document.getElementById('TxtFreightAmount').value = RES1.Projects[0].FreightAmount;
+                document.getElementById('TxtRemark').value = RES1.Projects[0].Narration;
+                document.getElementById('TxtQuoteNo').value = RES1.Projects[0].EstimateNo;
+
+                $("#gridProductList").dxDataGrid({
+                    dataSource: RES1.Contents
+                });
+
+                for (var i = 0; i < RES1.Contents.length; i++) {
+                    if (RES1.Contents[i].IsOffsetProduct !== true && RES1.Contents[i].IsUnitProduct !== true) {
+                        Getinputsizes(RES1.Contents[i].ProductEstimationContentID);
+                        GetSelectedPlan(RES1.Contents[i].ProductEstimationContentID);
+                    } else if (RES1.Contents[i].IsOffsetProduct === true) {
+                        ProjectBookingID = RES1.Contents[i].BookingID;
+                        if (queryString["FG"] === "Review" || queryString["FG"] === "false") {
+                            GetAllPlans(ProjectBookingID)
+                        }
+                    }
+                }
+
+                //if (results.includes("TblBooking") === false) {
+                $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+                //    alert(results.d);
+                //} else {
+                //    LoadAllPlans(RES1);
+                //}
+            },
+            error: function errorFunc(jqXHR) {
+                // alert("not show");
+                $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+            }
+        });
+
+    } catch (e) {
+        console.log(e);
+    }
+
+}
+
+function Getinputsizes(ProductEstimationContentID) {
+    try {
+        $("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
+        $.ajax({
+            async: false,
+            type: 'post',
+            url: 'WebServicePlanWindow.asmx/GetInputSizes',
+            dataType: 'text',
+            contentType: "application/json; charset=utf-8",
+            data: '{ProductEstimationContentID:' + ProductEstimationContentID + '}',
+            crossDomain: true,
+            success: function (results) {
+                var res = results.replace(/\\/g, '');
+                res = res.replace(/"d":""/g, '');
+                res = res.replace(/""/g, '');
+                res = res.replace(/":,/g, '":null,');
+                res = res.replace(/":}/g, '":null}');
+                //res = res.replace(/}/g, '');
+                //res = res.replace(/{/g, '');
+                res = res.replace(/u0026/g, '&');
+                res = res.substr(1);
+                res = res.slice(23, -4);
+                if (res.includes("error code:404")) {
+                    $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+                    DevExpress.ui.notify("Data not found", "error", 1000);
+                    return;
+                }
+                var RES1 = JSON.parse(res);
+
+                var gridProductData = $('#gridProductList').dxDataGrid('instance');
+
+                for (var i = 0; i < gridProductData._options.dataSource.length; i++) {
+                    if (gridProductData._options.dataSource[i].ProductEstimationContentID == ProductEstimationContentID)
+                        gridProductData._options.dataSource[i].ProductInputSizes = JSON.stringify(RES1)
+                }
+
+                $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+                $("#gridProductConfig").dxDataGrid({ dataSource: RES1 });
+
+            },
+            error: function errorFunc(jqXHR) {
+                // alert("not show");
+                $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+            }
+        });
+
+    } catch (e) {
+        console.log(e);
+    }
+}
+
+
+function GetSelectedPlan(ProductEstimationContentID) {
+    try {
+        $("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
+        $.ajax({
+            async: false,
+            type: 'post',
+            url: 'WebServicePlanWindow.asmx/GetSelectedPlan',
+            dataType: 'text',
+            contentType: "application/json; charset=utf-8",
+            data: '{ProductEstimationContentID:' + ProductEstimationContentID + '}',
+            crossDomain: true,
+            success: function (results) {
+                var res = results.replace(/\\/g, '');
+                res = res.replace(/"d":""/g, '');
+                res = res.replace(/""/g, '');
+                res = res.replace(/":,/g, '":null,');
+                res = res.replace(/":}/g, '":null}');
+                //res = res.replace(/}/g, '');
+                //res = res.replace(/{/g, '');
+                res = res.replace(/u0026/g, '&');
+                res = res.substr(1);
+                res = res.slice(18, -4);
+                if (res.includes("error code:404")) {
+                    $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+                    DevExpress.ui.notify("Data not found", "error", 1000);
+                    return;
+                }
+                var RES1 = JSON.parse(res);
+
+                var gridProductData = $('#gridProductList').dxDataGrid('instance');
+
+                for (var i = 0; i < gridProductData._options.dataSource.length; i++) {
+                    if (gridProductData._options.dataSource[i].ProductEstimationContentID == ProductEstimationContentID)
+                        gridProductData._options.dataSource[i].SelectedPlan = JSON.stringify(RES1)
+                }
+
+                $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+                $("#gridProductConfig").dxDataGrid({ dataSource: RES1 });
+
+            },
+            error: function errorFunc(jqXHR) {
+                // alert("not show");
+                $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+            }
+        });
+
+    } catch (e) {
+        console.log(e);
+    }
+}
+
+//vvvvvvvvv------------------------------------------------------------------ the old one developed by pkp 
+function GetAllPlans(BKID) {
+    try {
+        $("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
+        $.ajax({                ////Quotation Reload
+            async: false,
+            type: 'post',
             url: 'WebServicePlanWindow.asmx/LoadPlanDetails',
             dataType: 'text',
             contentType: "application/json; charset=utf-8",
-            data: '{BookingID:' + BookingID + '}',
+            data: '{BookingID:' + BKID + '}',
             crossDomain: true,
             success: function (results) {
                 var res = results.replace(/\\/g, '');
@@ -68,6 +256,8 @@ function GetAllPlans() {
                 } else {
                     LoadAllPlans(RES1);
                 }
+
+
             },
             error: function errorFunc(jqXHR) {
                 // alert("not show");
@@ -78,27 +268,29 @@ function GetAllPlans() {
     } catch (e) {
         console.log(e);
     }
+
+
 }
 
 function LoadAllPlans(dataSource) {
     try {
 
-        var tBodyContent = document.getElementById("Body_Planning");
-        var BodyLength = tBodyContent.rows.length;
-        if (BodyLength > 1) {
-            for (var j = 0; j < BodyLength; j++) {
-                if (j > 0) {
-                    document.getElementById("Body_Planning").deleteRow(1);
-                }
-            }
-        }
+        //var tBodyContent = document.getElementById("Body_Planning");
+        //var BodyLength = tBodyContent.rows.length;
+        //if (BodyLength > 1) {
+        //    for (var j = 0; j < BodyLength; j++) {
+        //        if (j > 0) {
+        //            document.getElementById("Body_Planning").deleteRow(1);
+        //        }
+        //    }
+        //}
 
         removeAllContentsData();
 
-        document.getElementById('lastCol').innerHTML = 0;
-        document.getElementById('lastRow').innerHTML = 1;
-        document.getElementById('Bdy_QtyRow').innerHTML = "";
-        document.getElementById('FinalCostDivFooter').innerHTML = "";
+        //document.getElementById('lastCol').innerHTML = 0;
+        //document.getElementById('lastRow').innerHTML = 1;
+        //document.getElementById('Bdy_QtyRow').innerHTML = "";
+        //document.getElementById('FinalCostDivFooter').innerHTML = "";
 
         var JobCont = dataSource.TblBookingContents;
         var JobBooking = dataSource.TblBooking[0];
@@ -107,10 +299,10 @@ function LoadAllPlans(dataSource) {
         document.getElementById("ArtWorkCode").value = JobBooking.ProductCode;
         document.getElementById("TaQuoteDetails").value = JobBooking.BookingRemark;
         document.getElementById("TaRemark").value = JobBooking.Remark;
-        document.getElementById("HTypeOfCost").value = JobBooking.TypeOfCost;
-        document.getElementById("HFinalCost").value = JobBooking.FinalCost;
-        document.getElementById("HQuotedCost").value = JobBooking.QuotedCost;
-        document.getElementById("expectedDays").value = JobBooking.ExpectedCompletionDays;
+        //document.getElementById("HTypeOfCost").value = JobBooking.TypeOfCost;
+        //document.getElementById("HFinalCost").value = JobBooking.FinalCost;
+        //document.getElementById("HQuotedCost").value = JobBooking.QuotedCost;
+        //document.getElementById("expectedDays").value = JobBooking.ExpectedCompletionDays;
 
         $("#SbClientName").dxSelectBox({ value: JobBooking.LedgerID });
         $("#SbCategory").dxSelectBox({ value: JobBooking.CategoryID });
@@ -118,16 +310,16 @@ function LoadAllPlans(dataSource) {
         $("#SbConsigneeName").dxSelectBox({ value: JobBooking.ConsigneeID });
 
         $("#SbCurrency").dxSelectBox({ value: JobBooking.CurrencySymbol });
-        document.getElementById("TxtCurrencyValue").value = JobBooking.ConversionValue;
+        //document.getElementById("TxtCurrencyValue").value = JobBooking.ConversionValue;
         GblShipperID = JobBooking.ShipperID;
 
         for (j = 0; j < dataSource.TblBookingCosting.length; j++) {
 
-            $("#Add_Quantity_Button").click();
-            document.getElementById("txtqty" + (j + 1)).value = dataSource.TblBookingCosting[j].PlanContQty;
+            //$("#Add_Quantity_Button").click();
+            //document.getElementById("txtqty" + (j + 1)).value = dataSource.TblBookingCosting[j].PlanContQty;
 
             for (var i = 0; i < JobCont.length; i++) {
-                var rowNo = Number(document.getElementById('lastRow').innerHTML);
+                //var rowNo = Number(document.getElementById('lastRow').innerHTML);
 
                 document.getElementById("PlanContQty").innerHTML = dataSource.TblBookingCosting[j].PlanContQty;
                 document.getElementById("PlanContName").innerHTML = JobCont[i].PlanContName;
@@ -141,7 +333,7 @@ function LoadAllPlans(dataSource) {
                 //    }
                 //}
 
-                addContentReplan(JobCont[i]);
+                //addContentReplan(JobCont[i]);
 
                 GblInputValues = {};
                 var JobValues = JobCont[i].ContentSizeValues.split('AndOr');
@@ -200,68 +392,68 @@ function LoadAllPlans(dataSource) {
 
             }
 
-            document.getElementById("FinalShipperCost" + (j + 1)).value = dataSource.TblBookingCosting[j].ShipperCost;
-            document.getElementById("FinalMiscPer" + (j + 1)).value = dataSource.TblBookingCosting[j].MiscPercentage;
-            document.getElementById("FinalMiscCost" + (j + 1)).value = dataSource.TblBookingCosting[j].MiscCost;
-            document.getElementById("FinalPftPer" + (j + 1)).value = dataSource.TblBookingCosting[j].ProfitPercentage;
-            document.getElementById("FinalProfitCost" + (j + 1)).value = dataSource.TblBookingCosting[j].ProfitCost;
-            document.getElementById("FinalDiscPer" + (j + 1)).value = dataSource.TblBookingCosting[j].DiscountPercentage;
-            document.getElementById("FinalDisCost" + (j + 1)).value = dataSource.TblBookingCosting[j].DiscountAmount;
-            document.getElementById("FinalTaxPer" + (j + 1)).value = dataSource.TblBookingCosting[j].TaxPercentage;
-            document.getElementById("FinalTaxCost" + (j + 1)).value = dataSource.TblBookingCosting[j].TaxAmount;
-            document.getElementById("FinaltotalCost" + (j + 1)).innerHTML = dataSource.TblBookingCosting[j].TotalCost;
+            //document.getElementById("FinalShipperCost" + (j + 1)).value = dataSource.TblBookingCosting[j].ShipperCost;
+            //document.getElementById("FinalMiscPer" + (j + 1)).value = dataSource.TblBookingCosting[j].MiscPercentage;
+            //document.getElementById("FinalMiscCost" + (j + 1)).value = dataSource.TblBookingCosting[j].MiscCost;
+            //document.getElementById("FinalPftPer" + (j + 1)).value = dataSource.TblBookingCosting[j].ProfitPercentage;
+            //document.getElementById("FinalProfitCost" + (j + 1)).value = dataSource.TblBookingCosting[j].ProfitCost;
+            //document.getElementById("FinalDiscPer" + (j + 1)).value = dataSource.TblBookingCosting[j].DiscountPercentage;
+            //document.getElementById("FinalDisCost" + (j + 1)).value = dataSource.TblBookingCosting[j].DiscountAmount;
+            //document.getElementById("FinalTaxPer" + (j + 1)).value = dataSource.TblBookingCosting[j].TaxPercentage;
+            //document.getElementById("FinalTaxCost" + (j + 1)).value = dataSource.TblBookingCosting[j].TaxAmount;
+            //document.getElementById("FinaltotalCost" + (j + 1)).innerHTML = dataSource.TblBookingCosting[j].TotalCost;
 
         }
 
-        var PTablecrow = document.getElementById("PlanTable").getElementsByTagName("tbody")[0].rows[0];
-        var ForID = document.getElementById("PlanTable").getElementsByTagName("tbody")[0];
-        ForID = ForID.rows.length;
-        for (i = 0; i < JobCont.length; i++) {
-            for (var ex = 2; ex <= ForID; ex++) {
-                if (document.getElementById("contName" + ex).innerHTML.replace(/'/g, '') === JobCont[i].PlanContName && document.getElementById("contType" + ex).innerHTML.replace(/'/g, '') === JobCont[i].PlanContentType) {
-                    for (var t = 1; t < PTablecrow.cells.length; t++) {
-                        if (Number(document.getElementById("txtqty" + t).value) === JobCont[i].PlanContQty) {
-                            document.getElementById("Plan" + ex + (t)).innerHTML = "";
-                            var unitCost = Number(Number(JobCont[i].GrantAmount) / Number(JobCont[i].PlanContQty)).toFixed(3);
+        //var PTablecrow = document.getElementById("PlanTable").getElementsByTagName("tbody")[0].rows[0];
+        //var ForID = document.getElementById("PlanTable").getElementsByTagName("tbody")[0];
+        //ForID = ForID.rows.length;
+        //for (i = 0; i < JobCont.length; i++) {
+        //    for (var ex = 2; ex <= ForID; ex++) {
+        //        if (document.getElementById("contName" + ex).innerHTML.replace(/'/g, '') === JobCont[i].PlanContName && document.getElementById("contType" + ex).innerHTML.replace(/'/g, '') === JobCont[i].PlanContentType) {
+        //            for (var t = 1; t < PTablecrow.cells.length; t++) {
+        //                if (Number(document.getElementById("txtqty" + t).value) === JobCont[i].PlanContQty) {
+        //                    document.getElementById("Plan" + ex + (t)).innerHTML = "";
+        //                    var unitCost = Number(Number(JobCont[i].GrantAmount) / Number(JobCont[i].PlanContQty)).toFixed(3);
 
-                            var divPara1 = '<div style="margin-top: 0em; margin-bottom: 0px;pointer-events: none; background: transparent;"><div hidden ><div style="padding: 2px; font-size: 11px;">Paper:₹' + JobCont[i].PaperAmount + ' </div></div><div hidden ><div style="padding: 2px; font-size: 11px;">Printing:₹' + Number(JobCont[i].PrintingAmount).toFixed(2) + ' </div></div hidden ><div hidden ><div style="padding: 2px; font-size: 11px;">Process:₹' + JobCont[i].OpAmt + ' </div></div><div><div style="padding: 2px; font-size: 11px;">Total:₹ <span id="finalCstSpan' + ex + (t) + '" class="th">' + JobCont[i].GrantAmount + '</span></div>' +
-                                '</div><div><div style="padding: 2px; font-size: 11px;">Unit:₹ ' + unitCost + '</div></div> <div style="display: none"><div style="padding: 2px; font-size: 11px;">Unit/1000:₹' + Number(Number(unitCost) * 1000).toFixed(3) + ' </div></div></div >';
-                            document.getElementById("Plan" + ex + (t)).innerHTML = divPara1;
+        //                    var divPara1 = '<div style="margin-top: 0em; margin-bottom: 0px;pointer-events: none; background: transparent;"><div hidden ><div style="padding: 2px; font-size: 11px;">Paper:₹' + JobCont[i].PaperAmount + ' </div></div><div hidden ><div style="padding: 2px; font-size: 11px;">Printing:₹' + Number(JobCont[i].PrintingAmount).toFixed(2) + ' </div></div hidden ><div hidden ><div style="padding: 2px; font-size: 11px;">Process:₹' + JobCont[i].OpAmt + ' </div></div><div><div style="padding: 2px; font-size: 11px;">Total:₹ <span id="finalCstSpan' + ex + (t) + '" class="th">' + JobCont[i].GrantAmount + '</span></div>' +
+        //                        '</div><div><div style="padding: 2px; font-size: 11px;">Unit:₹ ' + unitCost + '</div></div> <div style="display: none"><div style="padding: 2px; font-size: 11px;">Unit/1000:₹' + Number(Number(unitCost) * 1000).toFixed(3) + ' </div></div></div >';
+        //                    document.getElementById("Plan" + ex + (t)).innerHTML = divPara1;
 
-                            try {
-                                var finalCost = Number(document.getElementById("FinaltotalCost" + t).innerHTML);
+        //                    try {
+        //                        var finalCost = Number(document.getElementById("FinaltotalCost" + t).innerHTML);
 
-                                var value = Number(document.getElementById("FinalMiscPer" + t).value);
-                                var amt = finalCost / 100 * value;
-                                amt = Number(amt).toFixed(3);
-                                document.getElementById("FinalMiscCost" + t).value = amt;
+        //                        var value = Number(document.getElementById("FinalMiscPer" + t).value);
+        //                        var amt = finalCost / 100 * value;
+        //                        amt = Number(amt).toFixed(3);
+        //                        document.getElementById("FinalMiscCost" + t).value = amt;
 
-                                value = Number(document.getElementById("FinalPftPer" + t).value);
-                                amt = finalCost / 100 * value;
-                                amt = Number(amt).toFixed(3);
-                                document.getElementById("FinalProfitCost" + t).value = amt;
+        //                        value = Number(document.getElementById("FinalPftPer" + t).value);
+        //                        amt = finalCost / 100 * value;
+        //                        amt = Number(amt).toFixed(3);
+        //                        document.getElementById("FinalProfitCost" + t).value = amt;
 
-                                value = Number(document.getElementById("FinalDiscPer" + t).value);
-                                amt = finalCost / 100 * value;
-                                amt = Number(amt).toFixed(3);
-                                document.getElementById("FinalDisCost" + t).value = amt;
+        //                        value = Number(document.getElementById("FinalDiscPer" + t).value);
+        //                        amt = finalCost / 100 * value;
+        //                        amt = Number(amt).toFixed(3);
+        //                        document.getElementById("FinalDisCost" + t).value = amt;
 
-                                value = Number(document.getElementById("FinalTaxPer" + t).value);
-                                amt = finalCost / 100 * value;
-                                amt = Number(amt).toFixed(3);
-                                document.getElementById("FinalTaxCost" + t).value = amt;
-                            } catch (e) {
-                                continue;
-                            }
-                            sumAllCost(t);
-                            document.getElementById("FinalfinalCost" + t).value = dataSource.TblBookingCosting[t - 1].FinalCost;
-                            document.getElementById("FinalQuotedCost" + t).value = dataSource.TblBookingCosting[t - 1].QuotedCost;
-                            document.getElementById("txtqty" + t).disabled = true;
-                        }
-                    }
-                }
-            }
-        }
+        //                        value = Number(document.getElementById("FinalTaxPer" + t).value);
+        //                        amt = finalCost / 100 * value;
+        //                        amt = Number(amt).toFixed(3);
+        //                        document.getElementById("FinalTaxCost" + t).value = amt;
+        //                    } catch (e) {
+        //                        continue;
+        //                    }
+        //                    sumAllCost(t);
+        //                    document.getElementById("FinalfinalCost" + t).value = dataSource.TblBookingCosting[t - 1].FinalCost;
+        //                    document.getElementById("FinalQuotedCost" + t).value = dataSource.TblBookingCosting[t - 1].QuotedCost;
+        //                    document.getElementById("txtqty" + t).disabled = true;
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
 
         $("#SbHSNGroups").dxSelectBox({ value: JobBooking.ProductHSNID });
         $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);

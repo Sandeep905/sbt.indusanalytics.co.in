@@ -8944,11 +8944,13 @@ NextReel:
             Case "Rate/Unit"
                 Amount = (Final_Quantity * Rate) + Setup_Charges
             Case "Rate/1000 Units"
-                Amount = (RoundUp(Final_Quantity / 1000, 0) * 1000) * (Rate / 1000) + Setup_Charges
+                'Amount = (RoundUp(Final_Quantity / 1000, 0) * 1000) * (Rate / 1000) + Setup_Charges
+                Amount = Final_Quantity * (Rate / 1000) + Setup_Charges
             Case "Rate/Sheet"
                 Amount = (Pub_Sheets * Rate) + Setup_Charges
             Case "Rate/1000 Sheets"
-                Pub_Sheets = RoundUp(Pub_Sheets / 1000, 0) * 1000
+                'Pub_Sheets = RoundUp(Pub_Sheets / 1000, 0) * 1000
+                'Pub_Sheets = RoundUp(Pub_Sheets / 1000, 0) * 1000
                 Amount = (Pub_Sheets * (Rate / 1000)) + Setup_Charges
             Case "Rate/1000 Sheets Both Side"
                 Pub_Sheets = RoundUp(Pub_Sheets / 1000, 0) * 1000

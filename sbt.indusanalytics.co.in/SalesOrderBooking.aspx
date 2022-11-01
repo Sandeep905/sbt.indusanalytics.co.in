@@ -99,7 +99,7 @@
                             <div class="col-xs-12 col-sm-4 col-md-3 col-lg-3">
                                 <b class="font-11">Consignee</b>
                                 <div id="SOBConsignee"></div>
-                                <input class="forTextBox" type="text" placeholder="Enter consignee manually" name="txtSchConsignee" id="txtSchConsignee" value="" />
+                                <input class="forTextBox hidden" type="text" placeholder="Enter consignee manually" name="txtSchConsignee" id="txtSchConsignee" value="" />
                             </div>
 
                             <div class="col-xs-12 col-sm-4 col-md-2 col-lg-2">

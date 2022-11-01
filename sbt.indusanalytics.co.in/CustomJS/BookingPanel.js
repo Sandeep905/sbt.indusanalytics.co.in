@@ -12,6 +12,7 @@ $("#LoadIndicator").dxLoadPanel({
     visible: false
 });
 
+var gblquotatioNo = 0;
 var toolTip = $("#tooltip").dxTooltip({
 }).dxTooltip("instance");
 
@@ -53,6 +54,8 @@ try {
             columnAutoWidth: true,
             onContextMenuPreparing: function (e) {
                 if (e.target === "content" && e.column) {
+
+                    gblquotatioNo = e.row.QuotationNo
                     // e.items can be undefined
                     if (!e.items) e.items = [];
 
@@ -60,6 +63,7 @@ try {
                     e.items.push({
                         text: "Review",
                         onItemClick: function () {
+
                             QuotesLinkClick(e.row.key, "Review");
                         }
                     });
@@ -69,18 +73,18 @@ try {
                             QuotesLinkClick(e.row.key, false);
                         }
                     });
-                    e.items.push({
-                        text: "Clone",
-                        onItemClick: function () {
-                            QuotesLinkClick(e.row.key, true);
-                        }
-                    });
-                    e.items.push({
-                        text: "Delete",
-                        onItemClick: function () {
-                            deleteQuotationDetails(e.row.key);
-                        }
-                    });
+                    //e.items.push({
+                    //    text: "Clone",
+                    //    onItemClick: function () {
+                    //        QuotesLinkClick(e.row.key, true);
+                    //    }
+                    //});
+                    //e.items.push({
+                    //    text: "Delete",
+                    //    onItemClick: function () {
+                    //        deleteQuotationDetails(e.row.key);
+                    //    }
+                    //});
                     if (e.row.key.IsInternalApproved === false) return;
                     e.items.push({
                         text: "Print",
@@ -438,10 +442,80 @@ try {
                             { dataField: "QuotationNo" },
                             { dataField: "ProjectName" },
                             { dataField: "ClientName" },
+                            { dataField: "CreatedDate" },
                             { dataField: "SalesPerson" },
                             { dataField: "FreightAmount" },
                             { dataField: "Remark" },
                             { dataField: "EstimateBy" },
+                            {
+                                caption: "", fixedPosition: "right", fixed: true,
+                                cellTemplate: function (container, options) {
+                                    if (options.key.CommentCount > 0) {
+                                        $('<div title="Quote Comments">').addClass('fa fa-bell customgridbtn dx-link').append('<span class="bg-deep-orange badge font-10">' + options.key.CommentCount + '</span>')
+                                            .on('dxclick', function () {
+                                                FnNotification(options.key.BookingID);
+
+                                                this.setAttribute("data-toggle", "modal");
+                                                this.setAttribute("data-target", "#CommentModal");
+                                            }).appendTo(container);
+                                    }
+
+                                }
+                            },
+                            {
+                                caption: "", fixedPosition: "right", fixed: true,
+                                cellTemplate: function (container, options) {
+                                    $('<a title="Review Quote">').addClass('fa fa-eye dx-link')
+                                        .on('dxclick', function () {
+                                            QuotesLinkClick(options.data, "Review");
+                                        }).appendTo(container);
+                                }
+                            }, {
+                                caption: "", fixedPosition: "right", fixed: true,
+                                cellTemplate: function (container, options) {
+                                    $('<a title="Revise Quote">').addClass('fa fa-edit dx-link')
+                                        //                        .text('Revise')
+                                        .on('dxclick', function () {
+                                            QuotesLinkClick(options.data, false);
+                                        }).appendTo(container);
+                                }
+                            },
+                            //{
+                            //    caption: "", fixedPosition: "right", fixed: true,
+                            //    cellTemplate: function (container, options) {
+                            //        $('<a title="Clone Quote">').addClass('customgridbtn fa fa-copy dx-link')
+                            //            //.text('Clone')
+                            //            .on('dxclick', function () {
+                            //                QuotesLinkClick(options.data, true);
+                            //                //this.href = "DYnamicQty.aspx?BookingID=" + options.key.BookingID + "&FG=true";
+                            //            }).appendTo(container);
+                            //    }
+                            //},
+                            //{
+                            //    caption: "", fixedPosition: "right", fixed: true,
+                            //    cellTemplate: function (container, options) {
+                            //        $('<a title="Print Quote">').addClass('fa fa-print dx-link customgridbtn')
+                            //            .on('dxclick', function () {
+                            //                if (options.key.BookingID <= 0 || options.key.IsInternalApproved === false) return;
+                            //                //var url = "Print_Quotation.aspx?BN=" + options.key.BookingID + "&BookingNo=" + encodeURIComponent(options.key.BookingNo);
+                            //                var url = "QuotePreview.aspx?BKID=" + options.key.BookingID;//ReportQuotation.aspx?BookingID
+                            //                window.open(url, "_blank", "location=yes,height=" + window.innerHeight + ",width=" + window.innerWidth + ",scrollbars=yes,status=no", true);
+                            //            }).appendTo(container);
+
+                            //    }
+                            //},
+                            { dataField: "ReasonsofQuote", caption: "Reasons of Quote Failure", visible: false }, { dataField: "ReworkRemark", caption: "Rework Remark", visible: true, width: 200 },
+                            { dataField: "RemarkInternalApproved", caption: "IA Remark", visible: true },
+                            //{
+                            //    caption: "", fixedPosition: "right", fixed: true, width: 30,
+                            //    cellTemplate: function (container, options) {
+                            //        $('<div title="Delete Quote" style="color:red;">').addClass('fa fa-trash customgridbtn dx-link')
+                            //            .on('dxclick', function () {
+                            //                deleteQuotationDetails(options.key);
+                            //            }).appendTo(container);
+
+                            //    }
+                            //}
                         ],
 
                     });
@@ -566,7 +640,7 @@ $("#BtnDisApproval").click(function () {
                 res = res.replace(/}/g, '');
                 $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
                 if (res === "Save") {
-                   
+
                     swal("Status Updated..", "Selected quotes are successfully disapproved!", "success");
                     location.reload();
                 } else {
@@ -698,7 +772,7 @@ function QuotesLinkClick(rowData, Flag) {
         Captitle = "Review Quote No: ";
     }
     swal({
-        title: Captitle + rowData.BookingNo,
+        title: Captitle + rowData.QuotationNo ,
         text: "Are you sure to continue..?",
         type: "warning",
         showCancelButton: true,
@@ -707,7 +781,7 @@ function QuotesLinkClick(rowData, Flag) {
         closeOnConfirm: false
     },
         function () {
-            window.location.href = "DYnamicQty.aspx?BookingID=" + BKID + "&FG=" + Flag + "";
+            window.location.href = "ProjectQuotation.aspx?BookingID=" + BKID + "&FG=" + Flag + "";
             window.location.href.reload(true);
         });
 }

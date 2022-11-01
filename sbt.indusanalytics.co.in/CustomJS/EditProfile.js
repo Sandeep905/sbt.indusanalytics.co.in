@@ -5,6 +5,7 @@ var existUser = [];
 var newArray = [];
 var SupportSystemGridData = [];
 var SectionCount = 0;
+var text = "";
 
 $("#SelectBoxCountry").dxSelectBox({
     items: [],
@@ -554,7 +555,9 @@ $("#EditButton").click(function () {
     document.getElementById("RESMTPPassword").value = selectedUserRows[0].smtpUserPassword;
     document.getElementById("SMTPServer").value = selectedUserRows[0].smtpServer;
     document.getElementById("SMTPServerPort").value = selectedUserRows[0].smtpServerPort;
-
+    document.getElementById("TxtMessage").value = selectedUserRows[0].EmailMessage;
+    document.getElementById("TxtEmailHeader").value = selectedUserRows[0].HeaderText;
+    document.getElementById("TxtEmailFooter").value = selectedUserRows[0].FooterText.replace(/<br >/g,'\n');
     ///////////////////ReSelect operators list
     $("#TxtOperatorID").text(selectedUserRows[0].UserWiseOperatorsIDStr);
     try {

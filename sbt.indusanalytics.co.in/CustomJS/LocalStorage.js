@@ -175,6 +175,7 @@ function readContentsSizes(ContType, ContentName) {
         } else {
             try {
                 $.ajax({
+                    async: false,
                     type: 'post',
                     url: 'WebServicePlanWindow.asmx/GetContentSize',
                     data: '{ContName:' + JSON.stringify(ContType) + '}',
@@ -455,7 +456,7 @@ let GblCategoryID = 0; ///for the case of iframe we need filtered contents proce
  * // reload job size values contents type or qty wise with the local store!
  * @param {Text} ContId as contents type Text
  */
-function readContentsSizeValues(ContId, ContentName) {
+ function readContentsSizeValues(ContId, ContentName) {
     try {
         var flagReloaded = false;
         $("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
@@ -470,7 +471,7 @@ function readContentsSizeValues(ContId, ContentName) {
 
         GblInputValues = {};
         OprIds = []; GblInputOpr = [];
-        //$("#GridOperationAllocated").dxDataGrid({ dataSource: ObjDefaultProcess });
+        $("#GridOperationAllocated").dxDataGrid({ dataSource: ObjDefaultProcess });
         for (var i = 0; i < ObjDefaultProcess.length; i++) {
             OprIds.push(ObjDefaultProcess[i].ProcessID);
         }
@@ -654,10 +655,12 @@ function reloadKeyValues() {
                 }
             } else if (key === "MachineIDFiltered" || key === "MachineId") {
                 var objmid = [];
-                var objkey = GblInputValues[key].split(',');
-                for (var x in objkey) {
-                    if (objkey[x] !== "")
-                        objmid.push(Number(objkey[x]));
+                if (GblInputValues[key] != null) {
+                    var objkey = GblInputValues[key].split(',');
+                    for (var x in objkey) {
+                        if (objkey[x] !== "")
+                            objmid.push(Number(objkey[x]));
+                    }
                 }
                 if (objmid.length > 0) {
                     $("#MachineIDFiltered").dxTagBox({
@@ -688,6 +691,8 @@ function reloadInputOperations() {
     var PlanContQty = Number(document.getElementById("PlanContQty").innerHTML);
     var PlanContentType = document.getElementById("ContentOrientation").innerHTML;
     var ChkPlanMaster = $("#ChkUseFirstPlanAsMaster").dxCheckBox('instance').option('value');
+
+
     try {
 
         OprIds = []; GblInputOpr = [];
@@ -697,7 +702,13 @@ function reloadInputOperations() {
         ContentsOprations.openCursor().onsuccess = function (event) {
             var curOper = event.target.result;
             if (curOper) {
+                if (queryString["FG"] === "Review") {
+                    curOper.value.PlanContQty = PlanContQty;
+                    curOper.value.PlanContName = PlanContName;
+                    curOper.value.PlanContentType = PlanContentType
+                }
                 if (Number(curOper.value.PlanContQty) === PlanContQty && curOper.value.PlanContName === PlanContName && curOper.value.PlanContentType === PlanContentType) {
+                    GblInputOpr = [];
                     for (var val = 0; val < curOper.value.length; val++) {
                         GblInputOpr.push(curOper.value[val]);
                         OprIds.push(curOper.value[val].ProcessID);
@@ -706,16 +717,17 @@ function reloadInputOperations() {
                     flagReloaded = true;
                     readSelectedPlan();
                     return;
-                } else if (document.getElementById("Plan" + GblPlanID).innerHTML.includes("Click Me to plan..") === true && PlanContName === curOper.value["PlanContName"] && ChkPlanMaster === true && PlanContentType === curOper.value["PlanContentType"]) {
-                    for (var i = 0; i < curOper.value.length; i++) {
-                        GblInputOpr.push(curOper.value[i]);
-                        OprIds.push(curOper.value[i].ProcessID);
-                    }
-                    $("#GridOperationAllocated").dxDataGrid({ dataSource: GblInputOpr });
-                    flagReloaded = true;
-                    readSelectedPlan();
-                    return;
                 }
+                //else if (document.getElementById("Plan" + GblPlanID).innerHTML.includes("Click Me to plan..") === true && PlanContName === curOper.value["PlanContName"] && ChkPlanMaster === true && PlanContentType === curOper.value["PlanContentType"]) {
+                //    for (var i = 0; i < curOper.value.length; i++) {
+                //        GblInputOpr.push(curOper.value[i]);
+                //        OprIds.push(curOper.value[i].ProcessID);
+                //    }
+                //    $("#GridOperationAllocated").dxDataGrid({ dataSource: GblInputOpr });
+                //    flagReloaded = true;
+                //    readSelectedPlan();
+                //    return;
+                //}
                 curOper.continue();
             } else {
                 if (flagReloaded === false) {
@@ -1065,6 +1077,7 @@ function removeAllContentsData() {
             if (cursorPV) {
                 var FMid = cursorPV.value.Id;
                 var requestPV = db.transaction(["ContentsSizeValues"], "readwrite").objectStore("ContentsSizeValues");
+                if (FMid == "" || FMid == undefined) return;
                 var PVStoreRequestF = requestPV.delete(FMid);
                 PVStoreRequestF.onsuccess = function (event) {
                     //console.log("Entry has been removed from your database.");

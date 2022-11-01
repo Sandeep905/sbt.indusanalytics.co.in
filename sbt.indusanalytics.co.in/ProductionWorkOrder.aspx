@@ -5,14 +5,15 @@
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="Server">
     <div class="row">
-        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 m-l-0 p-r-0">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 p-0">
             <div class="dialogboxContainerMainMAster">
-                <div class="DialogBoxCustom" style="float: left; background-color: #fff;">
+                <div class="" style="float: left; background-color: #fff;">
                     <div id="ButtonDiv" style="height: auto; display: block">
                         <input type="button" name="BtnJobDetails" value="Job Details >>" id="BtnJobDetails" class="btn btn-primary" />
+
                         <input type="button" id="BtnPrintJobcard" value="Print" class="btn btn-print hidden" />
+
                         <input type="button" id="BtnDeleteJobcard" value="Delete" class="btn btn-danger hidden" />
-                        <a class="MasterDisplayName" style="float: right; color: #42909A">Production Work Order</a>
                     </div>
                 </div>
             </div>
@@ -22,7 +23,10 @@
             <div id="RadioPMPendingProc"></div>
         </div>
         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 m-l-10">
+            <label>Projects:</label>
             <div id="GridPendingProcessData"></div>
+            <label>Products:</label>
+            <div id="GridPendingContents"></div>
         </div>
     </div>
 
@@ -59,54 +63,54 @@
                                 <b class="font-11">Product Group</b><br />
                                 <div id="SbProductHSNGroup"></div>
                             </div>
-                            <div class="col-lg-1 col-md-1 col-sm-2 col-xs-6">
+                            <div class="col-lg-1 col-md-1 col-sm-2 col-xs-6 hidden">
                                 <div class="font-11">Quote No</div>
                                 <input type="text" class="forTextBox disabledbutton" disabled="disabled" id="TxtQuoteNo" readonly="" />
                             </div>
                         </div>
                         <%--Common Job Details--%>
 
-                        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-6">
+                        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 hidden">
                             <%--Quotation Details--%>
                             <div class="font-11">Order No</div>
                             <input type="text" class="forTextBox disabledbutton" disabled="disabled" id="TxtOrderBookingNo" readonly="" />
                         </div>
 
-                        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-6">
+                        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 hidden">
                             <div class="font-11">Order Date</div>
                             <input type="text" class="forTextBox disabledbutton" disabled="disabled" id="TxtOrderBookingDate" readonly="" />
                         </div>
 
-                        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-6">
+                        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 hidden">
                             <div class="font-11">PO No</div>
                             <input type="text" class="forTextBox" id="TxtPONo" />
                         </div>
 
-                        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-6">
+                        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 hidden">
                             <div class="font-11">PO Date</div>
                             <%--<input type="text" class="forTextBox disabledbutton" disabled="disabled" id="TxtPODate" />--%>
                             <div id="SelPODate"></div>
                         </div>
 
-                        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-6">
+                        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 hidden">
                             <div class="font-11">Delivery Date</div>
                             <%--<input type="text" class="forTextBox disabledbutton" id="TxtDeliveryDate" />--%>
                             <div id="SelDeliveryDate"></div>
                         </div>
 
-                        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12">
+                        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12 hidden">
                             <div class="font-11">Product Code</div>
                             <input type="text" class="forTextBox" id="TxtProductCode" />
                         </div>
 
-                        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12 hidden" hidden>
+                        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12 hidden" >
                             <div class="font-11">Job Coordinator</div>
                             <div id="SbJobCoordinator"></div>
                         </div>
 
                         <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
                             <div class="font-11">Job Name </div>
-                            <input type="text" class="forTextBox" id="TxtJobName" />
+                            <input type="text" class="forTextBox disabledbutton" id="TxtJobName" />
                         </div>
 
                         <div class="col-lg-2 col-md-2 col-sm-2 col-xs-6">
@@ -124,7 +128,7 @@
                             <div id="SbClientName"></div>
                         </div>
 
-                        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12 hidden" hidden>
+                        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12 " hidden>
                             <div class="font-11">Consignee Name</div>
                             <%--<input type="text" class="forTextBox disabledbutton" disabled="disabled" id="TxtConsigneeName" readonly="" />--%>
                             <div id="SbConsigneeName"></div>
@@ -156,7 +160,7 @@
                             <div id="SbJobReference"></div>
                         </div>
 
-                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-16 align-right">
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-16 align-right" id="arrowarea">
                             <div class="font-11">Grid Content Options</div>
                             <i data-toggle="modal" data-target="#largeModalContentsList" class="fa fa-plus btn btn-sm hidden" hidden></i>
                             <i id="ContSelMoveUp" class="fa fa-arrow-up btn btn-sm"></i>
@@ -178,12 +182,12 @@
                         </div>
 
                         <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
-                            <input type="button" id="BtnApplySpecialInstructions" value="Apply Instructions" class="btn btn-info" />
+                            <input type="button" style="float:right" id="BtnApplySpecialInstructions" value="Apply Instructions" class="btn btn-info" />
                             <input type="button" id="BtnProcessMaterialReq" value="Material Requirement" class="btn btn-primary waves-effect hidden" hidden />
-                            <input type="button" id="BtnShadeSelection" value="Shade Selection" class="btn btn-primary waves-effect" />
+                            <input type="button" id="BtnShadeSelection" value="Shade Selection" class="btn btn-primary waves-effect hidden" />
                             <input type="button" id="BtnShipper" value="Shipper" class="btn btn-primary waves-effect hidden" hidden />
-                            <input type="button" id="BtnFormWise" value="JC Formwise" class="btn btn-primary waves-effect" />
-                            <input type="button" id="BtnItemsBooking" value="Item Allocation" class="btn btn-primary waves-effect" />
+                            <input type="button" id="BtnFormWise" value="JC Formwise" class="btn btn-primary waves-effect hidden" />
+                            <input type="button" id="BtnItemsBooking" value="Item Allocation" class="btn btn-primary waves-effect hidden" />
                             <input type="button" data-target="#modalPackingDetails" data-toggle="modal" id="BtnPackingDetails" value="Packing Details" class="btn btn-primary waves-effect hidden" hidden />
                         </div>
 

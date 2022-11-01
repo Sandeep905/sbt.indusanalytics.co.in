@@ -30,12 +30,14 @@ Public Class WebServiceProductionWorkOrder
         Try
             CompanyId = Convert.ToString(HttpContext.Current.Session("CompanyId"))
             FYear = Convert.ToString(HttpContext.Current.Session("ReportFYear"))
-            If (check = "Processed") Then
-                str = "SELECT Distinct JEJ.JobBookingDate ,JEJ.CoordinatorLedgerID,JEJ.JobPriority,JEJ.CategoryID,Replace(Nullif(JEJ.Remark,''),'""','') As Remark,JOB.JobReference, JOB.JobType, Replace(Nullif(LM.LedgerName,''),'"" ','') as LedgerName ,Nullif(JEJ.PONo,'') as PONo,Replace(Convert(Nvarchar(13),JEJ.PODate,106),' ','-') As PODate,Replace(Nullif(CM.CategoryName,''),'""','') as CategoryName,JOB.SalesOrderNo,Replace(Nullif(JEJ.JobName,''),'""','') as JobName,JEJ.OrderQuantity As OrderQty,Replace(Nullif(JEJ.ProductCode,''),'""','') as ProductCode,JEJ.JobBookingNo,  JE.BookingNo,Replace(Convert(Nvarchar(13),JEJ.JobBookingDate,106),' ','-') as BookingDate,UM.UserName as BookedBy,Replace(Nullif(PM.ProductMasterCode,''),'""','') as ProductMasterCode,JEJ.FYear,JEJ.LedgerID,JEJ.ProductHSNID,Nullif(LM.Email,'') As Email,JEJ.OrderQuantity as Quantity,JEJ.BookingID,Replace(Convert(Nvarchar(13),JEJ.DeliveryDate,106),' ','-') as DeliveryDate,JE.ExpectedCompletionDays,JOB.OrderBookingID,JOB.OrderBookingDetailsID,JEJ.ProductMasterID,JEJ.JobBookingID,JEJ.ConsigneeID,JEJ.CriticalInstructions  " &
-                        " FROM LedgerMaster As LM INNER JOIN JobBookingJobCard  As JEJ ON JEJ.LedgerId =LM.LedgerId And JEJ.CompanyID = " & CompanyId & " And JEJ.FYear='" & FYear & "' And JEJ.IsDeletedTransaction=0  INNER JOIN JobOrderBookingDetails As JOB ON JEJ.LedgerId =JOB.LedgerId And JEJ.OrderBookingID=JOB.OrderBookingID And JEJ.CompanyID = JOB.CompanyID INNER JOIN CategoryMaster as CM ON  CM.CategoryId = JEJ.CategoryID  AND CM.CompanyID = JEJ.CompanyID INNER JOIN UserMaster AS UM ON UM.UserId = JEJ.CreatedBy LEFT JOIN JobBooking As JE  ON JE.BookingID = JEJ.BookingID LEFT JOIN ProductMaster AS PM On PM.ProductMasterID =JEJ.ProductMasterID Order by JobBookingDate DESC "
+            If check = "Processed" Then
+                'str = "SELECT Distinct JEJ.JobBookingDate ,JEJ.CategoryID,Replace(Nullif(JEJ.Remark,''),'""','') As Remark, Replace(Nullif(LM.LedgerName,''),'"" ','') as LedgerName ,Nullif(JEJ.PONo,'') as PONo,Replace(Convert(Nvarchar(13),JEJ.PODate,106),' ','-') As PODate,Replace(Nullif(CM.CategoryName,''),'""','') as CategoryName,JOB.SalesOrderNo,Replace(Nullif(JEJ.JobName,''),'""','') as JobName,JEJ.OrderQuantity As OrderQty,Replace(Nullif(JEJ.ProductCode,''),'""','') as ProductCode,JEJ.JobBookingNo,  JE.BookingNo,Replace(Convert(Nvarchar(13),JEJ.JobBookingDate,106),' ','-') as BookingDate,UM.UserName as BookedBy,Replace(Nullif(PM.ProductMasterCode,''),'""','') as ProductMasterCode,JEJ.FYear,JEJ.LedgerID,JEJ.ProductHSNID,Nullif(LM.Email,'') As Email,JEJ.OrderQuantity as Quantity,JEJ.BookingID,Replace(Convert(Nvarchar(13),JEJ.DeliveryDate,106),' ','-') as DeliveryDate,JE.ExpectedCompletionDays,JOB.OrderBookingID,JEJ.ProductMasterID,JEJ.JobBookingID,JEJ.ConsigneeID,JEJ.CriticalInstructions  " &
+                '      " FROM LedgerMaster As LM INNER JOIN JobBookingJobCard  As JEJ ON JEJ.LedgerId =LM.LedgerId And JEJ.CompanyID = " & CompanyId & " And JEJ.FYear='" & FYear & "' And JEJ.IsDeletedTransaction=0  INNER JOIN JobOrderBookingDetails As JOB ON JEJ.LedgerId =JOB.LedgerId And JEJ.OrderBookingID=JOB.OrderBookingID And JEJ.CompanyID = JOB.CompanyID INNER JOIN CategoryMaster as CM ON  CM.CategoryId = JEJ.CategoryID  AND CM.CompanyID = JEJ.CompanyID INNER JOIN UserMaster AS UM ON UM.UserId = JEJ.CreatedBy LEFT JOIN JobBooking As JE  ON JE.BookingID = JEJ.BookingID LEFT JOIN ProductMaster AS PM On PM.ProductMasterID =JEJ.ProductMasterID Order by JobBookingDate DESC "
+                str = " Select Distinct JBJC.BookingID, JBJC.ProductEstimateID,JOB.SalesOrderNo, Replace(Convert(Nvarchar(13),JBJC.PODate,106),' ','-') as PODate ,JBJC.PONo,PQ.ProjectName,JBJC.JobPriority,JBJC.CreatedBy,UM.UserName as BookedBy,LM.LedgerName from JobBookingJobCard as JBJC  inner join LedgerMaster as LM on LM.LedgerID = JBJC.LedgerID and LM.CompanyID = JBJC.CompanyID inner join UserMaster as UM on UM.UserID = JBJC.CreatedBy and UM.CompanyID = JBJC.CompanyID  inner join JobOrderBooking  as JOB on JOB.OrderBookingID = JBJC.OrderBookingID and JOB.CompanyID = JBJC.CompanyID inner join ProductQuotation as PQ on PQ.ProductEstimateID = JBJC.ProductEstimateID and PQ.CompanyID = JBJC.CompanyID where JBJC.CompanyId =" & CompanyId & " and JBJC.IsDeletedTransaction =0"
             Else
-                str = "SELECT Distinct JOBD.JobCoordinatorId As CoordinatorLedgerID,JOBD.JobPriority,JOBD.CategoryID,Replace(Nullif(JOBD.Remark,''),'""','') As Remark,JOBD.JobReference,JOBD.JobType, Replace(Nullif(LM.LedgerName,''),'""','') as LedgerName,JOBD.OrderQuantity as Quantity,Nullif(JOBD.PONo,'') as PONo,Replace(Convert(Nvarchar(13),JOBD.PODate,106),' ','-') as PODate,Replace(Nullif(CM.CategoryName,''),'""','') as CategoryName,Replace(Nullif(JOBD.JobName,''),'""','') as JobName,JOBD.OrderQuantity As OrderQty,Replace(Nullif(JOBD.ProductCode,''),'""','') as ProductCode,JE.BookingNo,JOB.SalesOrderNo,Replace(Convert(Nvarchar(13),JOBD.OrderBookingDate,106),' ','-') as BookingDate,UM.UserName as BookedBy,Replace(Nullif(PM.ProductMasterCode,''),'""','') as ProductMasterCode,Replace(Nullif(JOBD.ApprovalNo,''),'""','') as ApprovalNo,JOBD.FYear,JOBD.LedgerID,JE.ProductHSNID,Nullif(LM.Email,'') as Email,JOBD.BookingID, Replace(Convert(Nvarchar(13),JOBD.DeliveryDate,106),' ','-') as DeliveryDate,Replace(Nullif(JOBD.JobReferenceName ,''),'""','') as JobReferenceName,JE.ExpectedCompletionDays,JOB.OrderBookingID,JOBD.OrderBookingDetailsID,PM.ProductMasterID,(Select Top 1 Isnull(ConsigneeID,0) From JobOrderBookingDeliveryDetails Where OrderBookingID=JOBD.OrderBookingID AND BookingID=JOBD.BookingID AND CompanyID=JOBD.CompanyID)  AS ConsigneeID  " &
-                      " FROM LedgerMaster As LM INNER JOIN JobOrderBooking As JOB On JOB.LedgerID=LM.LedgerID And LM.CompanyID=JOB.CompanyID Inner Join JobOrderBookingDetails As JOBD ON JOBD.OrderBookingID = JOB.OrderBookingID And JOBD.LedgerId = LM.LedgerId And JOB.CompanyID = " & CompanyId & " And Isnull(JOB.IsDeletedTransaction,0)<>1 INNER JOIN CategoryMaster as CM ON CM.CategoryId = JOBD.CategoryID And CM.CompanyID=JOB.CompanyID And JOB.IsDeletedTransaction =CM.IsDeletedTransaction INNER JOIN UserMaster AS UM ON UM.UserId = JOBD.UserId And UM.CompanyID=JOB.CompanyID And ISNULL(JOBD.IsBooked,0) = 0 LEFT JOIN JobBooking As JE ON JE.BookingID = JOBD.BookingID And JE.CompanyID=JOB.CompanyID And JOB.IsDeletedTransaction=0 LEFT JOIN ProductMaster AS PM On PM.BookingID =JE.BookingID And JE.CompanyID=PM.CompanyID And PM.IsDeletedTransaction=0 Order by BookingDate Desc "
+                'str = "SELECT Distinct JOB.OrderBookingID, JOBD.JobCoordinatorId As Coor dinatorLedgerID,JOBD.JobPriority,JOBD.CategoryID,Replace(Nullif(JOBD.Remark,''),'""','') As Remark,JOBD.JobReference,JOBD.JobType, Replace(Nullif(LM.LedgerName,''),'""','') as LedgerName,JOBD.OrderQuantity as Quantity,Nullif(JOBD.PONo,'') as PONo,Replace(Convert(Nvarchar(13),JOBD.PODate,106),' ','-') as PODate,Replace(Nullif(CM.CategoryName,''),'""','') as CategoryName,Replace(Nullif(JOBD.JobName,''),'""','') as JobName,JOBD.OrderQuantity As OrderQty,Replace(Nullif(JOBD.ProductCode,''),'""','') as ProductCode,JE.BookingNo,JOB.SalesOrderNo,Replace(Convert(Nvarchar(13),JOBD.OrderBookingDate,106),' ','-') as BookingDate,UM.UserName as BookedBy,Replace(Nullif(PM.ProductMasterCode,''),'""','') as ProductMasterCode,Replace(Nullif(JOBD.ApprovalNo,''),'""','') as ApprovalNo,JOBD.FYear,JOBD.LedgerID,JOBD.ProductHSNID,Nullif(LM.Email,'') as Email,JOBD.BookingID, Replace(Convert(Nvarchar(13),JOBD.DeliveryDate,106),' ','-') as DeliveryDate,Replace(Nullif(JOBD.JobReferenceName ,''),'""','') as JobReferenceName,JE.ExpectedCompletionDays,JOB.OrderBookingID,JOBD.OrderBookingDetailsID,PM.ProductMasterID,(Select Top 1 Isnull(ConsigneeID,0) From JobOrderBookingDeliveryDetails Where OrderBookingID=JOBD.OrderBookingID AND BookingID=JOBD.BookingID AND CompanyID=JOBD.CompanyID)  AS ConsigneeID  " &
+                '     " FROM LedgerMaster As LM INNER JOIN JobOrderBooking As JOB On JOB.LedgerID=LM.LedgerID And LM.CompanyID=JOB.CompanyID Inner Join JobOrderBookingDetails As JOBD ON JOBD.OrderBookingID = JOB.OrderBookingID And JOBD.LedgerId = LM.LedgerId And JOB.CompanyID = " & CompanyId & " And Isnull(JOB.IsDeletedTransaction,0)<>1 INNER JOIN CategoryMaster as CM ON CM.CategoryId = JOBD.CategoryID And CM.CompanyID=JOB.CompanyID And JOB.IsDeletedTransaction =CM.IsDeletedTransaction INNER JOIN UserMaster AS UM ON UM.UserId = JOBD.UserId And UM.CompanyID=JOB.CompanyID And ISNULL(JOBD.IsBooked,0) = 0 LEFT JOIN JobBooking As JE ON JE.BookingID = JOBD.BookingID And JE.CompanyID=JOB.CompanyID And JOB.IsDeletedTransaction=0 LEFT JOIN ProductMaster AS PM On PM.BookingID =JE.BookingID And JE.CompanyID=PM.CompanyID And PM.IsDeletedTransaction=0 Order by BookingDate Desc "
+                str = "Select Distinct JOB.ProductEstimateID, JOB.OrderBookingID,LM.LedgerName,LM.Email,JOB.SalesOrderNo,Replace(Convert(Nvarchar(13),JOB.OrderBookingDate,106),' ','-') as BookingDate,PQ.ProjectName,UM.UserName as BookedBy from JobOrderBooking as JOB inner Join LedgerMaster as LM on LM.LedgerID =JOB.LedgerID and LM.CompanyID = JOB.CompanyID inner Join ProductQuotation as PQ on PQ.ProductEstimateID = JOB.ProductEstimateID and JOB.CompanyID = PQ.CompanyID inner join UserMaster as UM on UM.UserID = job.UserID and UM.CompanyID = JOB.CompanyID where JOB.CompanyID = " & CompanyId & " and Isnull(JOB.IsDeletedTransaction,0) = 0 order by BookingDate desc"
             End If
             db.FillDataTable(dataTable, str)
             data.Message = db.ConvertDataTableTojSonString(dataTable)
@@ -45,7 +47,51 @@ Public Class WebServiceProductionWorkOrder
             Return ex.Message
         End Try
     End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function GridPendingContentsData(ByVal BookingID As String) As String
+        CompanyId = Convert.ToString(HttpContext.Current.Session("CompanyID"))
 
+        str = "Select distinct PQC.ProcessIDStr,JOBD.OrderBookingID,JOBD.OrderBookingDetailsID, JOBD.PONo,Replace(Convert(Nvarchar(30),JOBD.DeliveryDate,106),'','-') as DeliveryDate,Replace(Convert(Nvarchar(30),JOBD.PODate,106),'','-') as PODate, JOBD.JobReference, JOBD.JobType,JOBD.JobPriority,JOBD.CategoryID,JOBD.LedgerID, JOBD.ProductHSNID, JOBD.BookingID,JOBD.JobName as ProductName,CM.CategoryName,HM.HSNCode, JOBD.OrderQuantity,JOBD.Rate,JOBD.RateType,JOBD.GSTPercantage,Round(JOBD.GSTAmount,2) as GSTAmount,JOBd.MiscAmount,JOBD.MiscPercantage,JOBD.ShippingCost,JOBD.NetAmount as FinalAmount,LM.LedgerName as VendorName from JobOrderBookingDetails as JOBD inner join CategoryMaster as CM on CM.CategoryID = JOBD.CategoryID and CM.CompanyID = JOBD.CompanyID inner join  ProductHSNMaster  as HM on HM.ProductHSNID = JOBD.ProductHSNID and HM.CompanyID = JOBd.CompanyID inner join LedgerMaster as LM on LM.LedgerID = JOBD.VendorID and LM.CompanyID = JOBD.CompanyID inner join JobOrderBooking as JOB on JOb.CompanyID = JOBD.CompanyID and JOB.OrderBookingID = JOBD.OrderBookingID inner join ProductQuotationContents as PQC on PQC.CompanyID = JOBD.CompanyID and PQC.ProductEstimateID = JOB.ProductEstimateID where JOBD.CompanyID =" & CompanyId & " and Isnull(JOBD.IsDeletedTransaction ,0) = 0 and JOBD.OrderBookingID = " & BookingID
+        db.FillDataTable(dataTable, str)
+        data.Message = db.ConvertDataTableTojSonString(dataTable)
+        js.MaxJsonLength = 2147483647
+        Return js.Serialize(data.Message)
+    End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function LoadProcess(ByVal pids As String) As String
+        CompanyId = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+
+        str = "Select distinct ProcessID,Rate,TypeofCharges as RateFactor from ProcessMaster where CompanyId=" & CompanyId & " ProcessID  in (" & pids & ") "
+        db.FillDataTable(dataTable, str)
+        data.Message = db.ConvertDataTableTojSonString(dataTable)
+        js.MaxJsonLength = 2147483647
+        Return js.Serialize(data.Message)
+    End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function GridProcessedContentsData(ByVal BookingID As String) As String
+        CompanyId = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+
+        str = "SELECT Distinct JEJ.JobBookingDate ,JEJ.CategoryID,Replace(Nullif(JEJ.Remark,''),'""','') As Remark, Replace(Nullif(LM.LedgerName,''),'"" ','') as LedgerName ,Nullif(JEJ.PONo,'') as PONo,Replace(Convert(Nvarchar(13),JEJ.PODate,106),' ','-') As PODate,Replace(Nullif(CM.CategoryName,''),'""','') as CategoryName,JOB.SalesOrderNo,Replace(Nullif(JEJ.JobName,''),'""','') as JobName,JEJ.OrderQuantity As OrderQty,Replace(Nullif(JEJ.ProductCode,''),'""','') as ProductCode,JEJ.JobBookingNo,  JE.BookingNo,Replace(Convert(Nvarchar(13),JEJ.JobBookingDate,106),' ','-') as BookingDate,UM.UserName as BookedBy,Replace(Nullif(PM.ProductMasterCode,''),'""','') as ProductMasterCode,JEJ.FYear,JEJ.LedgerID,JEJ.ProductHSNID,Nullif(LM.Email,'') As Email,JEJ.OrderQuantity as Quantity,JEJ.BookingID,Replace(Convert(Nvarchar(13),JEJ.DeliveryDate,106),' ','-') as DeliveryDate,JE.ExpectedCompletionDays,JOB.OrderBookingID,JEJ.ProductMasterID,JEJ.JobBookingID,JEJ.ConsigneeID,JEJ.CriticalInstructions  " &
+          " FROM LedgerMaster As LM INNER JOIN JobBookingJobCard  As JEJ ON JEJ.LedgerId =LM.LedgerId And JEJ.CompanyID = " & CompanyId & " And JEJ.BookingID='" & BookingID & "' And JEJ.IsDeletedTransaction=0  INNER JOIN JobOrderBookingDetails As JOB ON JEJ.LedgerId =JOB.LedgerId And JEJ.OrderBookingID=JOB.OrderBookingID And JEJ.CompanyID = JOB.CompanyID INNER JOIN CategoryMaster as CM ON  CM.CategoryId = JEJ.CategoryID  AND CM.CompanyID = JEJ.CompanyID INNER JOIN UserMaster AS UM ON UM.UserId = JEJ.CreatedBy LEFT JOIN JobBooking As JE  ON JE.BookingID = JEJ.BookingID LEFT JOIN ProductMaster AS PM On PM.ProductMasterID =JEJ.ProductMasterID Order by JobBookingDate DESC "
+        db.FillDataTable(dataTable, str)
+        data.Message = db.ConvertDataTableTojSonString(dataTable)
+        js.MaxJsonLength = 2147483647
+        Return js.Serialize(data.Message)
+    End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function CheckProductType(ByVal ContentName As String) As String
+        CompanyId = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+
+        str = "Select Isnull(IsOffsetProduct,0) IsOffsetProduct,Isnull(IsUnitProduct,0) IsUnitProduct From ProductCatalogMaster where ProductName = '" & ContentName & "' and IsDeletedTransaction = 0 and CompanyID = " & CompanyId
+        db.FillDataTable(dataTable, str)
+        data.Message = db.ConvertDataTableTojSonString(dataTable)
+        js.MaxJsonLength = 2147483647
+        Return js.Serialize(data.Message)
+    End Function
     '---------------------------------  Open Department Master code---------------------------------
     <WebMethod(EnableSession:=True)>
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
@@ -397,7 +443,6 @@ Public Class WebServiceProductionWorkOrder
                 If Val(JobBookingID) <= 0 Then Return "Error:500"
                 Dim TblObj, TblObjCont As New DataTable
                 TableName = "JobBookingJobCardContents"
-
                 If FlagEdit = True Then
                     For i = 0 To TblPlanning.length - 1
                         TblPlanning(i)("JobCardContentNo") = JobBookingNo & "[" & i + 1 & "_" & TblPlanning.length & "]"
@@ -415,6 +460,10 @@ Public Class WebServiceProductionWorkOrder
                     End If
 
                     'TblObjCont.DefaultView.Sort = "SequenceNo Asc"
+                    If TblObjCont.Rows.Count > 0 Then
+                        TblObjCont.Columns.Remove("OrderBookingID")
+                        TblObjCont.Columns.Remove("OrderBookingDetailsID")
+                    End If
                     TblObjCont.Columns.Add("JobCardContentNo")
                     For i = 0 To TblObjCont.Rows.Count - 1
                         TblObjCont.Rows(i)("JobCardContentNo") = JobBookingNo & "[" & i + 1 & "_" & TblObjCont.Rows.Count & "]"
@@ -1236,10 +1285,11 @@ Public Class WebServiceProductionWorkOrder
             Dim DTContent, DTProcess, DTBookForms, DTMaterials, DTInkShades, DTJCBookFormsDetail As New DataTable
             CompanyId = Convert.ToString(HttpContext.Current.Session("CompanyID"))
             If ProdMasCode = "" And JobCardNo = "" Then
-                str = "Select Top 1 Isnull(PlanContQty,0) FROM JobBookingContents As A Where A.BookingId=" & BookingID & " AND A.CompanyId=" & CompanyId & " Order By ABS(PlanContQty-" & Qty & ")"
+                str = "Select Top 1 Isnull(Quantity,0),B.BookingID FROM ProductQuotationContents As A inner join ProductQuotation as B on b.ProductEstimateID = A.ProductEstimateID Where A.ProductEstimateID=" & BookingID & " AND A.CompanyId=" & CompanyId & " Order By ABS(Quantity-" & Qty & ")"
                 db.FillDataTable(dataTable, str)
                 If dataTable.Rows.Count > 0 Then
                     Qty = dataTable.Rows(0)(0)
+                    BookingID = dataTable.Rows(0)(1)
                 End If
                 str = "SELECT Distinct JobContentsID, MachineID, MachineName, Gripper, GripperSide, MachineColors, PaperID, PaperSize, CutSize, CutL, CutW, UpsL, UpsW, TotalUps, BalPiece, BalSide, WasteArea, WastePerc, WastageKg, GrainDirection, PlateQty, PlateRate, PlateAmount, MakeReadyWastageSheet, ActualSheets, WastageSheets, TotalPaperWeightInKg, FullSheets, PaperRate, PaperAmount, PrintingImpressions, ImpressionsToBeCharged, PrintingRate, PrintingAmount, TotalMakeReadies, MakeReadyRate, MakeReadyAmount, FinalQuantity, TotalColors, TotalAmount, CutLH, CutHL, PrintingStyle, PrintingChargesType, ExpectedExecutionTime, TotalExecutionTime, MainPaperName, PlanType, PaperRateType, DieCutSize, InterlockStyle, NoOfSets, GrantAmount,GrantAmount As OldGrantAmount, Packing, UnitPerPacking, RoundofImpressionsWith, SpeColorFCharges, SpeColorBCharges, SpeColorFAmt, SpeColorBAmt, OpAmt, PlanID, PlanContQty, PlanContentType, PlanContName, ROW_NUMBER() OVER (ORDER BY JobContentsID) As SequenceNo, Nullif(ContentSizeValues,'') As ContentSizeValues, CoatingCharges, CoatingAmount, PaperGroup,(Select Distinct FieldValue From ItemMasterDetails Where FieldName='PurchaseUnit' And ItemID=JBC.PaperID And CompanyID=JBC.CompanyID ) As PurchaseUnit,NULL AS JobType,NULL As JobReference,NULL AS JobPriority,NULL As PlateType,JBC.UpsLayout,JBC.SheetLayout,NULL As UserAttachedPicture, NULL As AttachedFileName,NULL As SpecialInstructions,VendorID FROM JobBookingContents As JBC Inner Join JobBooking AS JB On JB.BookingID=JBC.BookingID And JB.CompanyID=JBC.CompanyID And Isnull(JB.IsDeletedTransaction,0)=0 And Isnull(JBC.IsDeletedTransaction,0)=0 WHERE (JB.BookingID = " & BookingID & ") And Isnull(JB.IsCancelled,0)=0 And Isnull(JB.IsEstimate,0)=1 And JB.QuoteType ='Job Costing' And Isnull(ContentSizeValues,'')<>'' And JBC.PlanContQty=" & Qty & " And JB.CompanyID=" & CompanyId & " Order BY JobContentsID"
                 db.FillDataTable(DTContent, str)

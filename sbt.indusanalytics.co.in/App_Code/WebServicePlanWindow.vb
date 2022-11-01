@@ -312,7 +312,7 @@ Public Class WebServicePlanWindow
             AddColName = ""
             AddColValue = ""
 
-            If db.CheckAuthories("DYnamicQty.aspx", GBLUserID, GBLCompanyID, "CanSave") = False Then
+            If db.CheckAuthories("ProjectQuotation.aspx", GBLUserID, GBLCompanyID, "CanSave") = False Then
                 Return "You are not authorized to save"
             End If
 
@@ -324,7 +324,7 @@ Public Class WebServicePlanWindow
                     MaxQuotationNo = db.GenerateMaxVoucherNo(TableName, "MaxBookingNo", "Where CompanyId = " & GBLCompanyID & " ")
                     RevisionNo = 0
                 Else
-                    RevisionNo = db.GenerateMaxVoucherNo(TableName, "RevisionNo", "Where MaxBookingNo = " & BookingNo & " and CompanyId = " & GBLCompanyID & " ")
+                    RevisionNo = db.GenerateMaxVoucherNo(TableName, "RevisionNo", "Where BookingID = " & BookingNo & " and CompanyId = " & GBLCompanyID & " ")
                     MaxQuotationNo = BookingNo
                 End If
                 BookingNo = MaxQuotationNo & "." & RevisionNo
@@ -546,7 +546,7 @@ Public Class WebServicePlanWindow
             GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
             'str = "SELECT Replace(JE.ClientName,'""','') As ClientName, CM.CategoryName, Replace(JE.JobName,'""',' inch') As JobName, JE.BookingNo,convert(varchar, JE.CreatedDate, 103) As CreatedDate, JE.OrderQuantity, JE.BookingID, JE.MAXBookingNo, JE.LedgerID, UM.UserName, Cast(JE.QuotedCost AS Nvarchar(50))+' '+Isnull(JE.CurrencySymbol,'INR') AS QuotedCost,JE.FinalCost,JE.TypeOfCost, JE.EnquiryID,ISNULL(JE.IsApproved,0) As JobApproved,ISNULL(JE.IsSendForPriceApproval,0) As PendingForPriceApproval,ISNULL(JE.IsInternalApproved,0) AS IsInternalApproved,JE.InternalApprovedUserID,ISNULL(JE.IsRework,0) AS IsRework ,ISNULL(JE.IsMailSent,0) AS IsMailSent,JE.IsBooked,(Case When Isnull(JE.ReworkRemark ,'') ='' then REPLACE(JE.Remark,'""','') Else ISNULL(REPLACE(JE.ReworkRemark,'""',''),'') End) As ReworkRemark,JE.IsSendForInternalApproval,Isnull(JE.IsCancelled,0) As IsCancelled, JE.ReasonsofQuote,Nullif(JE.ProductCode,'') As ProductCode,(SELECT DISTINCT A.FieldValue FROM dbo.LedgerMasterDetails A Where A.CompanyID=LM.CompanyID And A.LedgerID=LM.LedgerID And FieldName In ('MailingAddress') And Isnull(A.IsDeletedTransaction,0)=0) As Address,(Select UserName From UserMaster Where UserID=ApprovalSendTo And CompanyID=LM.CompanyID) As ApprovalSendTo,Convert(varchar, JE.InternalApprovedDate, 103) As InternalApprovedDate,JE.RemarkInternalApproved,(Select Count(*) From CommentChainMaster Where ModuleName='Estimation' And BookingID=JE.BookingID And CompanyID=LM.CompanyID) As CommentCount FROM JobBooking As JE, CategoryMaster As CM , UserMaster As UM,LedgerMaster AS LM Where UM.UserID = JE.CreatedBy And  JE.CategoryID = CM.CategoryID AND LM.LedgerID = JE.LedgerID AND IsEstimate=1 And Isnull(JE.IsDeletedTransaction,0)=0  And JE.COMPANYID=" & GBLCompanyID & " " & FilterSTR & " Group By JE.ClientName, CM.CategoryName, JE.JobName, JE.BookingNo, JE.CreatedDate, JE.OrderQuantity, JE.BookingID, JE.MAXBookingNo, JE.LedgerID, UM.UserName,JE.FinalCost,JE.QuotedCost , JE.CurrencySymbol,JE.TypeOfCost, JE.EnquiryID, JE.IsApproved,JE.IsSendForPriceApproval,JE.IsCancelled, JE.InternalApprovedUserID,JE.IsInternalApproved,JE.IsRework,JE.IsMailSent,JE.IsBooked,JE.ReworkRemark,JE.Remark,JE.IsSendForInternalApproval, JE.ReasonsofQuote ,JE.ProductCode,LM.LedgerID,LM.CompanyID,JE.ApprovalSendTo,JE.InternalApprovedDate,JE.RemarkInternalApproved Order By JE.BookingID Desc"
             Dim DT As New DataTable
-            str = "Select PQ.EstimateNo + '_'+  CONVERT(varchar(10),PQ.RevisionNo)  as QuotationNo,PQ.ProjectName, LM.LedgerName as ClientName,LMS.LedgerName as SalesPerson,PQ.FreightAmount,UM.UserName as EstimateBy,PQ.Narration as Remark,PQ.ProductEstimateID from ProductQuotation as PQ inner Join LedgerMaster as LM on LM.CompanyID = PQ.CompanyID and LM.LedgerID = PQ.LedgerID and LM.LedgerGroupID = 1 inner Join LedgerMaster as LMS on LMS.CompanyID = PQ.CompanyID and LMS.LedgerID = PQ.SalesPersonID and LMS.LedgerGroupID =3 inner Join UserMaster as UM on UM.CompanyID = PQ.CompanyID and UM.UserID = PQ.CreatedBy  where PQ.CompanyID =" & GBLCompanyID & " and PQ.IsDeletedTransaction = 0 " & FilterSTR
+            str = "Select PQ.EstimateNo as QuotationNo,convert(varchar, PQ.CreatedDate, 103) As CreatedDate,PQ.ProjectName, LM.LedgerName as ClientName,LMS.LedgerName as SalesPerson,PQ.FreightAmount,UM.UserName as EstimateBy,PQ.Narration as Remark,PQ.ProductEstimateID from ProductQuotation as PQ inner Join LedgerMaster as LM on LM.CompanyID = PQ.CompanyID and LM.LedgerID = PQ.LedgerID and LM.LedgerGroupID = 1 inner Join LedgerMaster as LMS on LMS.CompanyID = PQ.CompanyID and LMS.LedgerID = PQ.SalesPersonID and LMS.LedgerGroupID =3 inner Join UserMaster as UM on UM.CompanyID = PQ.CompanyID and UM.UserID = PQ.CreatedBy  where PQ.CompanyID =" & GBLCompanyID & " and PQ.IsDeletedTransaction = 0 " & FilterSTR & " order by PQ.CreatedDate desc"
             db.FillDataTable(dataTable, str)
             str = "Select PQC.ProductEstimateID,PCM.ProductName,CM.CategoryName,PHM.HSNCode,PQC.Quantity,PQC.Rate,PQC.RateType,PQC.UnitCost,PQC.GSTPercantage,PQC.GSTAmount,PQC.MiscPercantage,PQC.MiscAmount,Isnull(PQC.ShippingCost,0) as ShippingCost,PQC.ProfitPer,PQC.ProfitCost,PQC.FinalAmount,LM.LedgerName as VendorName from ProductQuotationContents as PQC inner Join ProductCatalogMaster as PCM on PCM.CompanyID = PQC.CompanyID and PQC.ProductCatalogID = PCM.ProductCatalogID Inner Join CategoryMaster as CM on CM.CompanyID = PQC.CompanyID and PQC.CategoryID = CM.CategoryID inner join LedgerMaster as LM on LM.CompanyID = PQC.CompanyID and PQC.VendorID = LM.LedgerID AND lm.LedgerGroupID = 8 Inner join ProductHSNMaster as PHM on PHM.CompanyID = PQC.CompanyID and PHM.ProductHSNID = PQC.ProductHSNID  where  PQC.IsDeletedTransaction = 0 and PQC.CompanyID = " & GBLCompanyID
             db.FillDataTable(DT, str)
@@ -559,6 +559,63 @@ Public Class WebServicePlanWindow
             dataset.Merge(dataTable)
             data.Message = db.ConvertDataSetsTojSonString(dataset)
             js.MaxJsonLength = 2147483647
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function LoadPlanProject(ByVal ProjectEstimateID As String) As String
+        Try
+
+            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+            Dim DT As New DataTable
+            str = "Select * from ProductQuotation where CompanyID=" & GBLCompanyID & " and ProductEstimateID=" & ProjectEstimateID
+            db.FillDataTable(dataTable, str)
+            str = "Select PQ.BookingID,LM.LedgerName as VendorName,LM.City,PCM.IsOffsetProduct,PCM.IsUnitProduct, PCM.ProductCatalogCode,PCM.ProductDescription,ProductEstimationContentID,PQC.ProductEstimateID,Quantity as RequiredQuantity ,Quantity,PQC.CategoryID,PQC.ProductCatalogID,PQC.VendorID,MiscAmount,MiscPercantage as MiscPer,ShippingCost,GSTAmount,GSTPercantage as GSTTaxPercentage,ProfitCost,ProfitPer,Rate,Rate as VendorRate,Amount,ProcessCost,FinalAmount,UnitCost,RateType,PQC.ProcessIDStr,PQC.ProductHSNID,PQC.DefaultProcessStr from ProductQuotationContents as PQC inner join ProductCatalogMaster as PCM on PCM.ProductCatalogID = PQC.ProductCatalogID and PCM.CompanyID =PQC.CompanyID inner join LedgerMaster as LM on LM.LedgerID = PQC.VendorID  and PQC.CompanyID = LM.CompanyID Inner Join ProductQuotation as PQ on PQ.ProductEstimateID = PQC.ProductEstimateID and PQ.CompanyID = PQC.CompanyID where PQC.IsDeletedTransaction=0 and LM.LedgerGroupID=8 and PQC.CompanyID=" & GBLCompanyID & " and PQC.ProductEstimateID=" & ProjectEstimateID
+            db.FillDataTable(DT, str)
+
+            DT.TableName = "Contents"
+            dataTable.TableName = "Projects"
+
+            Dim dataset As New DataSet
+            dataset.Merge(DT)
+            dataset.Merge(dataTable)
+            data.Message = db.ConvertDataSetsTojSonString(dataset)
+            js.MaxJsonLength = 2147483647
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function GetInputSizes(ByVal ProductEstimationContentID As String) As String
+        Try
+
+            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+
+            str = "Select ProductInputSizes from ProductQuotationContents where  CompanyID=" & GBLCompanyID & " and ProductEstimationContentID=" & ProductEstimationContentID
+            db.FillDataTable(dataTable, str)
+
+            data.Message = db.ConvertDataTableTojSonString(dataTable)
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function GetSelectedPlan(ByVal ProductEstimationContentID As String) As String
+        Try
+
+            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+
+            str = "Select SelectedPlan from ProductQuotationContents where  CompanyID=" & GBLCompanyID & " and ProductEstimationContentID=" & ProductEstimationContentID
+            db.FillDataTable(dataTable, str)
+
+            data.Message = db.ConvertDataTableTojSonString(dataTable)
             Return js.Serialize(data.Message)
         Catch ex As Exception
             Return ex.Message
@@ -620,10 +677,10 @@ Public Class WebServicePlanWindow
             db.FillDataTable(DTBooking, str)
             If DTBooking.Rows.Count <= 0 Then Return "error code:404"
 
-            str = "SELECT MachineID, MachineName, Gripper, GripperSide, MachineColors, PaperID, PaperSize, CutSize, CutL, CutW, UpsL, UpsW, TotalUps, BalPiece, BalSide, WasteArea, WastePerc, WastageKg, GrainDirection, PlateQty, PlateRate, PlateAmount, MakeReadyWastageSheet, ActualSheets, WastageSheets, TotalPaperWeightInKg, FullSheets, PaperRate, PaperAmount, PrintingImpressions, ImpressionsToBeCharged, PrintingRate, PrintingAmount, TotalMakeReadies, MakeReadyRate, MakeReadyAmount, FinalQuantity, TotalColors, TotalAmount, CutLH, CutHL, PrintingStyle, PrintingChargesType, ExpectedExecutionTime, TotalExecutionTime, MainPaperName, PlanType, PaperRateType, DieCutSize, InterlockStyle, NoOfSets, GrantAmount, Packing, UnitPerPacking, RoundofImpressionsWith, SpeColorFCharges, SpeColorBCharges, SpeColorFAmt, SpeColorBAmt, OpAmt, PlanID, PlanContQty, PlanContentType, PlanContName, SequenceNo, Nullif(ContentSizeValues,'') As ContentSizeValues, CoatingCharges, CoatingAmount, PaperGroup,VendorID,Nullif(VendorName,'') VendorName FROM JobBookingContents As JBC Inner Join JobBooking AS JB On JB.BookingID=JBC.BookingID  And Isnull(JB.IsDeletedTransaction,0)=0 And Isnull(JBC.IsDeletedTransaction,0)=0 WHERE (JB.BookingID = " & BookingID & ") /*And Isnull(JB.IsCancelled,0)=0*/ And Isnull(JB.IsEstimate,0)=1 And JB.QuoteType ='Job Costing' And Isnull(ContentSizeValues,'')<>'' And JB.CompanyID=" & GBLCompanyID
+            str = "SELECT Top 1 MachineID, MachineName, Gripper, GripperSide, MachineColors, PaperID, PaperSize, CutSize, CutL, CutW, UpsL, UpsW, TotalUps, BalPiece, BalSide, WasteArea, WastePerc, WastageKg, GrainDirection, PlateQty, PlateRate, PlateAmount, MakeReadyWastageSheet, ActualSheets, WastageSheets, TotalPaperWeightInKg, FullSheets, PaperRate, PaperAmount, PrintingImpressions, ImpressionsToBeCharged, PrintingRate, PrintingAmount, TotalMakeReadies, MakeReadyRate, MakeReadyAmount, FinalQuantity, TotalColors, TotalAmount, CutLH, CutHL, PrintingStyle, PrintingChargesType, ExpectedExecutionTime, TotalExecutionTime, MainPaperName, PlanType, PaperRateType, DieCutSize, InterlockStyle, NoOfSets, GrantAmount, Packing, UnitPerPacking, RoundofImpressionsWith, SpeColorFCharges, SpeColorBCharges, SpeColorFAmt, SpeColorBAmt, OpAmt, PlanID, PlanContQty, PlanContentType, PlanContName, SequenceNo, Nullif(ContentSizeValues,'') As ContentSizeValues, CoatingCharges, CoatingAmount, PaperGroup,VendorID,Nullif(VendorName,'') VendorName FROM JobBookingContents As JBC Inner Join JobBooking AS JB On JB.BookingID=JBC.BookingID  And Isnull(JB.IsDeletedTransaction,0)=0 And Isnull(JBC.IsDeletedTransaction,0)=0 WHERE (JB.BookingID = " & BookingID & ") /*And Isnull(JB.IsCancelled,0)=0*/ And Isnull(JB.IsEstimate,0)=1 And JB.QuoteType ='Job Costing' And Isnull(ContentSizeValues,'')<>'' And JB.CompanyID=" & GBLCompanyID
             db.FillDataTable(DTContent, str)
 
-            str = "SELECT PlanContQty, TaxPercentage, MiscPercentage, ProfitPercentage, DiscountPercentage, TotalCost, MiscCost, ProfitCost, DiscountAmount, TaxAmount, GrandTotalCost, UnitCost, UnitCost1000, JBC.FinalCost,Isnull(JBC.ShipperCost,0) As ShipperCost,Isnull(JBC.QuotedCost,0) As QuotedCost FROM JobBookingCostings  As JBC Inner Join JobBooking AS JB On JB.BookingID=JBC.BookingID WHERE (JB.BookingID = " & BookingID & ") /*And Isnull(JB.IsCancelled,0)=0*/ And Isnull(JB.IsEstimate,0)=1 And JB.QuoteType ='Job Costing' And Isnull(JB.IsDeletedTransaction,0)=0 And Isnull(JBC.IsDeletedTransaction,0)=0 And JB.CompanyID=" & GBLCompanyID
+            str = "SELECT  PlanContQty, TaxPercentage, MiscPercentage, ProfitPercentage, DiscountPercentage, TotalCost, MiscCost, ProfitCost, DiscountAmount, TaxAmount, GrandTotalCost, UnitCost, UnitCost1000, JBC.FinalCost,Isnull(JBC.ShipperCost,0) As ShipperCost,Isnull(JBC.QuotedCost,0) As QuotedCost FROM JobBookingCostings  As JBC Inner Join JobBooking AS JB On JB.BookingID=JBC.BookingID WHERE (JB.BookingID = " & BookingID & ") /*And Isnull(JB.IsCancelled,0)=0*/ And Isnull(JB.IsEstimate,0)=1 And JB.QuoteType ='Job Costing' And Isnull(JB.IsDeletedTransaction,0)=0 And Isnull(JBC.IsDeletedTransaction,0)=0 And JB.CompanyID=" & GBLCompanyID
             db.FillDataTable(DTCost, str)
 
             str = "SELECT Distinct PM.ProcessID,PM.ProcessName,Nullif(PMS.RateFactor,'') AS RateFactor, Quantity, PlanID, PlanContQty, PlanContentType, PlanContName,ROUND(JBC.Rate,4) As Rate, Ups, NoOfPass, Pieces, NoOfStitch, NoOfLoops, NoOfColors, SizeL, SizeW, Amount, Nullif(Remarks,'') AS Remarks, SequenceNo,PM.MinimumCharges,PM.TypeofCharges,PM.SetupCharges,Isnull(JBC.IsDisplay,0) As IsDisplay,Isnull(PM.Rate,0) As MasterRate FROM JobBookingProcess  As JBC Inner Join JobBooking AS JB On JB.BookingID=JBC.BookingID  And Isnull(JB.IsDeletedTransaction,0)=0 And JBC.CompanyID=JB.CompanyID Inner Join ProcessMaster AS PM On PM.ProcessID=JBC.ProcessID And JBC.CompanyID=PM.CompanyID Left Join ProcessMasterSlabs As PMS On PMS.ProcessID= PM.ProcessID And JBC.RateFactor=PMS.RateFactor WHERE (JB.BookingID = " & BookingID & ") /*And Isnull(JB.IsCancelled,0)=0*/ And Isnull(JB.IsEstimate,0)=1 And JB.QuoteType ='Job Costing' And Isnull(JBC.IsDeletedTransaction,0)=0 And JB.CompanyID=" & GBLCompanyID & " Order By PlanID,SequenceNo"

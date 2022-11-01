@@ -33,13 +33,12 @@ Namespace Connection
 #End Region
 
 #Region "Method"
-
         Public Function OpenDataBase() As SqlConnection
             Dim i As Integer = 0
             Dim constring As String
             'constring = "Data Source = 95.217.184.123\MSSQLSERVER2019;Initial Catalog=softber4_indus;Persist Security Info=True;User ID=softber4sql;Password=%9Lb535ze"
             constring = "Data Source = 65.2.64.18,1433;Initial Catalog=IndusEnterprise_SBT;Persist Security Info=True;User ID=Indus_SBT;Password=@5X10&#$313INDUS#!"
-            'constring = "Data Source = PAWAN;Initial Catalog=IndusEnterprise;Persist Security Info=True;User ID=Indus;Password=Param@99811"
+            'constring = "Data Source = NISHTHA\INSTANCEV15;Initial Catalog=Indus_SBT;Persist Security Info=True;User ID=Indus;Password=Param@99811"
 
             Try
                 Db = New SqlConnection
@@ -249,8 +248,6 @@ m:
                                     ColValue = ColValue & "," & "'" & dt.Rows(i)(column.ColumnName) & "'"
                                 End If
                             End If
-
-
                             'End If
                         End If
                     Next

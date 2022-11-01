@@ -292,6 +292,17 @@ Public Class WebServiceProductMaster
             Return "fail"
         End Try
     End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function GetEnquiryNo() As String
+        Try
+            Dim MaxVoucherNo As Long
+            Dim EnquiryNo = db.GeneratePrefixedNo("EnquiryMain", "EQ", "MaxEnquiryNo", MaxVoucherNo, "", " Where IsDeletedTransaction=0 And Prefix='EQ' And  CompanyID=" & GBLCompanyID)
+            Return EnquiryNo
+        Catch ex As Exception
+            Return "fail"
+        End Try
+    End Function
 
     <WebMethod(EnableSession:=True)>
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
@@ -322,8 +333,9 @@ Public Class WebServiceProductMaster
             Dim TempVendorID = Convert.ToString(HttpContext.Current.Session("VendorID"))
             TempVendorID = IIf(TempVendorID = 0 Or TempVendorID = "", "", " And LedgerID=" & TempVendorID)
             Dim DTVendorList As New DataTable
-            str = "Select Distinct LedgerID AS VendorID,LedgerName As VendorName,City, Isnull((Select Distinct VendorRate From ProductVendorWiseRateSetting AS PVR Where (PVR.IsDeletedTransaction = 0) AND PVR.VendorID = VM.LedgerID AND PVR.CompanyID = VM.CompanyID  And PVR.ProductCatalogID =" & ProductCatalogID & "),0) VendorRate From LedgerMaster As VM Where LedgerGroupID IN(Select LedgerGroupID From LedgerGroupMaster Where IsDeletedTransaction=0 And CompanyID=" & GBLCompanyID & " And   LedgerGroupNameID IN(25)) AND IsDeletedTransaction=0 AND CompanyID=" & GBLCompanyID & " " & IIf(LedgerID = 0, " OR ", " AND ") & "  City In(Select City From LedgerMaster Where IsDeletedTransaction=0 And CompanyID=" & GBLCompanyID & " And LedgerID=" & LedgerID & ") " & TempVendorID & " Order By VendorName"
-            db.FillDataTable(DTVendorList, str)
+            'str = "Select Distinct LedgerID AS VendorID,LedgerName As VendorName,City, Isnull((Select Distinct VendorRate From ProductVendorWiseRateSetting AS PVR Where (PVR.IsDeletedTransaction = 0) AND PVR.VendorID = VM.LedgerID AND PVR.CompanyID = VM.CompanyID  And PVR.ProductCatalogID =" & ProductCatalogID & "),0) VendorRate From LedgerMaster As VM Where LedgerGroupID IN(Select LedgerGroupID From LedgerGroupMaster Where IsDeletedTransaction=0 And CompanyID=" & GBLCompanyID & " And   LedgerGroupNameID IN(25)) AND IsDeletedTransaction=0 AND CompanyID=" & GBLCompanyID & " " & IIf(LedgerID = 0, " OR ", " AND ") & "  City In(Select City From LedgerMaster Where IsDeletedTransaction=0 And CompanyID=" & GBLCompanyID & " And LedgerID=" & LedgerID & ") " & TempVendorID & " Order By VendorName"
+            'db.FillDataTable(DTVendorList, str)
+
             If DTVendorList.Rows.Count = 0 Then
                 str = "Select Distinct LedgerID AS VendorID,LedgerName As VendorName,City, Isnull((Select Distinct VendorRate From ProductVendorWiseRateSetting AS PVR Where (PVR.IsDeletedTransaction = 0) AND PVR.VendorID = VM.LedgerID AND PVR.CompanyID = VM.CompanyID  And PVR.ProductCatalogID =" & ProductCatalogID & "),0) VendorRate From LedgerMaster As VM Where LedgerGroupID IN(Select LedgerGroupID From LedgerGroupMaster Where IsDeletedTransaction=0 And CompanyID=" & GBLCompanyID & " And   LedgerGroupNameID IN(25)) AND IsDeletedTransaction=0 AND CompanyID=" & GBLCompanyID & TempVendorID & " Order By VendorName"
                 db.FillDataTable(DTVendorList, str)
@@ -415,12 +427,12 @@ Public Class WebServiceProductMaster
 
     <WebMethod(EnableSession:=True)>
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
-    Public Function SaveProjectQuotation(ByVal ObjMain As Object, ByVal ObjProductConfig As Object) As String
+    Public Function SaveProjectQuotation(ByVal ObjMain As Object, ByVal ObjProductConfig As Object, ByVal FlagSave As String, ByVal BookingNo As String) As String
         ', ByVal ObjProductConfigNew As Object,
         Dim ProjectID As String = 0
         Dim dt As New DataTable
         Dim KeyField As String
-        Dim AddColName, AddColValue, TableName As String
+        Dim AddColName, AddColValue, TableName, MaxQuotationNo, RevisionNo As String
 
         Try
             If ProjectID > 0 Then
@@ -451,11 +463,23 @@ Public Class WebServiceProductMaster
 
                 Dim prefix = "Q"
                 Dim MaxVoucherNo As Long
+
                 Dim EstimateNo = db.GeneratePrefixedNo("ProductQuotation", prefix, "MaxEstimateNo", MaxVoucherNo, "", " Where IsDeletedTransaction=0 And Prefix='" & prefix & "' And  CompanyID=" & GBLCompanyID)
 
+
+                If FlagSave = "True" Or FlagSave = True Then
+                    MaxQuotationNo = db.GenerateMaxVoucherNo("ProductQuotation", "MaxBookingNo", "Where CompanyId = " & GBLCompanyID & " ")
+                    RevisionNo = 0
+                Else
+                    RevisionNo = db.GenerateMaxVoucherNo("ProductQuotation", "RevisionNo", "Where EstimateNo = " & BookingNo & " and CompanyId = " & GBLCompanyID & " ")
+                    EstimateNo = BookingNo
+                End If
+
+                BookingNo = EstimateNo & "." & RevisionNo
+
                 TableName = "ProductQuotation"
-                AddColName = "CreatedDate,CompanyID,CreatedBy,EstimateNo,Prefix,MaxEstimateNo"
-                AddColValue = "Getdate()," & GBLCompanyID & "," & GBLUserID & ",'" & EstimateNo & "','" & prefix & "'," & MaxVoucherNo
+                AddColName = "CreatedDate,CompanyID,CreatedBy,EstimateNo,Prefix,MaxEstimateNo,RevisionNo"
+                AddColValue = "Getdate()," & GBLCompanyID & "," & GBLUserID & ",'" & BookingNo & "','" & prefix & "'," & MaxVoucherNo & "," & RevisionNo
                 ProjectID = db.InsertDatatableToDatabase(ObjMain, TableName, AddColName, AddColValue)
 
                 If IsNumeric(ProjectID) = False Then
@@ -492,7 +516,43 @@ Public Class WebServiceProductMaster
                     "LEFT JOIN dbo.ProductCatalogMaster AS PCM ON PCM.ProductCatalogID = PQC.ProductCatalogID AND PQ.CompanyID = PQC.CompanyID " &
                     "INNER JOIN LedgerMaster As LM On LM.LedgerID=PQ.LedgerID And LM.CompanyID = PQ.CompanyID " &
                     "INNER JOIN LedgerMaster As SLM On SLM.LedgerID=PQ.SalesPersonID And SLM.CompanyID = PQ.CompanyID " &
-                    "LEFT JOIN LedgerMaster As VLM On VLM.LedgerID=PQC.VendorID And VLM.CompanyID = PQC.CompanyID Where PQ.IsDeletedTransaction=0 And PQ.CompanyID= " & GBLCompanyID
+                    "LEFT JOIN LedgerMaster As VLM On VLM.LedgerID=PQC.VendorID And VLM.CompanyID = PQC.CompanyID Where PQ.IsDeletedTransaction=0 And PQ.CompanyID= " & GBLCompanyID & " order by PQ.BookingID desc"
+            db.FillDataTable(dataTable, str)
+            data.Message = db.ConvertDataTableTojSonString(dataTable)
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function GetInputSizess(ByVal ID As String) As String
+        Try
+
+            Dim GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+
+            str = "Select ProductInputSizes from EnquiryDetails where  CompanyID=" & GBLCompanyID & " and EnquiryIDDetail=" & ID
+            db.FillDataTable(dataTable, str)
+
+            data.Message = db.ConvertDataTableTojSonString(dataTable)
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
+
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function GetEnquiryList() As String
+        Try
+
+            str = "SELECT PQC.ProductHSNID,PQC.GSTPercantage as GSTTaxPercentage, PCM.IsOffsetProduct,PCM.IsUnitProduct,PQC.CategoryID, PQ.EnquiryID,isnull(PQ.BookingID,0) as BookingID, PQC.EnquiryIDDetail, PQ.LedgerID, LM.LedgerName,SLM.LedgerName AS SalesLedgerName ,PQ.SalesPersonID, PQ.Narration, PQ.EnquiryNo, PQ.ProjectName, PQ.CreatedDate, PQ.IsApproved, PQ.ApprovedBy, PQC.Quantity, PQC.ProductCatalogID,PCM.ProductCatalogCode,PCM.ProductDescription, PCM.ProductName,PQC.VendorID,VLM.LedgerName AS VednorName, PQC.Rate, PQC.Amount, PQC.ProcessCost, PQC.FinalAmount, PQC.UnitCost, PQC.RateType, PQC.ProcessIDStr,PQC.DefaultProcessStr,PQ.FreightAmount/*, PQC.ProductInputSizes*/ " &
+                    "FROM  dbo.EnquiryMain AS PQ " &
+                    "LEFT JOIN dbo.EnquiryDetails AS PQC ON PQ.EnquiryID = PQC.EnquiryID AND PQ.CompanyID = PQC.CompanyID " &
+                    "LEFT JOIN dbo.ProductCatalogMaster AS PCM ON PCM.ProductCatalogID = PQC.ProductCatalogID AND PQ.CompanyID = PQC.CompanyID " &
+                    "INNER JOIN LedgerMaster As LM On LM.LedgerID=PQ.LedgerID And LM.CompanyID = PQ.CompanyID " &
+                    "INNER JOIN LedgerMaster As SLM On SLM.LedgerID=PQ.SalesPersonID And SLM.CompanyID = PQ.CompanyID " &
+                    "LEFT JOIN LedgerMaster As VLM On VLM.LedgerID=PQC.VendorID And VLM.CompanyID = PQC.CompanyID Where PQ.IsDeletedTransaction=0 And PQ.CompanyID= " & GBLCompanyID & " order by PQ.EnquiryID desc"
             db.FillDataTable(dataTable, str)
             data.Message = db.ConvertDataTableTojSonString(dataTable)
             Return js.Serialize(data.Message)
@@ -533,5 +593,97 @@ Public Class WebServiceProductMaster
             KeyField = "fail " & ex.Message
         End Try
         Return KeyField
+    End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function DeleteEnquiry(ByVal TxtBKID As Integer) As String
+
+        Dim KeyField As String
+        Dim dtExist As New DataTable
+
+        If db.CheckAuthories("Enquiry.aspx", GBLUserID, GBLCompanyID, "CanDelete", TxtBKID) = False Then Return "You are Not authorized To delete..!"
+
+        str = "Select EnquiryID From ProductQuotation Where  CompanyID=" & GBLCompanyID & " And EnquiryID=" & TxtBKID & " And IsDeletedTransaction = 0"
+        db.FillDataTable(dtExist, str)
+        If dtExist.Rows.Count > 0 Then
+            Return "This product Is further processed..! Record can't be delete..."
+        End If
+
+        Try
+            str = "Update EnquiryMain Set DeletedBy='" & GBLUserID & "',DeletedDate=Getdate(),IsDeletedTransaction=1 WHERE CompanyID=" & GBLCompanyID & " And EnquiryID=" & TxtBKID
+            str += ";Update EnquiryDetails Set DeletedBy='" & GBLUserID & "',DeletedDate=Getdate(),IsDeletedTransaction=1 WHERE CompanyID=" & GBLCompanyID & " and EnquiryID=" & TxtBKID
+            KeyField = db.ExecuteNonSQLQuery(str)
+
+        Catch ex As Exception
+            KeyField = "fail " & ex.Message
+        End Try
+        Return KeyField
+    End Function
+
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function SaveProjectEnquiry(ByVal ObjMain As Object, ByVal ObjProductConfig As Object, ByVal FlagSave As String, ByVal EnqID As String) As String
+        ', ByVal ObjProductConfigNew As Object,
+        Dim ProjectID As String = 0
+        Dim dt As New DataTable
+        Dim KeyField As String
+        Dim AddColName, AddColValue, TableName As String
+
+        Try
+            If FlagSave = "True" Then
+                If (db.CheckAuthories("Enquiry.aspx", GBLUserID, GBLCompanyID, "CanEdit", ObjMain(0)("ProjectName")) = False) Then Return "You are not authorized to edit..!, Can't Edit"
+
+                AddColName = "ModifiedDate=Getdate(),ModifiedBy=" & GBLUserID
+                AddColValue = "CompanyID = " & GBLCompanyID
+                KeyField = db.UpdateDatatableToDatabase(ObjMain, "EnquiryMain", AddColName, 1, AddColValue)
+                If KeyField <> "Success" Then
+                    Return "Error while updating in master " & KeyField
+                End If
+
+
+                str = "Delete from EnquiryDetails where EnquiryId =" & EnqID
+
+                db.ExecuteNonSQLQuery(str)
+
+                TableName = "EnquiryDetails"
+                AddColName = "CreatedDate,CompanyID,CreatedBy,EnquiryID"
+                AddColValue = "Getdate()," & GBLCompanyID & ",'" & GBLUserID & "'," & EnqID
+                KeyField = db.InsertDatatableToDatabase(ObjProductConfig, TableName, AddColName, AddColValue)
+                If IsNumeric(KeyField) = False Then
+                    Return "Updated"
+                End If
+
+            Else
+                If (db.CheckAuthories("Enquiry.aspx", GBLUserID, GBLCompanyID, "CanSave", ObjMain(0)("ProjectName")) = False) Then Return "You are not authorized to save..!, Can't Save"
+
+                Dim prefix = "EQ"
+                Dim MaxVoucherNo As Long
+                Dim EnquiryNo = db.GeneratePrefixedNo("EnquiryMain", prefix, "MaxEnquiryNo", MaxVoucherNo, "", " Where IsDeletedTransaction=0 And Prefix='" & prefix & "' And  CompanyID=" & GBLCompanyID)
+                TableName = "EnquiryMain"
+                AddColName = "CreatedDate,CompanyID,CreatedBy,EnquiryNo,Prefix,MaxEnquiryNo"
+                AddColValue = "Getdate()," & GBLCompanyID & "," & GBLUserID & ",'" & EnquiryNo & "','" & prefix & "'," & MaxVoucherNo
+                ProjectID = db.InsertDatatableToDatabase(ObjMain, TableName, AddColName, AddColValue)
+
+                If IsNumeric(ProjectID) = False Then
+                    Return "Error in main :- " & ProjectID
+                End If
+                TableName = "EnquiryDetails"
+                AddColName = "CreatedDate,CompanyID,CreatedBy,EnquiryID"
+                AddColValue = "Getdate()," & GBLCompanyID & ",'" & GBLUserID & "'," & ProjectID
+                KeyField = db.InsertDatatableToDatabase(ObjProductConfig, TableName, AddColName, AddColValue)
+                If IsNumeric(KeyField) = False Then
+                    db.ExecuteNonSQLQuery("Delete from EnquiryMain WHERE CompanyID=" & GBLCompanyID & " and EnquiryID=" & ProjectID)
+                    db.ExecuteNonSQLQuery("Delete from EnquiryDetails WHERE CompanyID=" & GBLCompanyID & " and EnquiryID=" & ProjectID)
+                    Return "Error in product config :- " & KeyField
+                End If
+            End If
+
+            KeyField = "Success"
+
+        Catch ex As Exception
+            KeyField = "fail " & ex.Message
+        End Try
+        Return KeyField
+
     End Function
 End Class

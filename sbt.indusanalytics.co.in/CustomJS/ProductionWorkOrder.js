@@ -2,10 +2,10 @@
 
 // *****  Declare Global varialbe  ****
 var check = "Pending", GblContentName, GblGenCode, GblProdMasCode = "", GblContentType, GblFlagFormName, GblCommandName, GblJobCardNo = "";
-var GblProductContID = 0, GblContentId = 0, GblProdMasID = 0, GblBookingID = 0, GblJobBookingID = 0, GblOrderQuantity = 0, GblPaperId = 0;
+var GblProductContID = 0, GblContentId = 0, GblProdMasID = 0, GblBookingID = 0, GblJobBookingID = 0, GblOrderQuantity = 0, GblPaperId = 0, ProductEstimateID = 0;
 
 // *****  Declare Global Objects  ****
-var ObjContentsDataAll, TablePendingData = [], GblObjProcessItemReq = {};
+var ObjContentsDataAll, TablePendingData = [], GblObjProcessItemReq = {}, GBLProductType = [];
 
 // *****  Declare Global Flags  ****
 var FlagEdit = false, FlagExport = false, ChkCond = false;
@@ -33,7 +33,8 @@ $("#SbConsigneeName").dxSelectBox({
     valueExpr: "ConsigneeID",
     placeholder: "Select consignee...",
     displayExpr: "ConsigneeName",
-    showClearButton: true
+    showClearButton: true,
+    disabled: true
 });
 
 //Department Name
@@ -42,7 +43,8 @@ $("#SelDepartment").dxSelectBox({
     displayExpr: 'DepartmentName',
     valueExpr: 'DepartmentID',
     searchEnabled: true,
-    showClearButton: true
+    showClearButton: true,
+    disabled: true
 });
 
 $("#SelPODate").dxDateBox({
@@ -62,7 +64,9 @@ $("#SelDeliveryDate").dxDateBox({
     pickerType: "rollers",
     value: new Date(),
     displayFormat: "dd-MMM-yyyy",
-    min: new Date()
+    min: new Date(),
+    disabled: true
+
 });
 
 $.ajax({
@@ -143,8 +147,9 @@ $.ajax({                //// For Job Type And Plate Type
             GblJobType = RES1.TblJobType;
             GblPlateType = RES1.TblPlateType;
         }
-        $("#SbJobType").dxSelectBox({
-            items: GblJobType
+        $("#SbJobTypeSbJobType").dxSelectBox({
+            items: GblJobType,
+            disabled: true
         });
     },
     error: function errorFunc(jqXHR) {
@@ -221,28 +226,18 @@ function LoadPendingProcessData() {
                 columns = [
                     { dataField: "LedgerName", caption: "Client Name", width: 200 },
                     { dataField: "SalesOrderNo", caption: "Order No" },
+                    { dataField: "ProjectName" },
                     { dataField: "BookingDate", caption: "Order Date", dataType: "date", format: 'dd-MMM-yyyy', Mode: "DateRangeCalendar", width: 120 },
-                    { dataField: "ProductMasterCode", caption: "Product Catalog Code" },
-                    { dataField: "CategoryName", caption: "Category" },
-                    { dataField: "JobName", caption: "Job Name", width: 150 }, "ProductCode",
-                    { dataField: "BookingNo", caption: "Quote No" }, "OrderQty",
-                    { dataField: "BookedBy", caption: "Order Bkd By" }, "DeliveryDate", "FYear"
+                    { dataField: "BookedBy", caption: "Order Bkd By" }
                 ];
             } else {
                 columns = [
-                    { dataField: "SalesOrderNo", caption: "Order Booking No", width: 100 },
+                    { dataField: "SalesOrderNo", caption: "Order Booking No", width: 110 },
                     { dataField: "PONo", caption: "PO No", width: 70 },
                     { dataField: "PODate", caption: "PO Date", dataType: "date", format: 'dd-MMM-yyyy', Mode: "DateRangeCalendar", width: 80 },
-                    { dataField: "JobBookingNo", caption: "Job Card No" },
-                    { dataField: "BookingDate", caption: "Job Date", dataType: "date", format: 'dd-MMM-yyyy', Mode: "DateRangeCalendar", width: 80 },
-                    { dataField: "CategoryName", caption: "Job Type" },
                     { dataField: "LedgerName", caption: "Client Name", width: 180 },
-                    { dataField: "JobName", caption: "Job Name", width: 200 },
-                    { dataField: "OrderQty", caption: "Order Qty" },
+                    { dataField: "ProjectName", caption: "Project Name", width: 200 },
                     { dataField: "BookedBy", caption: "Job Created By" },
-                    { dataField: "DeliveryDate", caption: "Delivery Date", dataType: "date", format: 'dd-MMM-yyyy', Mode: "DateRangeCalendar", width: 80 },
-                    { dataField: "ProductMasterCode", caption: "Product Catalog Code", width: 100 }, "ProductCode",
-                    { dataField: "BookingNo", caption: "Quote No" }, "FYear"
                 ];
             }
             $("#GridPendingProcessData").dxDataGrid({
@@ -275,7 +270,7 @@ $("#GridPendingProcessData").dxDataGrid({
         allowExportSelectedData: true
     },
     height: function () {
-        return window.innerHeight / 1.3;
+        return window.innerHeight / 2.9;
     },
     onRowPrepared: function (e) {
         setDataGridRowCss(e);
@@ -288,54 +283,83 @@ $("#GridPendingProcessData").dxDataGrid({
     ////rowAlternationEnabled: true,
     searchPanel: { visible: false },
     onSelectionChanged: function (data) {
-        TablePendingData = [];
         if (data) {
-            TablePendingData = data.selectedRowsData;
-            //if (data.selectedRowsData.length <= 0) { return false; }
-            //GblOrderQuantity = data.selectedRowsData[0].Quantity;
-            //GblBookingID = data.selectedRowsData[0].BookingID;
-            //GblProdMasCode = data.selectedRowsData[0].ProductMasterCode;
-            //GblJobCardNo = data.selectedRowsData[0].JobBookingNo;
-            //GblJobBookingID = data.selectedRowsData[0].JobBookingID;
-            //if (GblJobCardNo === undefined) {
-            //    GblJobCardNo = ""; GblJobBookingID = 0;
-            //}
-            //(async () => {
-            //    await removeAllContentsData();
-            //})();
-            //GetSelectedContentPlans();
-            //if (check === "Pending") {
-            //    FlagEdit = false;
-            //    document.getElementById("TxtBookingNoAuto").value = GblGenCode;
-            //    document.getElementById("BtnDeleteJobcard").style.display = "none";
-            //} else {
-            //    FlagEdit = true;
-            //    GblGenCode = data.selectedRowsData[0].BookingNo;
-            //    document.getElementById("TxtBookingNoAuto").value = GblGenCode;
-            //    document.getElementById("BtnDeleteJobcard").style.display = "block";
-            //}
-
-            //$('#TxtQuantity').val(data.selectedRowsData[0].OrderQty);
-            //$('#TxtJobName').val(data.selectedRowsData[0].JobName);
-            //$('#TxtOrderQuantity').val(data.selectedRowsData[0].OrderQty);
-            //$('#TxtOrderBookingDate').val(data.selectedRowsData[0].BookingDate);
-            //$('#TxtOrderBookingNo').val(data.selectedRowsData[0].SalesOrderNo);
-            //$('#TxtPONo').val(data.selectedRowsData[0].PONo);
-            //$('#TxtPODate').val(data.selectedRowsData[0].PODate);
-            //$('#TxtQuoteNo').val(data.selectedRowsData[0].BookingNo);
-            //$('#TxtDeliveryDate').val(data.selectedRowsData[0].DeliveryDate);
-            //$('#TxtProductCode').val(data.selectedRowsData[0].ProductCode);
-            //$('#TxtEmail').val(data.selectedRowsData[0].Email);
-            //$('#TxtRemark').val(data.selectedRowsData[0].Remark);
-
-            //$("#SbClientName").dxSelectBox({ value: data.selectedRowsData[0].LedgerID });
-            //$("#SbJobCoordinator").dxSelectBox({ value: data.selectedRowsData[0].CoordinatorLedgerID });
-            //$("#SbJobPriority").dxSelectBox({ value: data.selectedRowsData[0].JobPriority });
-            //$("#SbJobType").dxSelectBox({ value: data.selectedRowsData[0].JobType });
-            //$("#SbJobReference").dxSelectBox({ value: data.selectedRowsData[0].JobReference });
-            //$("#SbCategory").dxSelectBox({ value: data.selectedRowsData[0].CategoryID });
-            //$("#SbProductHSNGroup").dxSelectBox({ value: data.selectedRowsData[0].ProductHSNID });
-
+            if (check === "Pending" && data.selectedRowsData[0].ProductEstimateID != undefined) {
+                ProductEstimateID = data.selectedRowsData[0].ProductEstimateID;
+                $.ajax({
+                    type: 'POST',
+                    url: "WebServiceProductionWorkOrder.asmx/GridPendingContentsData",
+                    data: '{BookingID:' + JSON.stringify(data.selectedRowsData[0].OrderBookingID) + '}',
+                    contentType: 'application/json; charset=utf-8',
+                    dataType: 'text',
+                    success: function (results) {
+                        var res = results.replace(/\\/g, '');
+                        res = res.replace(/{"d":null/g, '');
+                        res = res.replace(/{"d":""/g, '');
+                        res = res.replace(/u0026/g, '&');
+                        res = res.slice(0, -3);
+                        $("#image-indicator").dxLoadPanel("instance").option("visible", false);
+                        var RES1 = JSON.parse(res.toString());
+                        $("#GridPendingContents").dxDataGrid({
+                            dataSource: RES1,
+                            columns: [
+                                { dataField: "ProductName" },
+                                { dataField: "CategoryName" },
+                                { dataField: "HSNCode" },
+                                { dataField: "OrderQuantity" },
+                                { dataField: "Rate" },
+                                { dataField: "RateType" },
+                                { dataField: "GSTPercantage" },
+                                { dataField: "GSTAmount" },
+                                { dataField: "MiscPercantage" },
+                                { dataField: "MiscAmount" },
+                                { dataField: "ShippingCost" },
+                                { dataField: "FinalAmount" },
+                                { dataField: "VendorName" }
+                            ],
+                        });
+                    },
+                    error: function errorFunc(jqXHR) {
+                        $("#image-indicator").dxLoadPanel("instance").option("visible", false);
+                    }
+                });
+            } else {
+                $.ajax({
+                    type: 'POST',
+                    url: "WebServiceProductionWorkOrder.asmx/GridProcessedContentsData",
+                    data: '{BookingID:' + JSON.stringify(data.selectedRowsData[0].BookingID) + '}',
+                    contentType: 'application/json; charset=utf-8',
+                    dataType: 'text',
+                    success: function (results) {
+                        var res = results.replace(/\\/g, '');
+                        res = res.replace(/{"d":null/g, '');
+                        res = res.replace(/{"d":""/g, '');
+                        res = res.replace(/u0026/g, '&');
+                        res = res.slice(0, -3);
+                        $("#image-indicator").dxLoadPanel("instance").option("visible", false);
+                        var RES1 = JSON.parse(res.toString());
+                        $("#GridPendingContents").dxDataGrid({
+                            dataSource: RES1,
+                            columns: [
+                                { dataField: "SalesOrderNo", caption: "Order Booking No" },
+                                { dataField: "PONo", caption: "PO No" },
+                                { dataField: "PODate", caption: "PO Date", dataType: "date", format: 'dd-MMM-yyyy', Mode: "DateRangeCalendar", width: 80 },
+                                { dataField: "JobBookingNo", caption: "Job Card No" },
+                                { dataField: "BookingDate", caption: "Job Date", dataType: "date", format: 'dd-MMM-yyyy', Mode: "DateRangeCalendar", width: 80 },
+                                { dataField: "CategoryName", caption: "Job Type" },
+                                { dataField: "LedgerName", caption: "Client Name", width: 180 },
+                                { dataField: "JobName", caption: "Job Name", width: 200 },
+                                { dataField: "OrderQty", caption: "Order Qty" },
+                                { dataField: "BookedBy", caption: "Job Created By" },
+                                { dataField: "DeliveryDate", caption: "Delivery Date", dataType: "date", format: 'dd-MMM-yyyy', Mode: "DateRangeCalendar", width: 80 },
+                            ]
+                        });
+                    },
+                    error: function errorFunc(jqXHR) {
+                        $("#image-indicator").dxLoadPanel("instance").option("visible", false);
+                    }
+                });
+            }
         } else {
             TablePendingData = [];
             GblOrderQuantity = 0;
@@ -345,6 +369,54 @@ $("#GridPendingProcessData").dxDataGrid({
             GblJobCardNo = ""; GblJobBookingID = 0;
         }
     }
+});
+
+$("#GridPendingContents").dxDataGrid({
+    dataSource: [],
+    loadPanel: {
+        enabled: true,
+        text: 'Data is loading...'
+    },
+    columns: [
+        { dataField: "ProductName" },
+        { dataField: "CategoryName" },
+        { dataField: "HSNCode" },
+        { dataField: "OrderQuantity" },
+        { dataField: "Rate" },
+        { dataField: "RateType" },
+        { dataField: "GSTPercantage" },
+        { dataField: "GSTAmount" },
+        { dataField: "MiscPercantage" },
+        { dataField: "MiscAmount" },
+        { dataField: "ShippingCost" },
+        { dataField: "FinalAmount" },
+        { dataField: "VendorName" }
+    ],
+    columnAutoWidth: true,
+    columnResizingMode: "widget",
+    showBorders: true,
+    showRowLines: true,
+    selection: { mode: "single" },
+    allowColumnResizing: true,
+    sorting: { mode: 'multiple' },
+    height: function () {
+        return window.innerHeight / 2.6;
+    },
+    onRowPrepared: function (e) {
+        setDataGridRowCss(e);
+    },
+    filterRow: { visible: true },
+    rowAlternationEnabled: true,
+    searchPanel: { visible: false },
+    onSelectionChanged: function (data) {
+        TablePendingData = [];
+        if (data) {
+
+            TablePendingData = data.selectedRowsData;
+            ProductType(TablePendingData[0].ProductName);
+        }
+    }
+
 });
 
 ////var ContRowNo, ContColNo;
@@ -809,7 +881,8 @@ $.ajax({                //// For Category
         res = res.slice(0, -1);
         var RES1 = JSON.parse(res);
         $("#SbCategory").dxSelectBox({
-            items: RES1
+            items: RES1,
+            disabled: true
         });
     },
     error: function errorFunc(jqXHR) {
@@ -832,7 +905,8 @@ $.ajax({                //// For Customer
         //alert(res);
         var RES1 = JSON.parse(res);
         $("#SbClientName").dxSelectBox({
-            items: RES1
+            items: RES1,
+            disabled: true
         });
     },
     error: function errorFunc(jqXHR) {
@@ -861,6 +935,7 @@ function loadConsigneeData(clientID, consigneeID) {
             consigneeID = Number(consigneeID);
             $("#SbConsigneeName").dxSelectBox({
                 dataSource: RES1,
+                disabled: true,
                 ////onValueChanged: function (e) {
                 ////    if (e.value) {
                 ////        document.getElementById("txtSchConsignee").value = e.value;
@@ -896,7 +971,8 @@ $.ajax({                //// For Job Priority
         res = res.slice(0, -1);
         var RES1 = JSON.parse(res);
         $("#SbJobPriority").dxSelectBox({
-            items: RES1
+            items: RES1,
+            disabled: true
         });
     },
     error: function errorFunc(jqXHR) {
@@ -920,7 +996,8 @@ $.ajax({                //// For Job Reference
         res = res.slice(0, -1);
         var RES1 = JSON.parse(res);
         $("#SbJobReference").dxSelectBox({
-            items: RES1
+            items: RES1,
+            disabled: true
         });
     },
     error: function errorFunc(jqXHR) {
@@ -942,7 +1019,8 @@ $.ajax({                //// For Job Coordinator
         res = res.slice(0, -1);
         var RES1 = JSON.parse(res);
         $("#SbJobCoordinator").dxSelectBox({
-            items: RES1
+            items: RES1,
+            disabled: true
         });
     },
     error: function errorFunc(jqXHR) {
@@ -970,7 +1048,8 @@ $.ajax({
             displayExpr: "ProductHSNName",
             valueExpr: "ProductHSNID",
             searchEnabled: true,
-            showClearButton: true
+            showClearButton: true,
+            disabled: true
         }).dxValidator({
             validationRules: [{ type: 'required', message: 'Product HSN Group is required' }]
         });
@@ -1393,6 +1472,7 @@ $("#BtnApplyItemAllocation").click(function () {
         if (reqItemGrid._options.dataSource.length > 0) {
             estimatedCost = Number(reqItemGrid._options.dataSource[0].QuotationPaperAmount);
         }
+
         for (var i = 0; i < dataGrid._options.dataSource.length; i++) {
             var newdata = dataGrid._options.dataSource[i];
 
@@ -1408,7 +1488,6 @@ $("#BtnApplyItemAllocation").click(function () {
                     return;
                 }
             }
-
             newdata.ItemGroupID = dataGrid._options.dataSource[i].ItemGroupID;
             newdata.ItemGroupNameID = dataGrid._options.dataSource[i].ItemGroupNameID;
             newdata.EstimatedQuantity = dataGrid._options.dataSource[i].EstimatedQuantity;
@@ -1484,23 +1563,46 @@ $("#BtnDeleteJobcard").click(function () {
     });
 });
 
+function ProductType(ContentName) {
+    $.ajax({
+        async: false,
+        type: "POST",
+        url: "WebServiceProductionWorkOrder.asmx/CheckProductType",
+        data: '{ContentName:' + JSON.stringify(ContentName) + '}',
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function (results) {
+            var res = results.d.replace(/\\/g, '');
+            res = res.replace(/"d":/g, '');
+            res = res.replace(/u0026/g, '&');
+            res = res.substr(1);
+            res = res.slice(0, -1);
+            var RES1 = JSON.parse(res);
+            GBLProductType = RES1;
+        },
+        error: function errorFunc(jqXHR) {
+            //alert("Something went wrong!");
+        }
+    });
+}
+
 $("#BtnJobDetails").click(function () {
-    //Get Selected Rows data By Minesh Jain On 22-May-2019
-    if (TablePendingData.length <= 0) { return false; }
-    GblOrderQuantity = TablePendingData[0].Quantity;
+    if (GBLProductType.length <= 0) { return; }
+    // For Offset Case 
+    if (TablePendingData.length <= 0) {
+        swal("Required..!", "Please select product..!", "warning");
+        return false;
+    }
+    GblOrderQuantity = TablePendingData[0].OrderQuantity;
     GblBookingID = TablePendingData[0].BookingID;
-    GblProdMasCode = TablePendingData[0].ProductMasterCode;
-    GblJobCardNo = TablePendingData[0].JobBookingNo;
-    GblJobBookingID = TablePendingData[0].JobBookingID;
+    //GblProdMasCode = TablePendingData[0].ProductMasterCode;
+    //GblJobCardNo = TablePendingData[0].JobBookingNo;
+    //GblJobBookingID = TablePendingData[0].JobBookingID;
     $("#BtnSaveJobcard").show();
     if (GblJobCardNo === undefined) {
         GblJobCardNo = ""; GblJobBookingID = 0;
     }
-    (async () => {
-        await removeAllContentsData();
-    })();
 
-    GetSelectedContentPlans();
 
     if (check === "Pending") {
         GenerateJobCardNo();
@@ -1519,9 +1621,9 @@ $("#BtnJobDetails").click(function () {
         });
     }
 
-    $('#TxtQuantity').val(TablePendingData[0].OrderQty);
-    $('#TxtJobName').val(TablePendingData[0].JobName);
-    $('#TxtOrderQuantity').val(TablePendingData[0].OrderQty);
+    $('#TxtQuantity').val(TablePendingData[0].OrderQuantity);
+    $('#TxtJobName').val(TablePendingData[0].ProductName);
+    $('#TxtOrderQuantity').val(TablePendingData[0].OrderQuantity);
     $('#TxtOrderBookingDate').val(TablePendingData[0].BookingDate);
     $('#TxtOrderBookingNo').val(TablePendingData[0].SalesOrderNo);
     $('#TxtPONo').val(TablePendingData[0].PONo);
@@ -1535,7 +1637,6 @@ $("#BtnJobDetails").click(function () {
     $('#TxtEmail').val(TablePendingData[0].Email);
     $('#TxtProductRemark').val(TablePendingData[0].Remark);
     $('#TxtCriticalRemark').val(TablePendingData[0].CriticalInstructions);
-
     $("#SbClientName").dxSelectBox({ value: TablePendingData[0].LedgerID });
     $("#SbJobCoordinator").dxSelectBox({ value: TablePendingData[0].CoordinatorLedgerID });
     $("#SbJobPriority").dxSelectBox({ value: TablePendingData[0].JobPriority });
@@ -1553,11 +1654,51 @@ $("#BtnJobDetails").click(function () {
     if (document.getElementById("TxtJobName").value.trim() === "" || TablePendingData.length <= 0) {
         return false;
     }
-    ProcesssData();
-    LoadIndentItemsList();
+
     OpenCloseModal(true, "BtnJobDetails", "#modalJobContentsDetails");
     $(".rowcontents").animate({ scrollTop: 0 }, "slow");
+    if (GBLProductType[0].IsOffsetProduct == true) {
+        (async () => {
+            await removeAllContentsData();
+        })();
+        ProcesssData();
+        LoadIndentItemsList();
+        GetSelectedContentPlans();
+        $('#GridProductContentDetails').removeClass('hidden');
+        $('#arrowarea').removeClass('hidden');
+    } else {
+        $('#GridProductContentDetails').addClass('hidden');
+        $('#arrowarea').addClass('hidden');
+        $("#GridProductContentDetails").dxDataGrid({
+            dataSource: []
+        });
+        loadprocessf(TablePendingData[0].ProcessIDStr)
+
+    }
+
 });
+
+function loadprocessf(pids) {
+    if (pids == "" || pids == undefined) {
+        $("#GridSelectedProductProcess").dxDataGrid({ dataSource: [] });
+        return
+    };
+    $.ajax({
+        type: "POST",
+        url: "WebServiceProductionWorkOrder.asmx/LoadProcess",
+        data: '{pids:' + JSON.stringify(pids) + '}',
+        contentType: "application/json; charset=utf-8",
+        dataType: "text",
+        success: function (results) {
+            var res = results.replace(/\\/g, '');
+            res = res.replace(/{"d":null/g, '');
+            res = res.replace(/{"d":""/g, '');
+            res = res.replace(/{":,/g, '":null,');
+            res = res.slice(0, -3);
+            $("#GridSelectedProductProcess").dxDataGrid({ dataSource: JSON.parse(res.toString()) });
+        }
+    });
+}
 
 $("#BtnSelectContent").click(function () {
     var TxtContentName = document.getElementById("TxtAddContentName").value.trim();
@@ -1720,18 +1861,18 @@ function ShowAllProcesss() {
         columns: [{ dataField: "ProcessID", visible: false, width: 0, allowEditing: false }, { dataField: "ProcessName", allowEditing: false },
         { dataField: "Rate", allowEditing: false, format: { type: "decimal", /* one of the predefined formats*/ precision: 3 /* the precision of values*/ } },
         { dataField: "RateFactor", allowEditing: false, visible: false }, { dataField: "Remarks", caption: "Process Remark", allowEditing: true },
-        { dataField: "PaperConsumptionRequired", width: 180, dataType: "boolean", allowEditing: true },
-        //{
-        //    dataField: "AddTools", caption: "Tool", visible: true, allowEditing: false, fixedPosition: "right", fixed: true, width: 35,
-        //    cellTemplate: function (container, options) {
-        //        $('<div>').addClass('fa fa-plus customgridbtn')
-        //            .on('dxclick', function () {
-        //                document.getElementById("TxtToolProcessName").value = options.data.ProcessName;
-        //                this.setAttribute("data-toggle", "modal");
-        //                this.setAttribute("data-target", "#myModalTool");
-        //            }).appendTo(container);
-        //    }
-        //}
+        { dataField: "PaperConsumptionRequired", visible: false, width: 180, dataType: "boolean", allowEditing: true },
+            //{
+            //    dataField: "AddTools", caption: "Tool", visible: true, allowEditing: false, fixedPosition: "right", fixed: true, width: 35,
+            //    cellTemplate: function (container, options) {
+            //        $('<div>').addClass('fa fa-plus customgridbtn')
+            //            .on('dxclick', function () {
+            //                document.getElementById("TxtToolProcessName").value = options.data.ProcessName;
+            //                this.setAttribute("data-toggle", "modal");
+            //                this.setAttribute("data-target", "#myModalTool");
+            //            }).appendTo(container);
+            //    }
+            //}
         ],
         showRowLines: true,
         showBorders: true,
@@ -2321,10 +2462,16 @@ function compareSequence(a, b) {
 
 function callSaveJobCard(TblPlanning, TblOperations, TblContentForms, TblContentMatRequireData, TblContentInkData, TblItemIndentsMainData, TblItemIndentsDetailData, TblContentFormsDetails, TblItemPickListDetailData, TblItemPickListMainData) {
     try {
-        if (TblPlanning.length <= 0) {
-            swal("Content Not Available", "Please add atleast one content", "error");
-            return;
+
+        if (GBLProductType[0].IsOffsetProduct == true) {
+            if (TblPlanning.length <= 0) {
+                swal("Content Not Available", "Please add atleast one content", "error");
+                return;
+            }
+        } else {
+            TblPlanning = []
         }
+
         var JobName = document.getElementById("TxtJobName").value.trim();
         var PONo = document.getElementById("TxtPONo").value.trim();
         var PODate = $('#SelPODate').dxDateBox('instance').option('value'); // document.getElementById("TxtPODate").value.trim();
@@ -2344,7 +2491,7 @@ function callSaveJobCard(TblPlanning, TblOperations, TblContentForms, TblContent
         var SbJobType = $("#SbJobType").dxSelectBox("instance").option('value');
         var SbJobReference = $("#SbJobReference").dxSelectBox("instance").option('value');
         var DeliveryDate = $('#SelDeliveryDate').dxDateBox('instance').option('value'); //  document.getElementById("TxtDeliveryDate").value.trim();
-        
+
         if (GblBookingID === undefined || GblBookingID <= 0 || GblBookingID === null) {
             return;
         }
@@ -2373,12 +2520,12 @@ function callSaveJobCard(TblPlanning, TblOperations, TblContentForms, TblContent
             ///$("#SbHSNGroups").dxValidator('instance').validate();
             return;
         }
-        if (ArtWorkCode === "" || ArtWorkCode === "null" || ArtWorkCode === null) {
-            swal("Invalid Product code", "Please Enter Product code", "warning");
-            DevExpress.ui.notify("Please Enter Product code..!", "error", 1500);
-            document.getElementById("TxtProductCode").focus();
-            return;
-        }
+        //if (ArtWorkCode === "" || ArtWorkCode === "null" || ArtWorkCode === null) {
+        //    swal("Invalid Product code", "Please Enter Product code", "warning");
+        //    DevExpress.ui.notify("Please Enter Product code..!", "error", 1500);
+        //    document.getElementById("TxtProductCode").focus();
+        //    return;
+        //}
         //if (SbJobCoordinatorID === "" || Number(SbJobCoordinatorID) <= 0 || SbJobCoordinatorID === null) {
         //    swal("Invalid Job Coordinator", "Please Enter Job Coordinator", "warning");
         //    DevExpress.ui.notify("Please Enter Job Coordinator..!", "error", 1500);
@@ -2402,8 +2549,8 @@ function callSaveJobCard(TblPlanning, TblOperations, TblContentForms, TblContent
         //    return;
         //}
         if (PONo === "" || PONo === null || PONo === "null") {
-            swal("Invalid PO Date", "Please Select PO Date", "warning");
-            DevExpress.ui.notify("Please Select PO Date..!", "error", 1500);
+            swal("Invalid PO No", "Please Select PO No", "warning");
+            DevExpress.ui.notify("Please Select PO No..!", "error", 1500);
             return;
         }
         if (PODate === "" || PODate === null || PODate === "null" || PODate === undefined) {
@@ -2443,8 +2590,9 @@ function callSaveJobCard(TblPlanning, TblOperations, TblContentForms, TblContent
             TblPlanning[val].CoordinatorLedgerName = $("#SbJobCoordinator").dxSelectBox("instance").option('text');
             TblPlanning[val].ConsigneeLedgerID = SbConsigneeID;
             TblPlanning[val].ProductMasterID = TablePendingData[0].ProductMasterID;
-            //TblPlanning[val].OrderBookingID = TablePendingData[0].OrderBookingID;
-            //TblPlanning[val].OrderBookingDetailsID = TablePendingData[0].OrderBookingDetailsID;
+            TblPlanning[val].OrderBookingID = TablePendingData[0].OrderBookingID;
+            TblPlanning[val].OrderBookingDetailsID = TablePendingData[0].OrderBookingDetailsID;
+
         }
 
         var TblBooking = [];
@@ -2472,7 +2620,7 @@ function callSaveJobCard(TblPlanning, TblOperations, TblContentForms, TblContent
         ObjBooking.Email = TxtEmail;
         ObjBooking.DeliveryDate = DeliveryDate;
         ObjBooking.CriticalInstructions = CriticalDetails;
-
+        ObjBooking.ProductEstimateID = ProductEstimateID;
         TblBooking.push(ObjBooking);
 
         var BookingNo = document.getElementById("TxtBookingNoAuto").value;

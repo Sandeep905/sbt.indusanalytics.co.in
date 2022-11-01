@@ -71,6 +71,7 @@ function refreshGrid(val) {
                     { dataField: "QuotationNo" },
                     { dataField: "ProjectName" },
                     { dataField: "ClientName" },
+                    { dataField: "CreatedDate" },
                     { dataField: "SalesPerson" },
                     { dataField: "FreightAmount" },
                     { dataField: "Remark" },

@@ -3,6 +3,7 @@ var JobPriority, JobReference, JobType, ProductHSNGrp, ObjSchData;
 var AprNo = "0", MaxProductCode;
 var GblClientID = 0, FlagEdit = false, GblSalesOrderNo = "";
 var ObjSchDelivery = [];
+let GBLProductEstimateID = 0;
 
 $('.disabledbutton').prop('disabled', true);
 $("#image-indicator").dxLoadPanel({
@@ -188,7 +189,7 @@ $(function () {
                     $.ajax({
                         type: "POST",
                         url: "WebServiceOthers.asmx/LoadOBProductsData",
-                        data: '{LedgerID:' + GblClientID + '}',//
+                        data: '{LedgerID:' + GblClientID + '}',
                         contentType: "application/json; charset=utf-8",
                         dataType: 'json',
                         success: function (results) {
@@ -316,12 +317,6 @@ $("#SOBProductData").dxDataGrid({
         { dataField: "ClientName" },
         { dataField: "SalesPerson" },
         { dataField: "FreightAmount" },
-        { dataField: "MiscAmount" },
-        { dataField: "ShippingCost" },
-        { dataField: "GSTAmount" },
-        { dataField: "FinalAmount" },
-        { dataField: "ProfitCost" },
-        { dataField: "ApprovedCost" },
         { dataField: "Remark" },
         { dataField: "ApprovedBy" },
     ],
@@ -401,12 +396,12 @@ $("#SOBProductData").dxDataGrid({
         setDataGridRowCss(e);
     },
     onSelectionChanged: function (data) {
-        //data.selectedRowsData[0].ProductEstimateID
+        GBLProductEstimateID = data.selectedRowsData[0].ProductEstimateID
 
         $.ajax({
             type: "POST",
             url: "WebServiceOthers.asmx/LoadProjectContents",
-            data: '{ProductEstimateID:' + data.selectedRowsData[0].ProductEstimateID + '}',//
+            data: '{ProductEstimateID:' + data.selectedRowsData[0].ProductEstimateID + '}',
             contentType: "application/json; charset=utf-8",
             dataType: 'json',
             success: function (results) {
@@ -581,6 +576,7 @@ $("#GridOrdersList").dxDataGrid({
     height: function () {
         return window.innerHeight / 3;
     },
+
     //summary: {
     //    recalculateWhileEditing: true,
     //    totalItems: [{
@@ -608,89 +604,41 @@ $("#GridOrdersList").dxDataGrid({
     //        alignByColumn: true
     //    }]
     //},
-    //onEditingStart: function (e) {
-    //    if (e.column.dataField === "ProductHSNID" || e.column.dataField === "OrderQuantity" || e.column.dataField === "FinalDeliveryDate" || e.column.dataField === "JobType" || e.column.dataField === "JobReference"
-    //        || e.column.dataField === "JobPriority" || e.column.dataField === "PrePressRemark") {
-    //        e.cancel = false;
-    //    } else
-    //        e.cancel = true;
-    //},
-    //onRowUpdated: function (e) {
-    //    //if (e.key.OrderQuantity > 0) {
-    //    var cost = 0;
-    //    if (e.key.ApprovedRate > 0) {
-    //        if (e.key.TypeOfCost.toUpperCase() === "PER UNIT" || e.key.TypeOfCost.toUpperCase() === "UNITCOST") {
-    //            cost = Number(e.key.OrderQuantity) * e.key.ApprovedRate;
-    //            e.key.TotalAmount = cost.toFixed(2);
-    //        } else if (e.key.TypeOfCost.toUpperCase() === "PER 1000" || e.key.TypeOfCost.toUpperCase() === "1000 UNIT" || e.key.TypeOfCost.toUpperCase() === "UNITTHCOST") {
-    //            cost = Number(Number(e.key.OrderQuantity) / 1000) * e.key.ApprovedRate;
-    //            e.key.TotalAmount = cost.toFixed(2);
-    //        } else if (e.key.TypeOfCost.toUpperCase() === "TOTAL") {
-    //            e.key.TotalAmount = e.key.ApprovedRate;
-    //        }
-    //    } else {
-    //        if (e.key.TypeOfCost.toUpperCase() === "PER UNIT" || e.key.TypeOfCost.toUpperCase() === "UNITCOST") {
-    //            cost = Number(e.key.OrderQuantity) * e.key.FinalCost;
-    //            e.key.TotalAmount = cost.toFixed(2);
-    //        } else if (e.key.TypeOfCost.toUpperCase() === "PER 1000" || e.key.TypeOfCost.toUpperCase() === "1000 UNIT" || e.key.TypeOfCost.toUpperCase() === "UNITTHCOST") {
-    //            cost = Number(Number(e.key.OrderQuantity) / 1000) * e.key.FinalCost;
-    //            e.key.TotalAmount = cost.toFixed(2);
-    //        } else if (e.key.TypeOfCost.toUpperCase() === "TOTAL") {
-    //            e.key.TotalAmount = e.key.FinalCost;
-    //        }
-    //    }
+    onEditingStart: function (e) {
+        if (e.column.dataField === "FinalDeliveryDate" || e.column.dataField === "JobType" || e.column.dataField === "JobReference"
+            || e.column.dataField === "JobPriority" || e.column.dataField === "PrePressRemark") {
+            e.cancel = false;
+        } else
+            e.cancel = true;
+    },
 
-    //    var HSNID = e.key.ProductHSNID;
-    //    var result = $.grep(ProductHSNGrp, function (ex) { return ex.ProductHSNID === HSNID; });
-    //    if (result.length === 1) {
-    //        if (e.key.ClientState !== e.key.CompanyState) {
-    //            e.key.IGSTTaxPercentage = result[0].IGSTTaxPercentage;
-    //            e.key.CGSTTaxPercentage = 0;
-    //            e.key.SGSTTaxPercentage = 0;
-    //        } else {
-    //            e.key.IGSTTaxPercentage = 0;
-    //            e.key.SGSTTaxPercentage = result[0].SGSTTaxPercentage;
-    //            e.key.CGSTTaxPercentage = result[0].CGSTTaxPercentage;
-    //        }
-    //        e.key.GSTTaxPercentage = result[0].GSTTaxPercentage;
-    //    }
-    //    e.key.IGSTTaxAmount = Number(Number(e.key.TotalAmount) * Number(e.key.IGSTTaxPercentage)) / 100;
-    //    e.key.CGSTTaxAmount = Number(Number(e.key.TotalAmount) * Number(e.key.CGSTTaxPercentage)) / 100;
-    //    e.key.SGSTTaxAmount = Number(Number(e.key.TotalAmount) * Number(e.key.SGSTTaxPercentage)) / 100;
-    //    var Amt = Number(cost) + Number(e.key.CGSTTaxAmount) + Number(e.key.SGSTTaxAmount) + Number(e.key.IGSTTaxAmount);
-    //    e.key.NetAmount = Amt.toFixed(2);
-    //    //}
-    //    e.component.refresh();
-    //    //alert('onRowUpdate');
-    //},
     onRowPrepared: function (e) {
         setDataGridRowCss(e);
     },
-    //onCellClick: function (e) {
-    //    if (e.row === undefined) return;
-    //    if (e.rowType === undefined) return;
 
-    //    //GridOrdersListRowPO = e.row.rowIndex;
-    //    //GridOrdersListColPO = e.columnIndex;
-    //    scheduleGridBlank();
-    //    if (e.rowType === "data") {
+    onCellClick: function (e) {
+        if (e.row === undefined) return;
+        if (e.rowType === undefined) return;
 
-    //        document.getElementById("SOBProductMasterNo").value = e.row.data.ProductMasterCode;
-    //        document.getElementById("SOBJobName").value = e.row.data.JobName;
+        //scheduleGridBlank();
+        //if (e.rowType === "data") {
 
-    //        document.getElementById('SOBQuoteNo').value = e.row.data.BookingNo;
-    //        document.getElementById('SOBSchQuantity').value = e.row.data.OrderQuantity;
+        //    document.getElementById("SOBProductMasterNo").value = 0;
+        //    document.getElementById("SOBJobName").value = e.row.data.JobName;
 
-    //        MaxProductCode = e.row.data.MaxPMCode;
-    //        ObjSchData = e.row.data;
-    //        reloadSchGrid();
-    //    } else {
-    //        ObjSchData = [];
-    //    }
-    //    //alert('oncellClick');
-    //},
+        //    document.getElementById('SOBQuoteNo').value = 0;
+        //    document.getElementById('SOBSchQuantity').value = e.row.data.OrderQuantity;
+
+        //    MaxProductCode = 0;
+        //    ObjSchData = e.row.data;
+        //    reloadSchGrid();
+        //} else {
+        //    ObjSchData = [];
+        //}
+        //alert('oncellClick');
+    },
     onSelectionChanged: function (data) {
-        scheduleGridBlank();
+        //scheduleGridBlank();
         if (data) {
             //document.getElementById("SOBProductMasterNo").value = data.selectedRowsData[0].ProductMasterCode;
             //document.getElementById("SOBQuoteNo").value = data.selectedRowsData[0].QuotationNo;
@@ -699,10 +647,31 @@ $("#GridOrdersList").dxDataGrid({
             //MaxProductCode = data.selectedRowsData[0].MaxPMCode;
 
             ObjSchData = data.selectedRowsData[0];
-            reloadSchGrid();
+            //reloadSchGrid();
         } else {
             ObjSchData = [];
         }
+
+        var HSNID = data.selectedRowsData[0].ProductHSNID;
+        var result = $.grep(ProductHSNGrp, function (ex) { return ex.ProductHSNID === HSNID; });
+        if (result.length === 1) {
+            if (data.selectedRowsData[0].ClientState !== data.selectedRowsData[0].CompanyState) {
+                data.selectedRowsData[0].IGSTTaxPercentage = result[0].IGSTTaxPercentage;
+                data.selectedRowsData[0].CGSTTaxPercentage = 0;
+                data.selectedRowsData[0].SGSTTaxPercentage = 0;
+            } else {
+                data.selectedRowsData[0].IGSTTaxPercentage = 0;
+                data.selectedRowsData[0].SGSTTaxPercentage = result[0].SGSTTaxPercentage;
+                data.selectedRowsData[0].CGSTTaxPercentage = result[0].CGSTTaxPercentage;
+            }
+            data.selectedRowsData[0].GSTTaxPercentage = result[0].GSTTaxPercentage;
+        }
+        data.selectedRowsData[0].IGSTTaxAmount = (Number(Number(data.selectedRowsData[0].FinalAmount) * Number(data.selectedRowsData[0].IGSTTaxPercentage)) / 100).toFixed(2);
+        data.selectedRowsData[0].CGSTTaxAmount = (Number(Number(data.selectedRowsData[0].FinalAmount) * Number(data.selectedRowsData[0].CGSTTaxPercentage)) / 100).toFixed(2);
+        data.selectedRowsData[0].SGSTTaxAmount = (Number(Number(data.selectedRowsData[0].FinalAmount) * Number(data.selectedRowsData[0].SGSTTaxPercentage)) / 100).toFixed(2);
+        //GridOrdersListRowPO = e.rowIndex;
+        //GridOrdersListColPO = e.columnIndex;
+        data.component.refresh();
     }
 });
 
@@ -798,6 +767,28 @@ $("#BtnBack").click(function () {
 $("#BtnAddSchedule").click(function () {
 
     try {
+        if (Object.keys(ObjSchData).length <= 0) {
+            DevExpress.ui.notify("Please select any item to add Schedule quantity..!", "warning", 1200);
+            return false;
+        }
+        if (Object.keys(ObjSchData).length > 0) {
+            if (ObjSchData.FinalDeliveryDate == "" || ObjSchData.FinalDeliveryDate == undefined) {
+                DevExpress.ui.notify("Please select final delivery date of selected product in list..!", "warning", 1200);
+                return false;
+            }
+            if (ObjSchData.JobType == "" || ObjSchData.JobType == undefined) {
+                DevExpress.ui.notify("Please select job type of selected product in list..!", "warning", 1200);
+                return false;
+            }
+            if (ObjSchData.JobReference == "" || ObjSchData.JobReference == undefined) {
+                DevExpress.ui.notify("Please select job reference of selected product in list..!", "warning", 1200);
+                return false;
+            }
+            if (ObjSchData.JobPriority == "" || ObjSchData.JobPriority == undefined) {
+                DevExpress.ui.notify("Please select job priority of selected product in list..!", "warning", 1200);
+                return false;
+            }
+        }
         var SchQty = Number(document.getElementById("SOBSchQuantity").value);
         var txtSchConsignee = $("#SOBConsignee").dxSelectBox("instance").option('text');
         if (txtSchConsignee === "" || txtSchConsignee === null) {
@@ -814,10 +805,7 @@ $("#BtnAddSchedule").click(function () {
         }
         document.getElementById('SOBJobName').style.borderColor = '';
 
-        if (ObjSchData.length <= 0) {
-            DevExpress.ui.notify("Please select any item to add Schedule quantity..!", "warning", 1200);
-            return false;
-        }
+
         if (Number(SchQty) <= 0) {
             DevExpress.ui.notify("Please enter currect schedule quantity..!", "warning", 1000);
             document.getElementById("SOBSchQuantity").value = 0;
@@ -861,23 +849,25 @@ $("#BtnAddSchedule").click(function () {
         var TtlSchQty = 0;
 
         for (var i = 0; i < dataGrid._options.dataSource.length; i++) {
-            var CompDate = dataGrid.cellValue(i, 2);
-            if (CompDate !== "" || CompDate !== null || CompDate !== undefined) {
-                var CompDateDay = CompDate.getDate();
-                CompDate = (CompDateDay < 10 ? '0' : '') + CompDateDay + '/' + (CompDate.getMonth() + 1) + '/' + CompDate.getFullYear();
+            if (dataGrid._options.dataSource[i].ProductEstimationContentID == ObjSchData.ProductEstimationContentID) {
+                var CompDate = dataGrid.cellValue(i, 2);
+                if (CompDate !== "" || CompDate !== null || CompDate !== undefined) {
+                    var CompDateDay = CompDate.getDate();
+                    CompDate = (CompDateDay < 10 ? '0' : '') + CompDateDay + '/' + (CompDate.getMonth() + 1) + '/' + CompDate.getFullYear();
 
-                if (DateDiff(DelDate, CompDate) === "Equal"
-                    && txtSchConsignee === dataGrid._options.dataSource[i].ConsigneeName) {
-                    alert("You have already made schedule for this date!");
-                    DevExpress.ui.notify("You have already made schedule for this date..!", "warning", 1500);
-                    document.getElementById('SOBDeliveryDate').style.borderColor = 'red';
-                    return false;
+                    if (DateDiff(DelDate, CompDate) === "Equal"
+                        && txtSchConsignee === dataGrid._options.dataSource[i].ConsigneeName) {
+                        alert("You have already made schedule for this date!");
+                        DevExpress.ui.notify("You have already made schedule for this date..!", "warning", 1500);
+                        document.getElementById('SOBDeliveryDate').style.borderColor = 'red';
+                        return false;
+                    }
+                    document.getElementById('SOBDeliveryDate').style.borderColor = '';
+                    TtlSchQty = TtlSchQty + Number(dataGrid._options.dataSource[i].ScheduleQuantity);
                 }
-                document.getElementById('SOBDeliveryDate').style.borderColor = '';
-                TtlSchQty = TtlSchQty + Number(dataGrid._options.dataSource[i].Quantity);
             }
         }
-        if (Number(ObjSchData.OrderQuantity) < Number(SchQty) + TtlSchQty) {
+        if (Number(ObjSchData.Quantity) < Number(SchQty) + TtlSchQty) {
             DevExpress.ui.notify("Can't add quantity more than order quantity..!", "warning", 1500);
             return false;
         }
@@ -885,6 +875,7 @@ $("#BtnAddSchedule").click(function () {
         var newdata = [];
         //newdata.ProductMasterCode = ObjSchData.ProductMasterCode;
         //newdata.ApprovalNo = ObjSchData.ApprovalNo;
+        newdata.ProductEstimationContentID = ObjSchData.ProductEstimationContentID;
         newdata.JobName = ObjSchData.ProductName;
         newdata.ScheduleQuantity = Number(SchQty);
         newdata.DeliveryDate = $("#SOBDeliveryDate").dxDateBox("instance").option('text');
@@ -1052,68 +1043,6 @@ function GridSelectedProductsRow() {
     return true;
 }
 
-//////var varRate = "";
-//////function GridValidation() {
-//////    var dataGrid = $('#GridOrdersList').dxDataGrid('instance');
-//////    var columnValue, CheckColumnValue = "", fillCol = "", varQty = "";
-//////    // var decimalOnly = /^\s*-?[1-9]\d*(\.\d{1,3})?\s*$/;
-
-//////    for (var i = 0; i <= dataGrid.totalCount() - 1; i++) {
-
-//////        var val = /^[0-9]+$/;
-//////        var decimalOnly = /^-{0,1}\d*\.{0,1}\d+$/;
-
-//////        var gridQty = dataGrid.cellValue(i, 6);
-//////        if (!val.test(gridQty) || gridQty === "" || gridQty === undefined) {
-//////            varQty = "";
-//////            varQty = "StringFormat";
-//////            dataGrid.cellValue(i, 6, fillCol);
-//////        }
-
-//////        var gridrate = dataGrid.cellValue(i, 7);
-//////        if (!decimalOnly.test(gridrate) || gridrate === "" || gridrate === undefined) {
-//////            varRate = "";
-//////            varRate = "StringFormat";
-//////            dataGrid.cellValue(i, 7, fillCol);
-//////        }
-
-//////        for (var j = 9; j < 14; j++) {
-//////            columnValue = "";
-//////            columnValue = dataGrid.cellValue(i, j);
-
-//////            if ((columnValue === undefined || columnValue === "" || columnValue === null) && dataGrid._options.columns[j].dataField !== "PrePressRemark") {
-//////                CheckColumnValue = "BLANK";
-//////                i = dataGrid.totalCount();
-//////                j = dataGrid.columnCount();
-//////                dataGrid.cellValue(i, j, fillCol);
-//////            }
-//////        }
-//////    }
-
-//////    if (varRate === "StringFormat") {
-//////        varRate = "";
-//////        alert("You can not enter string");
-//////        return false;
-//////    }
-//////    if (varQty === "StringFormat") {
-//////        varQty = "";
-//////        alert("You can not enter string");
-//////        return false;
-//////    }
-
-//////    if (CheckColumnValue === "BLANK") {
-//////        DevExpress.ui.notify({
-//////            message: "Please fill all column in job order grid",
-//////            position: {
-//////                my: "middle top",
-//////                at: "middle top"
-//////            }
-//////        }, "error", 3000);
-//////        return false;
-//////    }
-//////    return true;
-//////}
-
 function scheduleGridBlank() {
     document.getElementById('SOBProductMasterNo').value = "";
     document.getElementById('SOBJobName').value = "";
@@ -1163,7 +1092,7 @@ function DateDiff(PODate, DelDate) {
 function reloadSchGrid() {
     var newData = [];
     for (var i = 0; i < ObjSchDelivery.length; i++) {
-        if (ObjSchDelivery[i].ProductMasterCode === ObjSchData.ProductMasterCode && ObjSchDelivery[i].ApprovalNo === ObjSchData.ApprovalNo) {
+        if (ObjSchDelivery[i].ProductEstimationContentID === ObjSchData.ProductEstimationContentID && ObjSchDelivery[i].ApprovalNo === ObjSchData.ApprovalNo) {
             newData.push(ObjSchDelivery[i]);
         }
     }
@@ -1227,7 +1156,7 @@ $("#EditButton").click(function () {
     document.getElementById("EditButton").setAttribute("data-dismiss", "modal");
     document.getElementById("FieldCntainerRow").style.display = 'none';
     document.getElementById("DetailedFieldCntainer").style.display = 'block';
-
+    GetConsignee(GblClientID);
     $("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
     try {
         $.ajax({
@@ -1250,7 +1179,7 @@ $("#EditButton").click(function () {
                 ObjSchDelivery = RES1.OrderBookingDelivery;
                 reloadOrderList(RES1.OrderBooking);
                 ObjSchData = RES1.OrderBooking[0];
-                reloadSchGrid();
+                $("#SOBScheduleGrid").dxDataGrid({ dataSource: ObjSchDelivery });
 
                 $("#SOBDate").dxDateBox({
                     value: RES1.OrderBooking[0].OrderBookingDate
@@ -1328,7 +1257,7 @@ $("#BtnSave").click(function () {
             alert("Invalid client selection please select client again..!");
             return false;
         }
-        var TxtTotalAmt = Number(document.getElementById("TxtTotalAmt").value);
+        //var TxtTotalAmt = Number(document.getElementById("TxtTotalAmt").value);
         //if (TxtTotalAmt <= 0) return false;
         //if (GridSelectedProductsRow() === false) return false;
         var SOBTxtNo = document.getElementById('SOBTxtNo').value.trim();
@@ -1353,9 +1282,6 @@ $("#BtnSave").click(function () {
         }
         document.getElementById('SOBSalesRep').style.borderColor = '';
 
-        /// by sndp temperory
-        DevExpress.ui.notify("Information Saved successfully!", "success", 1500);
-        return;
 
         if (SOBPrefix === "" || SOBPrefix === null) {
             alertMSG = "Please select job order prefix..!";
@@ -1375,21 +1301,6 @@ $("#BtnSave").click(function () {
         }
         document.getElementById('SOBPrefix').style.borderColor = '';
 
-        //if (sel_Approval === "" || sel_Approval === null || sel_Approval === undefined) {
-        //    alert("Please Select Approval By");
-        //    document.getElementById('sel_Approval').focus();
-        //    document.getElementById('sel_Approval').style.borderColor = 'red';
-        //    return false;
-        //}
-        //document.getElementById('sel_Approval').style.borderColor = '';
-
-        //if (Sel_Job_Coordinator === "" || Sel_Job_Coordinator === null || Sel_Job_Coordinator === undefined) {
-        //    alert("Please Select Job Coordinator");
-        //    document.getElementById('Sel_Job_Coordinator').focus();
-        //    document.getElementById('Sel_Job_Coordinator').style.borderColor = 'red';
-        //    return false;
-        //}
-        //document.getElementById('Sel_Job_Coordinator').style.borderColor = '';
 
         if (txtPONo === "") {
             alert("Please Enter PO NO.");
@@ -1416,7 +1327,8 @@ $("#BtnSave").click(function () {
         }
         OrderBook.BookingPrefix = SOBPrefix;
         OrderBook.LedgerID = GblClientID;
-        OrderBook.TotalAmount = Number(TxtTotalAmt);
+        OrderBook.TotalAmount = 0;
+        OrderBook.ProductEstimateID = GBLProductEstimateID;
         OrderBook.PONo = txtPONo;
         OrderBook.PODate = PODate;
         OrderBook.Remark = document.getElementById("SOBRemark").value;
@@ -1425,21 +1337,17 @@ $("#BtnSave").click(function () {
 
         NewOrderBook.push(OrderBook);
 
+        //################################################################################################################################################
+
         for (var i = 0; i < grid._options.dataSource.length; i++) {
 
             SaveOrder = {}; subobjvalid = {};
-            if (grid._options.dataSource[i].ProductHSNID === undefined || grid._options.dataSource[i].ProductHSNID <= 0 || grid._options.dataSource[i].ProductHSNID === null) {
-                alertMSG = "Please select group name first..!";
-                alert(alertMSG);
-                DevExpress.ui.notify(alertMSG, "warning", 1000);
-                grid.cellValue(i, "ProductHSNName", "");
-                return false;
-            }
+
             if (FlagEdit === true) {
                 SaveOrder.SalesOrderNo = SOBTxtNo;
                 SaveOrder.OrderBookingDetailsID = grid._options.dataSource[i].OrderBookingDetailsID;
             }
-            //SaveOrder.OrderBookingNo = SOBTxtNo;
+
             SaveOrder.BookingID = grid._options.dataSource[i].ProductEstimateID;
             SaveOrder.NewBookingID = SaveOrder.BookingID;
             if (BKIDS === "") {
@@ -1452,11 +1360,12 @@ $("#BtnSave").click(function () {
             SaveOrder.JobName = grid._options.dataSource[i].ProductName;
             SaveOrder.CategoryID = grid._options.dataSource[i].CategoryID;
             SaveOrder.OrderQuantity = grid._options.dataSource[i].Quantity;
-            SaveOrder.ApproveQuantity = 0//grid._options.dataSource[i].Quantity;
-            SaveOrder.FinalCost = 0// grid._options.dataSource[i].FinalCost;
-            SaveOrder.Rate = 0//grid._options.dataSource[i].OrderRate;
-            SaveOrder.ChangeCost = 0// grid._options.dataSource[i].ApprovedRate;
-            SaveOrder.RateType = 0// grid._options.dataSource[i].TypeOfCost;
+            SaveOrder.ApproveQuantity = grid._options.dataSource[i].Quantity;
+            SaveOrder.FinalCost = grid._options.dataSource[i].FinalAmount;
+            SaveOrder.VendorID = grid._options.dataSource[i].VendorID;
+            SaveOrder.Rate = grid._options.dataSource[i].Rate;
+            SaveOrder.ChangeCost = grid._options.dataSource[i].ApprovedCost;
+            SaveOrder.RateType = grid._options.dataSource[i].RateType;
             SaveOrder.PONo = txtPONo;
             SaveOrder.PODate = PODate;
 
@@ -1466,29 +1375,36 @@ $("#BtnSave").click(function () {
             //var MSplit = Number(DelDate[1]);
             //var date = new Date($('#SOBDate').dxDateBox('instance').option('value'));
 
-            SaveOrder.DeliveryDate = 0//grid._options.dataSource[i].FinalDeliveryDate;
+            SaveOrder.DeliveryDate = grid._options.dataSource[i].FinalDeliveryDate;
             SaveOrder.ProductionUnitID = 1;
             SaveOrder.ProductCode = 0//grid._options.dataSource[i].ProductCode;
-            SaveOrder.JobType = 0 / grid._options.dataSource[i].JobType;
+            SaveOrder.JobType = grid._options.dataSource[i].JobType;
             //SaveOrder.ApprovalBy = sel_Approval;
             //SaveOrder.JobCoordinatorID = Sel_Job_Coordinator;
-            SaveOrder.JobPriority = 0// grid._options.dataSource[i].JobPriority;
+            SaveOrder.JobPriority = grid._options.dataSource[i].JobPriority;
             SaveOrder.BookingPrefix = SOBPrefix;
             SaveOrder.BookingNo = 0//grid._options.dataSource[i].QuotationNo;
             SaveOrder.ProductMasterCode = 0//grid._options.dataSource[i].ProductMasterCode;
 
-            if (PMIDS === "" && grid._options.dataSource[i].ProductMasterCode !== "") {
-                PMIDS = '"' + grid._options.dataSource[i].ProductMasterCode + '"';
-            } else if (grid._options.dataSource[i].ProductMasterCode !== "") {
-                PMIDS = PMIDS + ',' + '"' + 0 /*grid._options.dataSource[i].ProductMasterCode*/ + '"';
-            }
+            //if (PMIDS === "" && grid._options.dataSource[i].ProductMasterCode !== "") {
+            //    PMIDS = '"' + grid._options.dataSource[i].ProductMasterCode + '"';
+            //} else if (grid._options.dataSource[i].ProductMasterCode !== "") {
+            //    PMIDS = PMIDS + ',' + '"' + 0 /*grid._options.dataSource[i].ProductMasterCode*/ + '"';
+            //}
 
-            SaveOrder.ApprovalNo = 0// grid._options.dataSource[i].ApprovalNo;
-            SaveOrder.ExpectedDeliveryDate = 0// grid._options.dataSource[i].FinalDeliveryDate;
-            SaveOrder.PrePressRemark = 0//grid._options.dataSource[i].PrePressRemark;
+            SaveOrder.ApprovalNo = grid._options.dataSource[i].ApprovalNo;
+            SaveOrder.ExpectedDeliveryDate = grid._options.dataSource[i].FinalDeliveryDate;
+            SaveOrder.PrePressRemark = grid._options.dataSource[i].PrePressRemark;
             //SaveOrder.NewBookingNo = grid._options.dataSource[i].NewBookingNo;
-            SaveOrder.JobReference = 0//grid._options.dataSource[i].JobReference;
-                SaveOrder.SalesEmployeeId = SOBSalesRep;
+            SaveOrder.JobReference = grid._options.dataSource[i].JobReference;
+            SaveOrder.MiscAmount = grid._options.dataSource[i].MiscAmount;
+            SaveOrder.MiscPercantage = grid._options.dataSource[i].MiscPercantage;
+            SaveOrder.ShippingCost = grid._options.dataSource[i].ShippingCost;
+            SaveOrder.GSTAmount = grid._options.dataSource[i].GSTAmount;
+            SaveOrder.GSTPercantage = grid._options.dataSource[i].GSTPercantage;
+            SaveOrder.ProfitCost = grid._options.dataSource[i].ProfitCost;
+            SaveOrder.ProfitPer = grid._options.dataSource[i].ProfitPer;
+            SaveOrder.SalesEmployeeId = SOBSalesRep;
             SaveOrder.JobCoordinatorID = SOBSalesRep;
 
             //if (txtSchConsignee !== "") {
@@ -1502,13 +1418,10 @@ $("#BtnSave").click(function () {
             SaveOrder.PODetail = document.getElementById("SOBDeliveryDetails").value.trim();
 
             SaveOrder.BookingDate = grid._options.dataSource[i].BookingDate;
-            if (isNaN(grid._options.dataSource[i].ProductHSNName)) {
-                SaveOrder.ProductHSNID = grid._options.dataSource[i].ProductHSNID;
-            } else {
-                SaveOrder.ProductHSNID = grid._options.dataSource[i].ProductHSNName;
-            }
-            SaveOrder.BasicAmount = grid._options.dataSource[i].BasicAmount;
-            SaveOrder.TotalAmount = grid._options.dataSource[i].TotalAmount;
+            SaveOrder.ProductHSNID = grid._options.dataSource[i].ProductHSNID;
+
+            //SaveOrder.BasicAmount = grid._options.dataSource[i].BasicAmount;
+            //SaveOrder.TotalAmount = grid._options.dataSource[i].TotalAmount;
 
             if (Number(grid._options.dataSource[i].CGSTTaxAmount) > 0) {
                 SaveOrder.CGSTTaxPercentage = grid._options.dataSource[i].CGSTTaxPercentage;
@@ -1522,7 +1435,7 @@ $("#BtnSave").click(function () {
                 SaveOrder.IGSTTaxPercentage = grid._options.dataSource[i].IGSTTaxPercentage;
                 SaveOrder.IGSTTaxAmount = grid._options.dataSource[i].IGSTTaxAmount;
             }
-            SaveOrder.NetAmount = grid._options.dataSource[i].NetAmount;
+            SaveOrder.NetAmount = grid._options.dataSource[i].FinalAmount;
             SaveOrder.TransID = i + 1;
 
             ObjSaveOrder.push(SaveOrder);
@@ -1538,6 +1451,8 @@ $("#BtnSave").click(function () {
         }
         var NewOrderBookDetails = JSON.stringify(ObjSaveOrder);
 
+        //################################################################################################################################################
+
         var ObjSchOrder = [];
         var SchOrder = {};
         //var ScheduleGrid = $('#SOBScheduleGrid').dxDataGrid('instance'); //.option("dataSource")
@@ -1550,15 +1465,15 @@ $("#BtnSave").click(function () {
                 SchOrder.SalesOrderNo = SOBTxtNo;
             }
             SchOrder.OrderBookingNo = SOBTxtNo;
-            SchOrder.ProductMasterCode = ScheduleGrid[i].ProductMasterCode;
+            SchOrder.ProductEstimationContentID = ScheduleGrid[i].ProductEstimationContentID;
             SchOrder.JobName = ScheduleGrid[i].JobName;
-            SchOrder.ApprovalNo = ScheduleGrid[i].ApprovalNo;
+            SchOrder.ApprovalNo = 0;
             SchOrder.ScheduleQuantity = ScheduleGrid[i].ScheduleQuantity;
             SchOrder.DeliveryDate = ScheduleGrid[i].DeliveryDate;
             SchOrder.ConsigneeID = ScheduleGrid[i].ConsigneeID;
             SchOrder.TransporterID = ScheduleGrid[i].TransporterID;
             SchOrder.TransporterName = ScheduleGrid[i].Transporter;
-            SchOrder.BookingID = ScheduleGrid[i].BookingID;
+            SchOrder.BookingID = 0;
 
             ObjSchOrder.push(SchOrder);
         }
@@ -1660,24 +1575,42 @@ $("#BtnSave").click(function () {
 function reloadOrderList(data) {
     $("#GridOrdersList").dxDataGrid({
         dataSource: data,
+        editing: {
+            mode: "cell",
+            allowUpdating: true
+        },
         columns: [
-            { dataField: "ProductName" },
-            { dataField: "CategoryName" },
-            { dataField: "HSNCode" },
-            { dataField: "HSNCode" },
-            { dataField: "Quantity" },
-            { dataField: "Rate" },
-            { dataField: "RateType" },
-            { dataField: "UnitCost" },
-            { dataField: "GSTPercantage" },
-            { dataField: "GSTAmount" },
-            { dataField: "MiscPercantage" },
-            { dataField: "MiscAmount" },
-            { dataField: "ShippingCost" },
-            { dataField: "ProfitPer" },
-            { dataField: "ProfitCost" },
-            { dataField: "FinalAmount" },
-            { dataField: "VendorName" }
+            { allowEditing: false, dataField: "ProductName" },
+            { allowEditing: false, dataField: "CategoryName" },
+            { allowEditing: false, dataField: "ProductHSNID", caption: "HSN Name", width: 100, validationRules: [{ type: "required" }], lookup: { dataSource: ProductHSNGrp, valueExpr: 'ProductHSNID', displayExpr: 'ProductHSNName' } },
+            { allowEditing: false, dataField: "Quantity" },
+            { allowEditing: false, dataField: "Rate" },
+            { allowEditing: false, dataField: "RateType" },
+            //{ allowEditing: false, dataField: "UnitCost" },
+            { allowEditing: false, dataField: "GSTPercantage" },
+            { allowEditing: false, dataField: "GSTAmount" },
+            { allowEditing: false, dataField: "MiscPercantage" },
+            { allowEditing: false, dataField: "MiscAmount" },
+            { allowEditing: false, dataField: "ShippingCost" },
+            { allowEditing: false, dataField: "ProfitPer" },
+            { allowEditing: false, dataField: "ProfitCost" },
+            { dataField: "CGSTTaxPercentage", caption: "CGST %", width: 60, dataType: "numeric", visible: false, allowEditing: false },
+            { dataField: "SGSTTaxPercentage", caption: "SGST %", width: 60, dataType: "numeric", visible: false, allowEditing: false },
+            { dataField: "IGSTTaxPercentage", caption: "IGST %", width: 60, dataType: "numeric", visible: false, allowEditing: false },
+            { dataField: "CGSTTaxAmount", caption: "CGST", dataType: "numeric", allowEditing: false },
+            { dataField: "SGSTTaxAmount", caption: "SGST", dataType: "numeric", allowEditing: false },
+            { dataField: "IGSTTaxAmount", caption: "IGST", dataType: "numeric", allowEditing: false },
+            { allowEditing: false, dataField: "FinalAmount" },
+            { allowEditing: false, dataField: "VendorName" },
+            {
+                dataField: "FinalDeliveryDate", width: 100, dataType: "date",
+                format: "dd-MMM-yyyy", allowEditing: true, validationRules: [{ type: "required", message: "Final date of delivery is required" },
+                { type: "range", min: new Date(), message: "Final date of delivery is not valid" }], allowEditing: true
+            },
+            { dataField: "JobType", visible: true, width: 80, validationRules: [{ type: "required" }], lookup: { dataSource: JobType, valueExpr: 'JobType', displayExpr: 'JobType' }, allowEditing: true },
+            { dataField: "JobReference", visible: true, width: 100, validationRules: [{ type: "required" }], lookup: { dataSource: JobReference, valueExpr: 'JobReference', displayExpr: 'JobReference' }, allowEditing: true },
+            { dataField: "JobPriority", visible: true, width: 100, validationRules: [{ type: "required" }], lookup: { dataSource: JobPriority, valueExpr: 'JobPriority', displayExpr: 'JobPriority' }, allowEditing: true },
+            { dataField: "PrePressRemark", width: 100 }
         ],
         onContentReady: function (e) {
             document.getElementById("TxtTotalOrderQty").value = 0//e.component.getTotalSummaryValue("Quantity");

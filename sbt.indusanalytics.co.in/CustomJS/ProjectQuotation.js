@@ -1,4 +1,5 @@
-﻿let ProductCatalogID = 0;
+﻿//"use strict";
+let ProductCatalogID = 0;
 let CategoryID = 0;
 let OprDatap = [];
 var SelectedProductData = [];
@@ -6,6 +7,10 @@ var AllContents = [];
 var processids = '';
 var suggestedprocessids = '';
 var Defaultprocessids = '';
+var ProjectBookingID = 0
+var EnquiryID = 0;
+var NetcostOffset = 0;
+var EditMode = false;
 $("#LoadIndicator").dxLoadPanel({
     shadingColor: "rgba(0,0,0,0.4)",
     indicatorSrc: "images/Indus logo.png",
@@ -132,7 +137,7 @@ $("#gridOperation").dxDataGrid({                  //// GridOperation  gridopr
     columnFixing: { enabled: true },
     filterRow: { visible: true },
     height: function () {
-        return window.innerHeight / 3.2;
+        return window.innerHeight / 4.2;
     },
     onRowPrepared: function (e) {
         setDataGridRowCss(e);
@@ -204,6 +209,175 @@ $.ajax({                //// Add All Active Contents
     }
 });
 
+
+$("#GridShowlistLoadFromEnquiry").dxDataGrid({
+    dataSource: [],
+    keyExpr: 'EnquiryID',
+    columnAutoWidth: true,
+    allowColumnResizing: true,
+    columnResizingMode: "widget",
+    sorting: { mode: 'multiple' },
+    selection: { mode: "single" },
+    filterRow: { visible: true },
+    columns: [
+        { dataField: "EnquiryNo", caption: "Enquiry No", width: 180 },
+        { dataField: "ProjectName", caption: "Project Name", width: 180 },
+        { dataField: "LedgerName", caption: "Client" },
+        { dataField: "SalesLedgerName", caption: "Sales Person" },
+        { dataField: "ProductName", caption: "Product Name" },
+        { dataField: "Quantity", caption: "Quantity" },
+
+    ],
+    showRowLines: true,
+    showBorders: true,
+    height: function () {
+        return window.innerHeight / 1.21;
+    },
+    onRowPrepared: function (e) {
+        setDataGridRowCss(e);
+    },
+    onSelectionChanged: function (selectedItems) {
+        var data = selectedItems.selectedRowsData;
+        if (data.length > 0) {
+            document.getElementById("BookingID").value = data[0].EnquiryID;
+            EnquiryID = data[0].EnquiryID;
+        }
+    }
+});
+$("#BtnLoadFromEnquiry").click(function (e) {
+    $("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
+    try {
+        $.ajax({
+            async: false,
+            type: "POST",
+            url: "WebServiceProductMaster.asmx/GetEnquiryList",
+            data: '{}',//
+            contentType: "application/json; charset=utf-8",
+            dataType: 'json',
+            success: function (results) {
+                var res = results.d.replace(/\\/g, '');
+                res = res.replace(/"d":""/g, '');
+                res = res.replace(/"d":null/g, '');
+                res = res.replace(/u0026/g, '&');
+                res = res.substr(1);
+                res = res.slice(0, -1);
+                var RES1 = JSON.parse(res.toString());
+                $("#GridShowlistLoadFromEnquiry").dxDataGrid({ dataSource: RES1 });
+                document.getElementById('BtnLoadFromEnquiry').setAttribute("data-toggle", "modal");
+                document.getElementById('BtnLoadFromEnquiry').setAttribute("data-target", "#modalLoadFromEnquiry");
+            },
+            error: function errorFunc(jqXHR) {
+                console.log(jqXHR);
+            }
+        });
+
+    } catch (e) {
+        console.log(e);
+    } finally {
+        $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+    }
+});
+
+function Getinputsizess(ID, Type) {
+    try {
+        $("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
+        $.ajax({
+            async: false,
+            type: 'post',
+            url: 'WebServiceProductMaster.asmx/GetInputSizess',
+            dataType: 'text',
+            contentType: "application/json; charset=utf-8",
+            data: '{ID:' + ID + '}',
+            crossDomain: true,
+            success: function (results) {
+                var res = results.replace(/\\/g, '');
+                res = res.replace(/"d":""/g, '');
+                res = res.replace(/""/g, '');
+                res = res.replace(/":,/g, '":null,');
+                res = res.replace(/":}/g, '":null}');
+                //res = res.replace(/}/g, '');
+                //res = res.replace(/{/g, '');
+                res = res.replace(/u0026/g, '&');
+                res = res.substr(1);
+                res = res.slice(23, -4);
+                if (res.includes("error code:404")) {
+                    $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+                    DevExpress.ui.notify("Data not found", "error", 1000);
+                    return;
+                }
+                GblInputValues = {};
+                var JobValues = res.split('AndOr');
+                for (var key in JobValues) {
+                    var spKey = JobValues[key].split('=');
+                    if (spKey[0] === "ItemPlanGsm") {
+                        GblInputValues[spKey[0]] = Number(spKey[1]);
+                    } else if (spKey[0] !== "Id")
+                        GblInputValues[spKey[0]] = spKey[1];
+                }
+                if (Type === "Offset") {
+                    saveContentsSizeValues(GblInputValues);
+                    readContentsSizeValues(GblInputValues.PlanContName)
+                    return
+                }
+                var gridProductData = $('#gridProductList').dxDataGrid('instance');
+                for (var i = 0; i < gridProductData._options.dataSource.length; i++) {
+                    if (gridProductData._options.dataSource[i].EnquiryIDDetail == ID)
+                        gridProductData._options.dataSource[i].ProductInputSizes = JSON.stringify(JSON.parse(res))
+                }
+
+
+                $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+                $("#gridProductConfig").dxDataGrid({ dataSource: JSON.parse(res) });
+
+            },
+            error: function errorFunc(jqXHR) {
+                // alert("not show");
+                $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+            }
+        });
+
+    } catch (e) {
+        console.log(e);
+    }
+}
+$("#BtnLoadFromListt").click(function () {
+    var datasource = $('#GridShowlistLoadFromEnquiry').dxDataGrid('instance')._options.dataSource;
+    datasource = $.grep(datasource, function (ex) { return ex.EnquiryID === Number(document.getElementById("BookingID").value) })
+    //document.getElementById("BookingID").value
+
+    $("#SelClient").dxSelectBox({
+        value: datasource[0].LedgerID
+    });
+    $("#SelSalesPerson").dxSelectBox({
+        value: datasource[0].SalesPersonID
+    });
+    document.getElementById('TxtProjectName').value = datasource[0].ProjectName;
+    document.getElementById('TxtFreightAmount').value = datasource[0].FreightAmount;
+    document.getElementById('TxtRemark').value = datasource[0].Narration;
+    document.getElementById('TxtQuoteNo').value = datasource[0].EnquiryNo
+
+    $('#gridProductList').dxDataGrid({
+        dataSource: datasource
+    })
+
+    datasource.map(val => {
+
+        if (val.IsUnitProduct !== true) {
+            if (val.IsOffsetProduct == true) {
+                document.getElementById("PlanContName").innerHTML = val.ProductName
+                document.getElementById("PlanContQty").innerHTML = val.Quantity;
+                document.getElementById("ContentOrientation").innerHTML = $.grep(AllContents, function (ex) { return ex.ContentID === $.grep(ProductMasterList, function (ex) { return ex.ProductCatalogID === val.ProductCatalogID; })[0].ContentID; })[0].ContentName;
+
+                Getinputsizess(val.EnquiryIDDetail, "Offset")
+            } else {
+                Getinputsizess(val.EnquiryIDDetail, "Flex")
+            }
+        }
+    });
+    EditMode = true;
+
+    document.getElementById("BtnLoadFromListt").setAttribute("data-dismiss", "modal");
+})
 var grid = $("#gridProductList").dxDataGrid({
     dataSource: [],
     columnAutoWidth: true,
@@ -317,20 +491,40 @@ var grid = $("#gridProductList").dxDataGrid({
                     .on('dxclick', function () {
                         if (options.data.Quantity === undefined || Number(options.data.Quantity) <= 0) return;
                         SelectedProductData = options.data;
-                        document.getElementById("TxtProductName").value = options.data.ProductName;
-                        document.getElementById("TxtProductNameUnit").value = options.data.ProductName;
-                        document.getElementById("TxtPlanQty").value = options.data.Quantity;
-                        document.getElementById("TxtPlanQtyUnit").value = options.data.Quantity;
-                        document.getElementById("FinalTaxPer").value = options.data.GSTTaxPercentage;
-                        document.getElementById("FinalTaxPer1").value = options.data.GSTTaxPercentage;
-                        document.getElementById("FinalTaxPerUnit").value = options.data.GSTTaxPercentage;
-                        document.getElementById("FinalMiscPer1").value = Number(options.data.MiscPer);
-                        document.getElementById("FinalMiscPer").value = Number(options.data.MiscPer);
-                        document.getElementById("FinalMiscPerUnit").value = Number(options.data.MiscPer);
-                        document.getElementById("FinalShipperCost").value = Number(options.data.ShippingCost);
-                        document.getElementById("FinalShipperCost1").value = Number(options.data.ShippingCost);
-                        document.getElementById("FinalShipperCostUnit").value = Number(options.data.ShippingCost);
-                        document.getElementById("FinalTotal").value = Number(options.data.FinalAmount);
+
+                        if (options.data.ProductName == "" || options.data.ProductName == undefined) {
+                            var result = $.grep(ProductMasterList, function (ex) { return ex.ProductCatalogID === options.data.ProductCatalogID; })
+                            options.data.ProductName = result[0].ProductName
+                        }
+                        document.getElementById("TxtProductName").value = options.data.ProductName === undefined ? '' : options.data.ProductName;
+                        document.getElementById("TxtProductNameUnit").value = options.data.ProductName === undefined ? '' : options.data.ProductName;
+                        document.getElementById("TxtPlanQty").value = options.data.Quantity === undefined ? 0 : options.data.Quantity;
+                        document.getElementById("TxtPlanQtyUnit").value = options.data.Quantity === undefined ? 0 : options.data.Quantity;
+                        document.getElementById("FinalTaxPer").value = options.data.GSTTaxPercentage === undefined ? 0 : options.data.GSTTaxPercentage;
+                        document.getElementById("FinalTaxPer1").value = options.data.GSTTaxPercentage === undefined ? 0 : options.data.GSTTaxPercentage;
+                        document.getElementById("FinalTaxPerUnit").value = options.data.GSTTaxPercentage === undefined ? 0 : options.data.GSTTaxPercentage;
+                        document.getElementById("FinalMiscPer1").value = Number(options.data.MiscPer === undefined ? 0 : options.data.MiscPer);
+                        document.getElementById("FinalMiscPer").value = Number(options.data.MiscPer === undefined ? 0 : options.data.MiscPer);
+                        document.getElementById("FinalMiscPerUnit").value = Number(options.data.MiscPer === undefined ? 0 : options.data.MiscPer);
+                        document.getElementById("FinalShipperCost").value = Number(options.data.ShippingCost === undefined ? 0 : options.data.ShippingCost);
+                        document.getElementById("FinalShipperCost1").value = Number(options.data.ShippingCost === undefined ? 0 : options.data.ShippingCost);
+                        document.getElementById("FinalShipperCostUnit").value = Number(options.data.ShippingCost === undefined ? 0 : options.data.ShippingCost);
+                        document.getElementById("ProfitCost1").value = Number(options.data.ProfitCost === undefined ? 0 : options.data.ProfitCost);
+                        document.getElementById("ProfitPer1").value = Number(options.data.ProfitPer === undefined ? 0 : options.data.ProfitPer);
+
+                        document.getElementById("ProfitCost").value = Number(options.data.ProfitCost === undefined ? 0 : options.data.ProfitCost);
+                        document.getElementById("ProfitPer").value = Number(options.data.ProfitPer === undefined ? 0 : options.data.ProfitPer);
+
+                        document.getElementById("ProfitCostUnit").value = Number(options.data.ProfitCost === undefined ? 0 : options.data.ProfitCost);
+                        document.getElementById("ProfitPerUnit").value = Number(options.data.ProfitPer === undefined ? 0 : options.data.ProfitPer);
+
+                        document.getElementById("FinalTotal").value = Number(options.data.FinalAmount === undefined ? 0 : options.data.FinalAmount);
+
+                        if (options.data.IsOffsetProduct === true) {
+                            document.getElementById("PlanContName").innerHTML = $.grep(ProductMasterList, function (ex) { return ex.ProductCatalogID === options.data.ProductCatalogID; })[0].ProductName;
+                            document.getElementById("PlanContQty").innerHTML = options.data.Quantity;
+                            document.getElementById("ContentOrientation").innerHTML = $.grep(AllContents, function (ex) { return ex.ContentID === $.grep(ProductMasterList, function (ex) { return ex.ProductCatalogID === options.data.ProductCatalogID; })[0].ContentID; })[0].ContentName;
+                        }
 
                         const City = document.getElementById("TxtClientCity").value;
                         if (City === "" | City === undefined) {
@@ -338,28 +532,37 @@ var grid = $("#gridProductList").dxDataGrid({
                             DevExpress.ui.notify("Please select client for best nearby plan..!", "warning", 1500);
                         }
                         ProductCatalogID = options.data.ProductCatalogID;
-                        processids = options.data.ProcessIDStr;
-                        Defaultprocessids = options.data.DefaultProcessStr;
+                        processids = options.data.ProcessIDStr == null ? '' : options.data.ProcessIDStr;
+                        Defaultprocessids = options.data.DefaultProcessStr == null ? '' : options.data.DefaultProcessStr;
                         $("#gridContentPlansList").dxDataGrid({ dataSource: [] });
 
 
                         loadProcess();
                         $("OperIdPQ").text(options.data.ProcessIDStr);
 
-
                         //reload already created plan for the selected product
-                        if (options.data.VendorID > 0 && options.data.IsOffsetProduct !== true && options.data.IsUnitProduct !== true) {
-                            let plandata = [];
-                            plandata.push(options.data);
-                            $("#gridContentPlansList").dxDataGrid({ dataSource: plandata });
+                        if ((options.data.VendorID > 0 && options.data.IsOffsetProduct !== true && options.data.IsUnitProduct !== true) || (options.data.ProductInputSizes !== "" && options.data.ProductInputSizes !== undefined && options.data.IsOffsetProduct !== true && options.data.IsUnitProduct !== true)) {
+                            if (options.data.VendorID > 0) {
+                                //let plandata = [];
+                                //plandata.push(options.data.SelectedPlan);
+                                $("#gridContentPlansList").dxDataGrid({ dataSource: JSON.parse(options.data.SelectedPlan) });
+                            }
+                            //if (queryString["FG"] === "Review" || queryString["FG"] === "false") {
+                            //    //Getinputsizes(options.data.ProductEstimationContentID)
+                            //} else {
                             $("#gridProductConfig").dxDataGrid({ dataSource: JSON.parse(options.data.ProductInputSizes) });
+                            //}
                         } else {
                             if (options.data.IsUnitProduct !== true && options.data.IsOffsetProduct !== true)
                                 GetProductConfig(ProductCatalogID);
                         }
 
                         if (options.data.IsOffsetProduct === true) {
+                            //if (queryString["FG"] === "Review" || queryString["FG"] === "false") {
+                            //    GetAllPlans(options.data.BookingID)
+                            //}
                             allQuantity(options.data.Quantity, $.grep(ProductMasterList, function (ex) { return ex.ProductCatalogID === options.data.ProductCatalogID; })[0].ProductName, $.grep(AllContents, function (ex) { return ex.ContentID === $.grep(ProductMasterList, function (ex) { return ex.ProductCatalogID === options.data.ProductCatalogID; })[0].ContentID; })[0].ContentName, $.grep(ProductMasterList, function (ex) { return ex.ProductCatalogID === options.data.ProductCatalogID; })[0].ProductImagePath)
+                            onChangeCalcAmountp();
                         } else {
                             if (options.data.IsUnitProduct === true) {
                                 document.getElementById("VendorRate").value = Number(options.data.Rate);
@@ -369,6 +572,7 @@ var grid = $("#gridProductList").dxDataGrid({
                                 })
                                 this.setAttribute("data-toggle", "modal");
                                 this.setAttribute("data-target", "#modalEstimateProductUnit");
+                                CalculateUnitCost();
                                 return;
                             }
                             this.setAttribute("data-toggle", "modal");
@@ -380,7 +584,8 @@ var grid = $("#gridProductList").dxDataGrid({
                     .appendTo(container);
             },
         },
-        { dataField: "Rate", caption: "Cost", allowEditing: false, dataType: "number", /*validationRules: [{ type: "required", message: "Rate is required" }]*/ },
+        { dataField: "Rate", caption: "Rate", allowEditing: false, dataType: "number", /*validationRules: [{ type: "required", message: "Rate is required" }]*/ },
+        { dataField: "UnitCost", caption: "Unit Price", allowEditing: false, visible: true },
         {
             dataField: "RateType", caption: "Rate Type", allowEditing: true,
             lookup: {
@@ -415,7 +620,6 @@ var grid = $("#gridProductList").dxDataGrid({
         { dataField: "City", caption: "City", allowEditing: false, visible: false },
         { dataField: "ProcessCost", caption: "Operation Amount", allowEditing: false, visible: false },
         { dataField: "FinalAmount", caption: "Final Amount", allowEditing: false, visible: true },
-        { dataField: "UnitCost", caption: "Unit Price", allowEditing: false, visible: false },
         { dataField: "ProfitPer", caption: "Profit", allowEditing: false, visible: false },
         { dataField: "ProfitCost", caption: "Profit", allowEditing: false, visible: true },
         { dataField: "ProcessIDStr", allowEditing: false, visible: false },
@@ -502,6 +706,8 @@ var grid = $("#gridProductList").dxDataGrid({
 function AddRow() {
     $('#gridProductList').dxDataGrid('instance').addRow();
 }
+
+
 $("#gridProductConfig").dxDataGrid({
     dataSource: [],
     columnAutoWidth: true,
@@ -543,7 +749,7 @@ $("#gridProductConfig").dxDataGrid({
     showRowLines: true,
     showBorders: true,
     height: function () {
-        return window.innerHeight / 3.2;
+        return window.innerHeight / 4.2;
     },
     onRowPrepared: function (e) {
         setDataGridRowCss(e);
@@ -605,10 +811,13 @@ $("#gridContentPlansList").dxDataGrid({
     showRowLines: true,
     showBorders: true,
     height: function () {
-        return window.innerHeight / 3;
+        return window.innerHeight / 4;
     },
     onRowPrepared: function (e) {
         setDataGridRowCss(e);
+    },
+    onContentReady(e) {
+        if (!e.component.getSelectedRowKeys().length) { e.component.selectRowsByIndexes(0); }
     },
     onSelectionChanged: function (data) {
         if (data) {
@@ -714,7 +923,6 @@ $.ajax({
         console.log(jqXHR);
     }
 });
-
 function loadProcess() {
     $.ajax({
         async: false,
@@ -730,12 +938,16 @@ function loadProcess() {
             res = res.substr(1);
             res = res.slice(0, -1);
             $("#GridOperation").dxDataGrid({ dataSource: [] });
+            $("#GridOperationAllocated").dxDataGrid({ dataSource: [] });
             var fillarraySuggested = $.grep(JSON.parse(res.toString()), function (e) {
                 return Defaultprocessids.split(',').indexOf(e.ProcessID.toString()) < 0;
             });
             ObjDefaultProcess = $.grep(JSON.parse(res.toString()), function (e) {
                 return Defaultprocessids.split(',').indexOf(e.ProcessID.toString()) > -1;
             });
+            if (EditMode) {
+                saveContentsOprations(ObjDefaultProcess)
+            }
             $("#GridOperation").dxDataGrid({                  //// GridOperation  gridopr
                 dataSource: {
                     store: {
@@ -754,6 +966,45 @@ function loadProcess() {
         }
     });
 }
+//function loadProcess() {
+//    $.ajax({
+//        async: false,
+//        type: 'POST',
+//        url: "WebServicePlanWindow.asmx/SuggestedOperations",
+//        dataType: 'json',
+//        contentType: "application/json; charset=utf-8",
+//        data: "{'processids': '" + processids + "'}",
+//        crossDomain: true,
+//        success: function (results) {
+//            if (results.d === "500") return;
+//            var res = results.d.replace(/\\/g, '');
+//            res = res.substr(1);
+//            res = res.slice(0, -1);
+//            $("#GridOperation").dxDataGrid({ dataSource: [] });
+//            var fillarraySuggested = $.grep(JSON.parse(res.toString()), function (e) {
+//                return Defaultprocessids.split(',').indexOf(e.ProcessID.toString()) < 0;
+//            });
+//            ObjDefaultProcess = $.grep(JSON.parse(res.toString()), function (e) {
+//                return Defaultprocessids.split(',').indexOf(e.ProcessID.toString()) > -1;
+//            });
+//            $("#GridOperation").dxDataGrid({                  //// GridOperation  gridopr
+//                dataSource: {
+//                    store: {
+//                        type: "array",
+//                        data: fillarraySuggested,
+//                        key: "ProcessID"
+//                    }
+//                },
+//            });
+//            $("#GridOperationAllocated").dxDataGrid({
+//                dataSource: ObjDefaultProcess,
+//            });
+//        },
+//        error: function errorFunc(jqXHR) {
+//             alert(jqXHR.message);
+//        }
+//    });
+//}
 
 $.ajax({
     type: "POST",
@@ -896,8 +1147,8 @@ $("#BtnApplyPlan").click(function () {
         DevExpress.ui.notify("Please select vendor rate for the product..!", "warning", 2000);
         return;
     }
-    var FinalQuotedCost1 = Number(document.getElementById("FinalTotal").value);
     var FinalAmount = Number(document.getElementById("FinalTotal").value);
+    var UnitCost = Number(document.getElementById("FinalUnitCost1").value);
     var FinalMiscPer = Number(document.getElementById("FinalMiscPer1").value);
     var FinalShipperCost = Number(document.getElementById("FinalShipperCost1").value);
     var gridProductData = $('#gridProductList').dxDataGrid('instance');
@@ -905,12 +1156,19 @@ $("#BtnApplyPlan").click(function () {
     var ProfitPer = Number(document.getElementById("ProfitPer1").value);
     var ProfitCost = Number(document.getElementById("ProfitCost1").value);
 
+    var NetAmt = Number(document.getElementById("NetAmtflex").value);
+    var GSTAmount = Number(document.getElementById("FinalTaxCost1").value);
+    var FinalTaxPer = Number(document.getElementById("FinalTaxPer1").value);
+
+    var PrdDisc = document.getElementById("FlexPrdDisc").value;
+    var PkgDtail = document.getElementById("FlexPkgDtail").value;
+    var OtrDisc = document.getElementById("FlexOtrDisc").value;
 
     for (var i = 0; i < gridProductData._options.dataSource.length; i++) {
         if (gridProductData._options.dataSource[i].ProductCatalogID === ProductCatalogID && gridProductData._options.dataSource[i].Quantity === Number(document.getElementById("TxtPlanQty").value)) {
-            gridProductData._options.dataSource[i].Rate = (FinalAmount / SelectedPlanData[0].RequiredQuantity).toFixed(2);
-            gridProductData._options.dataSource[i].RateType = "Per Square Feet";
-            gridProductData._options.dataSource[i].Amount = SelectedPlanData[0].FinalAmount;
+            gridProductData._options.dataSource[i].Rate = SelectedPlanData[0].UnitCost;
+            gridProductData._options.dataSource[i].RateType = "Per Unit";
+            gridProductData._options.dataSource[i].Amount = NetAmt;
             gridProductData._options.dataSource[i].VendorName = SelectedPlanData[0].VendorName;
             gridProductData._options.dataSource[i].VendorID = SelectedPlanData[0].VendorID;
             gridProductData._options.dataSource[i].City = SelectedPlanData[0].City;
@@ -919,14 +1177,19 @@ $("#BtnApplyPlan").click(function () {
             gridProductData._options.dataSource[i].VendorRate = SelectedPlanData[0].VendorRate;
             gridProductData._options.dataSource[i].ProfitPer = Number(ProfitPer);
             gridProductData._options.dataSource[i].ProfitCost = Number(ProfitCost);
+            gridProductData._options.dataSource[i].GSTAmount = Number(GSTAmount);
+            gridProductData._options.dataSource[i].GSTTaxPercentage = Number(FinalTaxPer);
             gridProductData._options.dataSource[i].ProcessIDStr = $("OperIdPQ").text();
             gridProductData._options.dataSource[i].ProcessCost = SelectedPlanData[0].ProcessCost;
-            gridProductData._options.dataSource[i].UnitCost = SelectedPlanData[0].UnitCost;
+            gridProductData._options.dataSource[i].UnitCost = UnitCost.toFixed(2);
             gridProductData._options.dataSource[i].ProductInputSizes = JSON.stringify(gridProductConfig);
-            gridProductData._options.dataSource[i].Amount = Number(FinalAmount);
+            gridProductData._options.dataSource[i].SelectedPlan = JSON.stringify(SelectedPlanData);
+            gridProductData._options.dataSource[i].FinalAmount = Number(FinalAmount);
             gridProductData._options.dataSource[i].MiscPer = Number(FinalMiscPer);
             gridProductData._options.dataSource[i].ShippingCost = Number(FinalShipperCost);
-            gridProductData._options.dataSource[i].FinalAmount = Number(FinalQuotedCost1);;
+            gridProductData._options.dataSource[i].DescriptionOther = OtrDisc;
+            gridProductData._options.dataSource[i].PackagingDetails = PkgDtail;
+            gridProductData._options.dataSource[i].ProductDescription = PrdDisc;
             gridProductData.refresh();
             break;
         }
@@ -940,6 +1203,12 @@ $("#BtnApplyPlan").click(function () {
 });
 
 $("#BtnSave").click(function () {
+
+    //if (EnquiryID <= 0) {
+    //    alert("Please Make Enquiry First To Save Estimation");
+    //    return;
+    //}
+
     swal({
         title: "Project Quotation Saving...",
         text: 'Are you sure to save?',
@@ -994,13 +1263,11 @@ function FinalSave(BookingID) {
     ObjMainDetail.ProjectName = TxtProjectName;
     ObjMainDetail.Narration = TxtRemark;
     ObjMainDetail.BookingID = BookingID;
+    //ObjMainDetail.EnquiryID = EnquiryID;
     ObjMainDetail.FreightAmount = TxtFreightAmount;
     ObjMain.push(ObjMainDetail);
 
-    let SbProductHSNID = 0;
-    let QuotedCost = 0;
-    let TypeOfCost = "";
-    let PlanQty = 0;
+
     for (var i = 0; i < gridProductList._options.dataSource.length; i++) {
         gridProductData = {};
         if (Number(gridProductList._options.dataSource[i].Rate) >= 0 && Number(gridProductList._options.dataSource[i].Amount) >= 0) {
@@ -1027,14 +1294,17 @@ function FinalSave(BookingID) {
             gridProductData.ProcessCost = gridProductList._options.dataSource[i].ProcessCost;
             gridProductData.UnitCost = gridProductList._options.dataSource[i].UnitCost;
             gridProductData.ProductInputSizes = gridProductList._options.dataSource[i].ProductInputSizes;
-            gridProductData.MiscAmount = Number(gridProductList._options.dataSource[i].FinalAmount) / 100 * Number(gridProductList._options.dataSource[i].MiscPer);
-            gridProductData.GSTAmount = Number(gridProductList._options.dataSource[i].FinalAmount) / 100 * Number(gridProductList._options.dataSource[i].GSTTaxPercentage);
+            gridProductData.SelectedPlan = gridProductList._options.dataSource[i].SelectedPlan;
+            gridProductData.MiscAmount = Number(gridProductList._options.dataSource[i].MiscAmount);
+            gridProductData.GSTAmount = Number(gridProductList._options.dataSource[i].GSTAmount);
             gridProductData.GSTPercantage = gridProductList._options.dataSource[i].GSTTaxPercentage;
             gridProductData.ProfitPer = gridProductList._options.dataSource[i].ProfitPer;
             gridProductData.ProfitCost = gridProductList._options.dataSource[i].ProfitCost;
             gridProductData.MiscPercantage = gridProductList._options.dataSource[i].MiscPer;
             gridProductData.ShippingCost = gridProductList._options.dataSource[i].ShippingCost;
-
+            gridProductData.ProductDescription = gridProductList._options.dataSource[i].ProductDescription;
+            gridProductData.PackagingDetails = gridProductList._options.dataSource[i].PackagingDetails;
+            gridProductData.DescriptionOther = gridProductList._options.dataSource[i].DescriptionOther;
             objProductConfig.push(gridProductData);
         }
     }
@@ -1042,11 +1312,15 @@ function FinalSave(BookingID) {
         swal("Please plan the product first..");
         return;
     }
+    var BookingNo = document.getElementById("TxtQuoteNo").value;
+    var Quo_No = BookingNo.split('.');
+    BookingNo = Quo_No[0];
+
     $("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
     $.ajax({
         type: "POST",
         url: "WebServiceProductMaster.asmx/SaveProjectQuotation",
-        data: '{ObjMain:' + JSON.stringify(ObjMain) + ',ObjProductConfig:' + JSON.stringify(objProductConfig) + '}',
+        data: '{ObjMain:' + JSON.stringify(ObjMain) + ',ObjProductConfig:' + JSON.stringify(objProductConfig) + ',FlagSave:' + JSON.stringify(FlagSave) + ',BookingNo:' + JSON.stringify(BookingNo) + '}',
         contentType: "application/json; charset=utf-8",
         dataType: "json",
         success: function (results) {
@@ -1062,7 +1336,10 @@ function FinalSave(BookingID) {
                 Type = "error";
             }
             swal(Title, Text, Type);
-            if (Type === "success") window.location.reload();
+            if (Type === "success") {
+                window.location.href = window.location.href.split("?")[0].split("#")[0];
+                window.location.href.reload(true);
+            };
         },
         error: function errorFunc(jqXHR) {
             $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
@@ -1230,29 +1507,41 @@ $("#btnApplyCostPQ").click(function () {
         var lclGridForms = $("#GridFormsDetails").dxDataGrid('instance')._controllers.data._dataSource._items;
 
         var FinalQuotedCost1 = Number(document.getElementById("finalquotatedCost").value);
-        var FinalAmount = Number(document.getElementById("finalquotatedCost").value);
+        var NetAmount = Number(document.getElementById('NetAmt').value);
         var FinalMiscPer = Number(document.getElementById("FinalMiscPer").value);
         var FinalShipperCost = Number(document.getElementById("FinalShipperCost").value);
         var ProfitPer = Number(document.getElementById("ProfitPer").value);
         var ProfitCost = Number(document.getElementById("ProfitCost").value);
+        var GSTAmount = Number(document.getElementById("FinalTaxCost").value);
+        var FinalTaxPer = Number(document.getElementById("FinalTaxPer").value);
+
+
+        var PrdDisc = document.getElementById("OffsetPrdDisc").value;
+        var PkgDtail = document.getElementById("OffsetPkgDtail").value;
+        var OtrDisc = document.getElementById("OffsetOtrDisc").value;
 
         var gridProductData = $('#gridProductList').dxDataGrid('instance');
 
         for (var i = 0; i < gridProductData._options.dataSource.length; i++) {
             if (gridProductData._options.dataSource[i].ProductCatalogID === ProductCatalogID && gridProductData._options.dataSource[i].Quantity === Number(document.getElementById("TxtPlanQty").value)) {
                 gridProductData._options.dataSource[i].Rate = Number(document.getElementById('finalUnitCost').value);
+                gridProductData._options.dataSource[i].VendorRate = Number(document.getElementById('finalUnitCost').value);
                 gridProductData._options.dataSource[i].RateType = "Per Unit";
-                gridProductData._options.dataSource[i].Amount = Number(FinalAmount);
+                gridProductData._options.dataSource[i].Amount = Number(NetAmount);
                 gridProductData._options.dataSource[i].MiscPer = Number(FinalMiscPer);
                 gridProductData._options.dataSource[i].ShippingCost = Number(FinalShipperCost);
                 gridProductData._options.dataSource[i].FinalAmount = Number(FinalQuotedCost1);
                 gridProductData._options.dataSource[i].ProfitPer = Number(ProfitPer);
                 gridProductData._options.dataSource[i].ProfitCost = Number(ProfitCost);
+                gridProductData._options.dataSource[i].GSTAmount = Number(GSTAmount);
+                gridProductData._options.dataSource[i].GSTTaxPercentage = Number(FinalTaxPer);
                 gridProductData._options.dataSource[i].RequiredQuantity = gridProductData._options.dataSource[i].Quantity;
-                gridProductData._options.dataSource[i].VendorRate = GblPlanValues.PrintingRate;
                 gridProductData._options.dataSource[i].UnitCost = Number(document.getElementById('finalUnitCost').value);
                 gridProductData._options.dataSource[i].VendorID = GblPlanValues.VendorID;
                 gridProductData._options.dataSource[i].VendorName = GblPlanValues.VendorName;
+                gridProductData._options.dataSource[i].DescriptionOther = OtrDisc;
+                gridProductData._options.dataSource[i].PackagingDetails = PkgDtail;
+                gridProductData._options.dataSource[i].ProductDescription = PrdDisc;
                 gridProductData.refresh();
                 break;
             }
@@ -1284,66 +1573,96 @@ $("#btnApplyCostPQ").click(function () {
 
 function onChangeCalcAmountp(id) {
     try {
-
         var taxper = Number(document.getElementById('FinalTaxPer').value);
         var FinalShipperCost = Number(document.getElementById('FinalShipperCost').value);
         var FinalMiscPer = Number(document.getElementById('FinalMiscPer').value);
-        var finalCost = Number(document.getElementById('finalCost').value);
+        var finalCost = Number(NetcostOffset)// Number(document.getElementById('finalCost').value);
         var ProfitPer = Number(document.getElementById('ProfitPer').value);
         var MiscCost = Number(document.getElementById('FinalMiscCost').value);
         var ProfitCost = Number(document.getElementById('ProfitCost').value);
-        var taxamt = finalCost * taxper / 100;
 
+    
+
+        // Adding Misc Cost 
         if (id != undefined && id === 'FinalMiscCost') {
             document.getElementById('FinalMiscPer').value = (MiscCost * 100 / (finalCost)).toFixed(2);
         } else {
             document.getElementById('FinalMiscCost').value = (finalCost * FinalMiscPer / 100).toFixed(2);
         }
+        finalCost += Number(document.getElementById('FinalMiscCost').value);
 
+        // Calculation of Profits
+        if (id != undefined && id === 'ProfitCost') {
+            document.getElementById('ProfitPer').value = (ProfitCost * 100 / (finalCost)).toFixed(2);
+        } else {
+            document.getElementById('ProfitCost').value = (finalCost * ProfitPer / 100).toFixed(2);
+        }
+        finalCost += Number(document.getElementById('ProfitCost').value);
+
+        // Adding Shiping Cost To final Amt 
+        finalCost += Number(FinalShipperCost);
+
+        finalCost = Number(document.getElementById('PlanContQty').innerHTML)* Number(Number(finalCost) / Number(document.getElementById('PlanContQty').innerHTML)).toFixed(2)
+
+
+        var taxamt = finalCost * taxper / 100;
+
+        document.getElementById('NetAmt').value = Number(finalCost).toFixed(2);
+        document.getElementById('ShippingGSTOffset').innerText = Number(Number(FinalShipperCost) + Number(FinalShipperCost * 18 / 100)).toFixed(2);
 
         document.getElementById('finalquotatedCost').value = 0;
         document.getElementById('FinalTaxCost').value = taxamt.toFixed(2);
-        var totalfinal = (Number(finalCost) + Number(document.getElementById('FinalTaxCost').value) + Number(document.getElementById('FinalMiscCost').value) + Number(FinalShipperCost)).toFixed(2);
-        if (id != undefined && id === 'ProfitCost') {
-            document.getElementById('ProfitPer').value = (ProfitCost * 100 / (totalfinal)).toFixed(2);
-        } else {
-            document.getElementById('ProfitCost').value = (totalfinal * ProfitPer / 100).toFixed(2);
-        }
-        document.getElementById('finalquotatedCost').value = (Number(totalfinal) + Number(document.getElementById('ProfitCost').value)).toFixed(2)
-        document.getElementById('finalUnitCost').value = Number(totalfinal / Number(document.getElementById('TxtFinalQuantity').value)).toFixed(2);
-
+        document.getElementById('finalquotatedCost').value = (Number(finalCost) + Number(taxamt)).toFixed(2)
+        document.getElementById('finalUnitCost').value = Number(Number(finalCost) / Number(document.getElementById('PlanContQty').innerHTML)).toFixed(2);
+        //document.getElementById('QuotedUCostOffset').innerHTML = Number(Number(finalCost) / Number(document.getElementById('PlanContQty').innerHTML)).toFixed(2);
 
     } catch (e) {
         alert(e);
     }
 }
+
+
 function onChangeCalcAmountFlex(id) {
     try {
+        var finalCost = Number(document.getElementById('finalCost1').value);
+        var QTY = Number(document.getElementById('TxtPlanQty').value);
         var ProfitPer = Number(document.getElementById('ProfitPer1').value);
         var taxper = Number(document.getElementById('FinalTaxPer1').value);
         var FinalShipperCost = Number(document.getElementById('FinalShipperCost1').value);
         var FinalMiscPer = Number(document.getElementById('FinalMiscPer1').value);
-        var finalCost = Number(document.getElementById('finalCost1').value);
         var MiscCost = Number(document.getElementById('FinalMiscCost1').value);
         var ProfitCost = Number(document.getElementById('ProfitCost1').value);
-        var taxamt = finalCost * taxper / 100;
+
+        // Adding Misc Cost 
         if (id != undefined && id === 'FinalMiscCost1') {
             document.getElementById('FinalMiscPer1').value = (MiscCost * 100 / (finalCost)).toFixed(2);
         } else {
             document.getElementById('FinalMiscCost1').value = (finalCost * FinalMiscPer / 100).toFixed(2);
         }
+        finalCost += Number(document.getElementById('FinalMiscCost1').value);
 
+
+        // Calculation Profit 
+        if (id != undefined && id === 'ProfitCost1') {
+            document.getElementById('ProfitPer1').value = (ProfitCost * 100 / (finalCost)).toFixed(2);
+        } else {
+            document.getElementById('ProfitCost1').value = (finalCost * ProfitPer / 100).toFixed(2);
+        }
+        finalCost += Number(document.getElementById('ProfitCost1').value);
+
+      
+        // Adding Shiping Cost To final Amt
+        finalCost += Number(FinalShipperCost);
+        var taxamt = finalCost * taxper / 100;
+
+        document.getElementById('NetAmtflex').value = Number(finalCost).toFixed(2);
 
         document.getElementById('FinalTaxCost1').value = taxamt.toFixed(2);
-        //document.getElementById('FinalMiscCost1').value = Miscamt.toFixed(2);
-        var totalfinal = (Number(finalCost) + Number(document.getElementById('FinalTaxCost1').value) + Number(document.getElementById('FinalMiscCost1').value) + Number(FinalShipperCost)).toFixed(3);
-        if (id != undefined && id === 'ProfitCost1') {
-            document.getElementById('ProfitPer1').value = (ProfitCost * 100 / (totalfinal)).toFixed(2);
-        } else {
-            document.getElementById('ProfitCost1').value = (totalfinal * ProfitPer / 100).toFixed(2);
-        }
-        document.getElementById('FinalTotal').value = (Number(totalfinal) + Number(document.getElementById('ProfitCost1').value)).toFixed(2);
+        document.getElementById('ShippingGSTFlex').innerText = Number(Number(FinalShipperCost) + Number(FinalShipperCost * 18 / 100)).toFixed(2);
 
+        document.getElementById('FinalTotal').value = (Number(finalCost) + Number(taxamt)).toFixed(2);
+
+        document.getElementById('FinalUnitCost1').value = Number(Number(finalCost) / QTY).toFixed(2);
     } catch (e) {
         alert(e);
     }
@@ -1438,6 +1757,7 @@ function readAllSelectedPlans() {
         console.log(e);
     }
 }
+
 function callSaveQuote(TblPlanning, TblOperations, TblContentForms) {
     var JobName = document.getElementById("TxtProjectName").value.trim();
     var ArtWorkCode = document.getElementById("ArtWorkCode").value.trim();
@@ -1527,9 +1847,9 @@ function callSaveQuote(TblPlanning, TblOperations, TblContentForms) {
         }
     }
     var CostingData = JSON.stringify(jsonObjectsCosting);
-    var BookingNo = document.getElementById("QuotationNo").value;
-    var Quo_No = BookingNo.split('.');
-    BookingNo = Quo_No[0];
+    //var BookingNo = document.getElementById("QuotationNo").value;
+    //var Quo_No = BookingNo.split('.');
+    //BookingNo = Quo_No[0];
 
     document.getElementById("BtnSaveQuotation").style.display = 'none';
     $.ajax({
@@ -1537,7 +1857,7 @@ function callSaveQuote(TblPlanning, TblOperations, TblContentForms) {
         type: "POST",
         url: "WebServicePlanWindow.asmx/saveQuotationData",
         data: '{TblBooking:' + JSON.stringify(TblBooking) + ',TblPlanning:' + JSON.stringify(TblPlanning) + ',TblOperations:' + JSON.stringify(TblOperations) + '' +
-            ', TblContentForms: ' + JSON.stringify(TblContentForms) + ', CostingData: ' + CostingData + ', FlagSave: ' + JSON.stringify(true) + ', BookingNo: "",ObjShippers:[],ArrObjAttc:[]}',
+            ', TblContentForms: ' + JSON.stringify(TblContentForms) + ', CostingData: ' + CostingData + ', FlagSave: ' + JSON.stringify(FlagSave) + ', BookingNo: ' + JSON.stringify(ProjectBookingID) + ',ObjShippers:[],ArrObjAttc:[]}',
         contentType: "application/json; charset=utf-8",
         dataType: "text",
         success: function (results) {
@@ -1591,29 +1911,43 @@ function CalculateUnitCost(id) {
     var MiscCost = Number(document.getElementById('FinalMiscCostUnit').value);
     var ProfitCost = Number(document.getElementById('ProfitCostUnit').value);
 
-    document.getElementById('finalCostUnit').value = QTY * Rate;
+    var finalCost = Number(QTY * Rate);
 
-    var finalCost = Number(document.getElementById('finalCostUnit').value);
-
-    var taxamt = Number(finalCost * taxper / 100).toFixed(2);
-    document.getElementById('FinalTaxCostUnit').value = taxamt;
-
+    // Misc Cost Calculation --
     if (id != undefined && id === 'FinalMiscCostUnit') {
         document.getElementById('FinalMiscPerUnit').value = (MiscCost * 100 / (finalCost)).toFixed(2);
     } else {
         document.getElementById('FinalMiscCostUnit').value = finalCost * FinalMiscPer / 100;
     }
 
-    var totalfinal = (Number(document.getElementById('finalCostUnit').value) + Number(document.getElementById('FinalTaxCostUnit').value) + Number(document.getElementById('FinalMiscCostUnit').value) + Number(FinalShipperCost)).toFixed(2);
+    finalCost += Number(document.getElementById('FinalMiscCostUnit').value);
 
+    // Profit Cost Calculation ---
     if (id != undefined && id === 'ProfitCostUnit') {
-        document.getElementById('ProfitPerUnit').value = (ProfitCost * 100 / (totalfinal)).toFixed(2);
+        document.getElementById('ProfitPerUnit').value = (ProfitCost * 100 / (finalCost)).toFixed(2);
     } else {
-        document.getElementById('ProfitCostUnit').value = (totalfinal * ProfitPer / 100).toFixed(2);
+        document.getElementById('ProfitCostUnit').value = (finalCost * ProfitPer / 100).toFixed(2);
     }
 
-    document.getElementById('FinalTotalUnit').value = (Number(totalfinal) + Number(document.getElementById('ProfitCostUnit').value));
-    document.getElementById('FinalUnitCostUnit').value = (Number(document.getElementById('FinalTotalUnit').value) / QTY).toFixed(2);
+    finalCost += Number(document.getElementById('ProfitCostUnit').value);
+
+
+   
+    // Adding Shipping Cost 
+    finalCost += Number(FinalShipperCost);
+
+    // Tax Calculation
+    var TaxtAmt = Number(finalCost * taxper / 100).toFixed(2);
+
+    // Cost Calculation or Net Amount without GST
+    document.getElementById('finalCostUnit').value = Number(finalCost).toFixed(2)
+
+    document.getElementById('FinalTaxCostUnit').value = TaxtAmt;
+    document.getElementById('ShippingGSTUnit').innerText = Number(Number(FinalShipperCost) + Number(FinalShipperCost * 18 / 100)).toFixed(2);
+
+    document.getElementById('FinalTotalUnit').value = Number(Number(finalCost) + Number(TaxtAmt)).toFixed(2);
+
+    document.getElementById('FinalUnitCostUnit').value = Number(finalCost / QTY).toFixed(2);
 }
 
 $("#BtnApplyPlanUnit").click(function () {
@@ -1645,31 +1979,46 @@ $("#BtnApplyPlanUnit").click(function () {
 
     try {
         $("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
+        var QTY = Number(document.getElementById('TxtPlanQtyUnit').value);
+        var Rate = Number(document.getElementById('VendorRate').value);
 
         var FinalQuotedCost1 = Number(document.getElementById("FinalTotalUnit").value);
-        var FinalAmount = Number(document.getElementById("FinalTotalUnit").value);
         var FinalMiscPer = Number(document.getElementById("FinalMiscPerUnit").value);
         var FinalShipperCost = Number(document.getElementById("FinalShipperCostUnit").value);
         var ProfitPer = Number(document.getElementById("ProfitPerUnit").value);
         var ProfitCost = Number(document.getElementById("ProfitCostUnit").value);
 
+        var GSTAmount = Number(document.getElementById("FinalTaxCostUnit").value);
+        var FinalTaxPer = Number(document.getElementById("FinalTaxPerUnit").value);
+
+        var NetAmount = Number(document.getElementById("finalCostUnit").value).toFixed(2);
+
+        var PrdDisc = document.getElementById("UnitPrdDisc").value;
+        var PkgDtail = document.getElementById("UnitPkgDtail").value;
+        var OtrDisc = document.getElementById("UnitOtrDisc").value;
+
         var gridProductData = $('#gridProductList').dxDataGrid('instance');
 
         for (var i = 0; i < gridProductData._options.dataSource.length; i++) {
             if (gridProductData._options.dataSource[i].ProductCatalogID === ProductCatalogID && gridProductData._options.dataSource[i].Quantity === Number(document.getElementById("TxtPlanQtyUnit").value)) {
-                gridProductData._options.dataSource[i].Rate = Number(document.getElementById('FinalUnitCostUnit').value);
+                gridProductData._options.dataSource[i].Rate = Number(document.getElementById('VendorRate').value);
                 gridProductData._options.dataSource[i].RateType = "Per Unit";
-                gridProductData._options.dataSource[i].Amount = Number(FinalAmount);
+                gridProductData._options.dataSource[i].Amount = Number(NetAmount);
                 gridProductData._options.dataSource[i].MiscPer = Number(FinalMiscPer);
                 gridProductData._options.dataSource[i].ShippingCost = Number(FinalShipperCost);
                 gridProductData._options.dataSource[i].FinalAmount = Number(FinalQuotedCost1);
                 gridProductData._options.dataSource[i].ProfitPer = Number(ProfitPer);
                 gridProductData._options.dataSource[i].ProfitCost = Number(ProfitCost);
+                gridProductData._options.dataSource[i].GSTAmount = Number(GSTAmount);
+                gridProductData._options.dataSource[i].GSTTaxPercentage = Number(FinalTaxPer);
                 gridProductData._options.dataSource[i].RequiredQuantity = Number(document.getElementById("TxtPlanQtyUnit").value);
                 gridProductData._options.dataSource[i].VendorRate = Number(document.getElementById('VendorRate').value);
                 gridProductData._options.dataSource[i].UnitCost = Number(document.getElementById('FinalUnitCostUnit').value);
                 gridProductData._options.dataSource[i].VendorID = VendorID;
                 gridProductData._options.dataSource[i].VendorName = VendorName;
+                gridProductData._options.dataSource[i].DescriptionOther = OtrDisc;
+                gridProductData._options.dataSource[i].PackagingDetails = PkgDtail;
+                gridProductData._options.dataSource[i].ProductDescription = PrdDisc;
                 gridProductData.refresh();
                 break;
             }
@@ -1683,6 +2032,7 @@ $("#BtnApplyPlanUnit").click(function () {
         document.getElementById("FinalShipperCostUnit").value = 0;
         document.getElementById("FinalTaxPerUnit").value = 0;
         document.getElementById("ProfitPerUnit").value = 0;
+        document.getElementById("VendorRate").value = 0;
         $("#Selvendor").dxSelectBox({
             value: -1,
         })
