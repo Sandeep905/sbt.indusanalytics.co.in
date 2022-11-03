@@ -7,11 +7,11 @@
         <div id="image-indicator"></div>
         <div id="FieldCntainerRow" class="clearfix tab-pane animated fadeInRight active">
             <div class="col-xs-12 col-sm-3 col-md-2 col-lg-2">
-                <b class="font-11">Quote No.</b>
+                <b class="font-11">Enquiry No.</b>
                 <input type="text" id="TxtQuoteNo" class="forTextBox disabled" style="float: left; width: 100%;" readonly="" />
             </div>
             <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3">
-                <b class="font-11">Client Name</b>
+                <b class="font-11">Client Name</b><i class="fa fa-plus btn btn-link font-12 padding-0 reloadclient btnnewmaster" style="color: green"></i>
                 <div id="SelClient"></div>
             </div>
             <div class="col-xs-12 col-sm-3 col-md-2 col-lg-1">
@@ -46,7 +46,23 @@
             </div>
         </div>
     </div>
-
+      <!-- The Modal for new masters-->
+    <div class="modal fade" id="ModaliFrame" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content" style="border-radius: 4px; padding-bottom: 0em; padding-right: 0px; padding-left: 1px;">
+                <div class="DialogBoxCustom" style="float: left; border-top-left-radius: 4px; border-top-right-radius: 4px;">
+                    <strong>Add New Master</strong>
+                    <a href="javascript:void(0);" id="btnCloseiFrame" class="iconRightDbox btn-danger" data-dismiss="modal">
+                        <span data-dismiss="modal" style="font-weight: 900; margin-right: 8px">X</span>
+                    </a>
+                </div>
+                <label id="LbliFrame" hidden></label>
+                <div class="modal-body" style="position: initial; padding-right: 0px; padding-left: 6px; padding-right: 6px;">
+                    <iframe id="iFrameMasters" style="width: 100%;"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="modal clearfix" id="modalEstimateProduct" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -119,6 +135,7 @@
     <div id="myModal_1" class="clearfix tab-pane animated fadeInLeft">
         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
             <div role="tabpanel">
+                <div id="RadioEnquiry" style="width:100%"></div>
                 <div id="GridShowlist"></div>
             </div>
 

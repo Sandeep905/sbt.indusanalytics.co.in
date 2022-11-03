@@ -511,6 +511,26 @@ $("#CreateButton").click(function () {
     document.getElementById("CreateButton").setAttribute("data-target", "#largeModal");
 });
 
+//$.ajax({
+//    type: "POST",
+//    url: "UserAuthentication.asmx/GetAllForm",
+//    data: '{}',
+//    contentType: "application/json; charset=utf-8",
+//    dataType: 'text',
+//    success: function (results) {
+//        var res = results.replace(/\\/g, '');
+//        res = res.replace(/"d":/g, '');
+//        res = res.replace(/""/g, '');
+//        res = res.substr(1);
+//        res = res.slice(0, -1);
+//        SupportSystemGridData = JSON.parse(res);
+//        SectionCount = SupportSystemGridData[0].SectionCount;
+
+//        $("#SupportSystemGrid").dxDataGrid({
+//            dataSource: SupportSystemGridData
+//        });
+//    }
+//});
 $("#EditButton").click(function () {
 
     var txtGetGridRow = document.getElementById("UserGetGridRow").value;

@@ -422,7 +422,6 @@ Public Class WebServiceProductionWorkOrder
                     JobBookingID = db.InsertDatatableToDatabase(TblBooking, TableName, AddColName, AddColValue)
                 Else
                     db.UpdateDatatableToDatabase(TblBooking, TableName, "ModifiedDate = Getdate(),ModifiedBy =" & UserId & "", 1, " JobBookingID=" & JobBookingID & " And CompanyID=" & CompanyId)
-
                     db.ExecuteNonSQLQuery("Delete From JobBookingJobCardProcess Where  JobBookingID=" & JobBookingID & " And CompanyID=" & CompanyId & "")
                     db.ExecuteNonSQLQuery("Delete From JobBookingJobCardContentBookForms Where  JobBookingID=" & JobBookingID & " And CompanyID=" & CompanyId & "")
                     db.ExecuteNonSQLQuery("Delete From JobBookingJobCardProcessMaterialRequirement Where  JobBookingID=" & JobBookingID & " And CompanyID=" & CompanyId & "")

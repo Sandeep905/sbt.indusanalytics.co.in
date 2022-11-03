@@ -451,25 +451,21 @@ $(".btnnewmaster").click(function (e) {
         document.getElementById("LbliFrame").innerHTML = "reloadcategory";
     }
     if (UrlSrc === "") return;
-    $("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
+    $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
     document.getElementById("iFrameMasters").src = UrlSrc;
     document.getElementById("iFrameMasters").style.height = window.innerHeight / 1.1 + "px";
     $(".btnnewmaster").attr("data-toggle", "modal");
     $(".btnnewmaster").attr("data-target", "#ModaliFrame");
 });
 
-$("#btnCloseiFrame").click(function () {
-    var classid = document.getElementById("LbliFrame").innerHTML;
-    $("." + classid).click();
-});
 
-//$('#iFrameMasters').load(function () {
-//    $('#iFrameMasters').contents().find('#Customleftsidebar1').hide();
-//    $('#iFrameMasters').contents().find('#SelFYearList').hide();
-//    $('#iFrameMasters').contents().find('#myTopnav').hide();
-//    $('#iFrameMasters').contents().find('#CreateButton').click();
-//    $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
-//});
+$('#iFrameMasters').load(function () {
+    $('#iFrameMasters').contents().find('#Customleftsidebar1').hide();
+    $('#iFrameMasters').contents().find('#SelFYearList').hide();
+    $('#iFrameMasters').contents().find('#myTopnav').hide();
+    $('#iFrameMasters').contents().find('#CreateButton').click();
+    $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+});
 
 function GetConsignee(CID) {
     $.ajax({

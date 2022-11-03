@@ -178,7 +178,10 @@ $(function () {
                 searchEnabled: true,
                 showClearButton: true,
                 onValueChanged: function (e) {
-                    //var previousValue = e.element.context.id; ////Fetch current selectbox ID               
+                    //var previousValue = e.element.context.id; ////Fetch current selectbox ID       
+                    $("#SOBProductAddedData").dxDataGrid({
+                        dataSource: []
+                    });
                     // Event handling commands go here
                     if (!e.value) {
                         $("#SOBProductData").dxDataGrid({ dataSource: [] });
@@ -965,7 +968,7 @@ function GetOrderHistory() {
     var SOBProductData = $('#SOBProductData').dxDataGrid('instance');
     var selectedRow = SOBProductData.getSelectedRowsData();
     if (selectedRow.length <= 0) return;
-    var OID = selectedRow[0].ProductMasterCode;
+    var OID = selectedRow[0].ProductEstimateID;
     if (OID === "" || OID === null) return;
     $.ajax({
         type: "POST",

@@ -11,6 +11,23 @@ var ProjectBookingID = 0
 var EnquiryID = 0;
 var NetcostOffset = 0;
 var EditMode = false;
+var Isprocessed = 0;
+
+
+$('#RadioEnquiry').dxRadioGroup({
+    items: ["Pending", "Processed"],
+    value: "Pending",
+    layout: 'horizontal',
+    onValueChanged: function (e) {
+        if (e.value == "Processed")
+            Isprocessed = 1;
+        else
+            Isprocessed = 0;
+
+        LoadEnquiry();
+
+    }
+});
 $("#LoadIndicator").dxLoadPanel({
     shadingColor: "rgba(0,0,0,0.4)",
     indicatorSrc: "images/Indus logo.png",
@@ -245,13 +262,16 @@ $("#GridShowlistLoadFromEnquiry").dxDataGrid({
     }
 });
 $("#BtnLoadFromEnquiry").click(function (e) {
+    LoadEnquiry();
+});
+function LoadEnquiry() {
     $("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
     try {
         $.ajax({
             async: false,
             type: "POST",
             url: "WebServiceProductMaster.asmx/GetEnquiryList",
-            data: '{}',//
+            data: '{Isprocessed:' + Isprocessed + '}',//
             contentType: "application/json; charset=utf-8",
             dataType: 'json',
             success: function (results) {
@@ -276,7 +296,7 @@ $("#BtnLoadFromEnquiry").click(function (e) {
     } finally {
         $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
     }
-});
+}
 
 function Getinputsizess(ID, Type) {
     try {
@@ -343,6 +363,15 @@ function Getinputsizess(ID, Type) {
 $("#BtnLoadFromListt").click(function () {
     var datasource = $('#GridShowlistLoadFromEnquiry').dxDataGrid('instance')._options.dataSource;
     datasource = $.grep(datasource, function (ex) { return ex.EnquiryID === Number(document.getElementById("BookingID").value) })
+
+    if (datasource.length <= 0) {
+        alert('Please Select Enquiry :)');
+        return;
+    }
+    if (Isprocessed == 1) {
+        alert("You can't load this enquiry, Quotation is already created");
+        return;
+    }
     //document.getElementById("BookingID").value
 
     $("#SelClient").dxSelectBox({
@@ -902,27 +931,31 @@ $.ajax({
     }
 });
 
-///Clients
-$.ajax({
-    type: "POST",
-    url: "WebServiceProductMaster.asmx/GetClientData",
-    data: '{}',//
-    contentType: "application/json; charset=utf-8",
-    dataType: 'json',
-    success: function (results) {
-        var res = results.d.replace(/\\/g, '');
-        res = res.replace(/"d":""/g, '');
-        res = res.replace(/"d":null/g, '');
-        res = res.replace(/u0026/g, '&');
-        res = res.substr(1);
-        res = res.slice(0, -1);
-        var RES1 = JSON.parse(res.toString());
-        $("#SelClient").dxSelectBox({ dataSource: RES1 });
-    },
-    error: function errorFunc(jqXHR) {
-        console.log(jqXHR);
-    }
-});
+
+function ReloadClients() {
+    ///Clients
+    $.ajax({
+        type: "POST",
+        url: "WebServiceProductMaster.asmx/GetClientData",
+        data: '{}',//
+        contentType: "application/json; charset=utf-8",
+        dataType: 'json',
+        success: function (results) {
+            var res = results.d.replace(/\\/g, '');
+            res = res.replace(/"d":""/g, '');
+            res = res.replace(/"d":null/g, '');
+            res = res.replace(/u0026/g, '&');
+            res = res.substr(1);
+            res = res.slice(0, -1);
+            var RES1 = JSON.parse(res.toString());
+            $("#SelClient").dxSelectBox({ dataSource: RES1 });
+        },
+        error: function errorFunc(jqXHR) {
+            console.log(jqXHR);
+        }
+    });
+}
+ReloadClients();
 function loadProcess() {
     $.ajax({
         async: false,
@@ -966,45 +999,6 @@ function loadProcess() {
         }
     });
 }
-//function loadProcess() {
-//    $.ajax({
-//        async: false,
-//        type: 'POST',
-//        url: "WebServicePlanWindow.asmx/SuggestedOperations",
-//        dataType: 'json',
-//        contentType: "application/json; charset=utf-8",
-//        data: "{'processids': '" + processids + "'}",
-//        crossDomain: true,
-//        success: function (results) {
-//            if (results.d === "500") return;
-//            var res = results.d.replace(/\\/g, '');
-//            res = res.substr(1);
-//            res = res.slice(0, -1);
-//            $("#GridOperation").dxDataGrid({ dataSource: [] });
-//            var fillarraySuggested = $.grep(JSON.parse(res.toString()), function (e) {
-//                return Defaultprocessids.split(',').indexOf(e.ProcessID.toString()) < 0;
-//            });
-//            ObjDefaultProcess = $.grep(JSON.parse(res.toString()), function (e) {
-//                return Defaultprocessids.split(',').indexOf(e.ProcessID.toString()) > -1;
-//            });
-//            $("#GridOperation").dxDataGrid({                  //// GridOperation  gridopr
-//                dataSource: {
-//                    store: {
-//                        type: "array",
-//                        data: fillarraySuggested,
-//                        key: "ProcessID"
-//                    }
-//                },
-//            });
-//            $("#GridOperationAllocated").dxDataGrid({
-//                dataSource: ObjDefaultProcess,
-//            });
-//        },
-//        error: function errorFunc(jqXHR) {
-//             alert(jqXHR.message);
-//        }
-//    });
-//}
 
 $.ajax({
     type: "POST",
@@ -1263,7 +1257,7 @@ function FinalSave(BookingID) {
     ObjMainDetail.ProjectName = TxtProjectName;
     ObjMainDetail.Narration = TxtRemark;
     ObjMainDetail.BookingID = BookingID;
-    //ObjMainDetail.EnquiryID = EnquiryID;
+    ObjMainDetail.EnquiryID = EnquiryID;
     ObjMainDetail.FreightAmount = TxtFreightAmount;
     ObjMain.push(ObjMainDetail);
 
@@ -1313,8 +1307,8 @@ function FinalSave(BookingID) {
         return;
     }
     var BookingNo = document.getElementById("TxtQuoteNo").value;
-    var Quo_No = BookingNo.split('.');
-    BookingNo = Quo_No[0];
+    //    var Quo_No = BookingNo.split('.');
+    //  BookingNo = Quo_No[0];
 
     $("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
     $.ajax({
@@ -1377,6 +1371,9 @@ $("#BtnShowList").click(function () {
     } finally {
         $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
     }
+});
+$("#btnCloseiFrame").click(function () {
+    ReloadClients();
 });
 $("#BtnDelete").click(function () {
     var EstimateID = Number(document.getElementById("EstimateID").value);
@@ -1581,7 +1578,7 @@ function onChangeCalcAmountp(id) {
         var MiscCost = Number(document.getElementById('FinalMiscCost').value);
         var ProfitCost = Number(document.getElementById('ProfitCost').value);
 
-    
+
 
         // Adding Misc Cost 
         if (id != undefined && id === 'FinalMiscCost') {
@@ -1602,7 +1599,7 @@ function onChangeCalcAmountp(id) {
         // Adding Shiping Cost To final Amt 
         finalCost += Number(FinalShipperCost);
 
-        finalCost = Number(document.getElementById('PlanContQty').innerHTML)* Number(Number(finalCost) / Number(document.getElementById('PlanContQty').innerHTML)).toFixed(2)
+        finalCost = Number(document.getElementById('PlanContQty').innerHTML) * Number(Number(finalCost) / Number(document.getElementById('PlanContQty').innerHTML)).toFixed(2)
 
 
         var taxamt = finalCost * taxper / 100;
@@ -1650,7 +1647,7 @@ function onChangeCalcAmountFlex(id) {
         }
         finalCost += Number(document.getElementById('ProfitCost1').value);
 
-      
+
         // Adding Shiping Cost To final Amt
         finalCost += Number(FinalShipperCost);
         var taxamt = finalCost * taxper / 100;
@@ -1932,7 +1929,7 @@ function CalculateUnitCost(id) {
     finalCost += Number(document.getElementById('ProfitCostUnit').value);
 
 
-   
+
     // Adding Shipping Cost 
     finalCost += Number(FinalShipperCost);
 

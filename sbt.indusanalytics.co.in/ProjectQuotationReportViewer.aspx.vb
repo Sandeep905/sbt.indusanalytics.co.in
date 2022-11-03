@@ -28,28 +28,32 @@ Partial Class ProjectQuotationReportViewer
 
             Dim DTDetail As DataTable = GetDataTable("Select PQC.ProductDescription,PQC.PackagingDetails,PQC.DescriptionOther, PCM.ProductName,PQC.GSTPercantage,PQC.Quantity,PQC.Rate,PQC.Amount,PQC.UnitCost,PQC.FinalAmount AS TotalAmount,Isnull(PQ.FreightAmount,0) as FreightAmount,PHM.HSNCode as HSN,Round(PQC.GSTAmount,2) as  GST from ProductQuotationContents as PQC inner join  ProductCatalogMaster as PCM on PCM.ProductCatalogID = PQC.ProductCatalogID inner Join ProductQuotation as PQ on PQ.ProductEstimateID = PQC.ProductEstimateID inner join ProductHSNMaster as PHM on PHM.ProductHSNID = PQC.ProductHSNID  where PQ.CompanyID = " & GBLCompanyID & " and PQ.ProductEstimateID = " & ID)
 
-            Dim sum = New ReportParameter("TOTALINWORD", db.ReadNumber((Math.Round(DTDetail.Compute("Sum(TotalAmount)", "") + DTDetail.Rows(0)("FreightAmount") + DTDetail.Rows(0)("FreightAmount") * 0.18, 0)).ToString(), "Rupees", "Paise", "INRs")) ' DTDetail.Compute("Sum(TotalAmount)", "").ToString()
-            Dim GST = New ReportParameter("GSTINWORD", db.ReadNumber((DTDetail.Compute("Sum(GST)", "") + DTDetail.Rows(0)("FreightAmount") * 0.18).ToString(), "Rupees", "Paise", "INRs")) ' DTDetail.Compute("Sum(TotalAmount)", "").ToString()
+            Dim sum = New ReportParameter("TOTALINWORD", db.ReadNumber(Math.Round(DTDetail.Compute("Sum(TotalAmount)", "") + DTDetail.Rows(0)("FreightAmount") + DTDetail.Rows(0)("FreightAmount") * 0.18, 0).ToString(), "Rupees", "Paise", "INRs")) ' DTDetail.Compute("Sum(TotalAmount)", "").ToString()
+            Dim GST = New ReportParameter("GSTINWORD", db.ReadNumber(Math.Round(DTDetail.Compute("Sum(GST)", "") + DTDetail.Rows(0)("FreightAmount") * 0.18, 0).ToString(), "Rupees", "Paise", "INRs")) ' DTDetail.Compute("Sum(TotalAmount)", "").ToString()
             Dim IMG = New Uri(Server.MapPath("~/images/AuthorisedSignatory.jpeg")).AbsoluteUri
             Dim AuthorisedSignatory = New ReportParameter("ImageAuthoritys", IMG)
             Dim dsDetail As ReportDataSource = New ReportDataSource("ProjectQuotationDetail", DTDetail)
-            Dim FivePerGST = 0
-            Dim EighteenPerGST = 0
-            Dim TwentyEightPerGST = 0
+            Dim FivePerGST As Double = 0
+            Dim EighteenPerGST As Double = 0
+            Dim TwentyEightPerGST As Double = 0
+            Dim TwelvePerGST As Double = 0
             If DTDetail.Rows.Count > 0 Then
                 For i = 0 To DTDetail.Rows.Count - 1
                     Select Case DTDetail.Rows(i)("GSTPercantage").ToString()
                         Case "5"
-                            FivePerGST += Convert.ToInt32(DTDetail.Rows(i)("Amount"))
+                            FivePerGST += Convert.ToDouble(DTDetail.Rows(i)("Amount"))
+                        Case "12"
+                            TwelvePerGST += Convert.ToDouble(DTDetail.Rows(i)("Amount"))
                         Case "18"
-                            EighteenPerGST += Convert.ToInt32(DTDetail.Rows(i)("Amount"))
+                            EighteenPerGST += Convert.ToDouble(DTDetail.Rows(i)("Amount"))
                         Case "28"
-                            TwentyEightPerGST += Convert.ToInt32(DTDetail.Rows(i)("Amount"))
+                            TwentyEightPerGST += Convert.ToDouble(DTDetail.Rows(i)("Amount"))
                     End Select
                 Next
             End If
             Dim FivePerGSTP = New ReportParameter("FivePerGST", FivePerGST)
             Dim TwentyEightPerGSTP = New ReportParameter("TwentyEightPerGST", TwentyEightPerGST)
+            Dim TwelvePerGSTp = New ReportParameter("TwelvePerGST", TwelvePerGST)
             Dim EighteenPerGSTP = New ReportParameter("EighteenPerGST", EighteenPerGST + Convert.ToInt32(DTDetail.Rows(0)("FreightAmount")))
             ReportViewer1.LocalReport.EnableExternalImages = True
             ReportViewer1.LocalReport.SetParameters(sum)
@@ -57,6 +61,7 @@ Partial Class ProjectQuotationReportViewer
             ReportViewer1.LocalReport.SetParameters(AuthorisedSignatory)
             ReportViewer1.LocalReport.SetParameters(TwentyEightPerGSTP)
             ReportViewer1.LocalReport.SetParameters(EighteenPerGSTP)
+            ReportViewer1.LocalReport.SetParameters(TwelvePerGSTp)
             ReportViewer1.LocalReport.SetParameters(FivePerGSTP)
 
             ReportViewer1.LocalReport.DataSources.Add(dsDetail)

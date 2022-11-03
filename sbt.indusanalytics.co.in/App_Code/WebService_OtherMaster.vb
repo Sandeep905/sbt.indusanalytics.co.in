@@ -574,7 +574,7 @@ Public Class WebService_OtherMaster
 
     End Function
 
-    ''----------------------------Open UserMaster Delete  Save Data  ------------------------------------------
+    ''----------------------------Open UserMaster Delete Save Data  ------------------------------------------
     <WebMethod(EnableSession:=True)>
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function DeleteUserMasterData(ByVal Userid As String) As String
@@ -594,7 +594,7 @@ Public Class WebService_OtherMaster
             For index = 0 To dataTable.Rows.Count
                 str = "Select Count(CreatedBy) From " & dataTable.Rows(0)(0) & " Where Isnull(IsDeletedTransaction,0)=0 And CompanyID=" & GBLCompanyID & " And CreatedBy=" & Userid
                 db.FillDataTable(Dt, str)
-                If Dt.Rows.Count > 0 Then
+                If Dt.Rows(0)(0) <= 0 Then
                     Return "Error: This user name has been used in some transactions ,please delete transactions first"
                 End If
             Next

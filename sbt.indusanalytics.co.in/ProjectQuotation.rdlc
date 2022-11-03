@@ -168,6 +168,7 @@
               </Paragraph>
             </Paragraphs>
             <rd:DefaultName>Textbox1</rd:DefaultName>
+            <Top>0.00001cm</Top>
             <Left>3.16161in</Left>
             <Height>0.23959in</Height>
             <Width>1.5in</Width>
@@ -176,6 +177,7 @@
                 <Style>None</Style>
               </Border>
               <VerticalAlign>Middle</VerticalAlign>
+              <PaddingTop>1pt</PaddingTop>
             </Style>
           </Textbox>
           <Tablix Name="Tablix4">
@@ -272,7 +274,7 @@
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>Quantity(Nos.)</Value>
+                                  <Value>Quantity</Value>
                                   <Style>
                                     <FontWeight>Bold</FontWeight>
                                   </Style>
@@ -673,7 +675,7 @@
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!Quantity.Value</Value>
+                                  <Value>= CStr(Fields!Quantity.Value) + " Nos."</Value>
                                   <Style />
                                 </TextRun>
                               </TextRuns>
@@ -895,9 +897,7 @@
                               <TextRuns>
                                 <TextRun>
                                   <Value>Freight</Value>
-                                  <Style>
-                                    <FontWeight>Bold</FontWeight>
-                                  </Style>
+                                  <Style />
                                 </TextRun>
                               </TextRuns>
                               <Style>
@@ -930,9 +930,7 @@
                               <TextRuns>
                                 <TextRun>
                                   <Value>=System.Math.Round(Fields!FreightAmount.Value, 2)</Value>
-                                  <Style>
-                                    <FontWeight>Bold</FontWeight>
-                                  </Style>
+                                  <Style />
                                 </TextRun>
                               </TextRuns>
                               <Style>
@@ -968,9 +966,7 @@
                               <TextRuns>
                                 <TextRun>
                                   <Value />
-                                  <Style>
-                                    <FontWeight>Bold</FontWeight>
-                                  </Style>
+                                  <Style />
                                 </TextRun>
                               </TextRuns>
                               <Style>
@@ -1003,9 +999,7 @@
                               <TextRuns>
                                 <TextRun>
                                   <Value>18</Value>
-                                  <Style>
-                                    <FontWeight>Bold</FontWeight>
-                                  </Style>
+                                  <Style />
                                 </TextRun>
                               </TextRuns>
                               <Style>
@@ -1035,9 +1029,7 @@
                               <TextRuns>
                                 <TextRun>
                                   <Value>=First(Fields!FreightAmount.Value, "ProjectQuotationDetail")*0.18</Value>
-                                  <Style>
-                                    <FontWeight>Bold</FontWeight>
-                                  </Style>
+                                  <Style />
                                 </TextRun>
                               </TextRuns>
                               <Style>
@@ -1074,9 +1066,7 @@
                               <TextRuns>
                                 <TextRun>
                                   <Value>=First(Fields!FreightAmount.Value, "ProjectQuotationDetail") + First(Fields!FreightAmount.Value, "ProjectQuotationDetail") * 0.18</Value>
-                                  <Style>
-                                    <FontWeight>Bold</FontWeight>
-                                  </Style>
+                                  <Style />
                                 </TextRun>
                               </TextRuns>
                               <Style>
@@ -1099,6 +1089,225 @@
                               <Style>None</Style>
                             </BottomBorder>
                             <PaddingRight>2pt</PaddingRight>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                  </TablixCells>
+                </TablixRow>
+                <TablixRow>
+                  <Height>0.25299in</Height>
+                  <TablixCells>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox3">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>Sub Total</Value>
+                                  <Style>
+                                    <FontWeight>Bold</FontWeight>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Center</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox3</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Style>Solid</Style>
+                            </Border>
+                            <TopBorder>
+                              <Style>None</Style>
+                            </TopBorder>
+                            <BottomBorder>
+                              <Style>None</Style>
+                            </BottomBorder>
+                            <LeftBorder>
+                              <Color>Silver</Color>
+                              <Width>0.25pt</Width>
+                            </LeftBorder>
+                            <RightBorder>
+                              <Style>None</Style>
+                            </RightBorder>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox4">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>= System.Math.Round(Sum(Fields!Amount.Value) + First(Fields!FreightAmount.Value, "ProjectQuotationDetail"),2)</Value>
+                                  <Style />
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox4</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>Solid</Style>
+                              <Width>0.25pt</Width>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                        <ColSpan>3</ColSpan>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell />
+                    <TablixCell />
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox20">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value />
+                                  <Style />
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox20</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>Solid</Style>
+                              <Width>0.25pt</Width>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox21">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value />
+                                  <Style />
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox21</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>Solid</Style>
+                              <Width>0.25pt</Width>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox22">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Sum(System.Math.Round(Fields!GST.Value+Fields!FreightAmount.Value*0.18, 2))</Value>
+                                  <Style />
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox22</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>Solid</Style>
+                              <Width>0.25pt</Width>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox23">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Sum(System.Math.Round(Fields!TotalAmount.Value, 2))</Value>
+                                  <Style />
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox23</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>Solid</Style>
+                              <Width>0.25pt</Width>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
                           </Style>
                         </Textbox>
                       </CellContents>
@@ -1280,7 +1489,7 @@
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Round(Sum(System.Math.Round(Fields!GST.Value, 2))+First(Fields!FreightAmount.Value, "ProjectQuotationDetail")*0.18,0)</Value>
+                                  <Value>=Round(Sum(System.Math.Round(Fields!GST.Value, 2))+First(Fields!FreightAmount.Value, "ProjectQuotationDetail")*0.18,2)</Value>
                                   <Style>
                                     <FontWeight>Bold</FontWeight>
                                   </Style>
@@ -1305,7 +1514,6 @@
                           </Style>
                         </Textbox>
                         <ColSpan>3</ColSpan>
-                        <rd:Selected>true</rd:Selected>
                       </CellContents>
                     </TablixCell>
                     <TablixCell />
@@ -1319,7 +1527,7 @@
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Sum(System.Math.Round(Fields!TotalAmount.Value, 0)) + System.Math.Round(Fields!FreightAmount.Value + Fields!FreightAmount.Value * 0.18, 0)</Value>
+                                  <Value>=System.Math.Round(Sum(Fields!TotalAmount.Value) + Fields!FreightAmount.Value + Fields!FreightAmount.Value * 0.18, 0)</Value>
                                   <Style>
                                     <FontWeight>Bold</FontWeight>
                                   </Style>
@@ -1343,6 +1551,7 @@
                             <PaddingBottom>2pt</PaddingBottom>
                           </Style>
                         </Textbox>
+                        <rd:Selected>true</rd:Selected>
                       </CellContents>
                     </TablixCell>
                   </TablixCells>
@@ -1381,12 +1590,15 @@
                 <TablixMember>
                   <KeepWithGroup>Before</KeepWithGroup>
                 </TablixMember>
+                <TablixMember>
+                  <KeepWithGroup>Before</KeepWithGroup>
+                </TablixMember>
               </TablixMembers>
             </TablixRowHierarchy>
             <DataSetName>ProjectQuotationDetail</DataSetName>
             <Top>1.58764in</Top>
             <Left>0.00003cm</Left>
-            <Height>1.25in</Height>
+            <Height>1.50299in</Height>
             <Width>7.99846in</Width>
             <ZIndex>1</ZIndex>
             <Style>
@@ -1404,7 +1616,7 @@
               <Paragraph>
                 <TextRuns>
                   <TextRun>
-                    <Value>GST (In Words)                :</Value>
+                    <Value>GST (In Words) :</Value>
                     <Style>
                       <FontWeight>Bold</FontWeight>
                     </Style>
@@ -1414,10 +1626,10 @@
               </Paragraph>
             </Paragraphs>
             <rd:DefaultName>Textbox75</rd:DefaultName>
-            <Top>11.17685cm</Top>
+            <Top>12.63732cm</Top>
             <Left>0.02649cm</Left>
             <Height>0.50271cm</Height>
-            <Width>4.41114cm</Width>
+            <Width>2.82364cm</Width>
             <ZIndex>2</ZIndex>
             <Style>
               <Border>
@@ -1443,7 +1655,7 @@
               </Paragraph>
             </Paragraphs>
             <rd:DefaultName>Textbox80</rd:DefaultName>
-            <Top>7.38449cm</Top>
+            <Top>8.17821cm</Top>
             <Left>0.02649cm</Left>
             <Height>0.50271cm</Height>
             <Width>5.04614cm</Width>
@@ -1474,7 +1686,7 @@
               </Paragraph>
             </Paragraphs>
             <rd:DefaultName>Textbox71</rd:DefaultName>
-            <Top>7.31835cm</Top>
+            <Top>8.11207cm</Top>
             <Left>5.20669cm</Left>
             <Height>0.635cm</Height>
             <Width>14.96817cm</Width>
@@ -1509,10 +1721,10 @@
               </Paragraph>
             </Paragraphs>
             <rd:DefaultName>Textbox71</rd:DefaultName>
-            <Top>11.11071cm</Top>
-            <Left>4.48676cm</Left>
+            <Top>12.57118cm</Top>
+            <Left>2.89926cm</Left>
             <Height>0.635cm</Height>
-            <Width>15.709cm</Width>
+            <Width>17.13775cm</Width>
             <ZIndex>5</ZIndex>
             <Style>
               <Border>
@@ -1553,7 +1765,7 @@
                 </Style>
               </Paragraph>
             </Paragraphs>
-            <Top>1.64921cm</Top>
+            <Top>1.64918cm</Top>
             <Left>0.11697cm</Left>
             <Height>0.20833in</Height>
             <Width>3.87077in</Width>
@@ -1582,7 +1794,7 @@
                 </Style>
               </Paragraph>
             </Paragraphs>
-            <Top>2.27363cm</Top>
+            <Top>2.2736cm</Top>
             <Left>0.11697cm</Left>
             <Height>0.20833in</Height>
             <Width>3.87077in</Width>
@@ -1596,7 +1808,7 @@
             </Style>
           </Textbox>
           <Line Name="Line2">
-            <Top>4.29931in</Top>
+            <Top>4.87431in</Top>
             <Height>0in</Height>
             <Width>8.02347in</Width>
             <ZIndex>9</ZIndex>
@@ -1607,7 +1819,7 @@
             </Style>
           </Line>
           <Line Name="Line3">
-            <Top>4.69931in</Top>
+            <Top>5.27431in</Top>
             <Height>0in</Height>
             <Width>8.02347in</Width>
             <ZIndex>10</ZIndex>
@@ -1637,7 +1849,7 @@
               </Paragraph>
             </Paragraphs>
             <rd:DefaultName>Textbox71</rd:DefaultName>
-            <Top>12.72292cm</Top>
+            <Top>14.18339cm</Top>
             <Left>0.06353cm</Left>
             <Height>0.635cm</Height>
             <Width>12.94675cm</Width>
@@ -1653,7 +1865,7 @@
             </Style>
           </Textbox>
           <Line Name="Line5">
-            <Top>0.77996cm</Top>
+            <Top>0.77993cm</Top>
             <Left>4.01126in</Left>
             <Height>1.28056in</Height>
             <Width>0in</Width>
@@ -1712,7 +1924,7 @@
                 </Style>
               </Paragraph>
             </Paragraphs>
-            <Top>1.64921cm</Top>
+            <Top>1.64918cm</Top>
             <Left>10.3262cm</Left>
             <Height>0.20833in</Height>
             <Width>3.87077in</Width>
@@ -1741,7 +1953,7 @@
                 </Style>
               </Paragraph>
             </Paragraphs>
-            <Top>2.27363cm</Top>
+            <Top>2.2736cm</Top>
             <Left>10.3262cm</Left>
             <Height>0.20833in</Height>
             <Width>3.87077in</Width>
@@ -1785,9 +1997,9 @@
             </Style>
           </Textbox>
           <Line Name="Line10">
-            <Top>3.19458in</Top>
-            <Left>4.99814in</Left>
-            <Height>1.10972in</Height>
+            <Top>3.51958in</Top>
+            <Left>5.49814in</Left>
+            <Height>1.34722in</Height>
             <Width>0in</Width>
             <ZIndex>17</ZIndex>
             <Style>
@@ -1815,7 +2027,7 @@
               </Paragraph>
             </Paragraphs>
             <rd:DefaultName>Textbox122</rd:DefaultName>
-            <Top>3.31473in</Top>
+            <Top>3.56473in</Top>
             <Left>0.01251in</Left>
             <Height>0.17708in</Height>
             <Width>1.08333in</Width>
@@ -1827,9 +2039,9 @@
             </Style>
           </Textbox>
           <Line Name="Line11">
-            <Top>3.19458in</Top>
+            <Top>3.51958in</Top>
             <Left>1.13626in</Left>
-            <Height>1.10972in</Height>
+            <Height>1.34722in</Height>
             <Width>0in</Width>
             <ZIndex>19</ZIndex>
             <Style>
@@ -1857,8 +2069,8 @@
               </Paragraph>
             </Paragraphs>
             <rd:DefaultName>Textbox122</rd:DefaultName>
-            <Top>3.22723in</Top>
-            <Left>2.68113in</Left>
+            <Top>3.53973in</Top>
+            <Left>2.95613in</Left>
             <Height>0.17708in</Height>
             <Width>0.77206in</Width>
             <ZIndex>20</ZIndex>
@@ -1869,10 +2081,10 @@
             </Style>
           </Textbox>
           <Line Name="Line12">
-            <Top>3.47375in</Top>
+            <Top>3.77375in</Top>
             <Left>1.12932in</Left>
             <Height>0in</Height>
-            <Width>3.87569in</Width>
+            <Width>4.37569in</Width>
             <ZIndex>21</ZIndex>
             <Style>
               <Border>
@@ -1881,10 +2093,10 @@
             </Style>
           </Line>
           <Line Name="Line13">
-            <Top>3.69062in</Top>
+            <Top>4.00312in</Top>
             <Left>1.12932in</Left>
             <Height>0in</Height>
-            <Width>3.87569in</Width>
+            <Width>4.37569in</Width>
             <ZIndex>22</ZIndex>
             <Style>
               <Border>
@@ -1893,9 +2105,9 @@
             </Style>
           </Line>
           <Line Name="Line14">
-            <Top>3.46413in</Top>
+            <Top>3.77663in</Top>
             <Left>2.15501in</Left>
-            <Height>0.49048in</Height>
+            <Height>0.79048in</Height>
             <Width>0in</Width>
             <ZIndex>23</ZIndex>
             <Style>
@@ -1905,9 +2117,9 @@
             </Style>
           </Line>
           <Line Name="Line15">
-            <Top>3.46413in</Top>
-            <Left>3.76126in</Left>
-            <Height>0.46548in</Height>
+            <Top>3.77663in</Top>
+            <Left>4.44876in</Left>
+            <Height>0.77798in</Height>
             <Width>0in</Width>
             <ZIndex>24</ZIndex>
             <Style>
@@ -1933,7 +2145,7 @@
               </Paragraph>
             </Paragraphs>
             <rd:DefaultName>Textbox122</rd:DefaultName>
-            <Top>3.47375in</Top>
+            <Top>3.78625in</Top>
             <Left>1.17793in</Left>
             <Height>0.17708in</Height>
             <Width>0.97708in</Width>
@@ -1961,8 +2173,8 @@
               </Paragraph>
             </Paragraphs>
             <rd:DefaultName>Textbox122</rd:DefaultName>
-            <Top>3.47375in</Top>
-            <Left>2.6201in</Left>
+            <Top>3.78625in</Top>
+            <Left>3.3951in</Left>
             <Height>0.17708in</Height>
             <Width>0.97708in</Width>
             <ZIndex>26</ZIndex>
@@ -1989,8 +2201,8 @@
               </Paragraph>
             </Paragraphs>
             <rd:DefaultName>Textbox122</rd:DefaultName>
-            <Top>3.47375in</Top>
-            <Left>3.9655in</Left>
+            <Top>3.78625in</Top>
+            <Left>4.4655in</Left>
             <Height>0.17708in</Height>
             <Width>0.97708in</Width>
             <ZIndex>27</ZIndex>
@@ -2001,7 +2213,7 @@
             </Style>
           </Textbox>
           <Line Name="Line16">
-            <Top>3.19806in</Top>
+            <Top>3.51056in</Top>
             <Height>0in</Height>
             <Width>8.02347in</Width>
             <ZIndex>28</ZIndex>
@@ -2012,10 +2224,10 @@
             </Style>
           </Line>
           <Line Name="Line17">
-            <Top>3.94062in</Top>
+            <Top>4.25312in</Top>
             <Left>1.12932in</Left>
             <Height>0in</Height>
-            <Width>3.87569in</Width>
+            <Width>4.37569in</Width>
             <ZIndex>29</ZIndex>
             <Style>
               <Border>
@@ -2030,7 +2242,7 @@
               <Paragraph>
                 <TextRuns>
                   <TextRun>
-                    <Value>=Parameters!FivePerGST.Value</Value>
+                    <Value>=Round(CDbl(Parameters!FivePerGST.Value),2)</Value>
                     <Style />
                   </TextRun>
                 </TextRuns>
@@ -2040,7 +2252,7 @@
               </Paragraph>
             </Paragraphs>
             <rd:DefaultName>Textbox122</rd:DefaultName>
-            <Top>3.72708in</Top>
+            <Top>4.03958in</Top>
             <Left>1.16404in</Left>
             <Height>0.17708in</Height>
             <Width>0.97708in</Width>
@@ -2058,7 +2270,7 @@
               <Paragraph>
                 <TextRuns>
                   <TextRun>
-                    <Value>=Parameters!EighteenPerGST.Value</Value>
+                    <Value>=Round(CDbl(Parameters!EighteenPerGST.Value),2)</Value>
                     <Style />
                   </TextRun>
                 </TextRuns>
@@ -2068,8 +2280,8 @@
               </Paragraph>
             </Paragraphs>
             <rd:DefaultName>Textbox122</rd:DefaultName>
-            <Top>3.72708in</Top>
-            <Left>2.6201in</Left>
+            <Top>4.03958in</Top>
+            <Left>3.3951in</Left>
             <Height>0.17708in</Height>
             <Width>0.97708in</Width>
             <ZIndex>31</ZIndex>
@@ -2086,7 +2298,7 @@
               <Paragraph>
                 <TextRuns>
                   <TextRun>
-                    <Value>=Parameters!TwentyEightPerGST.Value</Value>
+                    <Value>=Round(CDbl(Parameters!TwentyEightPerGST.Value),2)</Value>
                     <Style />
                   </TextRun>
                 </TextRuns>
@@ -2096,8 +2308,8 @@
               </Paragraph>
             </Paragraphs>
             <rd:DefaultName>Textbox122</rd:DefaultName>
-            <Top>3.72708in</Top>
-            <Left>3.9655in</Left>
+            <Top>4.03958in</Top>
+            <Left>4.4655in</Left>
             <Height>0.17708in</Height>
             <Width>0.97708in</Width>
             <ZIndex>32</ZIndex>
@@ -2114,22 +2326,21 @@
               <Paragraph>
                 <TextRuns>
                   <TextRun>
-                    <Value>Total :</Value>
+                    <Value>Total Amt</Value>
                     <Style>
                       <FontWeight>Bold</FontWeight>
                     </Style>
                   </TextRun>
                 </TextRuns>
                 <Style>
-                  <TextAlign>Center</TextAlign>
+                  <TextAlign>Right</TextAlign>
                 </Style>
               </Paragraph>
             </Paragraphs>
             <rd:DefaultName>Textbox122</rd:DefaultName>
-            <Top>4.01007in</Top>
-            <Left>1.19772in</Left>
+            <Top>4.63507in</Top>
             <Height>0.2066in</Height>
-            <Width>0.97708in</Width>
+            <Width>1.08333in</Width>
             <ZIndex>33</ZIndex>
             <Style>
               <Border>
@@ -2156,10 +2367,10 @@
               </Paragraph>
             </Paragraphs>
             <rd:DefaultName>Textbox122</rd:DefaultName>
-            <Top>4.01007in</Top>
-            <Left>2.1951in</Left>
+            <Top>4.63507in</Top>
+            <Left>1.2201in</Left>
             <Height>0.2066in</Height>
-            <Width>2.70859in</Width>
+            <Width>4.19609in</Width>
             <ZIndex>34</ZIndex>
             <Style>
               <Border>
@@ -2184,7 +2395,7 @@
               </Paragraph>
             </Paragraphs>
             <rd:DefaultName>Textbox75</rd:DefaultName>
-            <Top>12.04382cm</Top>
+            <Top>13.50429cm</Top>
             <Left>0.06353cm</Left>
             <Height>0.50271cm</Height>
             <Width>1.18322cm</Width>
@@ -2283,7 +2494,7 @@
               </Textbox>
             </ReportItems>
             <KeepTogether>true</KeepTogether>
-            <Top>4.75486in</Top>
+            <Top>5.32986in</Top>
             <Left>5.41246in</Left>
             <Height>1.42708in</Height>
             <Width>2.5399in</Width>
@@ -2295,10 +2506,260 @@
             </Style>
           </Rectangle>
           <Line Name="Line6">
-            <Top>2.84063in</Top>
+            <Top>3.12813in</Top>
             <Height>0in</Height>
             <Width>8.02347in</Width>
             <ZIndex>37</ZIndex>
+            <Style>
+              <Border>
+                <Style>Solid</Style>
+              </Border>
+            </Style>
+          </Line>
+          <Line Name="Line20">
+            <Top>4.55938in</Top>
+            <Left>1.12389in</Left>
+            <Height>0in</Height>
+            <Width>4.38819in</Width>
+            <ZIndex>38</ZIndex>
+            <Style>
+              <Border>
+                <Style>Solid</Style>
+              </Border>
+            </Style>
+          </Line>
+          <Textbox Name="Textbox134">
+            <CanGrow>true</CanGrow>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>=Round(CDbl(Parameters!FivePerGST.Value)*0.05,2)</Value>
+                    <Style />
+                  </TextRun>
+                </TextRuns>
+                <Style>
+                  <TextAlign>Center</TextAlign>
+                </Style>
+              </Paragraph>
+            </Paragraphs>
+            <rd:DefaultName>Textbox122</rd:DefaultName>
+            <Top>4.34584in</Top>
+            <Left>1.17111in</Left>
+            <Height>0.17708in</Height>
+            <Width>0.97708in</Width>
+            <ZIndex>39</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Textbox>
+          <Textbox Name="Textbox135">
+            <CanGrow>true</CanGrow>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>=Round(CDbl(Parameters!EighteenPerGST.Value)*0.18,2)</Value>
+                    <Style />
+                  </TextRun>
+                </TextRuns>
+                <Style>
+                  <TextAlign>Center</TextAlign>
+                </Style>
+              </Paragraph>
+            </Paragraphs>
+            <rd:DefaultName>Textbox122</rd:DefaultName>
+            <Top>4.34584in</Top>
+            <Left>3.40217in</Left>
+            <Height>0.17708in</Height>
+            <Width>0.97708in</Width>
+            <ZIndex>40</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Textbox>
+          <Textbox Name="Textbox136">
+            <CanGrow>true</CanGrow>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>=Round(CDbl(Parameters!TwentyEightPerGST.Value)*0.28,2)</Value>
+                    <Style />
+                  </TextRun>
+                </TextRuns>
+                <Style>
+                  <TextAlign>Center</TextAlign>
+                </Style>
+              </Paragraph>
+            </Paragraphs>
+            <rd:DefaultName>Textbox122</rd:DefaultName>
+            <Top>4.34584in</Top>
+            <Left>4.47257in</Left>
+            <Height>0.17708in</Height>
+            <Width>0.97708in</Width>
+            <ZIndex>41</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Textbox>
+          <Textbox Name="Textbox137">
+            <CanGrow>true</CanGrow>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>Taxable Amt</Value>
+                    <Style>
+                      <FontWeight>Bold</FontWeight>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style>
+                  <TextAlign>Right</TextAlign>
+                </Style>
+              </Paragraph>
+            </Paragraphs>
+            <rd:DefaultName>Textbox122</rd:DefaultName>
+            <Top>4.05209in</Top>
+            <Height>0.17708in</Height>
+            <Width>1.08333in</Width>
+            <ZIndex>42</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Textbox>
+          <Textbox Name="Textbox138">
+            <CanGrow>true</CanGrow>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>Total Tax  Amt</Value>
+                    <Style>
+                      <FontWeight>Bold</FontWeight>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style>
+                  <TextAlign>Right</TextAlign>
+                </Style>
+              </Paragraph>
+            </Paragraphs>
+            <rd:DefaultName>Textbox122</rd:DefaultName>
+            <Top>4.35209in</Top>
+            <Height>0.17708in</Height>
+            <Width>1.08333in</Width>
+            <ZIndex>43</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Textbox>
+          <Textbox Name="Textbox139">
+            <CanGrow>true</CanGrow>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>12%</Value>
+                    <Style />
+                  </TextRun>
+                </TextRuns>
+                <Style>
+                  <TextAlign>Center</TextAlign>
+                </Style>
+              </Paragraph>
+            </Paragraphs>
+            <rd:DefaultName>Textbox122</rd:DefaultName>
+            <Top>3.78479in</Top>
+            <Left>2.23216in</Left>
+            <Height>0.17708in</Height>
+            <Width>0.97708in</Width>
+            <ZIndex>44</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Textbox>
+          <Textbox Name="Textbox141">
+            <CanGrow>true</CanGrow>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>=Round(CDbl(Parameters!TwelvePerGST.Value),2)</Value>
+                    <Style />
+                  </TextRun>
+                </TextRuns>
+                <Style>
+                  <TextAlign>Center</TextAlign>
+                </Style>
+              </Paragraph>
+            </Paragraphs>
+            <rd:DefaultName>Textbox122</rd:DefaultName>
+            <Top>4.02562in</Top>
+            <Left>2.23216in</Left>
+            <Height>0.17708in</Height>
+            <Width>0.97708in</Width>
+            <ZIndex>45</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Textbox>
+          <Textbox Name="Textbox142">
+            <CanGrow>true</CanGrow>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>=Round(CDbl(Parameters!TwelvePerGST.Value)* 0.12,2)</Value>
+                    <Style />
+                  </TextRun>
+                </TextRuns>
+                <Style>
+                  <TextAlign>Center</TextAlign>
+                </Style>
+              </Paragraph>
+            </Paragraphs>
+            <rd:DefaultName>Textbox122</rd:DefaultName>
+            <Top>4.33188in</Top>
+            <Left>2.23923in</Left>
+            <Height>0.17708in</Height>
+            <Width>0.97708in</Width>
+            <ZIndex>46</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Textbox>
+          <Line Name="Line18">
+            <Top>3.77664in</Top>
+            <Left>3.34924in</Left>
+            <Height>0.77798in</Height>
+            <Width>0in</Width>
+            <ZIndex>47</ZIndex>
             <Style>
               <Border>
                 <Style>Solid</Style>
@@ -2894,6 +3355,7 @@
                 </Paragraph>
               </Paragraphs>
               <rd:DefaultName>Textbox8</rd:DefaultName>
+              <Top>0.00001cm</Top>
               <Left>0.04605in</Left>
               <Height>0.2in</Height>
               <Width>7.90105in</Width>
@@ -2964,6 +3426,12 @@
       <AllowBlank>true</AllowBlank>
       <Prompt>ReportParameter1</Prompt>
     </ReportParameter>
+    <ReportParameter Name="TwelvePerGST">
+      <DataType>String</DataType>
+      <Nullable>true</Nullable>
+      <AllowBlank>true</AllowBlank>
+      <Prompt>ReportParameter1</Prompt>
+    </ReportParameter>
   </ReportParameters>
   <ReportParametersLayout>
     <GridLayoutDefinition>
@@ -2999,6 +3467,11 @@
           <ColumnIndex>1</ColumnIndex>
           <RowIndex>1</RowIndex>
           <ParameterName>TwentyEightPerGST</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>2</ColumnIndex>
+          <RowIndex>1</RowIndex>
+          <ParameterName>TwelvePerGST</ParameterName>
         </CellDefinition>
       </CellDefinitions>
     </GridLayoutDefinition>

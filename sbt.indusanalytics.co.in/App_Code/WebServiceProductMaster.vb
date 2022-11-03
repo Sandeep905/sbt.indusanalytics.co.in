@@ -436,7 +436,7 @@ Public Class WebServiceProductMaster
 
         Try
             If ProjectID > 0 Then
-                If (db.CheckAuthories("ProjectQuotation.aspx", GBLUserID, GBLCompanyID, "CanEdit", ObjMain(0)("ProjectName")) = False) Then Return "You are not authorized to edit..!, Can't Edit"
+                If db.CheckAuthories("ProjectQuotation.aspx", GBLUserID, GBLCompanyID, "CanEdit", ObjMain(0)("ProjectName")) = False Then Return "You are not authorized to edit..!, Can't Edit"
 
                 AddColName = "ModifiedDate=Getdate(),ModifiedBy=" & GBLUserID
                 AddColValue = "ProductEstimateID = " & ProjectID & " And CompanyID = " & GBLCompanyID
@@ -471,8 +471,8 @@ Public Class WebServiceProductMaster
                     MaxQuotationNo = db.GenerateMaxVoucherNo("ProductQuotation", "MaxBookingNo", "Where CompanyId = " & GBLCompanyID & " ")
                     RevisionNo = 0
                 Else
-                    RevisionNo = db.GenerateMaxVoucherNo("ProductQuotation", "RevisionNo", "Where EstimateNo = " & BookingNo & " and CompanyId = " & GBLCompanyID & " ")
-                    EstimateNo = BookingNo
+                    RevisionNo = db.GenerateMaxVoucherNo("ProductQuotation", "RevisionNo", "Where EstimateNo = '" & BookingNo & "' and CompanyId = " & GBLCompanyID & " ")
+                    EstimateNo = BookingNo.Split(".")(0).ToString()
                 End If
 
                 BookingNo = EstimateNo & "." & RevisionNo
@@ -489,14 +489,20 @@ Public Class WebServiceProductMaster
                 AddColName = "CreatedDate,CompanyID,CreatedBy,ProductEstimateID"
                 AddColValue = "Getdate()," & GBLCompanyID & ",'" & GBLUserID & "'," & ProjectID
                 KeyField = db.InsertDatatableToDatabase(ObjProductConfig, TableName, AddColName, AddColValue)
-                If IsNumeric(KeyField) = False Then
-                    db.ExecuteNonSQLQuery("Delete from ProductQuotation WHERE CompanyID=" & GBLCompanyID & " and ProductEstimateID=" & ProjectID)
-                    db.ExecuteNonSQLQuery("Delete from ProductQuotationContents WHERE CompanyID=" & GBLCompanyID & " and ProductEstimateID=" & ProjectID)
-                    Return "Error in product config :- " & KeyField
-                End If
-            End If
 
-            KeyField = "Success"
+                If ObjMain(0)("EnquiryID") > 0 Then
+                    str = "Update EnquiryMain set Isprocessed = 1 where EnquiryID=" & ObjMain(0)("EnquiryID")
+                    db.ExecuteNonSQLQuery(str)
+                End If
+
+                If IsNumeric(KeyField) = False Then
+                        db.ExecuteNonSQLQuery("Delete from ProductQuotation WHERE CompanyID=" & GBLCompanyID & " and ProductEstimateID=" & ProjectID)
+                        db.ExecuteNonSQLQuery("Delete from ProductQuotationContents WHERE CompanyID=" & GBLCompanyID & " and ProductEstimateID=" & ProjectID)
+                        Return "Error in product config :- " & KeyField
+                    End If
+                End If
+
+                KeyField = "Success"
 
         Catch ex As Exception
             KeyField = "fail " & ex.Message
@@ -543,16 +549,16 @@ Public Class WebServiceProductMaster
 
     <WebMethod(EnableSession:=True)>
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
-    Public Function GetEnquiryList() As String
+    Public Function GetEnquiryList(ByVal Isprocessed As Int16) As String
         Try
 
-            str = "SELECT PQC.ProductHSNID,PQC.GSTPercantage as GSTTaxPercentage, PCM.IsOffsetProduct,PCM.IsUnitProduct,PQC.CategoryID, PQ.EnquiryID,isnull(PQ.BookingID,0) as BookingID, PQC.EnquiryIDDetail, PQ.LedgerID, LM.LedgerName,SLM.LedgerName AS SalesLedgerName ,PQ.SalesPersonID, PQ.Narration, PQ.EnquiryNo, PQ.ProjectName, PQ.CreatedDate, PQ.IsApproved, PQ.ApprovedBy, PQC.Quantity, PQC.ProductCatalogID,PCM.ProductCatalogCode,PCM.ProductDescription, PCM.ProductName,PQC.VendorID,VLM.LedgerName AS VednorName, PQC.Rate, PQC.Amount, PQC.ProcessCost, PQC.FinalAmount, PQC.UnitCost, PQC.RateType, PQC.ProcessIDStr,PQC.DefaultProcessStr,PQ.FreightAmount/*, PQC.ProductInputSizes*/ " &
+            str = "SELECT PQC.ProductHSNID,PQC.GSTPercantage as GSTTaxPercentage, PCM.IsOffsetProduct,PCM.IsUnitProduct,PQC.CategoryID, PQ.EnquiryID,isnull(PQ.BookingID,0) as BookingID, PQC.EnquiryIDDetail, PQ.LedgerID, LM.LedgerName,SLM.LedgerName AS SalesLedgerName ,PQ.SalesPersonID, PQ.Narration, PQ.EnquiryNo, PQ.ProjectName, PQ.CreatedDate,PQ.ApprovedBy, PQC.Quantity, PQC.ProductCatalogID,PCM.ProductCatalogCode,PCM.ProductDescription, PCM.ProductName,PQC.VendorID,VLM.LedgerName AS VednorName, PQC.Rate, PQC.Amount, PQC.ProcessCost, PQC.FinalAmount, PQC.UnitCost, PQC.RateType, PQC.ProcessIDStr,PQC.DefaultProcessStr,PQ.FreightAmount/*, PQC.ProductInputSizes*/ " &
                     "FROM  dbo.EnquiryMain AS PQ " &
                     "LEFT JOIN dbo.EnquiryDetails AS PQC ON PQ.EnquiryID = PQC.EnquiryID AND PQ.CompanyID = PQC.CompanyID " &
                     "LEFT JOIN dbo.ProductCatalogMaster AS PCM ON PCM.ProductCatalogID = PQC.ProductCatalogID AND PQ.CompanyID = PQC.CompanyID " &
                     "INNER JOIN LedgerMaster As LM On LM.LedgerID=PQ.LedgerID And LM.CompanyID = PQ.CompanyID " &
                     "INNER JOIN LedgerMaster As SLM On SLM.LedgerID=PQ.SalesPersonID And SLM.CompanyID = PQ.CompanyID " &
-                    "LEFT JOIN LedgerMaster As VLM On VLM.LedgerID=PQC.VendorID And VLM.CompanyID = PQC.CompanyID Where PQ.IsDeletedTransaction=0 And PQ.CompanyID= " & GBLCompanyID & " order by PQ.EnquiryID desc"
+                    "LEFT JOIN LedgerMaster As VLM On VLM.LedgerID=PQC.VendorID And VLM.CompanyID = PQC.CompanyID Where PQ.IsDeletedTransaction=0 And PQ.CompanyID= " & GBLCompanyID & " and isnull(PQ.Isprocessed,0) = " & Isprocessed & "  order by PQ.EnquiryID desc"
             db.FillDataTable(dataTable, str)
             data.Message = db.ConvertDataTableTojSonString(dataTable)
             Return js.Serialize(data.Message)

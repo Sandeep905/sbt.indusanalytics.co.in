@@ -8,6 +8,7 @@ var suggestedprocessids = '';
 var Defaultprocessids = '';
 var ProjectBookingID = 0;
 var EditMode = false;
+var Isprocessed = 0;
 $("#LoadIndicator").dxLoadPanel({
     shadingColor: "rgba(0,0,0,0.4)",
     indicatorSrc: "images/Indus logo.png",
@@ -19,6 +20,20 @@ $("#LoadIndicator").dxLoadPanel({
     visible: false
 });
 
+$('#RadioEnquiry').dxRadioGroup({
+    items: ["Pending", "Processed"],
+    value: "Pending",
+    layout: 'horizontal',
+    onValueChanged: function (e) {
+        if (e.value == "Processed")
+            Isprocessed = 1;
+        else
+            Isprocessed = 0;
+
+        LoadEnquiry();
+
+    }
+});
 $("#SelClient").dxSelectBox({
     dataSource: [],
     placeholder: "Select --",
@@ -734,28 +749,33 @@ $.ajax({
     }
 });
 
-///Clients
-$.ajax({
-    type: "POST",
-    url: "WebServiceProductMaster.asmx/GetClientData",
-    data: '{}',//
-    contentType: "application/json; charset=utf-8",
-    dataType: 'json',
-    success: function (results) {
-        var res = results.d.replace(/\\/g, '');
-        res = res.replace(/"d":""/g, '');
-        res = res.replace(/"d":null/g, '');
-        res = res.replace(/u0026/g, '&');
-        res = res.substr(1);
-        res = res.slice(0, -1);
-        var RES1 = JSON.parse(res.toString());
-        $("#SelClient").dxSelectBox({ dataSource: RES1 });
-    },
-    error: function errorFunc(jqXHR) {
-        console.log(jqXHR);
-    }
+function ReloadClients() {
+    ///Clients
+    $.ajax({
+        type: "POST",
+        url: "WebServiceProductMaster.asmx/GetClientData",
+        data: '{}',//
+        contentType: "application/json; charset=utf-8",
+        dataType: 'json',
+        success: function (results) {
+            var res = results.d.replace(/\\/g, '');
+            res = res.replace(/"d":""/g, '');
+            res = res.replace(/"d":null/g, '');
+            res = res.replace(/u0026/g, '&');
+            res = res.substr(1);
+            res = res.slice(0, -1);
+            var RES1 = JSON.parse(res.toString());
+            $("#SelClient").dxSelectBox({ dataSource: RES1 });
+        },
+        error: function errorFunc(jqXHR) {
+            console.log(jqXHR);
+        }
+    });
+}
+ReloadClients();
+$("#btnCloseiFrame").click(function () {
+    ReloadClients();
 });
-
 function loadProcess() {
     $.ajax({
         async: false,
@@ -844,6 +864,10 @@ function setGridDisplay(FieldCntainerRow, myModal_1) {
 
 
 $("#BtnEdit").click(function () {
+    if (Isprocessed == 1) {
+        alert("You can't load this enquiry, Quotation is already created");
+        return;
+    }
     var datasource = $('#GridShowlist').dxDataGrid('instance')._options.dataSource;
     datasource = $.grep(datasource, function (ex) { return ex.EnquiryID === Number(document.getElementById("BookingID").value) })
     //document.getElementById("BookingID").value
@@ -1013,13 +1037,13 @@ function FinalSave() {
     });
 
 }
-$("#BtnShowList").click(function () {
+function LoadEnquiry() {
     $("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
     try {
         $.ajax({
             type: "POST",
             url: "WebServiceProductMaster.asmx/GetEnquiryList",
-            data: '{}',//
+            data: '{Isprocessed:' + Isprocessed + '}',//
             contentType: "application/json; charset=utf-8",
             dataType: 'json',
             success: function (results) {
@@ -1041,8 +1065,15 @@ $("#BtnShowList").click(function () {
     } finally {
         $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
     }
+}
+$("#BtnShowList").click(function () {
+    LoadEnquiry();
 });
 $("#BtnDelete").click(function () {
+    if (Isprocessed == 1) {
+        alert("You can't delete this enquiry, Quotation is already created");
+        return;
+    }
     var BookingID = Number(document.getElementById("BookingID").value);
 
     swal({

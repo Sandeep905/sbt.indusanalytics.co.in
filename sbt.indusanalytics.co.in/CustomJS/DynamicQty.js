@@ -1201,6 +1201,7 @@ $(".reloadcategory").click(function () {
     });
 });
 
+
 $(".reloadclient").click(function () {
     $.ajax({                //// For Client
         type: 'post',
@@ -1216,7 +1217,9 @@ $(".reloadclient").click(function () {
             res = res.replace(/u0026/g, '&');
             res = res.slice(0, -1);
             var RES1 = JSON.parse(res);
+            $("#SbClientName").dxSelectBox({ items: [] });
             $("#SbClientName").dxSelectBox({ items: RES1 });
+            //$("#SbClientName").dxSelectBox("getDataSource").reload();
         },
         error: function errorFunc(jqXHR) {
             // alert("not show");
