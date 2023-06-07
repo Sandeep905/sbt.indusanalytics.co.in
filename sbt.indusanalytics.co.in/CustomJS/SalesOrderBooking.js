@@ -4,7 +4,8 @@ var AprNo = "0", MaxProductCode;
 var GblClientID = 0, FlagEdit = false, GblSalesOrderNo = "";
 var ObjSchDelivery = [];
 let GBLProductEstimateID = 0;
-
+var SalesManagerId = 0, ClientCordinatorID = 0, SalesCordinatorId = 0,SalesExecutiveID =0;
+var QuotationNo = '';
 $('.disabledbutton').prop('disabled', true);
 $("#image-indicator").dxLoadPanel({
     shadingColor: "rgba(0,0,0,0.4)",
@@ -18,34 +19,53 @@ $("#image-indicator").dxLoadPanel({
     visible: false
 });
 
-$(function () {
-    $.ajax({
-        type: "POST",
-        url: "WebserviceOthers.asmx/SelctboxPrefix",
-        data: '{}',
-        contentType: "application/json; charset=utf-8",
-        dataType: "json",
-        success: function (results) {
-            var res = results.d.replace(/\\/g, '');
-            res = res.replace(/"d":/g, '');
-            res = res.replace(/""/g, '');
-            res = res.replace(/JobPrefix/g, '');
-            res = res.replace(/"":/g, '');
-            res = res.replace(/{/g, '');
-            res = res.replace(/}/g, '');
-            res = res.replace(/"nul/g, '');
-            res = res.substr(1);
-            res = res.slice(0, -1);
-            var RES1 = JSON.parse(res);
 
-            $("#SOBPrefix").dxSelectBox({
-                items: RES1
+$("#PendingProcess").dxRadioGroup({
+    items: ["Pending", "Processed"],
+    layout: "horizontal",
+    value: "Pending",
+    onValueChanged: function (data) {
+        if (data.value != null) {
+            LoadProducts()
+            $("#SOBProductAddedData").dxDataGrid({
+                dataSource: []
             });
-        },
-        error: function errorFunc(jqXHR) {
-            //alert("not show");
         }
-    });
+        if (data.value == "Processed") {
+            $("#BtnNext").hide();
+        } else {
+            $("#BtnNext").show();
+        }
+    }
+});
+$(function () {
+    //$.ajax({
+    //    type: "POST",
+    //    url: "WebserviceOthers.asmx/SelctboxPrefix",
+    //    data: '{}',
+    //    contentType: "application/json; charset=utf-8",
+    //    dataType: "json",
+    //    success: function (results) {
+    //        var res = results.d.replace(/\\/g, '');
+    //        res = res.replace(/"d":/g, '');
+    //        res = res.replace(/""/g, '');
+    //        res = res.replace(/JobPrefix/g, '');
+    //        res = res.replace(/"":/g, '');
+    //        res = res.replace(/{/g, '');
+    //        res = res.replace(/}/g, '');
+    //        res = res.replace(/"nul/g, '');
+    //        res = res.substr(1);
+    //        res = res.slice(0, -1);
+    //        var RES1 = JSON.parse(res);
+
+    //        $("#SOBPrefix").dxSelectBox({
+    //            items: RES1
+    //        });
+    //    },
+    //    error: function errorFunc(jqXHR) {
+    //        //alert("not show");
+    //    }
+    //});
 
     $.ajax({
         type: "POST",
@@ -178,6 +198,8 @@ $(function () {
                 searchEnabled: true,
                 showClearButton: true,
                 onValueChanged: function (e) {
+                    GblClientID = e.value;
+                    return
                     //var previousValue = e.element.context.id; ////Fetch current selectbox ID       
                     $("#SOBProductAddedData").dxDataGrid({
                         dataSource: []
@@ -188,7 +210,7 @@ $(function () {
                         GblClientID = 0;
                         return;
                     }
-                    GblClientID = e.value;
+
                     $.ajax({
                         type: "POST",
                         url: "WebServiceOthers.asmx/LoadOBProductsData",
@@ -240,31 +262,132 @@ $(function () {
 
 });
 
+//$.ajax({
+//    type: "POST",
+//    url: "WebServiceOthers.asmx/LoadOrderBookingData",
+//    data: '{}',//BookingID:' + BookingID + '
+//    contentType: "application/json; charset=utf-8",
+//    dataType: 'json',
+//    success: function (results) {
+//        var res = results.d.replace(/\\/g, '');
+//        res = res.replace(/"d":""/g, '');
+//        res = res.replace(/"d":null/g, '');
+//        res = res.replace(/u0026/g, '&');
+//        res = res.substr(1);
+//        res = res.slice(0, -1);
+//        var RES1 = JSON.parse(res.toString());
+//        $("#SalesOrderBookingGrid").dxDataGrid({
+//            dataSource: RES1
+//        });
+//    },
+//    error: function errorFunc(jqXHR) {
+//        $("#image-indicator").dxLoadPanel("instance").option("visible", false);
+//        alert(jqXHR.message);
+//    }
+//});
+
+
 $.ajax({
-    type: "POST",
-    url: "WebServiceOthers.asmx/LoadOrderBookingData",
-    data: '{}',//BookingID:' + BookingID + '
-    contentType: "application/json; charset=utf-8",
+    type: 'post',
+    url: 'WebServiceOthers.asmx/LoadSalesOrders',
     dataType: 'json',
+    contentType: "application/json; charset=utf-8",
+    data: {},
     success: function (results) {
+        if (results.d === "500") return;
         var res = results.d.replace(/\\/g, '');
-        res = res.replace(/"d":""/g, '');
-        res = res.replace(/"d":null/g, '');
-        res = res.replace(/u0026/g, '&');
         res = res.substr(1);
+        res = res.replace(/u0026/g, '&');
         res = res.slice(0, -1);
-        var RES1 = JSON.parse(res.toString());
+        var RES1 = JSON.parse(res);
         $("#SalesOrderBookingGrid").dxDataGrid({
-            dataSource: RES1
+            keyExpr: 'OrderBookingId',
+            dataSource: RES1.SalesOrders,
+            masterDetail: {
+                enabled: true,
+                template(container, options) {
+                    const currentProjectData = options.data;
+
+                    $('<div>')
+                        .addClass('master-detail-caption')
+                        .text(`${currentProjectData.ClientName} 's Products:`)
+                        .appendTo(container);
+                    $('<div>')
+                        .dxDataGrid({
+                            columnAutoWidth: true,
+                            showBorders: true,
+                            columns: [
+                                { dataField: "ProductName" },
+                                { dataField: "OrderQuantity" },
+                                { dataField: "Rate" },
+                                { dataField: "RateType" },
+                                { dataField: "NetAmount" },
+                                { dataField: "GSTAmount" },
+                                { dataField: "FinalCost" },
+                                { dataField: "JobType" },
+                                { dataField: "JobReference" },
+                                { dataField: "JobPriority" },
+                                { dataField: "ProductDescription" },
+                                { dataField: "PackagingDetails" },
+                                { dataField: "DescriptionOther" },
+                                { dataField: "ExpectedDeliveryDate" },
+                                { dataField: "VendorName", caption: "Planed Vendor Name" },
+
+                            ],
+                            dataSource: new DevExpress.data.DataSource({
+                                store: new DevExpress.data.ArrayStore({
+                                    //key: 'ID',
+                                    data: RES1.Contents,
+                                }),
+                                filter: ['OrderBookingId', '=', options.key],
+                            }),
+                        }).appendTo(container);
+                },
+            },
         });
+
     },
     error: function errorFunc(jqXHR) {
-        $("#image-indicator").dxLoadPanel("instance").option("visible", false);
-        alert(jqXHR.message);
+        // alert("not show");
     }
 });
+LoadProducts()
+function LoadProducts() {
+    var selOption = $("#PendingProcess").dxRadioGroup('instance').option('value');
 
+    $.ajax({
+        type: "POST",
+        url: "WebServiceOthers.asmx/LoadOBProductsData",
+        data: '{LedgerID:' + GblClientID + '}',
+        contentType: "application/json; charset=utf-8",
+        dataType: 'json',
+        success: function (results) {
+            var res = results.d.replace(/\\/g, '');
+            res = res.replace(/"d":""/g, '');
+            res = res.replace(/"d":null/g, '');
+            res = res.replace(/u0026/g, '&');
+            res = res.substr(1);
+            res = res.slice(0, -1);
+            var RES1 = JSON.parse(res.toString());
+            var Datasource = [];
+            if (selOption == "Processed") {
+                Datasource = $.grep(RES1, function (ex) { return ex.IsOrderBooked === 1; });
+            }
+            else {
+                Datasource = $.grep(RES1, function (ex) { return ex.IsOrderBooked === 0; });
+            }
+            $("#SOBProductData").dxDataGrid({
+                dataSource: Datasource
+            });
+        },
+        error: function errorFunc(jqXHR) {
+            $("#image-indicator").dxLoadPanel("instance").option("visible", false);
+            alert(jqXHR.message);
+        }
+    });
+}
 $("#SalesOrderBookingGrid").dxDataGrid({
+    keyExpr: 'OrderBookingID',
     allowColumnReordering: true,
     allowColumnResizing: true,
     columnAutoWidth: true,
@@ -275,9 +398,20 @@ $("#SalesOrderBookingGrid").dxDataGrid({
     filterRow: { visible: true },
     rowAlternationEnabled: false,
     headerFilter: { visible: false },
-    columns: ["SalesOrderNo", "OrderDate", "ClientName", { dataField: "BookingNo", caption: "Quote No", width: 60 }, "ProductCode", { dataField: "JobName", width: 145 }, { dataField: "OrderQuantity", caption: "Order Qty", width: 70 },
-        "DeliveryDate", "PONo", { dataField: "PODate", width: 70 }, { dataField: "BookedBy", caption: "Booked By", width: 60 }, { dataField: "IsBooked", dataType: "boolean", width: 40 }, { dataField: "City", width: 60 },
-        { dataField: "State", width: 60 }, { dataField: "JobWork", dataType: "boolean", width: 60 }, { dataField: "DirectOrder", dataType: "boolean", width: 60 }],
+    columns: [
+        { dataField: "EnquiryNo" },
+        { dataField: "EstimateNo", caption: 'Quotation No' },
+        { dataField: "SalesOrderNo" },
+        { dataField: "OrderBookingDate" },
+        { dataField: "PONo" },
+        { dataField: "POdate" },
+        { dataField: "ClientName" },
+        { dataField: "SalesManager" },
+        { dataField: "SalesPerson" },
+        { dataField: "SalesCordinator" },
+        { dataField: "ClientCordinator" },
+        { dataField: "CreatedBy" },
+    ],
     //onContentReady: function (e) {
     //    $("#image-indicator").dxLoadPanel("instance").option("visible", false);
     //},
@@ -295,6 +429,7 @@ $("#SalesOrderBookingGrid").dxDataGrid({
         } else {
             GblSalesOrderNo = data.selectedRowsData[0].SalesOrderNo;
             GblClientID = data.selectedRowsData[0].LedgerID;
+
         }
     }
 });
@@ -315,92 +450,46 @@ $("#SOBProductData").dxDataGrid({
     rowAlternationEnabled: false,
     headerFilter: { visible: false },
     columns: [
+        //{ dataField: "IsOrderBooked", dataType: "boolean" },
+        { dataField: "EnquiryNo" },
         { dataField: "QuotationNo" },
+        //{ dataField: "ApprovalNo" },
         { dataField: "ProjectName" },
         { dataField: "ClientName" },
+        { dataField: "ClientCordinator" },
+        { dataField: "SalesManager" },
         { dataField: "SalesPerson" },
-        { dataField: "FreightAmount" },
+        { dataField: "SalesCordinator" },
+        { dataField: "EstimateBy" },
         { dataField: "Remark" },
         { dataField: "ApprovedBy" },
     ],
     height: function () {
-        return window.innerHeight / 2.5;
+        return window.innerHeight / 2.8;
     },
-    //onEditingStart: function (e) {
-    //    if (e.column.dataField === "OrderQuantity") {
-    //        e.cancel = false;
-    //    } else {
-    //        e.cancel = true;
-    //    }
-    //},
-    //onRowUpdated: function (e) {
-    //    if (e.data.OrderQuantity > 0) {
-    //        e.key.ApprovedRate = CalculateSlabrates(e.key.BookingID, Number(e.key.OrderQuantity), "AR");
-    //        e.key.QuoteRate = CalculateSlabrates(e.key.BookingID, Number(e.key.OrderQuantity), "QR");
-    //    } else {
-    //        e.key.ApprovedRate = 0;
-    //        e.key.QuoteRate = 0;
-    //    }
-    //    e.component.refresh();
-    //},
-    //onCellClick: function (clickedCell) {
-    //    if (clickedCell.rowType === undefined) return;
-    //    if (clickedCell.rowType === "header" || clickedCell.rowType === "filter") {
-    //        return false;
-    //    }
-    //    if (clickedCell.column.dataField === "Add") {
-    //        try {
-    //            clickedCell.component.saveEditData();
-    //            clickedCell.component.refresh();
-    //            if (clickedCell.data.OrderQuantity <= 0 || !clickedCell.data.OrderQuantity) {
-    //                DevExpress.ui.notify("Please enter order quantity first..!", "warning", 1500);
-    //                clickedCell.component.cellValue(clickedCell.row.rowIndex, "OrderQuantity", "");
-    //                return false;
-    //            }
-    //            if (clickedCell.data.ApprovedRate <= 0 || !clickedCell.data.ApprovedRate) {
-    //                DevExpress.ui.notify("Entered quantity is not a valid approved quantity..!", "warning", 1500);
-    //                return false;
-    //            }
-    //            var dataGrid = $('#SOBProductAddedData').dxDataGrid('instance');
-    //            var result = $.grep(dataGrid._options.dataSource, function (e) { return e.BookingNo === clickedCell.data.BookingNo; });
-    //            if (result.length === 1) {
-    //                // data found
-    //                DevExpress.ui.notify("Product already added..!", "error", 500);
-    //                return false;
-    //            }
-
-    //            var newData = clickedCell.data;
-    //            newData.OrderQuantity = clickedCell.data.OrderQuantity;
-    //            newData.ApprovedRate = clickedCell.data.ApprovedRate; ///clickedCell.component._options.dataSource[clickedCell.rowIndex].ApprovedRate; 
-    //            newData.QuoteRate = clickedCell.data.QuoteRate;
-    //            newData.FinalCost = clickedCell.data.FinalCost;
-    //            newData.TotalAmount = clickedCell.data.TotalAmount;
-    //            newData.TypeOfCost = clickedCell.data.TypeOfCost;
-    //            newData.CGSTTaxAmount = 0;
-    //            newData.SGSTTaxAmount = 0;
-    //            newData.IGSTTaxAmount = 0;
-
-    //            var clonedItem = $.extend({}, newData);
-    //            dataGrid._options.dataSource.splice(dataGrid.totalCount(), 0, clonedItem);
-    //            dataGrid.refresh(true);
-
-    //            //dataGrid._events.preventDefault();
-    //            DevExpress.ui.notify("Product added..!", "success", 500);
-    //            clickedCell.component.clearFilter();
-    //            $("#SOBClientName").dxSelectBox({
-    //                disabled: true
-    //            });
-    //        } catch (e) {
-    //            console.log(e);
-    //        }
-    //    }
-    //},
     onRowPrepared: function (e) {
         setDataGridRowCss(e);
+        if (e.rowType === "data") {
+            if (e.data.IsOrderBooked > 0) {
+                e.rowElement.css('background', 'green');
+                e.rowElement.css('fontSize', '11px');
+                e.rowElement.css('color', 'white');
+            }
+        }
     },
     onSelectionChanged: function (data) {
+        if (data.selectedRowsData.length <= 0) return;
+        QuotationNo = data.selectedRowsData[0].QuotationNo
         GBLProductEstimateID = data.selectedRowsData[0].ProductEstimateID
-
+        SalesManagerId = data.selectedRowsData[0].SalesManagerId;
+        ClientCordinatorID = data.selectedRowsData[0].ClientCordinatorID;
+        SalesCordinatorId = data.selectedRowsData[0].SalesCordinatorId
+        SalesExecutiveID = data.selectedRowsData[0].SalesPersonID
+        $("#SOBClientName").dxSelectBox({
+            value: data.selectedRowsData[0].LedgerID,
+        });
+        GblClientID = data.selectedRowsData[0].LedgerID
+        document.getElementById("SOBTxtClientName").value = data.selectedRowsData[0].ClientName;
         $.ajax({
             type: "POST",
             url: "WebServiceOthers.asmx/LoadProjectContents",
@@ -427,6 +516,26 @@ $("#SOBProductData").dxDataGrid({
     }
 });
 
+const IsPoOnMail = document.getElementById('IsPoOnMail')
+
+IsPoOnMail.addEventListener('change', (event) => {
+    if (event.currentTarget.checked) {
+        $('#POContainer').addClass('hidden')
+        $('#mailContainer').removeClass('hidden')
+
+    } else {
+        $('#mailContainer').addClass('hidden')
+        $('#POContainer').removeClass('hidden')
+    }
+    $("#SOBPODate").dxDateBox({
+        value: new Date(),
+    });
+    $("#SOBPOMailDate").dxDateBox({
+        value: new Date(),
+    });
+    document.getElementById('SOBTxtPONo').value = ''
+    document.getElementById('SOBTxtPOMail').value = ''
+})
 $("#SOBProductAddedData").dxDataGrid({
     dataSource: [],
     allowColumnReordering: true,
@@ -448,10 +557,10 @@ $("#SOBProductAddedData").dxDataGrid({
         { dataField: "MiscPercantage" },
         { dataField: "MiscAmount" },
         { dataField: "ShippingCost" },
-        { dataField: "ProfitPer" },
+        { dataField: "ProfitPer", caption: "Profit %" },
         { dataField: "ProfitCost" },
         { dataField: "FinalAmount" },
-        { dataField: "VendorName" }
+        { dataField: "VendorName", visible: false }
     ],
     onRowPrepared: function (e) {
         setDataGridRowCss(e);
@@ -511,10 +620,14 @@ $("#SOBOrderHistory").dxDataGrid({
     showBorders: true,
     showRowLines: true,
     scrolling: { mode: 'infinite' },
-    columns: [{ dataField: "SalesOrderNo", caption: "Order No" }, { dataField: "OrderBookingDate", caption: "Order Date" }, { dataField: "OrderQuantity", caption: "Order Qty" }, { dataField: "Cost", caption: "Order Rate" },
-        "JobBookingNo", "ApproveCostRemark", "Remark"],
+    columns: [{ dataField: "SalesOrderNo", caption: "Order No" },
+    { dataField: "OrderBookingDate", caption: "Order Date" },
+    { dataField: "ClientName" },
+    { dataField: "PONo" },
+        "PODate",
+        "SalesPerson"],
     height: function () {
-        return window.innerHeight / 2.5;
+        return window.innerHeight / 1.2;
     },
     onRowPrepared: function (e) {
         setDataGridRowCss(e);
@@ -522,25 +635,37 @@ $("#SOBOrderHistory").dxDataGrid({
 });
 
 $("#SOBDate").dxDateBox({
-    pickerType: "rollers",
+
     disabled: true,
     value: new Date(),
     displayFormat: "dd-MMM-yyyy"
 });
 
 $("#SOBPrefix").dxSelectBox({
-    items: [],
-    //showClearButton: true,
-    //acceptCustomValue: true    
-    onValueChanged: function (data) {
-        var PFix = data.value;
-        if (!PFix) return;
-        GetMaxSOBNumber(PFix);
-    }
+    items: ["SB"],
+    value: "SB",
+    disabled: true,
+    //onValueChanged: function (data) {
+    //    var PFix = data.value;
+    //    if (!PFix) return;
+    //    GetMaxSOBNumber();
+    //}
 });
 
 $("#SOBPODate").dxDateBox({
-    pickerType: "rollers",
+
+    value: new Date(),
+    displayFormat: "dd-MMM-yyyy",
+    max: new Date(),
+    onValueChanged: function (data) {
+        var PDate = data.value;
+        $("#SOBDeliveryDate").dxDateBox({
+            min: PDate
+        });
+    }
+});
+$("#SOBPOMailDate").dxDateBox({
+
     value: new Date(),
     displayFormat: "dd-MMM-yyyy",
     max: new Date(),
@@ -553,7 +678,7 @@ $("#SOBPODate").dxDateBox({
 });
 
 $("#SOBDeliveryDate").dxDateBox({
-    pickerType: "rollers",
+
     value: new Date(),
     displayFormat: "dd-MMM-yyyy",
     min: new Date()
@@ -646,6 +771,7 @@ $("#GridOrdersList").dxDataGrid({
             //document.getElementById("SOBProductMasterNo").value = data.selectedRowsData[0].ProductMasterCode;
             //document.getElementById("SOBQuoteNo").value = data.selectedRowsData[0].QuotationNo;
             document.getElementById("SOBJobName").value = data.selectedRowsData[0].ProductName;
+
             document.getElementById('SOBSchQuantity').value = 0;
             //MaxProductCode = data.selectedRowsData[0].MaxPMCode;
 
@@ -655,26 +781,26 @@ $("#GridOrdersList").dxDataGrid({
             ObjSchData = [];
         }
 
-        var HSNID = data.selectedRowsData[0].ProductHSNID;
-        var result = $.grep(ProductHSNGrp, function (ex) { return ex.ProductHSNID === HSNID; });
-        if (result.length === 1) {
-            if (data.selectedRowsData[0].ClientState !== data.selectedRowsData[0].CompanyState) {
-                data.selectedRowsData[0].IGSTTaxPercentage = result[0].IGSTTaxPercentage;
-                data.selectedRowsData[0].CGSTTaxPercentage = 0;
-                data.selectedRowsData[0].SGSTTaxPercentage = 0;
-            } else {
-                data.selectedRowsData[0].IGSTTaxPercentage = 0;
-                data.selectedRowsData[0].SGSTTaxPercentage = result[0].SGSTTaxPercentage;
-                data.selectedRowsData[0].CGSTTaxPercentage = result[0].CGSTTaxPercentage;
-            }
-            data.selectedRowsData[0].GSTTaxPercentage = result[0].GSTTaxPercentage;
-        }
-        data.selectedRowsData[0].IGSTTaxAmount = (Number(Number(data.selectedRowsData[0].FinalAmount) * Number(data.selectedRowsData[0].IGSTTaxPercentage)) / 100).toFixed(2);
-        data.selectedRowsData[0].CGSTTaxAmount = (Number(Number(data.selectedRowsData[0].FinalAmount) * Number(data.selectedRowsData[0].CGSTTaxPercentage)) / 100).toFixed(2);
-        data.selectedRowsData[0].SGSTTaxAmount = (Number(Number(data.selectedRowsData[0].FinalAmount) * Number(data.selectedRowsData[0].SGSTTaxPercentage)) / 100).toFixed(2);
+        //var HSNID = data.selectedRowsData[0].ProductHSNID;
+        //var result = $.grep(ProductHSNGrp, function (ex) { return ex.ProductHSNID === HSNID; });
+        //if (result.length === 1) {
+        //    if (data.selectedRowsData[0].ClientState !== data.selectedRowsData[0].CompanyState) {
+        //        data.selectedRowsData[0].IGSTTaxPercentage = result[0].IGSTTaxPercentage;
+        //        data.selectedRowsData[0].CGSTTaxPercentage = 0;
+        //        data.selectedRowsData[0].SGSTTaxPercentage = 0;
+        //    } else {
+        //        data.selectedRowsData[0].IGSTTaxPercentage = 0;
+        //        data.selectedRowsData[0].SGSTTaxPercentage = result[0].SGSTTaxPercentage;
+        //        data.selectedRowsData[0].CGSTTaxPercentage = result[0].CGSTTaxPercentage;
+        //    }
+        //    data.selectedRowsData[0].GSTTaxPercentage = result[0].GSTTaxPercentage;
+        //}
+        //data.selectedRowsData[0].IGSTTaxAmount = (Number(Number(data.selectedRowsData[0].FinalAmount) * Number(data.selectedRowsData[0].IGSTTaxPercentage)) / 100).toFixed(2);
+        //data.selectedRowsData[0].CGSTTaxAmount = (Number(Number(data.selectedRowsData[0].FinalAmount) * Number(data.selectedRowsData[0].CGSTTaxPercentage)) / 100).toFixed(2);
+        //data.selectedRowsData[0].SGSTTaxAmount = (Number(Number(data.selectedRowsData[0].FinalAmount) * Number(data.selectedRowsData[0].SGSTTaxPercentage)) / 100).toFixed(2);
         //GridOrdersListRowPO = e.rowIndex;
         //GridOrdersListColPO = e.columnIndex;
-        data.component.refresh();
+        //data.component.refresh();
     }
 });
 
@@ -746,7 +872,7 @@ $("#BtnNext").click(function () {
         DevExpress.ui.notify("Please add products first..!", "warning", 1200);
         return;
     }
-
+    GetMaxSOBNumber()
     try {
         GetConsignee(GblClientID);
         dataGrid.refresh();
@@ -898,12 +1024,14 @@ $("#BtnAddSchedule").click(function () {
         alert(e);
     }
 });
-
-function GetMaxSOBNumber(PFix) {
+GetMaxSOBNumber
+function GetMaxSOBNumber() {
+    var SOBPrefix = $('#SOBPrefix').dxSelectBox('instance').option('value');
+    console.log(SOBPrefix);
     $.ajax({
         type: "POST",
         url: "WebServiceOthers.asmx/SOBOrderNo",
-        data: '{PFix:' + JSON.stringify(PFix) + '}',
+        data: '{PFix:' + JSON.stringify(SOBPrefix) + '}',
         contentType: "application/json; charset=utf-8",
         dataType: "text",
         success: function (results) {
@@ -939,17 +1067,6 @@ function GetConsignee(CID) {
             var RES1 = JSON.parse(res.toString());
             $("#SOBConsignee").dxSelectBox({
                 dataSource: RES1
-                ////onValueChanged: function (e) {
-                ////    if (e.value) {
-                ////        document.getElementById("txtSchConsignee").value = e.value;
-                ////    }
-                ////},
-                //onCustomItemCreating: function (data) {
-                //    var newItem = data.text;
-                //    RES1.push(newItem);
-                //    data.option("items", RES1);
-                //    data.customItem = newItem;
-                //}
             });
         },
         error: function errorFunc(jqXHR) {
@@ -965,15 +1082,23 @@ $("#BtnOrderHistory").click(function () {
 
 function GetOrderHistory() {
 
-    var SOBProductData = $('#SOBProductData').dxDataGrid('instance');
-    var selectedRow = SOBProductData.getSelectedRowsData();
-    if (selectedRow.length <= 0) return;
-    var OID = selectedRow[0].ProductEstimateID;
-    if (OID === "" || OID === null) return;
+
+    var ClientID = $("#SOBClientName").dxSelectBox("instance").option('value');
+    if (ClientID <= 0) {
+        DevExpress.ui.notify({
+            message: "Please Select Client",
+            //position: {
+            //    my: "middle top",
+            //    at: "middle top"
+            //}
+        }, "error", 3000);
+        return;
+    };
+
     $.ajax({
         type: "POST",
         url: "WebServiceOthers.asmx/GetOrderHistory",
-        data: '{OID:' + JSON.stringify(OID) + '}',//
+        data: '{OID:' + JSON.stringify(ClientID) + '}',//
         contentType: "application/json; charset=utf-8",
         dataType: 'json',
         success: function (results) {
@@ -985,7 +1110,41 @@ function GetOrderHistory() {
             res = res.slice(0, -1);
             var RES1 = JSON.parse(res.toString());
             $("#SOBOrderHistory").dxDataGrid({
-                dataSource: RES1
+                keyExpr: 'OrderBookingID',
+                dataSource: RES1.Project,
+                masterDetail: {
+                    enabled: true,
+                    template(container, options) {
+                        const currentProjectData = options.data;
+                        $('<div>')
+                            .addClass('master-detail-caption')
+                            .text(`${currentProjectData.ClientName} 's Products:`)
+                            .appendTo(container);
+                        $('<div>')
+                            .dxDataGrid({
+                                columnAutoWidth: true,
+                                showBorders: true,
+                                columns: [
+
+                                    { dataField: "CategoryName" },
+                                    { dataField: "JobName", caption: "ProductName" },
+                                    { dataField: "OrderQuantity" },
+                                    { dataField: "Rate" },
+                                    { dataField: "JobType" },
+                                    { dataField: "JobPriority" },
+                                    { dataField: "JobReference" },
+                                    { dataField: "VendorName" }
+                                ],
+                                dataSource: new DevExpress.data.DataSource({
+                                    store: new DevExpress.data.ArrayStore({
+                                        //key: 'ID',
+                                        data: RES1.Contents,
+                                    }),
+                                    filter: ['OrderBookingID', '=', options.key],
+                                }),
+                            }).appendTo(container);
+                    },
+                },
             });
         },
         error: function errorFunc(jqXHR) {
@@ -1108,6 +1267,7 @@ function OpenPopup(ID, modalId) {
 }
 
 $("#BtnCreateOrder").click(function () {
+    location.reload();
     GblSalesOrderNo = "";
     GblClientID = 0;
     FlagEdit = false;
@@ -1179,6 +1339,16 @@ $("#EditButton").click(function () {
                 $("#SOBProductAddedData").dxDataGrid({
                     dataSource: RES1.OrderBooking
                 });
+                GBLProductEstimateID = RES1.OrderBooking[0].ProductEstimateID
+                SalesManagerId = RES1.OrderBooking[0].SalesManagerId;
+                ClientCordinatorID = RES1.OrderBooking[0].ClientCordinatorID;
+                SalesCordinatorId = RES1.OrderBooking[0].SalesCordinatorId
+                SalesExecutiveID = RES1.OrderBooking[0].SalesEmployeeID
+                document.getElementById('SOBRemark').value = RES1.OrderBooking[0].Remark
+                document.getElementById('SOBDispatchedDetails').value = RES1.OrderBooking[0].DispatchRemark
+                document.getElementById('SOBDeliveryDetails').value = RES1.OrderBooking[0].PODetail
+                
+
                 ObjSchDelivery = RES1.OrderBookingDelivery;
                 reloadOrderList(RES1.OrderBooking);
                 ObjSchData = RES1.OrderBooking[0];
@@ -1254,37 +1424,42 @@ $("#DeleteButton").click(function () {
     }
 });
 
+$("#PrintButton").click(function () {
+    var grid = $('#SalesOrderBookingGrid').dxDataGrid('instance').getSelectedRowsData();
+
+    if (grid.length <= 0) {
+        alert("Please select an sales order");
+        return;
+    }
+
+    window.open("/ReportSalesOrderBooking.aspx?t=" + grid[0].OrderBookingId);
+
+
+});
 $("#BtnSave").click(function () {
     try {
+
+        var file = $('#fileSO')[0].files[0];
+
+
         if (GblClientID <= 0) {
             alert("Invalid client selection please select client again..!");
             return false;
         }
-        //var TxtTotalAmt = Number(document.getElementById("TxtTotalAmt").value);
-        //if (TxtTotalAmt <= 0) return false;
-        //if (GridSelectedProductsRow() === false) return false;
         var SOBTxtNo = document.getElementById('SOBTxtNo').value.trim();
 
         var txtPONo = document.getElementById('SOBTxtPONo').value.trim();
         var SOBPrefix = $('#SOBPrefix').dxSelectBox('instance').option('value');
-        //var sel_Approval = $('#sel_Approval').dxSelectBox('instance').option('value');
-        //var Sel_Job_Coordinator = $('#Sel_Job_Coordinator').dxSelectBox('instance').option('value');
 
         var SOBSalesRep = $('#SOBSalesRep').dxSelectBox('instance').option('value');
         var OrderDate = $('#SOBDate').dxDateBox('instance').option('value');
         var PODate = $('#SOBPODate').dxDateBox('instance').option('value');
         var SOBTxtClientName = document.getElementById('SOBTxtClientName').value.trim();
+        var SOBPOMailDate = $('#SOBPOMailDate').dxDateBox('instance').option('value');
+        var POMailAddress = document.getElementById('SOBTxtPOMail').value.trim();
+
 
         var alertMSG = "";
-        if (SOBSalesRep === "" || SOBSalesRep === null) {
-            alertMSG = "Please select job coordinator first..!";
-            alert(alertMSG);
-            DevExpress.ui.notify(alertMSG, "warning", 1000);
-            document.getElementById('SOBSalesRep').style.borderColor = 'red';
-            return false;
-        }
-        document.getElementById('SOBSalesRep').style.borderColor = '';
-
 
         if (SOBPrefix === "" || SOBPrefix === null) {
             alertMSG = "Please select job order prefix..!";
@@ -1304,20 +1479,62 @@ $("#BtnSave").click(function () {
         }
         document.getElementById('SOBPrefix').style.borderColor = '';
 
-
-        if (txtPONo === "") {
-            alert("Please Enter PO NO.");
-            alert(alertMSG);
-            DevExpress.ui.notify(alertMSG, "warning", 1000);
-            document.getElementById('SOBTxtPONo').focus();
-            document.getElementById('SOBTxtPONo').style.borderColor = 'red';
-            return false;
+        if (document.getElementById('IsPoOnMail').checked) {
+            if (POMailAddress === "") {
+                alert("Please Enter PO Mail Address");
+                alert(alertMSG);
+                DevExpress.ui.notify(alertMSG, "warning", 1000);
+                document.getElementById('SOBTxtPOMail').focus();
+                document.getElementById('SOBTxtPOMail').style.borderColor = 'red';
+                return false;
+            }
+        } else {
+            if (txtPONo === "") {
+                alert("Please Enter PO NO.");
+                alert(alertMSG);
+                DevExpress.ui.notify(alertMSG, "warning", 1000);
+                document.getElementById('SOBTxtPONo').focus();
+                document.getElementById('SOBTxtPONo').style.borderColor = 'red';
+                return false;
+            }
         }
         document.getElementById('SOBTxtPONo').style.borderColor = '';
 
-        //if (GridValidation() === false) {
-        //    return false;
-        //}
+
+        if (file) {
+            uploadFile($('#fileSO')[0].files[0])
+                .then(function (response) {
+                    SaveData(response) /// Sending File Name
+                })
+                .catch(function (error) {
+                    alert("File upload error: " + error.message);
+                });
+        } else {
+            SaveData("")
+        }
+    } catch (e) {
+        console.log(e);
+        return;
+    }
+
+
+});
+
+function SaveData(refdocname) {
+    try {
+        var SOBTxtNo = document.getElementById('SOBTxtNo').value.trim();
+
+        var txtPONo = document.getElementById('SOBTxtPONo').value.trim();
+        var SOBPrefix = $('#SOBPrefix').dxSelectBox('instance').option('value');
+
+        var SOBSalesRep = SalesExecutiveID //$('#SOBSalesRep').dxSelectBox('instance').option('value');
+        var OrderDate = $('#SOBDate').dxDateBox('instance').option('value');
+        var PODate = $('#SOBPODate').dxDateBox('instance').option('value');
+        var SOBTxtClientName = document.getElementById('SOBTxtClientName').value.trim();
+        var SOBPOMailDate = $('#SOBPOMailDate').dxDateBox('instance').option('value');
+        var POMailAddress = document.getElementById('SOBTxtPOMail').value.trim();
+
+
 
         var grid = $('#GridOrdersList').dxDataGrid('instance');
         if (grid._options.dataSource.length <= 0) return false;
@@ -1329,21 +1546,41 @@ $("#BtnSave").click(function () {
             SaveOrder.SalesOrderNo = SOBTxtNo;
         }
         OrderBook.BookingPrefix = SOBPrefix;
+        OrderBook.attachedfile = refdocname; // RefDocFileName
         OrderBook.LedgerID = GblClientID;
         OrderBook.TotalAmount = 0;
+
+
         OrderBook.ProductEstimateID = GBLProductEstimateID;
         OrderBook.PONo = txtPONo;
         OrderBook.PODate = PODate;
         OrderBook.Remark = document.getElementById("SOBRemark").value;
         OrderBook.PODetail = document.getElementById("SOBDeliveryDetails").value.trim();
         OrderBook.SalesEmployeeId = SOBSalesRep;
-
+        OrderBook.SalesCordinatorId = SalesCordinatorId;
+        OrderBook.SalesManagerId = SalesManagerId;
+        OrderBook.ClientCordinatorID = ClientCordinatorID;
+        OrderBook.POMailAddress = POMailAddress;
+        OrderBook.POMailDate = SOBPOMailDate;
         NewOrderBook.push(OrderBook);
 
         //################################################################################################################################################
-
         for (var i = 0; i < grid._options.dataSource.length; i++) {
-
+            var result = $.grep($('#SOBScheduleGrid').dxDataGrid('instance')._options.dataSource, function (ex) {
+                return ex.ProductEstimationContentID === grid._options.dataSource[i].ProductEstimationContentID;
+            });
+            var Pre = 0, total = 0;
+            if (result.length > 0) {
+                var total = 0;
+                for (var j = 0; j < result.length; j++) {
+                    total += result[j].ScheduleQuantity;
+                }
+            }
+            // Condition to Check Total Order Qty is Equal to Schedule Qty
+            if (Number(total) != Number(grid._options.dataSource[i].Quantity)) {
+                alert(`The total quantity scheduled for the product ${grid._options.dataSource[i].ProductName} should be equal to the order quantity.`);
+                return;
+            }
             SaveOrder = {}; subobjvalid = {};
 
             if (FlagEdit === true) {
@@ -1358,87 +1595,68 @@ $("#BtnSave").click(function () {
             } else
                 BKIDS = BKIDS + ',' + grid._options.dataSource[i].ProductEstimateID;
 
-            SaveOrder.OrderBookingDate = OrderDate;
+            SaveOrder.OrderBookingDate = convertToISOString(OrderDate);
             SaveOrder.LedgerID = GblClientID;
             SaveOrder.JobName = grid._options.dataSource[i].ProductName;
             SaveOrder.CategoryID = grid._options.dataSource[i].CategoryID;
             SaveOrder.OrderQuantity = grid._options.dataSource[i].Quantity;
             SaveOrder.ApproveQuantity = grid._options.dataSource[i].Quantity;
-            SaveOrder.FinalCost = grid._options.dataSource[i].FinalAmount;
+            SaveOrder.FinalCost = grid._options.dataSource[i].FinalAmount.toString();
             SaveOrder.VendorID = grid._options.dataSource[i].VendorID;
-            SaveOrder.Rate = grid._options.dataSource[i].Rate;
-            SaveOrder.ChangeCost = grid._options.dataSource[i].ApprovedCost;
+            SaveOrder.Rate = grid._options.dataSource[i].Rate.toString();
+            SaveOrder.UnitCost = grid._options.dataSource[i].UnitCost.toString();
+           // SaveOrder.ChangeCost = grid._options.dataSource[i].ApprovedCost.toString();
             SaveOrder.RateType = grid._options.dataSource[i].RateType;
             SaveOrder.PONo = txtPONo;
-            SaveOrder.PODate = PODate;
+            SaveOrder.PODate = convertToISOString(PODate);
 
-            //var monthNames = ["", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-            //var DD = grid._options.dataSource[i].FinalDeliveryDate;  ///(i, 8); pKp 271217  /// (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear();
-            //var DelDate = DD.split("/");
-            //var MSplit = Number(DelDate[1]);
-            //var date = new Date($('#SOBDate').dxDateBox('instance').option('value'));
-
-            SaveOrder.DeliveryDate = grid._options.dataSource[i].FinalDeliveryDate;
+            SaveOrder.DeliveryDate = convertToISOString(grid._options.dataSource[i].FinalDeliveryDate);
             SaveOrder.ProductionUnitID = 1;
             SaveOrder.ProductCode = 0//grid._options.dataSource[i].ProductCode;
             SaveOrder.JobType = grid._options.dataSource[i].JobType;
-            //SaveOrder.ApprovalBy = sel_Approval;
-            //SaveOrder.JobCoordinatorID = Sel_Job_Coordinator;
             SaveOrder.JobPriority = grid._options.dataSource[i].JobPriority;
             SaveOrder.BookingPrefix = SOBPrefix;
-            SaveOrder.BookingNo = 0//grid._options.dataSource[i].QuotationNo;
+            SaveOrder.BookingNo = QuotationNo;
             SaveOrder.ProductMasterCode = 0//grid._options.dataSource[i].ProductMasterCode;
 
-            //if (PMIDS === "" && grid._options.dataSource[i].ProductMasterCode !== "") {
-            //    PMIDS = '"' + grid._options.dataSource[i].ProductMasterCode + '"';
-            //} else if (grid._options.dataSource[i].ProductMasterCode !== "") {
-            //    PMIDS = PMIDS + ',' + '"' + 0 /*grid._options.dataSource[i].ProductMasterCode*/ + '"';
-            //}
-
             SaveOrder.ApprovalNo = grid._options.dataSource[i].ApprovalNo;
-            SaveOrder.ExpectedDeliveryDate = grid._options.dataSource[i].FinalDeliveryDate;
+            SaveOrder.ExpectedDeliveryDate = convertToISOString(grid._options.dataSource[i].FinalDeliveryDate);
             SaveOrder.PrePressRemark = grid._options.dataSource[i].PrePressRemark;
             //SaveOrder.NewBookingNo = grid._options.dataSource[i].NewBookingNo;
             SaveOrder.JobReference = grid._options.dataSource[i].JobReference;
-            SaveOrder.MiscAmount = grid._options.dataSource[i].MiscAmount;
-            SaveOrder.MiscPercantage = grid._options.dataSource[i].MiscPercantage;
-            SaveOrder.ShippingCost = grid._options.dataSource[i].ShippingCost;
-            SaveOrder.GSTAmount = grid._options.dataSource[i].GSTAmount;
-            SaveOrder.GSTPercantage = grid._options.dataSource[i].GSTPercantage;
-            SaveOrder.ProfitCost = grid._options.dataSource[i].ProfitCost;
-            SaveOrder.ProfitPer = grid._options.dataSource[i].ProfitPer;
+            SaveOrder.MiscAmount = grid._options.dataSource[i].MiscAmount.toString();
+            SaveOrder.MiscPercantage = grid._options.dataSource[i].MiscPercantage.toString();
+            SaveOrder.ShippingCost = grid._options.dataSource[i].ShippingCost.toString();
+            SaveOrder.GSTAmount = grid._options.dataSource[i].GSTAmount.toString();
+            SaveOrder.GSTPercantage = grid._options.dataSource[i].GSTPercantage.toString();
+            SaveOrder.ProfitCost = grid._options.dataSource[i].ProfitCost.toString();
+            SaveOrder.ProfitPer = grid._options.dataSource[i].ProfitPer.toString();
             SaveOrder.SalesEmployeeId = SOBSalesRep;
-            SaveOrder.JobCoordinatorID = SOBSalesRep;
+            //SaveOrder.JobCoordinatorID = SOBSalesRep;
+            SaveOrder.ProductEstimationContentID = grid._options.dataSource[i].ProductEstimationContentID;
 
-            //if (txtSchConsignee !== "") {
-            //    SaveOrder.ConsigneeID = 0;
-            //} else {
-            //    SaveOrder.ConsigneeID = $("#SOBConsignee").dxSelectBox("instance").option('value');
-            //}
             SaveOrder.ConsigneeID = $("#SOBConsignee").dxSelectBox("instance").option('value');
             SaveOrder.DispatchRemark = document.getElementById("SOBDispatchedDetails").value.trim();
             SaveOrder.Remark = document.getElementById("SOBRemark").value.trim();
             SaveOrder.PODetail = document.getElementById("SOBDeliveryDetails").value.trim();
 
-            SaveOrder.BookingDate = grid._options.dataSource[i].BookingDate;
+            //SaveOrder.BookingDate = grid._options.dataSource[i].BookingDate;
             SaveOrder.ProductHSNID = grid._options.dataSource[i].ProductHSNID;
 
-            //SaveOrder.BasicAmount = grid._options.dataSource[i].BasicAmount;
-            //SaveOrder.TotalAmount = grid._options.dataSource[i].TotalAmount;
 
-            if (Number(grid._options.dataSource[i].CGSTTaxAmount) > 0) {
-                SaveOrder.CGSTTaxPercentage = grid._options.dataSource[i].CGSTTaxPercentage;
-                SaveOrder.CGSTTaxAmount = grid._options.dataSource[i].CGSTTaxAmount;
+            if (Number(grid._options.dataSource[i].CGSTAmount) > 0) {
+                SaveOrder.CGSTTaxPercentage = grid._options.dataSource[i].CGSTPercantage.toString();
+                SaveOrder.CGSTTaxAmount = grid._options.dataSource[i].CGSTAmount.toString();
             }
-            if (Number(grid._options.dataSource[i].SGSTTaxAmount) > 0) {
-                SaveOrder.SGSTTaxPercentage = grid._options.dataSource[i].SGSTTaxPercentage;
-                SaveOrder.SGSTTaxAmount = grid._options.dataSource[i].SGSTTaxAmount;
+            if (Number(grid._options.dataSource[i].SGSTAmount) > 0) {
+                SaveOrder.SGSTTaxPercentage = grid._options.dataSource[i].SGSTPercantage.toString();
+                SaveOrder.SGSTTaxAmount = grid._options.dataSource[i].SGSTAmount.toString();
             }
-            if (Number(grid._options.dataSource[i].IGSTTaxAmount) > 0) {
-                SaveOrder.IGSTTaxPercentage = grid._options.dataSource[i].IGSTTaxPercentage;
-                SaveOrder.IGSTTaxAmount = grid._options.dataSource[i].IGSTTaxAmount;
+            if (Number(grid._options.dataSource[i].IGSTAmount) > 0) {
+                SaveOrder.IGSTTaxPercentage = grid._options.dataSource[i].IGSTPercantage.toString();
+                SaveOrder.IGSTTaxAmount = grid._options.dataSource[i].IGSTAmount.toString();
             }
-            SaveOrder.NetAmount = grid._options.dataSource[i].FinalAmount;
+            SaveOrder.NetAmount = grid._options.dataSource[i].Amount.toString();
             SaveOrder.TransID = i + 1;
 
             ObjSaveOrder.push(SaveOrder);
@@ -1458,8 +1676,6 @@ $("#BtnSave").click(function () {
 
         var ObjSchOrder = [];
         var SchOrder = {};
-        //var ScheduleGrid = $('#SOBScheduleGrid').dxDataGrid('instance'); //.option("dataSource")
-        //ScheduleGrid = ScheduleGrid._options.dataSource;
         var ScheduleGrid = ObjSchDelivery;
         for (i = 0; i < ScheduleGrid.length; i++) {
             SchOrder = {};
@@ -1482,7 +1698,7 @@ $("#BtnSave").click(function () {
         }
         var ScheduleGridData = JSON.stringify(ObjSchOrder);
         $("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
-
+        
         if (FlagEdit === false) {
             ///check valid or not PO no with product code
             $.ajax({
@@ -1501,17 +1717,17 @@ $("#BtnSave").click(function () {
                     $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
 
                     if (res === "Valid") {
-                        saveCall();
+                        FinalSave();
                     } else if (res === "Session Expired") {
                         alert("Login session expired..!\n Please login and save order again..!");
                     } else {
                         var confirmation = confirm(res);
                         if (confirmation === true) {
-                            saveCall();
+                            FinalSave();
                         }
                         return;
                     }
-                    location.reload();
+
                 },
                 error: function errorFunc(jqXHR) {
                     $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
@@ -1519,62 +1735,63 @@ $("#BtnSave").click(function () {
                 }
             });
         } else {
-            saveCall();
+            FinalSave();
+        }
+
+
+        function FinalSave() {
+            try {
+                $("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
+                $.ajax({
+                    type: "POST",
+                    url: "WebServiceOthers.asmx/SaveNewJobOrder",
+                    data: '{NewOrderBook:' + JSON.stringify(NewOrderBook) + ',NewOrderBookDetails:' + NewOrderBookDetails + ',ScheduleGridData:' + ScheduleGridData + ',FlagEdit:' + JSON.stringify(FlagEdit) + ',SOBTxtNo:' + JSON.stringify(SOBTxtNo) + ',Prefix:' + JSON.stringify(SOBPrefix) + ',PMIDS:' + JSON.stringify(PMIDS) + ',BKIDS:' + JSON.stringify(BKIDS) + '}',
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "text",
+                    success: function (results) {
+                        var res = results.replace(/"/g, '');
+                        res = res.replace(/d:/g, '');
+                        res = res.replace(/{/g, '');
+                        res = res.replace(/}/g, '');
+                        $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+
+                        if (res === "Not Editable") {
+                            alert("This order is further processed Can't be edit...!");
+                            DevExpress.ui.notify("This order is further processed Can't be edit...!!", "warning", 1500);
+                        } else if (res === "Success") {
+                            if (FlagEdit === true) {
+                                alert("Information Updated successfully!");
+                                DevExpress.ui.notify("Information Updated successfully!", "success", 1500);
+                                location.reload();
+                            } else {
+                                DevExpress.ui.notify("Information Saved successfully!", "success", 1500);
+                                alert("Information Saved successfully!");
+                                FlagEdit = true;
+                                location.reload();
+                            }
+                        } else if (res === "Session Expired") {
+                            DevExpress.ui.notify(res, "error", 1500);
+                            alert("Login session expired..!\n Please login and save order again..!");
+                        } else {
+                            alert(res);
+                            return;
+                        }
+
+                    },
+                    error: function errorFunc(jqXHR) {
+                        $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+                        alert("error occured!");
+                    }
+                });
+            } catch (e) {
+                alert(e);
+            }
         }
     } catch (e) {
-        console.log(e);
-        return;
+        console.error(e)
     }
 
-    function saveCall() {
-        try {
-            $("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
-            $.ajax({
-                type: "POST",
-                url: "WebServiceOthers.asmx/SaveNewJobOrder",
-                data: '{NewOrderBook:' + JSON.stringify(NewOrderBook) + ',NewOrderBookDetails:' + NewOrderBookDetails + ',ScheduleGridData:' + ScheduleGridData + ',FlagEdit:' + JSON.stringify(FlagEdit) + ',SOBTxtNo:' + JSON.stringify(SOBTxtNo) + ',Prefix:' + JSON.stringify(SOBPrefix) + ',PMIDS:' + JSON.stringify(PMIDS) + ',BKIDS:' + JSON.stringify(BKIDS) + '}',
-                contentType: "application/json; charset=utf-8",
-                dataType: "text",
-                success: function (results) {
-                    var res = results.replace(/"/g, '');
-                    res = res.replace(/d:/g, '');
-                    res = res.replace(/{/g, '');
-                    res = res.replace(/}/g, '');
-                    $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
-
-                    if (res === "Not Editable") {
-                        alert("This order is further processed Can't be edit...!");
-                        DevExpress.ui.notify("This order is further processed Can't be edit...!!", "warning", 1500);
-                    } else if (res === "Success") {
-                        if (FlagEdit === true) {
-                            alert("Information Updated successfully!");
-                            DevExpress.ui.notify("Information Updated successfully!", "success", 1500);
-                        } else {
-                            DevExpress.ui.notify("Information Saved successfully!", "success", 1500);
-                            alert("Information Saved successfully!");
-                            FlagEdit = true;
-                        }
-                    } else if (res === "Session Expired") {
-                        DevExpress.ui.notify(res, "error", 1500);
-                        alert("Login session expired..!\n Please login and save order again..!");
-                    } else {
-                        alert(res);
-                        return;
-                    }
-                    location.reload();
-                },
-                error: function errorFunc(jqXHR) {
-                    $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
-                    alert("error occured!");
-                }
-            });
-        } catch (e) {
-            alert(e);
-        }
-    }
-
-});
-
+}
 function reloadOrderList(data) {
     $("#GridOrdersList").dxDataGrid({
         dataSource: data,
@@ -1589,26 +1806,26 @@ function reloadOrderList(data) {
             { allowEditing: false, dataField: "Quantity" },
             { allowEditing: false, dataField: "Rate" },
             { allowEditing: false, dataField: "RateType" },
-            //{ allowEditing: false, dataField: "UnitCost" },
-            { allowEditing: false, dataField: "GSTPercantage" },
-            { allowEditing: false, dataField: "GSTAmount" },
+            { allowEditing: false, dataField: "UnitCost" },
+            { allowEditing: false, dataField: "GSTPercantage", visible: false },
+            { allowEditing: false, dataField: "GSTAmount", visible: false },
             { allowEditing: false, dataField: "MiscPercantage" },
             { allowEditing: false, dataField: "MiscAmount" },
             { allowEditing: false, dataField: "ShippingCost" },
-            { allowEditing: false, dataField: "ProfitPer" },
+            { allowEditing: false, dataField: "ProfitPer", caption: "Profit %" },
             { allowEditing: false, dataField: "ProfitCost" },
-            { dataField: "CGSTTaxPercentage", caption: "CGST %", width: 60, dataType: "numeric", visible: false, allowEditing: false },
-            { dataField: "SGSTTaxPercentage", caption: "SGST %", width: 60, dataType: "numeric", visible: false, allowEditing: false },
-            { dataField: "IGSTTaxPercentage", caption: "IGST %", width: 60, dataType: "numeric", visible: false, allowEditing: false },
-            { dataField: "CGSTTaxAmount", caption: "CGST", dataType: "numeric", allowEditing: false },
-            { dataField: "SGSTTaxAmount", caption: "SGST", dataType: "numeric", allowEditing: false },
-            { dataField: "IGSTTaxAmount", caption: "IGST", dataType: "numeric", allowEditing: false },
+            { dataField: "CGSTPercantage", caption: "CGST %", width: 60, dataType: "numeric", visible: true, allowEditing: false },
+            { dataField: "SGSTPercantage", caption: "SGST %", width: 60, dataType: "numeric", visible: true, allowEditing: false },
+            { dataField: "IGSTPercantage", caption: "IGST %", width: 60, dataType: "numeric", visible: true, allowEditing: false },
+            { dataField: "CGSTAmount", caption: "CGST", dataType: "numeric", allowEditing: false },
+            { dataField: "SGSTAmount", caption: "SGST", dataType: "numeric", allowEditing: false },
+            { dataField: "IGSTAmount", caption: "IGST", dataType: "numeric", allowEditing: false },
             { allowEditing: false, dataField: "FinalAmount" },
             { allowEditing: false, dataField: "VendorName" },
             {
                 dataField: "FinalDeliveryDate", width: 100, dataType: "date",
                 format: "dd-MMM-yyyy", allowEditing: true, validationRules: [{ type: "required", message: "Final date of delivery is required" },
-                { type: "range", min: new Date(), message: "Final date of delivery is not valid" }], allowEditing: true
+                { type: "range", min: new Date(new Date().toDateString()), message: "Final date of delivery is not valid" }], allowEditing: true
             },
             { dataField: "JobType", visible: true, width: 80, validationRules: [{ type: "required" }], lookup: { dataSource: JobType, valueExpr: 'JobType', displayExpr: 'JobType' }, allowEditing: true },
             { dataField: "JobReference", visible: true, width: 100, validationRules: [{ type: "required" }], lookup: { dataSource: JobReference, valueExpr: 'JobReference', displayExpr: 'JobReference' }, allowEditing: true },
@@ -1621,6 +1838,17 @@ function reloadOrderList(data) {
             document.getElementById("TxtNetAmt").value = 0// e.component.getTotalSummaryValue("FinalAmount");
         }
     });
+}
+function convertToISOString(dateString) {
+    const date = new Date(dateString);
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+
+    const isoString = `${year}-${month}-${day}`;
+
+    return isoString;
 }
 
 $("#BtnNotification").click(function () {
@@ -1821,3 +2049,28 @@ $(function () {
         });
     });
 });
+
+function uploadFile(file) {
+    return new Promise(function (resolve, reject) {
+        var fd = new FormData();
+        fd.append("file", file);
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "FileUploadSalesOrder.ashx", true);
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                var response = xhr.responseText;
+                console.log("File uploaded successfully. File name: " + response);
+                resolve(response); // Resolve the Promise with the response
+            } else {
+                console.error("Error uploading file. Status: " + xhr.status);
+                reject(new Error("File upload failed")); // Reject the Promise with an error
+            }
+        };
+        xhr.onerror = function () {
+            console.error("File upload failed due to network error");
+            reject(new Error("File upload failed")); // Reject the Promise with an error
+        };
+        xhr.send(fd);
+    });
+}

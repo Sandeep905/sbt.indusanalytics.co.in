@@ -12,7 +12,7 @@ var GridReceiptBatchDetails;
 var supplieridvalidate = "";
 var GblReceiptNo = "";
 var ApprovedVoucher = false;
-$("#sel_Receiver").dxSelectBox({ value: '' });
+var GblUnitConversionFormula = [];
 
 $("#optreceiptradio").dxRadioGroup({
     items: optionreceiptoptions,
@@ -37,7 +37,16 @@ $("#DtPickerVoucherDate").dxDateBox({
     value: new Date().toISOString().substr(0, 10),
     displayFormat: 'dd-MMM-yyyy'
 });
-RefreshWarehouse();
+
+$("#sel_Receiver").dxSelectBox({
+    items: [],
+    placeholder: "Select Received By",
+    displayExpr: 'LedgerName',
+    valueExpr: 'LedgerID',
+    searchEnabled: true,
+    showClearButton: true
+});
+
 $(function () {
     $("#optreceiptradio").dxRadioGroup({
         onValueChanged: function (e) {
@@ -107,12 +116,10 @@ $("#Btn_Next").click(function () {
     document.getElementById("TxtLRNo").value = '';
     document.getElementById("TxtTransporters").value = '';
     document.getElementById("TxtNarration").value = '';
-    $("#sel_Receiver").dxSelectBox({ value: '' });
+    $("#sel_Receiver").dxSelectBox({ value: null });
     $("#DtPickerVoucherDate").dxDateBox({ value: new Date().toISOString().substr(0, 10) });
     $("#DtPickerDnDate").dxDateBox({ value: new Date().toISOString().substr(0, 10) });
-    $("#DtPickerGEDate").dxDateBox({
-        value: new Date().toISOString().substr(0, 10)
-    });
+    $("#DtPickerGEDate").dxDateBox({ value: new Date().toISOString().substr(0, 10) });
     $("#GridPurchaseOrders").dxDataGrid({ dataSource: [] });
     $("#GridReceiptBatchDetails").dxDataGrid({ dataSource: [] });
     var optradiovalue = $("#optreceiptradio").dxRadioGroup("instance");
@@ -165,6 +172,12 @@ $("#Btn_Next").click(function () {
             OptObj.UnitDecimalPlaceStockUnit = GetSelectedListData[i].UnitDecimalPlaceStockUnit;
             OptObj.FormulaStockToPurchaseUnit = GetSelectedListData[i].FormulaStockToPurchaseUnit;
             OptObj.UnitDecimalPlacePurchaseUnit = GetSelectedListData[i].UnitDecimalPlacePurchaseUnit;
+            OptObj.GSM = GetSelectedListData[i].GSM;
+            OptObj.ReleaseGSM = GetSelectedListData[i].ReleaseGSM;
+            OptObj.AdhesiveGSM = GetSelectedListData[i].AdhesiveGSM;
+            OptObj.Thickness = GetSelectedListData[i].Thickness;
+            OptObj.Density = GetSelectedListData[i].Density;
+
             GetPendingData.push(OptObj);
             if (i === 0) {
                 DefaultRowData.push(OptObj);
@@ -185,7 +198,6 @@ $("#Btn_Next").click(function () {
             dGrid.refresh();
             dGrid.repaint();
             if (GetPendingData.length > 0) {
-
                 DefaultRowData[0].BatchNo = '_' + DefaultRowData[0].PurchaseVoucherNo + '_' + DefaultRowData[0].ItemID + '_1';
                 DefaultRowData[0].ReceiptWtPerPacking = DefaultRowData[0].WtPerPacking;
                 DefaultRowData[0].ReceiptQuantity = 0;
@@ -267,8 +279,8 @@ $("#Btn_Next").click(function () {
                     //    Item_ID = receiptBatchDetail[0].ItemID;
                     //}
                     for (i = 0; i < receiptBatchDetail.length; i++) {
-                        var results = $.grep(receiptpoDetail, function (e) { return (e.TransactionID === receiptBatchDetail[i].PurchaseTransactionID && e.ItemID === receiptBatchDetail[i].ItemID); });
-                        if (results.length <= 0) {
+                        var results1 = $.grep(receiptpoDetail, function (e) { return (e.TransactionID === receiptBatchDetail[i].PurchaseTransactionID && e.ItemID === receiptBatchDetail[i].ItemID); });
+                        if (results1.length <= 0) {
                             var formula = 0, PurchaseQty = 0, ReceiptQty = 0, UnitPerPacking = 0;
                             var pendingQty = 0, SizeW = 0, WtPerPacking = 0, UnitDecimalPlace = 0, ConversionFactor = 0;
                             formula = receiptBatchDetail[i].FormulaStockToPurchaseUnit;
@@ -279,37 +291,43 @@ $("#Btn_Next").click(function () {
                             WtPerPacking = receiptBatchDetail[i].WtPerPacking;
                             UnitDecimalPlace = receiptBatchDetail[i].UnitDecimalPlacePurchaseUnit;
                             ConversionFactor = receiptBatchDetail[i].ConversionFactor;
-
-                            if (formula !== "" && formula !== null && formula !== undefined && formula !== "undefined") {
-                                formula = formula.split('e.').join('');
-                                formula = formula.replace("Quantity", "ReceiptQty");
-
-                                var n = formula.search("UnitPerPacking");
-                                if (n > 0) {
-                                    if (Number(UnitPerPacking) > 0) {
-                                        pendingQty = eval(formula);
-                                        pendingQty = (Number(PurchaseQty) - Number(pendingQty)).toFixed(Number(UnitDecimalPlace));
-                                    }
-                                } else {
-                                    n = formula.search("SizeW");
-                                    if (n > 0) {
-                                        if (Number(SizeW) > 0) {
-                                            pendingQty = eval(formula);
-
-                                            pendingQty = (Number(PurchaseQty) - Number(pendingQty)).toFixed(Number(UnitDecimalPlace));
-                                        }
-                                    } else {
-                                        pendingQty = eval(formula);
-                                        pendingQty = (Number(PurchaseQty) - Number(pendingQty)).toFixed(Number(UnitDecimalPlace));
-                                    }
-                                }
+                            if (Number(receiptBatchDetail[i].ReceiptQuantity) > 0) {
+                                ReceiptQty = Number(StockUnitConversion("", Number(receiptBatchDetail[i].ReceiptQuantity), Number(receiptBatchDetail[i].UnitPerPacking), Number(receiptBatchDetail[i].WtPerPacking), Number(receiptBatchDetail[i].ConversionFactor), Number(receiptBatchDetail[i].SizeW), Number(receiptBatchDetail[i].UnitDecimalPlacePurchaseUnit), receiptBatchDetail[i].StockUnit.toString(), receiptBatchDetail[i].PurchaseUnit.toString(), Number(receiptBatchDetail[i].GSM), Number(receiptBatchDetail[i].ReleaseGSM), Number(receiptBatchDetail[i].AdhesiveGSM), Number(receiptBatchDetail[i].Thickness), Number(receiptBatchDetail[i].Density)));
+                                pendingQty = (Number(PurchaseQty) - Number(ReceiptQty)).toFixed(Number(UnitDecimalPlace));
                             } else {
-                                if (ReceiptQty > 0) {
-                                    pendingQty = (Number(PurchaseQty) - Number(ReceiptQty)).toFixed(Number(UnitDecimalPlace));
-                                } else {
-                                    pendingQty = Number(PurchaseQty);
-                                }
+                                pendingQty = Number(PurchaseQty);
                             }
+
+                            //if (formula !== "" && formula !== null && formula !== undefined && formula !== "undefined") {
+                            //    formula = formula.split('e.').join('');
+                            //    formula = formula.replace("Quantity", "ReceiptQty");
+
+                            //    var n = formula.search("UnitPerPacking");
+                            //    if (n > 0) {
+                            //        if (Number(UnitPerPacking) > 0) {
+                            //            pendingQty = eval(formula);
+                            //            pendingQty = (Number(PurchaseQty) - Number(pendingQty)).toFixed(Number(UnitDecimalPlace));
+                            //        }
+                            //    } else {
+                            //        n = formula.search("SizeW");
+                            //        if (n > 0) {
+                            //            if (Number(SizeW) > 0) {
+                            //                pendingQty = eval(formula);
+
+                            //                pendingQty = (Number(PurchaseQty) - Number(pendingQty)).toFixed(Number(UnitDecimalPlace));
+                            //            }
+                            //        } else {
+                            //            pendingQty = eval(formula);
+                            //            pendingQty = (Number(PurchaseQty) - Number(pendingQty)).toFixed(Number(UnitDecimalPlace));
+                            //        }
+                            //    }
+                            //} else {
+                            //    if (ReceiptQty > 0) {
+                            //        pendingQty = (Number(PurchaseQty) - Number(ReceiptQty)).toFixed(Number(UnitDecimalPlace));
+                            //    } else {
+                            //        pendingQty = Number(PurchaseQty);
+                            //    }
+                            //}
                             OptObj = {};
                             OptObj.TransactionID = receiptBatchDetail[i].PurchaseTransactionID;
                             OptObj.LedgerID = receiptBatchDetail[i].LedgerID;
@@ -332,7 +350,11 @@ $("#Btn_Next").click(function () {
                             OptObj.UnitDecimalPlaceStockUnit = receiptBatchDetail[i].UnitDecimalPlaceStockUnit;
                             OptObj.FormulaStockToPurchaseUnit = receiptBatchDetail[i].FormulaStockToPurchaseUnit;
                             OptObj.UnitDecimalPlacePurchaseUnit = receiptBatchDetail[i].UnitDecimalPlacePurchaseUnit;
-
+                            OptObj.GSM = receiptBatchDetail[i].GSM;
+                            OptObj.ReleaseGSM = receiptBatchDetail[i].ReleaseGSM;
+                            OptObj.AdhesiveGSM = receiptBatchDetail[i].AdhesiveGSM;
+                            OptObj.Thickness = receiptBatchDetail[i].Thickness;
+                            OptObj.Density = receiptBatchDetail[i].Density;
                             OptObj.RefJobCardContentNo = receiptBatchDetail[i].RefJobCardContentNo;
                             OptObj.PendingQty = pendingQty;
 
@@ -373,6 +395,11 @@ $("#Btn_Next").click(function () {
                                     OptObj1.UnitPerPacking = rs1[0].UnitPerPacking;
                                     OptObj1.ConversionFactor = rs1[0].ConversionFactor;
                                     OptObj1.SizeW = rs1[0].SizeW;
+                                    OptObj1.GSM = rs1[0].GSM;
+                                    OptObj1.ReleaseGSM = rs1[0].ReleaseGSM;
+                                    OptObj1.AdhesiveGSM = rs1[0].AdhesiveGSM;
+                                    OptObj1.Thickness = rs1[0].Thickness;
+                                    OptObj1.Density = rs1[0].Density;
                                     OptObj1.WarehouseID = 0;
                                     OptObj1.Warehouse = "";
                                     OptObj1.Bin = "";
@@ -432,6 +459,11 @@ function checkExistingBatchDetail(options) {
                     objpub.UnitDecimalPlaceStockUnit = receiptBatchDetail[i].UnitDecimalPlaceStockUnit;
                     objpub.FormulaStockToPurchaseUnit = receiptBatchDetail[i].FormulaStockToPurchaseUnit;
                     objpub.UnitDecimalPlacePurchaseUnit = receiptBatchDetail[i].UnitDecimalPlacePurchaseUnit;
+                    objpub.GSM = receiptBatchDetail[i].GSM;
+                    objpub.ReleaseGSM = receiptBatchDetail[i].ReleaseGSM;
+                    objpub.AdhesiveGSM = receiptBatchDetail[i].AdhesiveGSM;
+                    objpub.Thickness = receiptBatchDetail[i].Thickness;
+                    objpub.Density = receiptBatchDetail[i].Density;
                     newData.push(objpub);
                     objpub = {};
                 }
@@ -450,7 +482,7 @@ function checkExistingBatchDetail(options) {
         } else {
             options.data.ReceiptWtPerPacking = options.data.WtPerPacking;
             options.data.ReceiptQuantity = 0;
-            options.data.BatchNo = '_' + options.data.PurchaseVoucherNo + '_' + options.data.ItemID + '_1'
+            options.data.BatchNo = '_' + options.data.PurchaseVoucherNo + '_' + options.data.ItemID + '_1';
         }
         options.data.WarehouseID = 0;
         options.data.Warehouse = "";
@@ -495,28 +527,46 @@ function refreshbatchdetailsgrid(newData) {
             {
                 dataField: "ReceiptQuantity", validationRules: [{ type: "required" }, { type: "numeric" }], caption: "Receipt Quantity", visible: true, width: 120,
                 setCellValue: function (newData, value, currentRowData) {
-                    newData.ReceiptQuantity = value;
+                    if (value === null || value === undefined || isNaN(value) === true) return false;
+                    newData.ReceiptQuantity = Number(value);
                     //newData.TotalPrice = currentRowData.Price * value;
+                    if (currentRowData.FormulaStockToPurchaseUnit === undefined || currentRowData.FormulaStockToPurchaseUnit === null) currentRowData.FormulaStockToPurchaseUnit = "";
                     if (currentRowData.ReceiptWtPerPacking > 0) {
-                        newData.ReceiptQuantityInPurchaseUnit = Number(StockUnitConversion(currentRowData.FormulaStockToPurchaseUnit, value, currentRowData.UnitPerPacking, currentRowData.ReceiptWtPerPacking, currentRowData.ConversionFactor, currentRowData.SizeW, currentRowData.UnitDecimalPlacePurchaseUnit));
+                        newData.ReceiptQuantityInPurchaseUnit = Number(StockUnitConversion(currentRowData.FormulaStockToPurchaseUnit, Number(value), currentRowData.UnitPerPacking, currentRowData.ReceiptWtPerPacking, currentRowData.ConversionFactor, currentRowData.SizeW, currentRowData.UnitDecimalPlacePurchaseUnit, currentRowData.StockUnit, currentRowData.PurchaseUnit, Number(currentRowData.GSM), Number(currentRowData.ReleaseGSM), Number(currentRowData.AdhesiveGSM), Number(currentRowData.Thickness), Number(currentRowData.Density)));
                     } else {
-                        newData.ReceiptQuantityInPurchaseUnit = Number(StockUnitConversion(currentRowData.FormulaStockToPurchaseUnit, value, currentRowData.UnitPerPacking, currentRowData.WtPerPacking, currentRowData.ConversionFactor, currentRowData.SizeW, currentRowData.UnitDecimalPlacePurchaseUnit));
+                        newData.ReceiptQuantityInPurchaseUnit = Number(StockUnitConversion(currentRowData.FormulaStockToPurchaseUnit, Number(value), currentRowData.UnitPerPacking, currentRowData.WtPerPacking, currentRowData.ConversionFactor, currentRowData.SizeW, currentRowData.UnitDecimalPlacePurchaseUnit, currentRowData.StockUnit, currentRowData.PurchaseUnit, Number(currentRowData.GSM), Number(currentRowData.ReleaseGSM), Number(currentRowData.AdhesiveGSM), Number(currentRowData.Thickness), Number(currentRowData.Density)));
                     }
                 }
             },
             {
                 dataField: "ReceiptQuantityInPurchaseUnit", caption: "Receipt Qty (In P.U.)", visible: true, width: 120,
                 calculateCellValue: function (rowData) {
+                    if (rowData.ItemID === undefined || rowData.ItemID === null || isNaN(rowData.ItemID) === true) return false;
+                    if (rowData.FormulaStockToPurchaseUnit === undefined || rowData.FormulaStockToPurchaseUnit === null) rowData.FormulaStockToPurchaseUnit = "";
                     if (Number(rowData.ReceiptWtPerPacking) > 0) {
-                        return Number(StockUnitConversion(rowData.FormulaStockToPurchaseUnit, Number(rowData.ReceiptQuantity), Number(rowData.UnitPerPacking), Number(rowData.ReceiptWtPerPacking), Number(rowData.ConversionFactor), Number(rowData.SizeW), Number(rowData.UnitDecimalPlacePurchaseUnit)));
+                        return Number(StockUnitConversion(rowData.FormulaStockToPurchaseUnit, Number(rowData.ReceiptQuantity), Number(rowData.UnitPerPacking), Number(rowData.ReceiptWtPerPacking), Number(rowData.ConversionFactor), Number(rowData.SizeW), Number(rowData.UnitDecimalPlacePurchaseUnit), rowData.StockUnit, rowData.PurchaseUnit, Number(rowData.GSM), Number(rowData.ReleaseGSM), Number(rowData.AdhesiveGSM), Number(rowData.Thickness), Number(rowData.Density)));
                     } else {
-                        return Number(StockUnitConversion(rowData.FormulaStockToPurchaseUnit, Number(rowData.ReceiptQuantity), Number(rowData.UnitPerPacking), Number(rowData.WtPerPacking), Number(rowData.ConversionFactor), Number(rowData.SizeW), Number(rowData.UnitDecimalPlacePurchaseUnit)));
+                        return Number(StockUnitConversion(rowData.FormulaStockToPurchaseUnit, Number(rowData.ReceiptQuantity), Number(rowData.UnitPerPacking), Number(rowData.WtPerPacking), Number(rowData.ConversionFactor), Number(rowData.SizeW), Number(rowData.UnitDecimalPlacePurchaseUnit), rowData.StockUnit, rowData.PurchaseUnit, Number(rowData.GSM), Number(rowData.ReleaseGSM), Number(rowData.AdhesiveGSM), Number(rowData.Thickness), Number(rowData.Density)));
                     }
                 }
             },
             {
                 dataField: "BatchNo", validationRules: [{ type: "required" }], caption: "Ref. Batch No.", visible: true, width: 120
             },
+            { dataField: "SupplierBatchNo", caption: "Supp.Batch No.", allowEditing: true, visible: true, width: 120 },
+
+            {
+                dataField: "MfgDate", visible: true, allowEditing: true, caption: "Mfg.Date", width: 120,
+                dataType: "date", format: "dd-MMM-yyyy",
+                showEditorAlways: true
+            },
+
+            {
+                dataField: "ExpiryDate", visible: true, allowEditing: true, caption: "Expiry Date", width: 120,
+                dataType: "date", format: "dd-MMM-yyyy",
+                showEditorAlways: true
+            },
+
             { dataField: "StockUnit", visible: true },
             { dataField: "ReceiptWtPerPacking", visible: true, validationRules: [{ type: "required" }, { type: "numeric" }], caption: "Wt/Packing", width: 120 },
             {
@@ -561,7 +611,7 @@ function refreshbatchdetailsgrid(newData) {
             { dataField: "FormulaPurchaseToStockUnit", visible: false, caption: "FormulaPurchaseToStockUnit" },
             { dataField: "UnitDecimalPlaceStockUnit", visible: false, caption: "UnitDecimalPlaceStockUnit" },
             { dataField: "FormulaStockToPurchaseUnit", visible: false, caption: "FormulaStockToPurchaseUnit" },
-            { dataField: "UnitDecimalPlacePurchaseUnit", visible: false, caption: "UnitDecimalPlacePurchaseUnit" },
+            { dataField: "UnitDecimalPlacePurchaseUnit", visible: false, caption: "UnitDecimalPlacePurchaseUnit" }
         ],
         summary: {
             totalItems: [{
@@ -573,7 +623,6 @@ function refreshbatchdetailsgrid(newData) {
     }).dxDataGrid("instance");
 }
 PendingReceiptData();
-SetPurchaseOrderGrid();
 
 function PendingReceiptData() {
     try {
@@ -610,37 +659,44 @@ function PendingReceiptData() {
                     WtPerPacking = tt[i].WtPerPacking;
                     UnitDecimalPlace = tt[i].UnitDecimalPlacePurchaseUnit;
                     ConversionFactor = tt[i].ConversionFactor;
-
-                    if (formula !== "" && formula !== null && formula !== undefined && formula !== "undefined") {
-                        formula = formula.split('e.').join('');
-                        formula = formula.replace("Quantity", "ReceiptQty");
-
-                        var n = formula.search("UnitPerPacking");
-                        if (n > 0) {
-                            if (Number(UnitPerPacking) > 0) {
-                                pendingQty = eval(formula);
-                                pendingQty = (Number(PurchaseQty) - Number(pendingQty)).toFixed(Number(UnitDecimalPlace));
-                            }
-                        } else {
-                            n = formula.search("SizeW");
-                            if (n > 0) {
-                                if (Number(SizeW) > 0) {
-
-                                    pendingQty = eval(formula);
-                                    pendingQty = (Number(PurchaseQty) - Number(pendingQty)).toFixed(Number(UnitDecimalPlace));
-                                }
-                            } else {
-                                pendingQty = eval(formula);
-                                pendingQty = (Number(PurchaseQty) - Number(pendingQty)).toFixed(Number(UnitDecimalPlace));
-                            }
-                        }
+                    if (Number(tt[i].ReceiptQuantity) > 0) {
+                        ReceiptQty = Number(StockUnitConversion("", Number(tt[i].ReceiptQuantity), Number(tt[i].UnitPerPacking), Number(tt[i].WtPerPacking), Number(tt[i].ConversionFactor), Number(tt[i].SizeW), Number(tt[i].UnitDecimalPlacePurchaseUnit), tt[i].StockUnit.toString(), tt[i].PurchaseUnit.toString(), Number(tt[i].GSM), Number(tt[i].ReleaseGSM), Number(tt[i].AdhesiveGSM), Number(tt[i].Thickness), Number(tt[i].Density)));
+                        pendingQty = (Number(PurchaseQty) - Number(ReceiptQty)).toFixed(Number(UnitDecimalPlace));
                     } else {
-                        if (ReceiptQty > 0) {
-                            pendingQty = (Number(PurchaseQty) - Number(ReceiptQty)).toFixed(Number(UnitDecimalPlace));
-                        } else {
-                            pendingQty = Number(PurchaseQty);
-                        }
+                        pendingQty = Number(PurchaseQty);
                     }
+
+
+                    //if (formula !== "" && formula !== null && formula !== undefined && formula !== "undefined") {
+                    //    formula = formula.split('e.').join('');
+                    //    formula = formula.replace("Quantity", "ReceiptQty");
+
+                    //    var n = formula.search("UnitPerPacking");
+                    //    if (n > 0) {
+                    //        if (Number(UnitPerPacking) > 0) {
+                    //            pendingQty = eval(formula);
+                    //            pendingQty = (Number(PurchaseQty) - Number(pendingQty)).toFixed(Number(UnitDecimalPlace));
+                    //        }
+                    //    } else {
+                    //        n = formula.search("SizeW");
+                    //        if (n > 0) {
+                    //            if (Number(SizeW) > 0) {
+
+                    //                pendingQty = eval(formula);
+                    //                pendingQty = (Number(PurchaseQty) - Number(pendingQty)).toFixed(Number(UnitDecimalPlace));
+                    //            }
+                    //        } else {
+                    //            pendingQty = eval(formula);
+                    //            pendingQty = (Number(PurchaseQty) - Number(pendingQty)).toFixed(Number(UnitDecimalPlace));
+                    //        }
+                    //    }
+                    //} else {
+                    //    if (ReceiptQty > 0) {
+                    //        pendingQty = (Number(PurchaseQty) - Number(ReceiptQty)).toFixed(Number(UnitDecimalPlace));
+                    //    } else {
+                    //        pendingQty = Number(PurchaseQty);
+                    //    }
+                    //}
                     tt[i].PendingQty = pendingQty;
                 }
                 SetPendingReceiptGrid(tt);
@@ -695,44 +751,7 @@ function SetPendingReceiptGrid(tt) {
     supplieridvalidate = "";
     $("#gridreceiptlist").dxDataGrid({
         dataSource: tt.filter(function (e) { return e.PendingQty > 0; }),
-        columnAutoWidth: true,
-        showBorders: true,
-        showRowLines: true,
-        allowColumnReordering: true,
-        allowColumnResizing: true,
-        columnResizingMode: "widget",
-        //keyExpr: "TransactionID",
-        sorting: {
-            mode: "multiple"
-        },
         selection: { mode: "multiple", showCheckBoxesMode: "always" },
-        paging: {
-            pageSize: 20
-        },
-        pager: {
-            showPageSizeSelector: true,
-            allowedPageSizes: [20, 40, 50, 100]
-        },
-        // scrolling: { mode: 'virtual' },
-        filterRow: { visible: true, applyFilter: "auto" },
-        columnChooser: { enabled: true },
-        headerFilter: { visible: true },
-        //rowAlternationEnabled: true,
-        searchPanel: { visible: true },
-        loadPanel: {
-            enabled: true,
-            height: 90,
-            width: 200,
-            text: 'Data is loading...'
-        },
-        export: {
-            enabled: true,
-            fileName: "Pending Orders",
-            allowExportSelectedData: true,
-        },
-        onRowPrepared: function (e) {
-            setDataGridRowCss(e);
-        },
         onSelectionChanged: function (clickedIndentCell) {
             if (clickedIndentCell.currentSelectedRowKeys.length > 0) {
                 if (supplieridvalidate === "") {
@@ -763,7 +782,7 @@ function SetPendingReceiptGrid(tt) {
             { dataField: "ItemSubGroupName", visible: true, caption: "Sub Group", width: 120 },
             { dataField: "ItemName", visible: true, caption: "Item Name", width: 200 },
             { dataField: "PurchaseOrderQuantity", visible: true, caption: "P.O. Qty", width: 80 },
-            { dataField: "PendingQty", visible: true, caption: "Pending Qty", width: 100, },
+            { dataField: "PendingQty", visible: true, caption: "Pending Qty", width: 100 },
             { dataField: "PurchaseUnit", visible: true, caption: "Unit", width: 80 },
             { dataField: "StockUnit", visible: false, caption: "Stock Unit", width: 40 },
             { dataField: "PurchaseDivision", visible: true, caption: "Purchase Division", width: 120 },
@@ -784,47 +803,61 @@ function SetPendingReceiptGrid(tt) {
     });
 }
 
+$("#gridreceiptlist").dxDataGrid({
+    dataSource: [],
+    columnAutoWidth: true,
+    showBorders: true,
+    showRowLines: true,
+    allowColumnReordering: true,
+    allowColumnResizing: true,
+    columnResizingMode: "widget",
+    //keyExpr: "TransactionID",
+    sorting: {
+        mode: "multiple"
+    },
+    selection: { mode: "multiple", showCheckBoxesMode: "always" },
+    paging: {
+        pageSize: 20
+    },
+    pager: {
+        showPageSizeSelector: true,
+        allowedPageSizes: [20, 40, 50, 100]
+    },
+    filterRow: { visible: true, applyFilter: "auto" },
+    columnChooser: { enabled: true },
+    headerFilter: { visible: true },
+    height: function () {
+        return window.innerHeight / 1.2;
+    },
+    searchPanel: { visible: true },
+    loadPanel: {
+        enabled: true,
+        text: 'Data is loading...'
+    },
+    export: {
+        enabled: true,
+        fileName: "Purchase GRN",
+        allowExportSelectedData: true
+    },
+    onRowPrepared: function (e) {
+        if (e.rowType === "header") {
+            e.rowElement.css('background', '#509EBC');
+            e.rowElement.css('color', 'white');
+            e.rowElement.css('font-weight', 'bold');
+        }
+        e.rowElement.css('fontSize', '11px');
+    }
+});
+
 function SetProcessedReceiptGrid(tt) {
     document.getElementById("BtnDelete").disabled = false;
     var grid1 = $("#gridreceiptlist").dxDataGrid('instance');
     grid1.clearSelection();
     $("#gridreceiptlist").dxDataGrid({
         dataSource: tt,
-        columnAutoWidth: true,
-        showBorders: true,
-        showRowLines: true,
-        allowColumnReordering: true,
-        allowColumnResizing: true,
-        columnResizingMode: "widget",
-        sorting: {
-            mode: "multiple"
-        },
         selection: { mode: "single" },
-        paging: {
-            pageSize: 15
-        },
-        pager: {
-            showPageSizeSelector: true,
-            allowedPageSizes: [15, 25, 50, 100]
-        },
-        // scrolling: { mode: 'virtual' },
-        filterRow: { visible: true, applyFilter: "auto" },
-        columnChooser: { enabled: true },
-        headerFilter: { visible: true },
-        //rowAlternationEnabled: true,
-        searchPanel: { visible: true },
-        loadPanel: {
-            enabled: true,
-            height: 90,
-            width: 200,
-            text: 'Data is loading...'
-        },
-        export: {
-            enabled: true,
-            fileName: "Receipt Note Vouchers",
-            allowExportSelectedData: true
-        },
         columns: [
+            { dataField: "MaxVoucherNo", visible: true, caption: "Ref.Receipt No.", width: 120 },
             { dataField: "LedgerName", visible: true, caption: "Supplier Name", width: 180, fixed: true },
             { dataField: "ReceiptVoucherNo", visible: true, caption: "Receipt Note No.", width: 120 },
             { dataField: "ReceiptVoucherDate", visible: true, caption: "Receipt Note Date", width: 140, dataType: "date", format: "dd-MMM-yyyy", Mode: "DateRangeCalendar" },
@@ -853,218 +886,367 @@ function SetProcessedReceiptGrid(tt) {
     });
 }
 
-function SetPurchaseOrderGrid() {
-    $("#GridPurchaseOrders").dxDataGrid({
-        allowColumnResizing: true,
-        columnResizingMode: "widget",
-        columnAutoWidth: true,
-        showBorders: true,
-        showRowLines: true,
-        allowColumnReordering: true,
-        wordWrapEnabled: true,
-        sorting: {
-            mode: "none"
+$("#GridPurchaseOrders").dxDataGrid({
+    dataSource: [],
+    allowColumnResizing: true,
+    columnResizingMode: "widget",
+    columnAutoWidth: true,
+    showBorders: true,
+    showRowLines: true,
+    allowColumnReordering: true,
+    wordWrapEnabled: true,
+    //keyExpr: "TransactionID",
+    sorting: {
+        mode: "none"
+    },
+    selection: {
+        mode: "single"
+    },
+    scrolling: { mode: 'infinite' },
+    rowAlternationEnabled: false,
+    columns: [
+        { dataField: "TransactionID", visible: false, caption: "TransactionID" },
+        { dataField: "LedgerID", visible: false, caption: "LedgerID" },
+        { dataField: "ItemID", visible: false, caption: "ItemID" },
+        { dataField: "ItemGroupID", visible: false, caption: "ItemGroupID" },
+        { dataField: "ItemGroupNameID", visible: false, caption: "ItemGroupNameID" },
+        { dataField: "PurchaseVoucherNo", visible: true, caption: "P.O. No.", width: 100 },
+        { dataField: "PurchaseVoucherDate", visible: true, caption: "P.O. Date", width: 80 },
+        { dataField: "ItemCode", visible: true, caption: "Item Code", width: 60 },
+        { dataField: "ItemSubGroupName", visible: true, caption: "Sub Group", width: 60 },
+        { dataField: "ItemName", visible: true, caption: "Item Name", width: 300 },
+        { dataField: "PurchaseOrderQuantity", visible: true, caption: "P.O.Qty (P.U.)", width: 80 },
+        {
+            dataField: "PurchaseOrderQuantityInStockUnit", visible: true, caption: "P.O.Qty (S.U.)", width: 80,
+            calculateCellValue: function (rowData) {
+                if (rowData.FormulaPurchaseToStockUnit === undefined || rowData.FormulaPurchaseToStockUnit === null) rowData.FormulaPurchaseToStockUnit = "";
+                return Number(StockUnitConversion(rowData.FormulaPurchaseToStockUnit, Number(rowData.PurchaseOrderQuantity), Number(rowData.UnitPerPacking), Number(rowData.WtPerPacking), Number(rowData.ConversionFactor), Number(rowData.SizeW), Number(rowData.UnitDecimalPlaceStockUnit), rowData.PurchaseUnit, rowData.StockUnit, Number(rowData.GSM), Number(rowData.ReleaseGSM), Number(rowData.AdhesiveGSM), Number(rowData.Thickness), Number(rowData.Density)));
+            }
         },
-        selection: {
-            mode: "single"
+        { dataField: "PurchaseTolerance", visible: true, caption: "Tol.(%)", width: 40 },
+        { dataField: "PendingQty", visible: true, caption: "Pending Qty (P.U.)", width: 80 },
+        {
+            dataField: "PendingQtyInStockUnit", visible: true, caption: "Pending Qty (S.U.)", width: 80,
+            calculateCellValue: function (rowData) {
+                if (rowData.FormulaPurchaseToStockUnit === undefined || rowData.FormulaPurchaseToStockUnit === null) rowData.FormulaPurchaseToStockUnit = "";
+                return Number(StockUnitConversion(rowData.FormulaPurchaseToStockUnit, Number(rowData.PendingQty), Number(rowData.UnitPerPacking), Number(rowData.WtPerPacking), Number(rowData.ConversionFactor), Number(rowData.SizeW), Number(rowData.UnitDecimalPlaceStockUnit), rowData.PurchaseUnit, rowData.StockUnit, Number(rowData.GSM), Number(rowData.ReleaseGSM), Number(rowData.AdhesiveGSM), Number(rowData.Thickness), Number(rowData.Density)));
+            }
         },
-        scrolling: { mode: 'infinite' },
-        rowAlternationEnabled: false,
-        columns: [
-            { dataField: "PurchaseVoucherNo", visible: true, caption: "P.O. No.", width: 100 },
-            { dataField: "PurchaseVoucherDate", visible: true, caption: "P.O. Date", width: 80 },
-            { dataField: "ItemCode", visible: true, caption: "Item Code", width: 60 },
-            { dataField: "ItemSubGroupName", visible: true, caption: "Sub Group", width: 60 },
-            { dataField: "ItemName", visible: true, caption: "Item Name", width: 300 },
-            { dataField: "PurchaseOrderQuantity", visible: true, caption: "P.O.Qty (P.U.)", width: 80 },
-            {
-                dataField: "PurchaseOrderQuantityInStockUnit", visible: true, caption: "P.O.Qty (S.U.)", width: 80,
-                calculateCellValue: function (rowData) {
-                    return Number(StockUnitConversion(rowData.FormulaPurchaseToStockUnit, Number(rowData.PurchaseOrderQuantity), Number(rowData.UnitPerPacking), Number(rowData.WtPerPacking), Number(rowData.ConversionFactor), Number(rowData.SizeW), Number(rowData.UnitDecimalPlaceStockUnit)));
-                }
-            },
-            { dataField: "PurchaseTolerance", visible: true, caption: "Tol.(%)", width: 40 },
-            { dataField: "PendingQty", visible: true, caption: "Pending Qty (P.U.)", width: 80 },
-            {
-                dataField: "PendingQtyInStockUnit", visible: true, caption: "Pending Qty (S.U.)", width: 80,
-                calculateCellValue: function (rowData) {
-                    return Number(StockUnitConversion(rowData.FormulaPurchaseToStockUnit, Number(rowData.PendingQty), Number(rowData.UnitPerPacking), Number(rowData.WtPerPacking), Number(rowData.ConversionFactor), Number(rowData.SizeW), Number(rowData.UnitDecimalPlaceStockUnit)));
-                }
-            },
-            { dataField: "PurchaseUnit", visible: true, caption: "Purchase Unit", width: 80 },
-            { dataField: "StockUnit", visible: true, caption: "Stock Unit", width: 80 },
-            { dataField: "PurchaseReferenceRemark", visible: true, caption: "P.O. Ref. Remark", width: 140 },
-            { dataField: "RefJobCardContentNo", visible: true, caption: "Job Card No.", width: 100 },
-            { dataField: "WtPerPacking", visible: false, caption: "WtPerPacking" },
-            { dataField: "UnitPerPacking", visible: false, caption: "UnitPerPacking" },
-            { dataField: "ConversionFactor", visible: false, caption: "ConversionFactor" },
-            { dataField: "SizeW", visible: false, caption: "SizeW" },
-            {
-                dataField: "BatchDetail", caption: "Batch Detail", visible: true, width: 80,
-                cellTemplate: function (container, options) {
-                    $('<div>').addClass('master-detail-label dx-link')
-                        .text('Batch Detail')
-                        .on('dxclick', function () { checkExistingBatchDetail(options); }).appendTo(container);
-                }
+        { dataField: "PurchaseUnit", visible: true, caption: "Purchase Unit", width: 80 },
+        { dataField: "StockUnit", visible: true, caption: "Stock Unit", width: 80 },
+        { dataField: "PurchaseReferenceRemark", visible: true, caption: "P.O. Ref. Remark", width: 140 },
+        { dataField: "RefJobCardContentNo", visible: true, caption: "Job Card No.", width: 100 },
+        { dataField: "WtPerPacking", visible: false, caption: "WtPerPacking" },
+        { dataField: "UnitPerPacking", visible: false, caption: "UnitPerPacking" },
+        { dataField: "ConversionFactor", visible: false, caption: "ConversionFactor" },
+        { dataField: "SizeW", visible: false, caption: "SizeW" },
+        {
+            dataField: "BatchDetail", caption: "Batch Detail", visible: true, width: 80,
+            cellTemplate: function (container, options) {
+                $('<div>').addClass('master-detail-label dx-link')
+                    .text('Batch Detail')
+                    .on('dxclick', function () { checkExistingBatchDetail(options); }).appendTo(container);
+            }
 
-            },
-            { dataField: "FormulaPurchaseToStockUnit", visible: false, caption: "FormulaPurchaseToStockUnit" },
-            { dataField: "UnitDecimalPlaceStockUnit", visible: false, caption: "UnitDecimalPlaceStockUnit" },
-            { dataField: "FormulaStockToPurchaseUnit", visible: false, caption: "FormulaStockToPurchaseUnit" },
-            { dataField: "UnitDecimalPlacePurchaseUnit", visible: false, caption: "UnitDecimalPlacePurchaseUnit" }
-        ],
-        height: function () {
-            return window.innerHeight / 4;
         },
-        onRowPrepared: function (e) {
-            setDataGridRowCss(e);
-        },
-        onSelectionChanged: function (selectedItems) {
-            purchaseorderrow = selectedItems.selectedRowsData[0];
-        },
-        onContentReady: function (e) {
-            e.component.selectRowsByIndexes([0]);
+        { dataField: "FormulaPurchaseToStockUnit", visible: false, caption: "FormulaPurchaseToStockUnit" },
+        { dataField: "UnitDecimalPlaceStockUnit", visible: false, caption: "UnitDecimalPlaceStockUnit" },
+        { dataField: "FormulaStockToPurchaseUnit", visible: false, caption: "FormulaStockToPurchaseUnit" },
+        { dataField: "UnitDecimalPlacePurchaseUnit", visible: false, caption: "UnitDecimalPlacePurchaseUnit" }
+    ],
+    //customizeColumns: function (columns) {
+    //    columns[0].width = 120;
+    //    columns[1].width = 150;
+    //},
+    height: function () {
+        return window.innerHeight / 4;
+    },
+    onRowPrepared: function (e) {
+        if (e.rowType === "header") {
+            e.rowElement.css('background', '#509EBC');
+            e.rowElement.css('color', 'white');
+            e.rowElement.css('font-weight', 'bold');
         }
-    });
+        e.rowElement.css('fontSize', '11px');
+    },
+    onSelectionChanged: function (selectedItems) {
+        purchaseorderrow = "";
+        purchaseorderrow = selectedItems.selectedRowsData[0];
+    },
+    onContentReady: function (e) {
+        e.component.selectRowsByIndexes([0]);
+    }
+});
 
-    $("#GridReceiptBatchDetails").dxDataGrid({
-        dataSource: [],
-        allowColumnReordering: true,
-        allowColumnResizing: true,
-        showBorders: true,
-        showRowLines: true,
-        columnResizingMode: "widget",
-        sorting: {
-            mode: "none"
+$("#GridReceiptBatchDetails").dxDataGrid({
+    dataSource: [],
+    allowColumnReordering: true,
+    allowColumnResizing: true,
+    //columnAutoWidth: true,
+    showBorders: true,
+    showRowLines: true,
+    columnResizingMode: "widget",
+    //keyExpr: "TransactionID",
+    sorting: {
+        mode: "none"
+    },
+    editing: {
+        mode: "cell",
+        allowDeleting: true,
+        allowUpdating: true
+    },
+    scrolling: { mode: 'infinite' },
+    rowAlternationEnabled: false,
+    columns: [
+        { dataField: "TransactionID", visible: false, caption: "PurchaseTransactionID", width: 120 },
+        { dataField: "LedgerID", visible: false, caption: "LedgerID", width: 120 },
+        { dataField: "ItemID", visible: false, caption: "ItemID", width: 120 },
+        { dataField: "ItemGroupID", visible: false, caption: "ItemGroupID", width: 120 },
+        { dataField: "PurchaseVoucherDate", visible: false, caption: "P.O. Date", width: 120 },
+        { dataField: "PurchaseOrderQuantity", visible: false, caption: "P.O.Qty", width: 120 },
+        { dataField: "PurchaseUnit", visible: false, caption: "Purchase Unit", width: 120 },
+        { dataField: "PurchaseVoucherNo", visible: true, caption: "P.O. No.", width: 120 },
+        { dataField: "ItemCode", visible: true, caption: "Item Code", width: 120 },
+        { dataField: "ItemName", visible: true, caption: "Item Name", width: 400 },
+        {
+            dataField: "ReceiptQuantity", validationRules: [{ type: "required" }, { type: "numeric" }], caption: "Receipt Quantity", visible: true, width: 120,
+            setCellValue: function (newData, value, currentRowData) {
+                if (value === undefined || value === null || isNaN(value) === true) return false;
+                newData.ReceiptQuantity = Number(value).toFixed(Number(currentRowData.UnitDecimalPlaceStockUnit));
+                if (currentRowData.FormulaStockToPurchaseUnit === undefined || currentRowData.FormulaStockToPurchaseUnit === null) currentRowData.FormulaStockToPurchaseUnit = "";
+                //newData.TotalPrice = currentRowData.Price * value;
+                if (Number(currentRowData.ReceiptWtPerPacking) > 0) {
+                    newData.ReceiptQuantityInPurchaseUnit = Number(StockUnitConversion(currentRowData.FormulaStockToPurchaseUnit, value, currentRowData.UnitPerPacking, currentRowData.ReceiptWtPerPacking, currentRowData.ConversionFactor, currentRowData.SizeW, currentRowData.UnitDecimalPlacePurchaseUnit, currentRowData.StockUnit, currentRowData.PurchaseUnit, Number(currentRowData.GSM), Number(currentRowData.ReleaseGSM), Number(currentRowData.AdhesiveGSM), Number(currentRowData.Thickness), Number(currentRowData.Density)));
+                } else {
+                    newData.ReceiptQuantityInPurchaseUnit = Number(StockUnitConversion(currentRowData.FormulaStockToPurchaseUnit, value, currentRowData.UnitPerPacking, currentRowData.WtPerPacking, currentRowData.ConversionFactor, currentRowData.SizeW, currentRowData.UnitDecimalPlacePurchaseUnit, currentRowData.StockUnit, currentRowData.PurchaseUnit, Number(currentRowData.GSM), Number(currentRowData.ReleaseGSM), Number(currentRowData.AdhesiveGSM), Number(currentRowData.Thickness), Number(currentRowData.Density)));
+                }
+            }
         },
-        editing: {
-            mode: "cell",
-            allowDeleting: true,
-            allowUpdating: true
-        },
-        scrolling: { mode: 'infinite' },
-        rowAlternationEnabled: false,
-        columns: [
-            { dataField: "PurchaseVoucherDate", visible: false, caption: "P.O. Date", width: 120 },
-            { dataField: "PurchaseOrderQuantity", visible: false, caption: "P.O.Qty", width: 120 },
-            { dataField: "PurchaseUnit", visible: false, caption: "Purchase Unit", width: 120 },
-            { dataField: "PurchaseVoucherNo", visible: true, caption: "P.O. No.", width: 120 },
-            { dataField: "ItemCode", visible: true, caption: "Item Code", width: 120 },
-            { dataField: "ItemName", visible: true, caption: "Item Name", width: 400 },
-            {
-                dataField: "ReceiptQuantity", validationRules: [{ type: "required" }, { type: "numeric" }], caption: "Receipt Quantity", visible: true, width: 120,
-                setCellValue: function (newData, value, currentRowData) {
-                    newData.ReceiptQuantity = Number(value).toFixed(Number(currentRowData.UnitDecimalPlaceStockUnit));
+        {
+            dataField: "ReceiptQuantityInPurchaseUnit", caption: "Receipt Qty (In P.U.)", visible: true, width: 120,
+            calculateCellValue: function (rowData) {
+                if (rowData.FormulaPurchaseToStockUnit === undefined || rowData.FormulaPurchaseToStockUnit === null) rowData.FormulaPurchaseToStockUnit = "";
+                if (Number(rowData.ReceiptWtPerPacking) > 0) {
+                    return Number(StockUnitConversion(rowData.FormulaPurchaseToStockUnit, Number(rowData.PurchaseOrderQuantity), Number(rowData.UnitPerPacking), Number(rowData.ReceiptWtPerPacking), Number(rowData.ConversionFactor), Number(rowData.SizeW), Number(rowData.UnitDecimalPlaceStockUnit), rowData.PurchaseUnit, rowData.StockUnit, Number(rowData.GSM), Number(rowData.ReleaseGSM), Number(rowData.AdhesiveGSM), Number(rowData.Thickness), Number(rowData.Density)));
+                } else {
+                    return Number(StockUnitConversion(rowData.FormulaPurchaseToStockUnit, Number(rowData.PurchaseOrderQuantity), Number(rowData.UnitPerPacking), Number(rowData.WtPerPacking), Number(rowData.ConversionFactor), Number(rowData.SizeW), Number(rowData.UnitDecimalPlaceStockUnit), rowData.PurchaseUnit, rowData.StockUnit, Number(rowData.GSM), Number(rowData.ReleaseGSM), Number(rowData.AdhesiveGSM), Number(rowData.Thickness), Number(rowData.Density)));
+                }
 
-                    //newData.TotalPrice = currentRowData.Price * value;
-                    if (Number(currentRowData.ReceiptWtPerPacking) > 0) {
-                        newData.ReceiptQuantityInPurchaseUnit = Number(StockUnitConversion(currentRowData.FormulaStockToPurchaseUnit, value, currentRowData.UnitPerPacking, currentRowData.ReceiptWtPerPacking, currentRowData.ConversionFactor, currentRowData.SizeW, currentRowData.UnitDecimalPlacePurchaseUnit));
-                    } else {
-                        newData.ReceiptQuantityInPurchaseUnit = Number(StockUnitConversion(currentRowData.FormulaStockToPurchaseUnit, value, currentRowData.UnitPerPacking, currentRowData.WtPerPacking, currentRowData.ConversionFactor, currentRowData.SizeW, currentRowData.UnitDecimalPlacePurchaseUnit));
-                    }
-                }
-            },
-            {
-                dataField: "ReceiptQuantityInPurchaseUnit", caption: "Receipt Qty (In P.U.)", visible: true, width: 120,
-                calculateCellValue: function (rowData) {
-                    if (Number(rowData.ReceiptWtPerPacking) > 0) {
-                        return Number(StockUnitConversion(rowData.FormulaPurchaseToStockUnit, Number(rowData.PurchaseOrderQuantity), Number(rowData.UnitPerPacking), Number(rowData.ReceiptWtPerPacking), Number(rowData.ConversionFactor), Number(rowData.SizeW), Number(rowData.UnitDecimalPlaceStockUnit)));
-                    } else {
-                        return Number(StockUnitConversion(rowData.FormulaPurchaseToStockUnit, Number(rowData.PurchaseOrderQuantity), Number(rowData.UnitPerPacking), Number(rowData.WtPerPacking), Number(rowData.ConversionFactor), Number(rowData.SizeW), Number(rowData.UnitDecimalPlaceStockUnit)));
-                    }
-
-                }
-            },
-            {
-                dataField: "BatchNo", validationRules: [{ type: "required" }], caption: "Ref. Batch No.", visible: true, width: 120
-            },
-            { dataField: "StockUnit", visible: true, width: 80 },
-            { dataField: "ReceiptWtPerPacking", visible: true, validationRules: [{ type: "required" }, { type: "numeric" }], caption: "Wt/Packing", width: 120 },
-            {
-                dataField: "Warehouse", visible: true, caption: "Warehouse", width: 120,
-                lookup: {
-                    dataSource: ResWarehouse,
-                    displayExpr: "Warehouse",
-                    valueExpr: "Warehouse"
-                    //keyExpr: "WarehouseID"
-                },
-                validationRules: [{ type: "required" }],
-                setCellValue: function (rowData, value) {
-                    rowData.Warehouse = value;
-                    if (value !== "") {
-                        RefreshBin(value);
-                    }
-                }
-            },
-            {
-                dataField: "Bin", visible: true, width: 120,
-                lookup: {
-                    dataSource: ResBin,
-                    displayExpr: "Bin",
-                    valueExpr: "WarehouseID"
-                },
-                validationRules: [{ type: "required" }],
-                setCellValue: function (rowData, value) {
-                    rowData.Bin = value;
-                    rowData.WarehouseID = 0;
-                    if (value > 0) {
-                        rowData.WarehouseID = value;
-                    }
-                }
-            },
-            { dataField: "PurchaseTolerance", visible: false, caption: "P.O. Tol.(%)", width: 120 }, //, width: 40 
-            { dataField: "WtPerPacking", visible: false, caption: "WtPerPacking", width: 120 },  //, width: 40 
-            { dataField: "UnitPerPacking", visible: false, caption: "UnitPerPacking", width: 120 },  //, width: 40 
-            { dataField: "ConversionFactor", visible: false, caption: "ConversionFactor", width: 120 },  //, width: 40 
-            { dataField: "SizeW", visible: false, caption: "SizeW", width: 120 },//, width: 40 
-            { dataField: "WarehouseID", visible: false, caption: "WarehouseID", width: 120 },    //, width: 40 
-            { dataField: "ItemGroupNameID", visible: false, caption: "ItemGroupNameID", width: 120 },
-            { dataField: "FormulaPurchaseToStockUnit", visible: false, caption: "FormulaPurchaseToStockUnit" },
-            { dataField: "UnitDecimalPlaceStockUnit", visible: false, caption: "UnitDecimalPlaceStockUnit" },
-            { dataField: "FormulaStockToPurchaseUnit", visible: false, caption: "FormulaStockToPurchaseUnit" },
-            { dataField: "UnitDecimalPlacePurchaseUnit", visible: false, caption: "UnitDecimalPlacePurchaseUnit" }
-        ],
-        height: function () {
-            return window.innerHeight / 3.4;
+            }
         },
-        onEditingStart: function (e) {
-            if (e.column.dataField === "ReceiptQuantity" || e.column.dataField === "Warehouse" || e.column.dataField === "Bin" || e.column.dataField === "ReceiptWtPerPacking") {// || e.column.dataField === "BatchNo"
+        {
+            dataField: "BatchNo", validationRules: [{ type: "required" }], caption: "Ref. Batch No.", visible: true, width: 120
+        },
+
+        { dataField: "SupplierBatchNo", caption: "Supp.Batch No.", allowEditing: true, visible: true, width: 120 },
+
+        {
+            dataField: "MfgDate", visible: true, allowEditing: true, caption: "Mfg.Date", width: 120,
+            dataType: "date", format: "dd-MMM-yyyy",
+            showEditorAlways: true
+        },
+
+        {
+            dataField: "ExpiryDate", visible: true, allowEditing: true, caption: "Expiry Date", width: 120,
+            dataType: "date", format: "dd-MMM-yyyy",
+            showEditorAlways: true
+        },
+        { dataField: "StockUnit", visible: true, width: 80 },
+        { dataField: "ReceiptWtPerPacking", visible: true, validationRules: [{ type: "required" }, { type: "numeric" }], caption: "Wt/Packing", width: 120 },
+        {
+            dataField: "Warehouse", visible: true, caption: "Warehouse", width: 120,
+            lookup: {
+                dataSource: ResWarehouse,
+                displayExpr: "Warehouse",
+                valueExpr: "Warehouse"
+                //keyExpr: "WarehouseID"
+            },
+            validationRules: [{ type: "required" }],
+            setCellValue: function (rowData, value) {
+                rowData.Warehouse = value;
+                if (value !== "") {
+                    RefreshBin(value);
+                }
+            }
+        },
+        {
+            dataField: "Bin", visible: true, width: 120,
+            lookup: {
+                dataSource: ResBin,
+                displayExpr: "Bin",
+                valueExpr: "WarehouseID"
+            },
+            validationRules: [{ type: "required" }],
+            setCellValue: function (rowData, value) {
+                rowData.Bin = value;
+                rowData.WarehouseID = 0;
+                if (value > 0) {
+                    rowData.WarehouseID = value;
+                }
+            }
+        },
+        { dataField: "PurchaseTolerance", visible: false, caption: "P.O. Tol.(%)", width: 120 }, //, width: 40 
+        { dataField: "WtPerPacking", visible: false, caption: "WtPerPacking", width: 120 },  //, width: 40 
+        { dataField: "UnitPerPacking", visible: false, caption: "UnitPerPacking", width: 120 },  //, width: 40 
+        { dataField: "ConversionFactor", visible: false, caption: "ConversionFactor", width: 120 },  //, width: 40 
+        { dataField: "SizeW", visible: false, caption: "SizeW", width: 120 },//, width: 40 
+        { dataField: "WarehouseID", visible: false, caption: "WarehouseID", width: 120 },    //, width: 40 
+        { dataField: "ItemGroupNameID", visible: false, caption: "ItemGroupNameID", width: 120 },
+        { dataField: "FormulaPurchaseToStockUnit", visible: false, caption: "FormulaPurchaseToStockUnit" },
+        { dataField: "UnitDecimalPlaceStockUnit", visible: false, caption: "UnitDecimalPlaceStockUnit" },
+        { dataField: "FormulaStockToPurchaseUnit", visible: false, caption: "FormulaStockToPurchaseUnit" },
+        { dataField: "UnitDecimalPlacePurchaseUnit", visible: false, caption: "UnitDecimalPlacePurchaseUnit" }
+    ],
+    height: function () {
+        return window.innerHeight / 3.4;
+    },
+    onEditingStart: function (e) {
+        //if (e.column.dataField === "ReceiptQuantity" || e.column.dataField === "Warehouse" || e.column.dataField === "Bin" || e.column.dataField === "ReceiptWtPerPacking") {// || e.column.dataField === "BatchNo"
+        if (e.column.dataField === "SupplierBatchNo" || e.column.dataField === "MfgDate" || e.column.dataField === "ExpiryDate" || e.column.dataField === "ReceiptQuantity" || e.column.dataField === "Warehouse" || e.column.dataField === "Bin" || e.column.dataField === "ReceiptWtPerPacking") {// || e.column.dataField === "BatchNo"
+            e.cancel = false;
+        } else {
+            e.cancel = true;
+        }
+
+        if (e.data.ItemGroupNameID === "-1" || e.data.ItemGroupNameID === -1) {
+            if (e.column.dataField === "ReceiptWtPerPacking") {
                 e.cancel = false;
-            } else {
+            }
+        }
+        else {
+            if (e.column.dataField === "ReceiptWtPerPacking") {
                 e.cancel = true;
             }
+        }
 
-            if (e.data.ItemGroupNameID === "-1" || e.data.ItemGroupNameID === -1) {
-                if (e.column.dataField === "ReceiptWtPerPacking") {
-                    e.cancel = false;
-                }
+    },
+    onRowPrepared: function (e) {
+        if (e.rowType === "header") {
+            e.rowElement.css('background', '#509EBC');
+            e.rowElement.css('color', 'white');
+            e.rowElement.css('font-weight', 'bold');
+        }
+        e.rowElement.css('fontSize', '11px');
+    },
+    onRowRemoved: function (e) {
+        var dataGrid = $("#GridReceiptBatchDetails").dxDataGrid('instance');
+        var newData = [];
+        objpub = {};
+
+        receiptBatchDetail = receiptBatchDetail.filter(function (obj) {
+            if (obj.BatchNo === e.key.BatchNo) {
+                return false;
             }
             else {
-                if (e.column.dataField === "ReceiptWtPerPacking") {
-                    e.cancel = true;
-                }
+                return true;
             }
+        });
 
-        },
-        onRowPrepared: function (e) {
-            setDataGridRowCss(e);
-        },
-        onRowRemoved: function (e) {
-            var dataGrid = $("#GridReceiptBatchDetails").dxDataGrid('instance');
-            var newData = [];
-            objpub = {};
+        if (dataGrid._options.dataSource.length === 0 || e.key.ReceiptQuantity === 0) {
+            objpub.TransactionID = e.key.TransactionID;
+            objpub.LedgerID = e.key.LedgerID;
+            objpub.ItemID = e.key.ItemID;
+            objpub.ItemGroupID = e.key.ItemGroupID;
+            objpub.ItemGroupNameID = e.key.ItemGroupNameID;
+            objpub.PurchaseVoucherNo = e.key.PurchaseVoucherNo;
+            objpub.PurchaseVoucherDate = e.key.PurchaseVoucherDate;
+            objpub.ItemCode = e.key.ItemCode;
+            objpub.ItemName = e.key.ItemName;
+            objpub.PurchaseOrderQuantity = e.key.PurchaseOrderQuantity;
+            objpub.PurchaseUnit = e.key.PurchaseUnit;
+            objpub.ChallanQuantity = e.key.ReceiptQuantity;
+            objpub.ReceiptQuantityInPurchaseUnit = e.key.ReceiptQuantityInPurchaseUnit;
+            objpub.BatchNo = e.key.BatchNo;
 
-            receiptBatchDetail = receiptBatchDetail.filter(function (obj) {
-                if (obj.BatchNo === e.key.BatchNo) {
-                    return false;
+            objpub.SupplierBatchNo = e.key.SupplierBatchNo;
+            objpub.MfgDate = e.key.MfgDate;
+            objpub.ExpiryDate = e.key.ExpiryDate;
+
+            objpub.StockUnit = e.key.StockUnit;
+            objpub.Warehouse = "";//e.key.Warehouse
+            objpub.Bin = "";//e.key.Bin
+            objpub.PurchaseTolerance = e.key.PurchaseTolerance;
+            objpub.ReceiptWtPerPacking = e.key.ReceiptWtPerPacking;
+            objpub.WtPerPacking = e.key.WtPerPacking;
+            objpub.UnitPerPacking = e.key.UnitPerPacking;
+            objpub.ConversionFactor = e.key.ConversionFactor;
+            objpub.SizeW = e.key.SizeW;
+            objpub.WarehouseID = 0;//e.key.WarehouseID
+            objpub.ReceiptQuantity = 0;
+            objpub.FormulaPurchaseToStockUnit = e.key.FormulaPurchaseToStockUnit;
+            objpub.UnitDecimalPlaceStockUnit = e.key.UnitDecimalPlaceStockUnit;
+            objpub.FormulaStockToPurchaseUnit = e.key.FormulaStockToPurchaseUnit;
+            objpub.UnitDecimalPlacePurchaseUnit = e.key.UnitDecimalPlacePurchaseUnit;
+
+            dataGrid._options.dataSource.push(objpub);
+        }
+
+        $("#GridReceiptBatchDetails").dxDataGrid({
+            dataSource: dataGrid._options.dataSource,
+            columnAutoWidth: true
+        });
+        dataGrid.refresh();
+    },
+    onRowUpdated: function (e) {
+        //if (Object.getOwnPropertyNames(e.data) === "ReceiptQuantity" || Object.getOwnPropertyNames(e.data) === "Warehouse" || Object.getOwnPropertyNames(e.data) === "Bin") {
+        if (e.key.StockUnit.toUpperCase() === "SHEETS" || e.key.StockUnit.toUpperCase() === "SHEET" || e.key.StockUnit.toUpperCase() === "METER" || e.key.StockUnit.toUpperCase() === "MTR") {
+            var textValue = Number(e.key.ReceiptQuantity);
+            var decimal = /^[0-9]*$/;
+            if (decimal.test(textValue) === false) {
+                DevExpress.ui.notify("Please enter only numeric value..!", "warning", 1200);
+                e.key.ReceiptQuantity = 0;
+            }
+            // e.component.refresh();
+        }
+        var i = 0;
+        var rowUpdated = false;
+        for (i = 0; i < receiptBatchDetail.length; i++) {
+            if (receiptBatchDetail[i].PurchaseTransactionID === e.key.TransactionID && receiptBatchDetail[i].ItemID === e.key.ItemID && receiptBatchDetail[i].BatchNo === e.key.BatchNo) {
+                if (e.key.ReceiptQuantity === 0) {
+                    e.key.ReceiptQuantity = receiptBatchDetail[i].ChallanQuantity;
+                    e.key.ReceiptQuantityInPurchaseUnit = receiptBatchDetail[i].ReceiptQuantityInPurchaseUnit;
+                } else if (e.key.ReceiptQuantity <= 0) {
+                    e.key.ReceiptQuantity = receiptBatchDetail[i].ChallanQuantity;
+                } else {
+                    if (CheckQuantityTolerance(e.key.ReceiptQuantity, e.key.TransactionID, e.key.ItemID, e.key.BatchNo, e.key.PurchaseTolerance, e.key.WtPerPacking, e.key.UnitPerPacking, e.key.ConversionFactor, e.key.SizeW, e.key.PurchaseUnit.toString(), e.key.StockUnit.toString(), Number(e.key.GSM), Number(e.key.ReleaseGSM), Number(e.key.AdhesiveGSM), Number(e.key.Thickness), Number(e.key.Density))) {
+                        receiptBatchDetail[i].ChallanQuantity = e.key.ReceiptQuantity;
+                        receiptBatchDetail[i].ReceiptQuantityInPurchaseUnit = e.key.ReceiptQuantityInPurchaseUnit;
+                    } else {
+                        e.key.ReceiptQuantity = receiptBatchDetail[i].ChallanQuantity;
+                        e.key.ReceiptQuantityInPurchaseUnit = Number(receiptBatchDetail[i].ReceiptQuantityInPurchaseUnit);
+                        DevExpress.ui.notify("Please enter valid receipt quantity under tolerance limit..!", "warning", 1200);
+                        return;
+                    }
+
                 }
-                else {
-                    return true;
+                if (e.key.ReceiptWtPerPacking === 0) {
+                    e.key.ReceiptWtPerPacking = receiptBatchDetail[i].ReceiptWtPerPacking;
+                } else if (e.key.ReceiptWtPerPacking <= 0) {
+                    e.key.ReceiptWtPerPacking = receiptBatchDetail[i].ReceiptWtPerPacking;
+                } else {
+                    e.key.ReceiptWtPerPacking = Number(e.key.ReceiptWtPerPacking).toFixed(6);
+                    receiptBatchDetail[i].ReceiptWtPerPacking = Number(e.key.ReceiptWtPerPacking).toFixed(6);
                 }
-            });
+                receiptBatchDetail[i].Warehouse = e.key.Warehouse;
+                receiptBatchDetail[i].Bin = e.key.Bin;
+                receiptBatchDetail[i].WarehouseID = e.key.WarehouseID;
 
-            if (dataGrid._options.dataSource.length === 0 || e.key.ReceiptQuantity === 0) {
-                objpub.TransactionID = e.key.TransactionID;
+                receiptBatchDetail[i].SupplierBatchNo = e.key.SupplierBatchNo;
+                receiptBatchDetail[i].MfgDate = e.key.MfgDate;
+                receiptBatchDetail[i].ExpiryDate = e.key.ExpiryDate;
+
+                rowUpdated = true;
+            }
+        }
+        if (rowUpdated === false) {
+            if (e.key.ReceiptQuantity > 0 && e.key.TransactionID > 0 && e.key.ItemID > 0 && e.key.Warehouse !== "" && e.key.Bin !== "" && e.key.WarehouseID > 0) {
+                if (!CheckQuantityTolerance(e.key.ReceiptQuantity, e.key.TransactionID, e.key.ItemID, e.key.BatchNo, e.key.PurchaseTolerance, e.key.WtPerPacking, e.key.UnitPerPacking, e.key.ConversionFactor, e.key.SizeW, e.key.PurchaseUnit.toString(), e.key.StockUnit.toString(), Number(e.key.GSM), Number(e.key.ReleaseGSM), Number(e.key.AdhesiveGSM), Number(e.key.Thickness), Number(e.key.Density))) {
+                    DevExpress.ui.notify("Please enter valid receipt quantity under tolerance limit..!", "warning", 1200);
+                    e.key.ReceiptQuantity = 0;
+                    return;
+                }
+                var objpub = {};
+                objpub.PurchaseTransactionID = e.key.TransactionID;
                 objpub.LedgerID = e.key.LedgerID;
                 objpub.ItemID = e.key.ItemID;
                 objpub.ItemGroupID = e.key.ItemGroupID;
@@ -1078,224 +1260,154 @@ function SetPurchaseOrderGrid() {
                 objpub.ChallanQuantity = e.key.ReceiptQuantity;
                 objpub.ReceiptQuantityInPurchaseUnit = e.key.ReceiptQuantityInPurchaseUnit;
                 objpub.BatchNo = e.key.BatchNo;
+
+                objpub.SupplierBatchNo = e.key.SupplierBatchNo;
+                objpub.MfgDate = e.key.MfgDate;
+                objpub.ExpiryDate = e.key.ExpiryDate;
+
                 objpub.StockUnit = e.key.StockUnit;
-                objpub.Warehouse = "";//e.key.Warehouse
-                objpub.Bin = "";//e.key.Bin
+                objpub.Warehouse = e.key.Warehouse;
+                objpub.Bin = e.key.Bin;
                 objpub.PurchaseTolerance = e.key.PurchaseTolerance;
-                objpub.ReceiptWtPerPacking = e.key.ReceiptWtPerPacking;
+                e.key.ReceiptWtPerPacking = Number(e.key.ReceiptWtPerPacking).toFixed(6);
+                objpub.ReceiptWtPerPacking = Number(e.key.ReceiptWtPerPacking).toFixed(6);
                 objpub.WtPerPacking = e.key.WtPerPacking;
                 objpub.UnitPerPacking = e.key.UnitPerPacking;
                 objpub.ConversionFactor = e.key.ConversionFactor;
                 objpub.SizeW = e.key.SizeW;
-                objpub.WarehouseID = 0;//e.key.WarehouseID
-                objpub.ReceiptQuantity = 0;
+                objpub.WarehouseID = e.key.WarehouseID;
                 objpub.FormulaPurchaseToStockUnit = e.key.FormulaPurchaseToStockUnit;
                 objpub.UnitDecimalPlaceStockUnit = e.key.UnitDecimalPlaceStockUnit;
                 objpub.FormulaStockToPurchaseUnit = e.key.FormulaStockToPurchaseUnit;
                 objpub.UnitDecimalPlacePurchaseUnit = e.key.UnitDecimalPlacePurchaseUnit;
+                objpub.GSM = e.key.GSM;
+                objpub.ReleaseGSM = e.key.ReleaseGSM;
+                objpub.AdhesiveGSM = e.key.AdhesiveGSM;
+                objpub.Thickness = e.key.Thickness;
+                objpub.Density = e.key.Density;
+                receiptBatchDetail.push(objpub);
 
-                dataGrid._options.dataSource.push(objpub);
-            }
+                //adding new row in batch details grid
+                var x = $("#GridReceiptBatchDetails").dxDataGrid("instance");
 
-            $("#GridReceiptBatchDetails").dxDataGrid({
-                dataSource: dataGrid._options.dataSource,
-                columnAutoWidth: true
-            });
-            dataGrid.refresh();
-        },
-        onRowUpdated: function (e) {
-            //if (Object.getOwnPropertyNames(e.data) === "ReceiptQuantity" || Object.getOwnPropertyNames(e.data) === "Warehouse" || Object.getOwnPropertyNames(e.data) === "Bin") {
-            if (e.key.StockUnit.toUpperCase() === "SHEETS" || e.key.StockUnit.toUpperCase() === "SHEET") {
-                var textValue = Number(e.key.ReceiptQuantity);
-                var decimal = /^[0-9]*$/;
-                if (decimal.test(textValue) === false) {
-                    DevExpress.ui.notify("Please enter only numeric value..!", "warning", 1200);
-                    e.key.ReceiptQuantity = 0;
+                i = 0;
+                var newData = [];
+                objpub = {};
+                if (receiptBatchDetail.length > 0) {
+                    for (i = 0; i < receiptBatchDetail.length; i++) {
+                        if (receiptBatchDetail[i].PurchaseTransactionID === e.key.TransactionID && receiptBatchDetail[i].ItemID === e.key.ItemID) {
+                            objpub.TransactionID = receiptBatchDetail[i].PurchaseTransactionID;
+                            objpub.LedgerID = receiptBatchDetail[i].LedgerID;
+                            objpub.ItemID = receiptBatchDetail[i].ItemID;
+                            objpub.ItemGroupID = receiptBatchDetail[i].ItemGroupID;
+                            objpub.ItemGroupNameID = receiptBatchDetail[i].ItemGroupNameID;
+                            objpub.PurchaseVoucherNo = receiptBatchDetail[i].PurchaseVoucherNo;
+                            objpub.PurchaseVoucherDate = receiptBatchDetail[i].PurchaseVoucherDate;
+                            objpub.ItemCode = receiptBatchDetail[i].ItemCode;
+                            objpub.ItemName = receiptBatchDetail[i].ItemName;
+                            objpub.PurchaseOrderQuantity = receiptBatchDetail[i].PurchaseOrderQuantity;
+                            objpub.PurchaseUnit = receiptBatchDetail[i].PurchaseUnit;
+                            objpub.ReceiptQuantity = receiptBatchDetail[i].ChallanQuantity;
+                            objpub.ReceiptQuantityInPurchaseUnit = receiptBatchDetail[i].ReceiptQuantityInPurchaseUnit;
+                            objpub.BatchNo = receiptBatchDetail[i].BatchNo;
+                            objpub.SupplierBatchNo = receiptBatchDetail[i].SupplierBatchNo;
+                            objpub.MfgDate = receiptBatchDetail[i].MfgDate;
+                            objpub.ExpiryDate = receiptBatchDetail[i].ExpiryDate;
+                            objpub.StockUnit = receiptBatchDetail[i].StockUnit;
+                            objpub.Warehouse = receiptBatchDetail[i].Warehouse;
+                            objpub.Bin = receiptBatchDetail[i].Bin;
+                            objpub.PurchaseTolerance = receiptBatchDetail[i].PurchaseTolerance;
+                            objpub.ReceiptWtPerPacking = receiptBatchDetail[i].ReceiptWtPerPacking;
+                            objpub.WtPerPacking = receiptBatchDetail[i].WtPerPacking;
+                            objpub.UnitPerPacking = receiptBatchDetail[i].UnitPerPacking;
+                            objpub.ConversionFactor = receiptBatchDetail[i].ConversionFactor;
+                            objpub.SizeW = receiptBatchDetail[i].SizeW;
+                            objpub.WarehouseID = receiptBatchDetail[i].WarehouseID;
+                            objpub.FormulaPurchaseToStockUnit = receiptBatchDetail[i].FormulaPurchaseToStockUnit;
+                            objpub.UnitDecimalPlaceStockUnit = receiptBatchDetail[i].UnitDecimalPlaceStockUnit;
+                            objpub.FormulaStockToPurchaseUnit = receiptBatchDetail[i].FormulaStockToPurchaseUnit;
+                            objpub.UnitDecimalPlacePurchaseUnit = receiptBatchDetail[i].UnitDecimalPlacePurchaseUnit;
+                            objpub.GSM = receiptBatchDetail[i].GSM;
+                            objpub.ReleaseGSM = receiptBatchDetail[i].ReleaseGSM;
+                            objpub.AdhesiveGSM = receiptBatchDetail[i].AdhesiveGSM;
+                            objpub.Thickness = receiptBatchDetail[i].Thickness;
+                            objpub.Density = receiptBatchDetail[i].Density;
+
+                            newData.push(objpub);
+                            objpub = {};
+                        }
+                    }
                 }
-                // e.component.refresh();
-            }
-            var i = 0;
-            var rowUpdated = false;
-            for (i = 0; i < receiptBatchDetail.length; i++) {
-                if (receiptBatchDetail[i].PurchaseTransactionID === e.key.TransactionID && receiptBatchDetail[i].ItemID === e.key.ItemID && receiptBatchDetail[i].BatchNo === e.key.BatchNo) {
-                    if (e.key.ReceiptQuantity === 0) {
-                        e.key.ReceiptQuantity = receiptBatchDetail[i].ChallanQuantity;
-                        e.key.ReceiptQuantityInPurchaseUnit = receiptBatchDetail[i].ReceiptQuantityInPurchaseUnit;
-                    } else if (e.key.ReceiptQuantity <= 0) {
-                        e.key.ReceiptQuantity = receiptBatchDetail[i].ChallanQuantity;
-                    } else {
-                        if (CheckQuantityTolerance(e.key.ReceiptQuantity, e.key.TransactionID, e.key.ItemID, e.key.BatchNo, e.key.PurchaseTolerance, e.key.WtPerPacking, e.key.UnitPerPacking, e.key.ConversionFactor, e.key.SizeW)) {
-                            receiptBatchDetail[i].ChallanQuantity = e.key.ReceiptQuantity;
-                            receiptBatchDetail[i].ReceiptQuantityInPurchaseUnit = e.key.ReceiptQuantityInPurchaseUnit;
-                        } else {
-                            e.key.ReceiptQuantity = receiptBatchDetail[i].ChallanQuantity;
-                            e.key.ReceiptQuantityInPurchaseUnit = receiptBatchDetail[i].ReceiptQuantityInPurchaseUnit;
-                            DevExpress.ui.notify("Please enter valid receipt quantity under tolerance limit..!", "warning", 1200);
-                            return;
-                        }
+                objpub.TransactionID = e.key.TransactionID;
+                objpub.LedgerID = e.key.LedgerID;
+                objpub.ItemID = e.key.ItemID;
+                objpub.ItemGroupID = e.key.ItemGroupID;
+                objpub.ItemGroupNameID = e.key.ItemGroupNameID;
+                objpub.PurchaseVoucherNo = e.key.PurchaseVoucherNo;
+                objpub.PurchaseVoucherDate = e.key.PurchaseVoucherDate;
+                objpub.ItemCode = e.key.ItemCode;
+                objpub.ItemName = e.key.ItemName;
+                objpub.PurchaseOrderQuantity = e.key.PurchaseOrderQuantity;
+                objpub.PurchaseUnit = e.key.PurchaseUnit;
+                objpub.StockUnit = e.key.StockUnit;
+                objpub.SupplierBatchNo = e.key.SupplierBatchNo;
+                objpub.MfgDate = e.key.MfgDate;
+                objpub.ExpiryDate = e.key.ExpiryDate;
 
-                    }
-                    if (e.key.ReceiptWtPerPacking === 0) {
-                        e.key.ReceiptWtPerPacking = receiptBatchDetail[i].ReceiptWtPerPacking;
-                    } else if (e.key.ReceiptWtPerPacking <= 0) {
-                        e.key.ReceiptWtPerPacking = receiptBatchDetail[i].ReceiptWtPerPacking;
-                    } else {
-                        e.key.ReceiptWtPerPacking = Number(e.key.ReceiptWtPerPacking).toFixed(6);
-                        receiptBatchDetail[i].ReceiptWtPerPacking = Number(e.key.ReceiptWtPerPacking).toFixed(6);
-                    }
-                    receiptBatchDetail[i].Warehouse = e.key.Warehouse;
-                    receiptBatchDetail[i].Bin = e.key.Bin;
-                    receiptBatchDetail[i].WarehouseID = e.key.WarehouseID;
-                    rowUpdated = true;
-                }
-            }
-            if (rowUpdated === false) {
-                if (e.key.ReceiptQuantity > 0 && e.key.TransactionID > 0 && e.key.ItemID > 0 && e.key.Warehouse !== "" && e.key.Bin !== "" && e.key.WarehouseID > 0) {
-                    if (!CheckQuantityTolerance(e.key.ReceiptQuantity, e.key.TransactionID, e.key.ItemID, e.key.BatchNo, e.key.PurchaseTolerance, e.key.WtPerPacking, e.key.UnitPerPacking, e.key.ConversionFactor, e.key.SizeW)) {
-                        DevExpress.ui.notify("Please enter valid receipt quantity under tolerance limit..!", "warning", 1200);
-                        e.key.ReceiptQuantity = 0;
-                        return;
-                    }
-                    var objpub = {};
-                    objpub.PurchaseTransactionID = e.key.TransactionID;
-                    objpub.LedgerID = e.key.LedgerID;
-                    objpub.ItemID = e.key.ItemID;
-                    objpub.ItemGroupID = e.key.ItemGroupID;
-                    objpub.ItemGroupNameID = e.key.ItemGroupNameID;
-                    objpub.PurchaseVoucherNo = e.key.PurchaseVoucherNo;
-                    objpub.PurchaseVoucherDate = e.key.PurchaseVoucherDate;
-                    objpub.ItemCode = e.key.ItemCode;
-                    objpub.ItemName = e.key.ItemName;
-                    objpub.PurchaseOrderQuantity = e.key.PurchaseOrderQuantity;
-                    objpub.PurchaseUnit = e.key.PurchaseUnit;
-                    objpub.ChallanQuantity = e.key.ReceiptQuantity;
-                    objpub.ReceiptQuantityInPurchaseUnit = e.key.ReceiptQuantityInPurchaseUnit;
-                    objpub.BatchNo = e.key.BatchNo;
-                    objpub.StockUnit = e.key.StockUnit;
-                    objpub.Warehouse = e.key.Warehouse;
-                    objpub.Bin = e.key.Bin;
-                    objpub.PurchaseTolerance = e.key.PurchaseTolerance;
-                    e.key.ReceiptWtPerPacking = Number(e.key.ReceiptWtPerPacking).toFixed(6);
-                    objpub.ReceiptWtPerPacking = Number(e.key.ReceiptWtPerPacking).toFixed(6);
-                    objpub.WtPerPacking = e.key.WtPerPacking;
-                    objpub.UnitPerPacking = e.key.UnitPerPacking;
-                    objpub.ConversionFactor = e.key.ConversionFactor;
-                    objpub.SizeW = e.key.SizeW;
-                    objpub.WarehouseID = e.key.WarehouseID;
-                    objpub.FormulaPurchaseToStockUnit = e.key.FormulaPurchaseToStockUnit;
-                    objpub.UnitDecimalPlaceStockUnit = e.key.UnitDecimalPlaceStockUnit;
-                    objpub.FormulaStockToPurchaseUnit = e.key.FormulaStockToPurchaseUnit;
-                    objpub.UnitDecimalPlacePurchaseUnit = e.key.UnitDecimalPlacePurchaseUnit;
+                objpub.PurchaseTolerance = e.key.PurchaseTolerance;
+                objpub.ReceiptWtPerPacking = e.key.WtPerPacking;
+                objpub.WtPerPacking = e.key.WtPerPacking;
+                objpub.UnitPerPacking = e.key.UnitPerPacking;
+                objpub.ConversionFactor = e.key.ConversionFactor;
+                objpub.SizeW = e.key.SizeW;
+                objpub.FormulaPurchaseToStockUnit = e.key.FormulaPurchaseToStockUnit;
+                objpub.UnitDecimalPlaceStockUnit = e.key.UnitDecimalPlaceStockUnit;
+                objpub.FormulaStockToPurchaseUnit = e.key.FormulaStockToPurchaseUnit;
+                objpub.UnitDecimalPlacePurchaseUnit = e.key.UnitDecimalPlacePurchaseUnit;
+                objpub.GSM = e.key.GSM;
+                objpub.ReleaseGSM = e.key.ReleaseGSM;
+                objpub.AdhesiveGSM = e.key.AdhesiveGSM;
+                objpub.Thickness = e.key.Thickness;
+                objpub.Density = e.key.Density;
 
-                    receiptBatchDetail.push(objpub);
-
-                    //adding new row in batch details grid
-                    var x = $("#GridReceiptBatchDetails").dxDataGrid("instance");
-
-                    i = 0;
-                    var newData = [];
-                    objpub = {};
-                    if (receiptBatchDetail.length > 0) {
-                        for (i = 0; i < receiptBatchDetail.length; i++) {
-                            if (receiptBatchDetail[i].PurchaseTransactionID === e.key.TransactionID && receiptBatchDetail[i].ItemID === e.key.ItemID) {
-                                objpub.TransactionID = receiptBatchDetail[i].PurchaseTransactionID;
-                                objpub.LedgerID = receiptBatchDetail[i].LedgerID;
-                                objpub.ItemID = receiptBatchDetail[i].ItemID;
-                                objpub.ItemGroupID = receiptBatchDetail[i].ItemGroupID;
-                                objpub.ItemGroupNameID = receiptBatchDetail[i].ItemGroupNameID;
-                                objpub.PurchaseVoucherNo = receiptBatchDetail[i].PurchaseVoucherNo;
-                                objpub.PurchaseVoucherDate = receiptBatchDetail[i].PurchaseVoucherDate;
-                                objpub.ItemCode = receiptBatchDetail[i].ItemCode;
-                                objpub.ItemName = receiptBatchDetail[i].ItemName;
-                                objpub.PurchaseOrderQuantity = receiptBatchDetail[i].PurchaseOrderQuantity;
-                                objpub.PurchaseUnit = receiptBatchDetail[i].PurchaseUnit;
-                                objpub.ReceiptQuantity = receiptBatchDetail[i].ChallanQuantity;
-                                objpub.ReceiptQuantityInPurchaseUnit = receiptBatchDetail[i].ReceiptQuantityInPurchaseUnit;
-                                objpub.BatchNo = receiptBatchDetail[i].BatchNo;
-                                objpub.StockUnit = receiptBatchDetail[i].StockUnit;
-                                objpub.Warehouse = receiptBatchDetail[i].Warehouse;
-                                objpub.Bin = receiptBatchDetail[i].Bin;
-                                objpub.PurchaseTolerance = receiptBatchDetail[i].PurchaseTolerance;
-                                objpub.ReceiptWtPerPacking = receiptBatchDetail[i].ReceiptWtPerPacking;
-                                objpub.WtPerPacking = receiptBatchDetail[i].WtPerPacking;
-                                objpub.UnitPerPacking = receiptBatchDetail[i].UnitPerPacking;
-                                objpub.ConversionFactor = receiptBatchDetail[i].ConversionFactor;
-                                objpub.SizeW = receiptBatchDetail[i].SizeW;
-                                objpub.WarehouseID = receiptBatchDetail[i].WarehouseID;
-                                objpub.FormulaPurchaseToStockUnit = receiptBatchDetail[i].FormulaPurchaseToStockUnit;
-                                objpub.UnitDecimalPlaceStockUnit = receiptBatchDetail[i].UnitDecimalPlaceStockUnit;
-                                objpub.FormulaStockToPurchaseUnit = receiptBatchDetail[i].FormulaStockToPurchaseUnit;
-                                objpub.UnitDecimalPlacePurchaseUnit = receiptBatchDetail[i].UnitDecimalPlacePurchaseUnit;
-
-                                newData.push(objpub);
-                                objpub = {};
-                            }
-                        }
-                    }
-                    objpub.TransactionID = e.key.TransactionID;
-                    objpub.LedgerID = e.key.LedgerID;
-                    objpub.ItemID = e.key.ItemID;
-                    objpub.ItemGroupID = e.key.ItemGroupID;
-                    objpub.ItemGroupNameID = e.key.ItemGroupNameID;
-                    objpub.PurchaseVoucherNo = e.key.PurchaseVoucherNo;
-                    objpub.PurchaseVoucherDate = e.key.PurchaseVoucherDate;
-                    objpub.ItemCode = e.key.ItemCode;
-                    objpub.ItemName = e.key.ItemName;
-                    objpub.PurchaseOrderQuantity = e.key.PurchaseOrderQuantity;
-                    objpub.PurchaseUnit = e.key.PurchaseUnit;
-                    objpub.StockUnit = e.key.StockUnit;
-                    objpub.PurchaseTolerance = e.key.PurchaseTolerance;
-                    objpub.ReceiptWtPerPacking = e.key.WtPerPacking;
-                    objpub.WtPerPacking = e.key.WtPerPacking;
-                    objpub.UnitPerPacking = e.key.UnitPerPacking;
-                    objpub.ConversionFactor = e.key.ConversionFactor;
-                    objpub.SizeW = e.key.SizeW;
-                    objpub.FormulaPurchaseToStockUnit = e.key.FormulaPurchaseToStockUnit;
-                    objpub.UnitDecimalPlaceStockUnit = e.key.UnitDecimalPlaceStockUnit;
-                    objpub.FormulaStockToPurchaseUnit = e.key.FormulaStockToPurchaseUnit;
-                    objpub.UnitDecimalPlacePurchaseUnit = e.key.UnitDecimalPlacePurchaseUnit;
-
-                    if (newData.length > 0) {
-                        if (FlagEdit === false) {
-                            objpub.BatchNo = '_' + newData[newData.length - 1].PurchaseVoucherNo + '_' + newData[newData.length - 1].ItemID + '_' + (newData.length + 1)
-                            objpub.ReceiptQuantity = 0;
-                            objpub.ReceiptQuantityInPurchaseUnit = 0;
-                        } else {
-                            objpub.BatchNo = TransactionID + '_' + newData[newData.length - 1].PurchaseVoucherNo + '_' + newData[newData.length - 1].ItemID + '_' + (newData.length + 1)
-                            objpub.ReceiptQuantity = 0;
-                            objpub.ReceiptQuantityInPurchaseUnit = 0;
-                        }
-                        objpub.WarehouseID = newData[newData.length - 1].WarehouseID;
-                        objpub.Warehouse = newData[newData.length - 1].Warehouse;
-                        objpub.Bin = newData[newData.length - 1].WarehouseID;
-                    } else {
+                if (newData.length > 0) {
+                    if (FlagEdit === false) {
+                        objpub.BatchNo = '_' + newData[newData.length - 1].PurchaseVoucherNo + '_' + newData[newData.length - 1].ItemID + '_' + (newData.length + 1)
                         objpub.ReceiptQuantity = 0;
                         objpub.ReceiptQuantityInPurchaseUnit = 0;
-                        objpub.WarehouseID = 0;
-                        objpub.Warehouse = "";
-                        objpub.Bin = "";
-                        objpub.BatchNo = '_' + objpub.PurchaseVoucherNo + '_' + objpub.ItemID + '_1';
+                    } else {
+                        objpub.BatchNo = TransactionID + '_' + newData[newData.length - 1].PurchaseVoucherNo + '_' + newData[newData.length - 1].ItemID + '_' + (newData.length + 1)
+                        objpub.ReceiptQuantity = 0;
+                        objpub.ReceiptQuantityInPurchaseUnit = 0;
                     }
-
-                    newData.push(objpub);
-
-                    $("#GridReceiptBatchDetails").dxDataGrid({
-                        dataSource: newData
-                    });
+                    objpub.WarehouseID = newData[newData.length - 1].WarehouseID;
+                    objpub.Warehouse = newData[newData.length - 1].Warehouse;
+                    objpub.Bin = newData[newData.length - 1].WarehouseID;
+                } else {
+                    objpub.ReceiptQuantity = 0;
+                    objpub.ReceiptQuantityInPurchaseUnit = 0;
+                    objpub.WarehouseID = 0;
+                    objpub.Warehouse = "";
+                    objpub.Bin = "";
+                    objpub.BatchNo = '_' + objpub.PurchaseVoucherNo + '_' + objpub.ItemID + '_1';
                 }
-            }
-        },
-        summary: {
-            totalItems: [{
-                column: "ReceiptQuantity",
-                summaryType: "sum",
-                displayFormat: "Ttl: {0}"
-            }]
-        }
-    });
-}
 
-function CheckQuantityTolerance(ReceiptQUantity, PurchaseTransactionID, ItemID, ReceiptBatchNo, Tolerance, WtPerPacking, UnitPerPacking, ConversionFactor, SizeW) {
+                newData.push(objpub);
+
+                $("#GridReceiptBatchDetails").dxDataGrid({ dataSource: newData });
+            }
+        }
+    },
+    summary: {
+        totalItems: [{
+            column: "ReceiptQuantity",
+            summaryType: "sum",
+            displayFormat: "Ttl: {0}"
+        }]
+    }
+});
+
+function CheckQuantityTolerance(ReceiptQUantity, PurchaseTransactionID, ItemID, ReceiptBatchNo, Tolerance, WtPerPacking, UnitPerPacking, ConversionFactor, SizeW, BaseUnit, ConversionUnit, PaperGSM, ReleaseGSM, AdhesiveGSM, Thickness, Density) {
     var flag = false;
     try {
         $.ajax({
@@ -1319,39 +1431,41 @@ function CheckQuantityTolerance(ReceiptQUantity, PurchaseTransactionID, ItemID, 
                 var UnitDecimalPlace = receivers[0].UnitDecimalPlaceStockUnit;
                 var currentreceiptquantity = 0;
                 var totalreceiptquantity = 0;
-                var results = $.grep(receiptBatchDetail, function (e) { return (e.PurchaseTransactionID === PurchaseTransactionID && e.ItemID === ItemID && e.BatchNo !== ReceiptBatchNo); })
-                if (results.length > 0) {
-                    for (var x = 0; x < results.length; x++) {
+                var results1 = $.grep(receiptBatchDetail, function (e) { return (e.PurchaseTransactionID === PurchaseTransactionID && e.ItemID === ItemID && e.BatchNo !== ReceiptBatchNo); });
+                if (results1.length > 0) {
+                    for (var x = 0; x < results1.length; x++) {
                         // currentreceiptquantity = currentreceiptquantity + Number(results[x].ReceiptQuantity);
-                        currentreceiptquantity = Number(currentreceiptquantity) + Number(results[x].ChallanQuantity);//Updated By Pradeep Yadav 14 Oct 2019
+                        currentreceiptquantity = Number(currentreceiptquantity) + Number(results1[x].ChallanQuantity);//Updated By Pradeep Yadav 14 Oct 2019
                     }
                 }
                 totalreceiptquantity = Number(currentreceiptquantity) + Number(ReceiptQUantity) + Number(prereceiptquantity);
-                if (Conversionformula !== "" && Conversionformula !== null && Conversionformula !== undefined && Conversionformula !== "undefined") {
-                    Conversionformula = Conversionformula.split('e.').join('');
-                    Conversionformula = Conversionformula.replace("Quantity", "poquantity");
-                    var n = Conversionformula.search("WtPerPacking");
-                    if (n > 0) {
-                        if (Number(WtPerPacking) > 0) {
-                            stockunitpoquantity = eval(Conversionformula);
-                            flag = Number(totalreceiptquantity) <= Number(Number(stockunitpoquantity) + Number(Number(stockunitpoquantity) * (Number(Tolerance) / 100)));
-                            //pendingQty = (Number(PurchaseQty) - Number(pendingQty)).toFixed(Number(UnitDecimalPlace));
-                        }
-                    } else {
-                        n = Conversionformula.search("SizeW");
-                        if (n > 0) {
-                            if (Number(SizeW) > 0) {
-                                stockunitpoquantity = eval(Conversionformula);
-                                flag = Number(totalreceiptquantity) <= Number(Number(stockunitpoquantity) + (Number(stockunitpoquantity) * (Number(Tolerance) / 100)));
-                            }
-                        } else {
-                            stockunitpoquantity = eval(Conversionformula);
-                            flag = Number(totalreceiptquantity) <= Number(Number(stockunitpoquantity) + (Number(stockunitpoquantity) * (Number(Tolerance) / 100)));
-                        }
-                    }
-                } else {
-                    flag = Number(totalreceiptquantity) <= Number(poquantity) + Number(Number(poquantity) * (Number(Tolerance) / 100));
-                }
+                stockunitpoquantity = StockUnitConversion("", poquantity, UnitPerPacking, WtPerPacking, ConversionFactor, SizeW, UnitDecimalPlace, BaseUnit, ConversionUnit, PaperGSM, ReleaseGSM, AdhesiveGSM, Thickness, Density);
+                flag = Number(totalreceiptquantity) <= Number(Number(stockunitpoquantity) + Number(Number(stockunitpoquantity) * (Number(Tolerance) / 100)));
+                //if (Conversionformula !== "" && Conversionformula !== null && Conversionformula !== undefined && Conversionformula !== "undefined") {
+                //    Conversionformula = Conversionformula.split('e.').join('');
+                //    Conversionformula = Conversionformula.replace("Quantity", "poquantity");
+                //    var n = Conversionformula.search("WtPerPacking");
+                //    if (n > 0) {
+                //        if (Number(WtPerPacking) > 0) {
+                //            stockunitpoquantity = eval(Conversionformula);
+                //            flag = Number(totalreceiptquantity) <= Number(Number(stockunitpoquantity) + Number(Number(stockunitpoquantity) * (Number(Tolerance) / 100)));
+                //            //pendingQty = (Number(PurchaseQty) - Number(pendingQty)).toFixed(Number(UnitDecimalPlace));
+                //        }
+                //    } else {
+                //        n = Conversionformula.search("SizeW");
+                //        if (n > 0) {
+                //            if (Number(SizeW) > 0) {
+                //                stockunitpoquantity = eval(Conversionformula);
+                //                flag = Number(totalreceiptquantity) <= Number(Number(stockunitpoquantity) + (Number(stockunitpoquantity) * (Number(Tolerance) / 100)));
+                //            }
+                //        } else {
+                //            stockunitpoquantity = eval(Conversionformula);
+                //            flag = Number(totalreceiptquantity) <= Number(Number(stockunitpoquantity) + (Number(stockunitpoquantity) * (Number(Tolerance) / 100)));
+                //        }
+                //    }
+                //} else {
+                //    flag = Number(totalreceiptquantity) <= Number(poquantity) + Number(Number(poquantity) * (Number(Tolerance) / 100));
+                //}
             }
         });
     } catch (e) {
@@ -1359,64 +1473,89 @@ function CheckQuantityTolerance(ReceiptQUantity, PurchaseTransactionID, ItemID, 
     }
     return flag;
 }
-refreshReceiver();
-function refreshReceiver() {
-    try {
-        $.ajax({
-            type: "POST",
-            url: "WebServicePurchaseGRN.asmx/GetReceiverList",
-            data: '{}',
-            contentType: "application/json; charset=utf-8",
-            dataType: "text",
-            success: function (results) {
-                var res = results.replace(/\\/g, '');
-                res = res.replace(/"d":""/g, '');
-                res = res.replace(/""/g, '');
-                res = res.substr(1);
-                res = res.slice(0, -1);
-                var receivers = JSON.parse(res);
 
-                $("#sel_Receiver").dxSelectBox({
-                    items: receivers,
-                    placeholder: "Select Received By",
-                    displayExpr: 'LedgerName',
-                    valueExpr: 'LedgerID',
-                    searchEnabled: true,
-                    showClearButton: true,
-                    onValueChanged: function (data) {
-                        //alert(data.value);
-                    },
+try {
+    $.ajax({
+        type: "POST",
+        url: "WebServicePurchaseGRN.asmx/GetReceiverList",
+        data: '{}',
+        contentType: "application/json; charset=utf-8",
+        dataType: "text",
+        success: function (results) {
+            var res = results.replace(/\\/g, '');
+            res = res.replace(/"d":""/g, '');
+            res = res.replace(/""/g, '');
+            res = res.substr(1);
+            res = res.slice(0, -1);
+            var receivers = JSON.parse(res);
 
-                });
-            },
-        });
-
-    } catch (e) {
-        console.log(e);
-    }
-
+            $("#sel_Receiver").dxSelectBox({
+                items: receivers
+            });
+        }
+    });
+} catch (e) {
+    console.log(e);
 }
 
-function RefreshWarehouse() {
-    try {
-        $.ajax({
-            type: "POST",
-            url: "WebServicePurchaseGRN.asmx/GetWarehouseList",
-            data: '{}',
-            contentType: "application/json; charset=utf-8",
-            dataType: "text",
-            success: function (results) {
-                var res = results.replace(/\\/g, '');
-                res = res.replace(/"d":""/g, '');
-                res = res.replace(/""/g, '');
-                res = res.substr(1);
-                res = res.slice(0, -1);
-                ResWarehouse = JSON.parse(res);
-            }
-        });
-    } catch (e) {
-        console.log(e);
-    }
+//refreshTransporter();
+//function refreshTransporter() {
+//    try {
+//        $.ajax({
+//            type: "POST",
+//            url: "WebServicePurchaseGRN.asmx/GetPurchaseSuppliersList",
+//            data: '{}',
+//            contentType: "application/json; charset=utf-8",
+//            dataType: "text",
+//            success: function (results) {
+//                
+//                var res = results.replace(/\\/g, '');
+//                res = res.replace(/"d":""/g, '');
+//                res = res.replace(/""/g, '');
+//                res = res.substr(1);
+//                res = res.slice(0, -1);
+//                var transporters = JSON.parse(res);
+
+//                $("#sel_Transporter").dxSelectBox({
+//                    items: transporters,
+//                    placeholder: "Select Transporter",
+//                    displayExpr: 'LedgerName',
+//                    valueExpr: 'LedgerID',
+//                    searchEnabled: true,
+//                    showClearButton: true,
+//                    onValueChanged: function (data) {
+//                        //alert(data.value);
+//                    },
+
+//                });
+//            },
+//        });
+
+//    } catch (e) {
+//        alert(e);
+//    }
+
+//}
+
+try {
+    $.ajax({
+        type: "POST",
+        url: "WebServicePurchaseGRN.asmx/GetWarehouseList",
+        data: '{}',
+        contentType: "application/json; charset=utf-8",
+        dataType: "text",
+        success: function (results) {
+
+            var res = results.replace(/\\/g, '');
+            res = res.replace(/"d":""/g, '');
+            res = res.replace(/""/g, '');
+            res = res.substr(1);
+            res = res.slice(0, -1);
+            ResWarehouse = JSON.parse(res);
+        }
+    });
+} catch (e) {
+    console.log(e);
 }
 
 function RefreshBin(value) {
@@ -1467,7 +1606,7 @@ $("#BtnSave").click(function () {
         }
         var dataGrid1 = $("#GridPurchaseOrders").dxDataGrid('instance');
         for (i = 0; i < dataGrid1.totalCount(); i++) {
-            var result = $.grep(receiptBatchDetail, function (e) { return (e.ItemID === dataGrid1.cellValue(i, "ItemID") && e.PurchaseTransactionID === dataGrid1.cellValue(i, "TransactionID")); });
+            var result = $.grep(receiptBatchDetail, function (e) { return e.ItemID === dataGrid1.cellValue(i, "ItemID") && e.PurchaseTransactionID === dataGrid1.cellValue(i, "TransactionID"); });
             if (result.length === 0) {
                 //Not found
                 DevExpress.ui.notify("Please enter valid receipt batch details against purchase order no. '" + dataGrid1.cellValue(i, "PurchaseVoucherNo") + "' and item name '" + dataGrid1.cellValue(i, "ItemName") + " to create receipt note..!", "warning", 1200);
@@ -1519,8 +1658,13 @@ $("#BtnSave").click(function () {
                     TransactionDetailRecord.ChallanWeight = receiptBatchDetail[e].ReceiptQuantityInPurchaseUnit;
                     TransactionDetailRecord.BatchNo = "_" + receiptBatchDetail[e].PurchaseVoucherNo + "_" + receiptBatchDetail[e].ItemID;
                     TransactionDetailRecord.StockUnit = receiptBatchDetail[e].StockUnit;
+
+                    TransactionDetailRecord.SupplierBatchNo = receiptBatchDetail[e].SupplierBatchNo;
+                    (receiptBatchDetail[e].MfgDate !== null && receiptBatchDetail[e].MfgDate !== undefined) ? TransactionDetailRecord.MfgDate = new Date(receiptBatchDetail[e].MfgDate).toISOString().substr(0, 10) : TransactionDetailRecord.MfgDate = null;
+                    (receiptBatchDetail[e].ExpiryDate !== null && receiptBatchDetail[e].ExpiryDate !== undefined) ? TransactionDetailRecord.ExpiryDate = new Date(receiptBatchDetail[e].ExpiryDate).toISOString().substr(0, 10) : TransactionDetailRecord.ExpiryDate = null;
+
                     var ReceiptWtPerPacking = 0.00;
-                    ReceiptWtPerPacking = Number(receiptBatchDetail[e].ReceiptWtPerPacking).toFixed(5);
+                    ReceiptWtPerPacking = Number(receiptBatchDetail[e].ReceiptWtPerPacking).toFixed(6);
                     TransactionDetailRecord.ReceiptWtPerPacking = ReceiptWtPerPacking;
                     TransactionDetailRecord.WarehouseID = receiptBatchDetail[e].WarehouseID;
                     TransactionDetailRecord.PurchaseTransactionID = receiptBatchDetail[e].PurchaseTransactionID;
@@ -1627,9 +1771,10 @@ $("#BtnSave").click(function () {
 });
 
 $("#BtnPrint").click(function () {
+    //var url = "PrintReceiptApproval.aspx?TI=" + TransactionID;
     var TxtGRNID = document.getElementById("TxtGRNID").value;
     if (TxtGRNID === "" || TxtGRNID === null || TxtGRNID === undefined) {
-        swal("Please select valid grn details to print..!");
+        alert("Please select valid grn details to print..!");
         return false;
     }
     if (ApprovedVoucher === "" || ApprovedVoucher === null || ApprovedVoucher === undefined || ApprovedVoucher === false) {
@@ -1641,9 +1786,10 @@ $("#BtnPrint").click(function () {
 });
 
 $("#BtnTransporterSlip").click(function () {
+    //var url = "PrintReceiptApproval.aspx?TI=" + TransactionID;
     var TxtGRNID = document.getElementById("TxtGRNID").value;
     if (TxtGRNID === "" || TxtGRNID === null || TxtGRNID === undefined) {
-        swal("Please select valid grn details to print..!");
+        alert("Please select valid grn details to print..!");
         return false;
     }
 
@@ -1655,7 +1801,7 @@ $("#BtnDelete").click(function () {
 
     var TxtGRNID = document.getElementById("TxtGRNID").value;
     if (TxtGRNID === "" || TxtGRNID === null || TxtGRNID === undefined) {
-        swal("Please Choose any row from below Grid..!");
+        alert("Please Choose any row from below Grid..!");
         return false;
     }
 
@@ -1853,7 +1999,7 @@ $(function () {
                 res = res.slice(0, -1);
                 //if (res === "Success") {
                 // RadioValue = "Pending Requisitions";
-                alert("Comment saved!", "Comment saved successfully.", "success");
+                swal("Comment saved!", "Comment saved successfully.", "success");
                 var commentData = "";
                 var newHtml = '';
                 var receiptId = document.getElementById("TxtGRNID").value;
@@ -1897,35 +2043,73 @@ $(function () {
     });
 });
 
-function StockUnitConversion(formula, PhysicalStock, UnitPerPacking, WtPerPacking, ConversionFactor, SizeW, UnitDecimalPlace) {
-    var convertedQuantity = 0;
-    if (formula !== "" && formula !== null && formula !== undefined && formula !== "undefined") {
-        formula = formula.split('e.').join('')
-        formula = formula.replace("Quantity", "PhysicalStock");
+//Load Unit Conversion Formula List Added by Minesh Jain 03-Sep-2022
+$.ajax({
+    type: "POST",
+    async: false,
+    url: "WebServiceOthers.asmx/GetConversionFormulaList",
+    data: '{}',
+    contentType: "application/json; charset=utf-8",
+    dataType: "text",
+    success: function (results) {
+        let res = results.replace(/\\/g, '');
+        res = res.replace(/"d":""/g, '');
+        res = res.replace(/""/g, '');
+        res = res.replace(/u0026/g, '&');
+        res = res.substr(1);
+        res = res.slice(0, -1);
+        GblUnitConversionFormula = JSON.parse(res);
+    }
+});
 
-        var n = formula.search("UnitPerPacking");
-        if (n > 0) {
-            if (Number(UnitPerPacking) > 0) {
-                convertedQuantity = eval(formula);
-                convertedQuantity = Number(convertedQuantity).toFixed(Number(UnitDecimalPlace));
+function StockUnitConversion(formula, PhysicalStock, UnitPerPacking, WtPerPacking, ConversionFactor, SizeW, UnitDecimalPlace, BaseUnit, ConversionUnit, PaperGSM, ReleaseGSM, AdhesiveGSM, Thickness, Density) {
+    let convertedQuantity = 0;
+    let conversionFormula = "";
+    let GSM = 0;
+    GSM = (Number(PaperGSM) + Number(ReleaseGSM) + Number(AdhesiveGSM));
+    GSM === 0 ? GSM = (Number(Thickness) * Number(Density)).toFixed(0) : GSM = Number(GSM);
+    GSM === 0 ? GSM = 1 : GSM = Number(GSM);
 
-            }
-        } else {
-            n = formula.search("SizeW");
-            if (n > 0) {
-                if (Number(SizeW) > 0) {
-
-                    convertedQuantity = eval(formula);
-
-                    convertedQuantity = Number(convertedQuantity).toFixed(Number(UnitDecimalPlace));
-                }
-            } else {
-                convertedQuantity = eval(formula);
-                convertedQuantity = Number(convertedQuantity).toFixed(Number(UnitDecimalPlace));
+    let ConvertedUnitDecimalPlace = 0;
+    if (GblUnitConversionFormula.length > 0) {
+        for (let k = 0; k < GblUnitConversionFormula.length; k++) {
+            if (GblUnitConversionFormula[k].BaseUnitSymbol.toString().toUpperCase() === BaseUnit.toString().toUpperCase() && GblUnitConversionFormula[k].ConvertedUnitSymbol.toString().toUpperCase() === ConversionUnit.toString().toUpperCase()) {
+                conversionFormula = GblUnitConversionFormula[k].ConversionFormula.toString();
+                ConvertedUnitDecimalPlace = Number(GblUnitConversionFormula[k].ConvertedUnitDecimalPlace);
             }
         }
+        if (conversionFormula === "") {
+            conversionFormula = formula;
+            ConvertedUnitDecimalPlace = Number(UnitDecimalPlace);
+        }
+
+        if (conversionFormula !== "" && conversionFormula !== null && conversionFormula !== undefined && conversionFormula !== "undefined") {
+            conversionFormula = conversionFormula.split('e.').join('');
+            conversionFormula = conversionFormula.replace("Quantity", "PhysicalStock");
+
+            var n = conversionFormula.search("UnitPerPacking");
+            if (n > 0) {
+                if (Number(UnitPerPacking) > 0) {
+                    convertedQuantity = eval(conversionFormula);
+                    convertedQuantity = Number(convertedQuantity).toFixed(Number(ConvertedUnitDecimalPlace));
+                }
+            } else {
+                n = conversionFormula.search("SizeW");
+                if (n > 0) {
+                    if (Number(SizeW) > 0) {
+                        convertedQuantity = eval(conversionFormula);
+                        convertedQuantity = Number(convertedQuantity).toFixed(Number(ConvertedUnitDecimalPlace));
+                    }
+                } else {
+                    convertedQuantity = eval(conversionFormula);
+                    convertedQuantity = Number(convertedQuantity).toFixed(Number(ConvertedUnitDecimalPlace));
+                }
+            }
+        } else {
+            convertedQuantity = Number(PhysicalStock);
+        }
     } else {
-        convertedQuantity = Number(PhysicalStock);
+        convertedQuantity = Number(PhysicalStock).toFixed(Number(UnitDecimalPlace));
     }
     return convertedQuantity;
 }

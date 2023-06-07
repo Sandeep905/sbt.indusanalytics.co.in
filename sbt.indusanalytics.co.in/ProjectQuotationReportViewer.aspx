@@ -5,6 +5,10 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
+    
+    <!-- Favicon-->
+    <link rel="icon" href="images/Fevicon.png" type="image/x-icon">
+
     <title>Project Quotation</title>
     <style>
         body:nth-of-type(1) img[src*="Blank.gif"] {

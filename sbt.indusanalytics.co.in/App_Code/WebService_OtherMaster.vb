@@ -71,6 +71,18 @@ Public Class WebService_OtherMaster
         data.Message = ConvertDataTableTojSonString(dataTable)
         Return js.Serialize(data.Message)
     End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function EmployeeUser() As String
+
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+
+        str = "Select Distinct LedgerID,LedgerName From LedgerMaster Where Isnull(IsDeletedTransaction,0)=0 and LedgerGroupId = 3 and CompanyID = " & GBLCompanyID
+
+        db.FillDataTable(dataTable, str)
+        data.Message = ConvertDataTableTojSonString(dataTable)
+        Return js.Serialize(data.Message)
+    End Function
 
     ''----------------------------Open CategoryMaster  Save Data  ------------------------------------------
     <WebMethod(EnableSession:=True)>
@@ -395,7 +407,7 @@ Public Class WebService_OtherMaster
         If IsUserCreate = False Or IsUserCreate = "False" Then
             str = " And UserID=" & GBLUserID
         End If
-        str = "Select UserID,UserName,Password,ContactNo,UnderUserID,nullif(Designation,'') as Designation,nullif(EmailID,'') as EmailID,nullif(Country,'') as Country,nullif(State,'') as State,nullif(City,'') as City,nullif(smtpUserName,'') as smtpUserName,nullif(smtpUserPassword,'') as smtpUserPassword,nullif(smtpServer,'') as smtpServer,nullif(smtpServerPort,'') as smtpServerPort,nullif(smtpAuthenticate,'') as smtpAuthenticate,nullif(smtpUseSSL,'') as smtpUseSSL,nullif(Details,'') as Details,IsCreateUser,IsExtraPaperIssue,IsUserCannotViewCostingDetail,IsHidden,IsAdmin,ISChooseAnotherPaper,IsEditableProductionDate,nullif(ProfilePicHref,'') as ProfilePicHref,nullif(SignPicHref,'') as SignPicHref,Nullif(UserWiseOperatorsIDStr,'') As UserWiseOperatorsIDStr,Nullif(EmailMessage,'') As EmailMessage,Nullif(HeaderText,'') As HeaderText,Nullif(FooterText,'') As FooterText from UserMaster Where CompanyID=" & GBLCompanyID & str & " And IsDeletedUser=0 " & VendorID & " Order By UserID desc "
+        str = "Select EmployeeId, UserID,UserName,Password,ContactNo,UnderUserID,nullif(Designation,'') as Designation,nullif(EmailID,'') as EmailID,nullif(Country,'') as Country,nullif(State,'') as State,nullif(City,'') as City,nullif(smtpUserName,'') as smtpUserName,nullif(smtpUserPassword,'') as smtpUserPassword,nullif(smtpServer,'') as smtpServer,nullif(smtpServerPort,'') as smtpServerPort,nullif(smtpAuthenticate,'') as smtpAuthenticate,nullif(smtpUseSSL,'') as smtpUseSSL,nullif(Details,'') as Details,IsCreateUser,IsExtraPaperIssue,IsUserCannotViewCostingDetail,IsHidden,IsAdmin,ISChooseAnotherPaper,IsEditableProductionDate,nullif(ProfilePicHref,'') as ProfilePicHref,nullif(SignPicHref,'') as SignPicHref,Nullif(UserWiseOperatorsIDStr,'') As UserWiseOperatorsIDStr,Nullif(EmailMessage,'') As EmailMessage,Nullif(HeaderText,'') As HeaderText,Nullif(FooterText,'') As FooterText from UserMaster Where CompanyID=" & GBLCompanyID & str & " And IsDeletedUser=0 " & VendorID & " Order By UserID desc "
 
         db.FillDataTable(dataTable, str)
         data.Message = ConvertDataTableTojSonString(dataTable)

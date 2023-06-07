@@ -122,7 +122,7 @@ function SaveData() {
                 type: "POST",
                 async: false,
                 url: "WebService_LedgerMaster.asmx/SaveData",
-                data: '{CostingDataLedgerMaster:' + JSON.stringify(ObjMainData) + ',CostingDataLedgerDetailMaster:' + JSON.stringify(ObjIMDRecord) + ',MasterName:' + JSON.stringify(MasterName) + ',ActiveLedger:' + JSON.stringify("True") + ',LedgerGroupID:' + JSON.stringify(MasterID) + ',CostingDataSlab:' + JSON.stringify([]) + '}',
+                data: '{CostingDataLedgerMaster:' + JSON.stringify(ObjMainData) + ',CostingDataLedgerDetailMaster:' + JSON.stringify(ObjIMDRecord) + ',MasterName:' + JSON.stringify(MasterName) + ',ActiveLedger:' + JSON.stringify("True") + ',LedgerGroupID:' + JSON.stringify(MasterID) + ',CostingDataSlab:' + JSON.stringify([]) + ',ItemStringArray:' + JSON.stringify('') + '}',
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
                 success: function (results) {

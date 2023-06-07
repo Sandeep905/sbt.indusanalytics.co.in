@@ -1,5 +1,6 @@
-﻿
+﻿var flgEnquiry = false //  To Show Count of pending enquiry  for authorised User ' 'sndp 7-11-22
 $.ajax({
+    async: false,
     type: "POST",
     url: "WebService_OtherMaster.asmx/CreateDynamicMenuWithSubMenu",
     data: '{}',
@@ -85,4 +86,39 @@ function setDataGridRowCss(e) {
         e.rowElement.css('font-weight', 'bold');
     }
     e.rowElement.css('fontSize', '11px');
+}
+
+var Enqtag = document.querySelector('[href="Enquiry.aspx"]');
+if (Enqtag != null || Enqtag == '') {
+    $.ajax({
+        async: false,
+        type: "POST",
+        url: "WebServiceProductMaster.asmx/GetPendingEnquirycount",
+        data: '{}',
+        contentType: "application/json; charset=utf-8",
+        dataType: "text",
+        success: function (results) {
+            var res = results.replace(/\\/g, '');
+            res = res.replace(/"d":""/g, '');
+            res = res.replace(/""/g, '');
+            res = res.substr(1);
+            res = res.slice(0, -1);
+            var SubMenu = JSON.parse(res);
+            var label = document.createElement('label');
+            label.setAttribute('for', 'college')
+            label.innerHTML = SubMenu[0].Enquirycount;
+            label.style.cssFloat = "Right";
+            label.style.marginTop = "0px";
+            label.style.backgroundColor = "red";
+            label.style.color = "white";
+            label.style.padding = "2px";
+            label.style.borderRadius = "5px";
+            //label.setAttribute('class', 'col-sm-3 control-label input-sm');
+            Enqtag.append(label);
+
+        }
+    });
+
+
+
 }

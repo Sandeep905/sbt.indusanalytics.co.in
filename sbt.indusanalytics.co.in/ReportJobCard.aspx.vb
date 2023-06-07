@@ -11,14 +11,19 @@ Partial Class ReportJobCard
     ReadOnly db As New DBConnection
     Dim GBLCompanyID As String
     ReadOnly ContID As String = Convert.ToString(HttpContext.Current.Request.QueryString("ContID"))
+    ReadOnly JobCardId As String = Convert.ToString(HttpContext.Current.Request.QueryString("JobCardId"))
+    ReadOnly jobContentID As String = Convert.ToString(HttpContext.Current.Request.QueryString("jobContentID"))
+    ReadOnly OrderBookingScheduleID As String = Convert.ToString(HttpContext.Current.Request.QueryString("OrderBookingScheduleID"))
+
     Dim GBLUserID As String
     Dim dsContents As New DataTable
+    Dim ProductType As String = ""
 
     Protected Sub Page_Load(sender As Object, e As EventArgs) Handles Me.Load
         If Not IsPostBack Then
             GBLUserID = Convert.ToString(HttpContext.Current.Session("UserId"))
             GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyId"))
-            If db.CheckAuthories("ProductionWorkOrder.aspx", GBLUserID, GBLCompanyID, "CanPrint", ContID) = False Then
+            If db.CheckAuthories("JobCardSchedule.aspx", GBLUserID, GBLCompanyID, "CanPrint", JobCardId) = False Then
                 MailError.InnerHtml = "You are not authorized to print..!, Can't Print"
                 Exit Sub
             End If
@@ -28,54 +33,84 @@ Partial Class ReportJobCard
     End Sub
 
     Public Sub ShowData()
+
         Dim UserName = Convert.ToString(HttpContext.Current.Session("UserName"))
-        dsContents = GetData("Execute ProductionWorkOrderPrint 1,'" & ContID & "','" & GBLCompanyID & "'")
-        'reset
-        ReportViewer1.Reset()
-        If dsContents.Rows.Count <= 0 Then Exit Sub
-        'path
-        ReportViewer1.LocalReport.ReportPath = Server.MapPath("~/JobCardPrint.rdlc")
-        For i = 0 To dsContents.Rows.Count - 1
-            dsContents.Rows(i)("PrintedBy") = UserName
-        Next
-        'dataSource
-        Dim JobContents As ReportDataSource = New ReportDataSource("JobCardContents", dsContents)
-        ReportViewer1.LocalReport.DataSources.Add(JobContents)
 
-        'Dim UserName = Convert.ToString(HttpContext.Current.Session("UserName"))
-        'Dim DTJob As DataTable = GetData("Select  '" & UserName & "' As PrintedBy,Getdate() As PrintedDate ")
-        'Dim JobContents1 As ReportDataSource = New ReportDataSource("DataSet1", DTJob)
-        'ReportViewer1.LocalReport.DataSources.Add(JobContents1)
+        Dim JobSchedule = GetData("Select JCS.JobCardID AS JobBookingID,JCS.ProductType,LMV.LedgerName as PlanedVendorName,LMAV.LedgerName ScheduleVendorName, JCS.OrderBookingScheduleID,JCS.OrderBookingID,JCS.ProductEstimateID,JCS.JobName as ProductName,JCS.OrderQuantity,JCS.JobType,JCS.JobReference,JCS.JobPriority, convert(CHAR(30),JCS.ExpectedDeliveryDate, 106) ExpectedDeliveryDate,JCS.TotalAmount,JCS.NetAmount,JCS.SGSTTaxAmount,JCS.SGSTTaxPercentage,JCS.CGSTTaxAmount,JCS.CGSTTaxPercentage,JCS.IGSTTaxAmount,JCS.IGSTTaxPercentage,JCS.RateType,JCS.Rate,JCS.ScheduleQty,JCS.VendorID,JCS.ScheduleVendorId,JCS.CriticalRemark  from JobCardSchedule as JCS inner Join LedgerMaster as LMV on LMV.LedgerID = JCS.VendorID inner Join LedgerMaster as LMAV on LMAV.LedgerID = JCS.ScheduleVendorId where isnull(JCS.IsDeletedTransaction,0) <> 1 and JCS.CompanyID =" & GBLCompanyID & " and JCS.JobCardID=" & JobCardId & " and JCS.JobContentsID = " & jobContentID & " And JCS.OrderBookingScheduleID=" & OrderBookingScheduleID)
 
-        'Add SubReport
-        'JobCardSummary
-        AddHandler ReportViewer1.LocalReport.SubreportProcessing, AddressOf JobCardSummarySubreportProcessing
-        'JobDescription
-        AddHandler ReportViewer1.LocalReport.SubreportProcessing, AddressOf JobCardProductionDetailsSubreportProcessing
-        'Production Form Detail
-        AddHandler ReportViewer1.LocalReport.SubreportProcessing, AddressOf FormDetailSubreportProcessing
-        'Production Item Detail
-        AddHandler ReportViewer1.LocalReport.SubreportProcessing, AddressOf ProductionItemDetailSubreportProcessing
-        'Reel Details
-        AddHandler ReportViewer1.LocalReport.SubreportProcessing, AddressOf ProductionReelDetailSubreportProcessing
-        'Material Details
-        AddHandler ReportViewer1.LocalReport.SubreportProcessing, AddressOf ProductionMaterialDetailSubreportProcessing
-        'Operation Details
-        AddHandler ReportViewer1.LocalReport.SubreportProcessing, AddressOf OperationDetailSubreportProcessing
+        If JobSchedule.Rows.Count > 0 Then
+            Dim Vendor As ReportDataSource = New ReportDataSource("DataSetVendor", JobSchedule)
+            ReportViewer1.LocalReport.DataSources.Add(Vendor)
 
-        'refresh
-        ReportViewer1.LocalReport.Refresh()
+            ProductType = JobSchedule.Rows(0)("ProductType")
+            If ProductType = "Offset" Then
+                dsContents = GetData("Execute ProductionWorkOrderPrint 1,'" & ContID & "','" & GBLCompanyID & "'," & jobContentID & "," & OrderBookingScheduleID & "")
+                'reset
+                ReportViewer1.Reset()
+                If dsContents.Rows.Count <= 0 Then Exit Sub
+                'path
+                ReportViewer1.LocalReport.ReportPath = Server.MapPath("~/JobCardPrint.rdlc")
+                For i = 0 To dsContents.Rows.Count - 1
+                    dsContents.Rows(i)("PrintedBy") = UserName
+                Next
+                'dataSource
+                Dim JobContents As ReportDataSource = New ReportDataSource("JobCardContents", dsContents)
+                ReportViewer1.LocalReport.DataSources.Add(JobContents)
+
+                'Dim UserName = Convert.ToString(HttpContext.Current.Session("UserName"))
+                'Dim DTJob As DataTable = GetData("Select  '" & UserName & "' As PrintedBy,Getdate() As PrintedDate ")
+                'Dim JobContents1 As ReportDataSource = New ReportDataSource("DataSet1", DTJob)
+                'ReportViewer1.LocalReport.DataSources.Add(JobContents1)
+
+                'Add SubReport
+                'JobCardSummary
+                AddHandler ReportViewer1.LocalReport.SubreportProcessing, AddressOf JobCardSummarySubreportProcessing
+                'JobDescription
+                AddHandler ReportViewer1.LocalReport.SubreportProcessing, AddressOf JobCardProductionDetailsSubreportProcessing
+                'Production Form Detail
+                AddHandler ReportViewer1.LocalReport.SubreportProcessing, AddressOf FormDetailSubreportProcessing
+                'Production Item Detail
+                AddHandler ReportViewer1.LocalReport.SubreportProcessing, AddressOf ProductionItemDetailSubreportProcessing
+                'Reel Details
+                AddHandler ReportViewer1.LocalReport.SubreportProcessing, AddressOf ProductionReelDetailSubreportProcessing
+                'Material Details
+                AddHandler ReportViewer1.LocalReport.SubreportProcessing, AddressOf ProductionMaterialDetailSubreportProcessing
+                'Operation Details
+                AddHandler ReportViewer1.LocalReport.SubreportProcessing, AddressOf OperationDetailSubreportProcessing
+
+                'refresh
+                ReportViewer1.LocalReport.Refresh()
+            Else
+                dsContents = GetData("SELECT  b.JobCardContentNo JobBookingNo, replace(Convert(nvarchar(20),JCS.ExpectedDeliveryDate ,106),' ','-')  DeliveryDate, JCS.DescriptionOther,JCS.PackagingDetails,JCS.ProductDescription,B.BookingID,B.JobContentsID,B.JobContentsID JobBookingJobCardContentsID, replace(Convert(nvarchar(20),A.JobBookingDate,106),' ','-')   As JobBookingDate,B.Tolerence, B.Email,0 AS NoOfSetsOfFrontBack,NUll AS ApprovalBy,A.JobName,A.ProductCode,JE.BookingNo,L.LedgerName,J.PONo, replace(Convert(nvarchar(20),J.PODate,106),' ','-') AS PODate,JCS.JobPriority,E.LedgerName AS JobCoordinatorName,C.CategoryName As Category,JCS.JobType,JCS.JobReference,CM.LedgerName AS ConsigneeName,Null AS Email,B.PlanType,IM.Caliper,ItemCode AS PaperCode,J.SalesOrderNo AS OrderBookingNo,Null AS OrderBookingDate, JCS.ScheduleQty OrderQuantity,A.DeliveryDate, UM.UserName , A.Remark as JobBookingRemark,A.JobBookingID,IM.EstimationUnit,jcs.CriticalRemark SpecialInstructions,UserName As PrintedBy,GETDATE()  As PrintedDate FROM JobBookingJobCard AS A  " &
+                                     "LEFT JOIN JobBookingJobCardContents AS B ON A.JobBookingID=B.JobBookingID And A.CompanyID=B.CompanyID  AND Isnull(A.IsDeletedTransaction,0)=0 inner join JobCardSchedule as JCS on JCS.JobCardID = B.JobBookingID and JCS.JobContentsID = B.JobContentsID LEFT JOIN ViewJobBookingJobCardContents AS JJC ON JJC.JobBookingJobCardContentsID=B.JobBookingJobCardContentsID And JJC.CompanyID=B.CompanyID  And B.IsDeletedTransaction=0 LEFT JOIN JobOrderBooking AS J ON J.OrderBookingID=A.OrderBookingID And J.CompanyID=A.CompanyID AND Isnull(J.IsDeletedTransaction,0)=0 LEFT JOIN LedgerMaster AS L ON JCS.SchedulevENDORid=L.LedgerID  And Jcs.CompanyID=L.CompanyID LEFT JOIN CategoryMaster AS C ON C.CategoryID=A.CategoryID AND C.CompanyID=A.CompanyID LEFT JOIN LedgerMaster AS E ON E.LedgerID=B.CoordinatorLedgerID  AND E.CompanyID=B.CompanyID " &
+                                     "LEFT JOIN JobBooking AS JE ON JE.BookingID=A.BookingID And JE.CompanyID=A.CompanyID LEFT JOIN LedgerMaster AS CM ON CM.LedgerID=ISNULL(A.ConsigneeID,0) AND CM.CompanyID=A.CompanyID LEFT JOIN UserMaster as UM ON UM.UserID = A.CreatedBy  And UM.CompanyID=A.CompanyID LEFT JOIN ItemMaster As IM On B.PaperID= IM.ItemID And B.CompanyID = IM.CompanyID Where  B.CompanyID=" & GBLCompanyID & "  AND B.JobContentsID =" & jobContentID & " and B.JobBookingID=" & JobCardId & " Order By B.SequenceNo Asc")
+                'reset
+                ReportViewer1.Reset()
+                If dsContents.Rows.Count <= 0 Then Exit Sub
+                'path
+                ReportViewer1.LocalReport.ReportPath = Server.MapPath("~/JobCardOtherPrint.rdlc")
+                For i = 0 To dsContents.Rows.Count - 1
+                    dsContents.Rows(i)("PrintedBy") = UserName
+                Next
+                'dataSource
+                Dim JobContents As ReportDataSource = New ReportDataSource("JobCardSummary", dsContents)
+                ReportViewer1.LocalReport.DataSources.Add(JobContents)
+
+                AddHandler ReportViewer1.LocalReport.SubreportProcessing, AddressOf JobCardSummarySubreportProcessing
+                AddHandler ReportViewer1.LocalReport.SubreportProcessing, AddressOf JobCardProductionDetailsSubreportProcessing
+            End If
+        Else
+
+        End If
+
     End Sub
 
     Private Sub JobCardSummarySubreportProcessing(ByVal sender As Object, ByVal e As SubreportProcessingEventArgs)
         Dim JobBookingJobcardContentsID As String = e.Parameters("JobBookingJobcardContentsID").Values(0)
         Dim UserName = Convert.ToString(HttpContext.Current.Session("UserName"))
 
-        Dim CDT As DataTable = GetData("Select   JEJC.JobBookingID, JEJC.JobBookingJobCardContentsID, UM.UserName, LM.LedgerName,CM.LedgerName AS ConsigneeName, CC.CategoryName,JEJ.JobBookingNo,JEJ.JobBookingDate,J1.BookingNo,JEJ.DeliveryDate,JEJ.OrderQuantity,JEJ.JobName,JEJ.PONo,JEJ.PODate,JEJC.JobPriority,JEJC.JobType,JCM.LedgerName AS JobCoordinatorName ,'" & UserName & "' As PrintedBy,Getdate() As PrintedDate " &
-                                                "From JobBookingJobCard AS JEJ INNER JOIN JobBookingJobCardContents as JEJC ON JEJC.JobBookingID = JEJ.JobBookingID AND JEJC.CompanyID=JEJ.CompanyID INNER JOIN UserMaster as UM ON UM.UserID = JEJ.CreatedBy And UM.CompanyID=JEJ.CompanyID  " &
-                                                "INNER JOIN LedgerMaster as LM ON JEJ.LedgerID = LM.LedgerID AND JEJ.CompanyID=LM.CompanyID LEFT JOIN CategoryMaster as CC ON JEJ.CategoryID = CC.CategoryID  And JEJ.CompanyID=CC.CompanyID   " &
-                                                "LEFT JOIN JobBooking AS J1 ON JEJ.BookingID = J1.BookingID AND JEJ.CompanyID=J1.CompanyID LEFT JOIN LedgerMaster as CM ON JEJ.ConsigneeID = CM.LedgerID And J1.CompanyID=CM.CompanyID  LEFT JOIN LedgerMaster as JCM ON JEJ.CoordinatorLedgerID = JCM.LedgerID And JEJ.CompanyID=JCM.CompanyID      " &
-                                                "Where JEJC.JobBookingJobcardContentsID = '" & JobBookingJobcardContentsID & "'  AND JEJC.CompanyID='" & GBLCompanyID & "'")
+        Dim CDT As DataTable = GetData("Select Distinct JEJC.JobBookingID, JEJC.JobBookingJobCardContentsID, UM.UserName, LM.LedgerName,CM.LedgerName AS ConsigneeName, CC.CategoryName,JEJ.JobBookingNo,JEJ.JobBookingDate,J1.BookingNo, JCS.ExPectedDeliveryDate as DeliveryDate,JCS.ScheduleQty OrderQuantity,JEJ.JobName,JEJ.PONo,JEJ.PODate,JCS.JobPriority,JCS.JobType,JCM.LedgerName AS JobCoordinatorName ,'Ritesh Bansal' As PrintedBy,Getdate() As PrintedDate From JobBookingJobCard AS JEJ INNER JOIN JobBookingJobCardContents as JEJC ON JEJC.JobBookingID = JEJ.JobBookingID AND JEJC.CompanyID=JEJ.CompanyID inner join JobCardSchedule as JCS on JCS.JobCardID = JEJC.JobBookingID and JCS.JobContentsID = JEJC.JobContentsID INNER JOIN UserMaster as UM ON UM.UserID = JEJ.CreatedBy And UM.CompanyID=JEJ.CompanyID  INNER JOIN LedgerMaster as LM ON JCS.SchedulevENDORid = LM.LedgerID AND JCS.CompanyID=LM.CompanyID LEFT JOIN CategoryMaster as CC ON JEJ.CategoryID = CC.CategoryID  And JEJ.CompanyID=CC.CompanyID LEFT JOIN JobBooking AS J1 ON JEJ.BookingID = J1.BookingID AND JEJ.CompanyID=J1.CompanyID LEFT JOIN LedgerMaster as CM ON JEJ.ConsigneeID = CM.LedgerID And J1.CompanyID=CM.CompanyID  left join  LedgerMaster as JCM ON JEJ.CoordinatorLedgerID = JCM.LedgerID And JEJ.CompanyID=JCM.CompanyID " &
+                                                "Where JEJC.JobBookingJobcardContentsID = '" & JobBookingJobcardContentsID & "'  AND JEJC.CompanyID='" & GBLCompanyID & "'  and JCS.OrderBookingScheduleID =" & OrderBookingScheduleID)
         Dim datasource As ReportDataSource = New ReportDataSource("JobcardSummary", CDT)
         e.DataSources.Add(datasource)
 
@@ -90,6 +125,8 @@ Partial Class ReportJobCard
         'Dim dsContents As DataTable = getData("execute ProductionWorkOrderPrint 1," & ContID & ",'" & GBLCompanyID & "'")
         Dim datasource As ReportDataSource = New ReportDataSource("JobCardProductionDetails", dsContents)
         d.DataSources.Add(datasource)
+        Dim datasource1 As ReportDataSource = New ReportDataSource("DataSetItemDetails", dsContents)
+        d.DataSources.Add(datasource1)
 
         'Dim FDetail As New DataTable
         'FDetail = getData("Select JobCardFormNO,RefNo,TransID,PrintingStyle,Pages,TotalSheets,PrintingRemark,ActualSheets,WasteSheets,JobBookingID,JobBookingJobCardContentsID From JobBookingJOBCardFormWiseDetails Where CompanyID='" & GBLCompanyID & "' AND JobBookingID ='" & JobBookingJobcardContentsID & "' Order By TransID")

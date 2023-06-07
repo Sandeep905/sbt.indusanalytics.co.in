@@ -130,6 +130,10 @@
               <xs:element name="PrintedDate" type="xs:string" minOccurs="0" />
               <xs:element name="SpecialInstructions" type="xs:string" minOccurs="0" />
               <xs:element name="SequenceNo" type="xs:string" minOccurs="0" />
+              <xs:element name="VendorName" type="xs:string" minOccurs="0" />
+              <xs:element name="ProductDescription" type="xs:string" minOccurs="0" />
+              <xs:element name="PackagingDetails" type="xs:string" minOccurs="0" />
+              <xs:element name="DescriptionOther" type="xs:string" minOccurs="0" />
             </xs:sequence>
           </xs:complexType>
         </xs:element>
@@ -383,6 +387,12 @@
               <xs:element name="SalesPerson" type="xs:string" minOccurs="0" />
               <xs:element name="ClientAddress" type="xs:string" minOccurs="0" />
               <xs:element name="Narration" type="xs:string" minOccurs="0" />
+              <xs:element name="EnquiryNo" type="xs:string" minOccurs="0" />
+              <xs:element name="PaymentTerms" type="xs:string" minOccurs="0" />
+              <xs:element name="DeliveryUpto" type="xs:string" minOccurs="0" />
+              <xs:element name="ValidUpto" type="xs:string" minOccurs="0" />
+              <xs:element name="GSTIN" type="xs:string" minOccurs="0" />
+              <xs:element name="RevisionNo" type="xs:string" minOccurs="0" />
             </xs:sequence>
           </xs:complexType>
         </xs:element>
@@ -403,6 +413,11 @@
               <xs:element name="PackagingDetails" type="xs:string" minOccurs="0" />
               <xs:element name="DescriptionOther" type="xs:string" minOccurs="0" />
               <xs:element name="GSTPercantage" type="xs:string" minOccurs="0" />
+              <xs:element name="CGST" type="xs:string" minOccurs="0" />
+              <xs:element name="SGST" type="xs:string" minOccurs="0" />
+              <xs:element name="IGST" type="xs:string" minOccurs="0" />
+              <xs:element name="Process" type="xs:string" minOccurs="0" />
+              <xs:element name="RemarkDesc" type="xs:string" minOccurs="0" />
             </xs:sequence>
           </xs:complexType>
         </xs:element>
@@ -410,6 +425,58 @@
           <xs:complexType>
             <xs:sequence>
               <xs:element name="FooterText" type="xs:string" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="PrintFooterQuotation">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="PrintedDate" type="xs:string" minOccurs="0" />
+              <xs:element name="ApprovedBy" type="xs:string" minOccurs="0" />
+              <xs:element name="PrintedBy" type="xs:string" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="ServicePOMain">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="QuotationDate" type="xs:string" minOccurs="0" />
+              <xs:element name="EstimateNo" type="xs:string" minOccurs="0" />
+              <xs:element name="LedgerName" type="xs:string" minOccurs="0" />
+              <xs:element name="SalesPerson" type="xs:string" minOccurs="0" />
+              <xs:element name="ClientAddress" type="xs:string" minOccurs="0" />
+              <xs:element name="Narration" type="xs:string" minOccurs="0" />
+              <xs:element name="EnquiryNo" type="xs:string" minOccurs="0" />
+              <xs:element name="PaymentTerms" type="xs:string" minOccurs="0" />
+              <xs:element name="DeliveryUpto" type="xs:string" minOccurs="0" />
+              <xs:element name="ValidUpto" type="xs:string" minOccurs="0" />
+              <xs:element name="GSTIN" type="xs:string" minOccurs="0" />
+              <xs:element name="RevisionNo" type="xs:string" minOccurs="0" />
+              <xs:element name="PONumber" type="xs:string" minOccurs="0" />
+              <xs:element name="PODate" type="xs:string" minOccurs="0" />
+              <xs:element name="DelivaryAddress" type="xs:string" minOccurs="0" />
+              <xs:element name="JCNO" type="xs:string" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="ServicePoDetails">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="ProductName" type="xs:string" minOccurs="0" />
+              <xs:element name="Specification" type="xs:string" minOccurs="0" />
+              <xs:element name="Quantity" type="xs:string" minOccurs="0" />
+              <xs:element name="Rate" type="xs:string" minOccurs="0" />
+              <xs:element name="Amount" type="xs:string" minOccurs="0" />
+              <xs:element name="HSN" type="xs:string" minOccurs="0" />
+              <xs:element name="GST" type="xs:string" minOccurs="0" />
+              <xs:element name="TotalAmount" type="xs:string" minOccurs="0" />
+              <xs:element name="FreightAmount" type="xs:string" minOccurs="0" />
+              <xs:element name="UnitCost" type="xs:string" minOccurs="0" />
+              <xs:element name="ProductDescription" type="xs:string" minOccurs="0" />
+              <xs:element name="PackagingDetails" type="xs:string" minOccurs="0" />
+              <xs:element name="SGSTAmount" type="xs:string" minOccurs="0" />
+              <xs:element name="CGSTAmount" type="xs:string" minOccurs="0" />
+              <xs:element name="IGSTAmount" type="xs:string" minOccurs="0" />
             </xs:sequence>
           </xs:complexType>
         </xs:element>

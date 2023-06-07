@@ -7249,6 +7249,7 @@ button.close {
     .modal-backdrop.in {
         filter: alpha(opacity=50);
         opacity: .5;
+        /*display: none*/
     }
 
 .modal-header {
@@ -7301,9 +7302,8 @@ button.close {
     .modal-dialog {
         /*width: 600px;*/
         /*margin: 30px auto;*/
-         width: 98%;
-         margin-left:13px;
-        
+        width: 98%;
+        margin-left: 13px;
     }
 
     .modal-content {
@@ -7313,24 +7313,24 @@ button.close {
 
     .modal-sm {
         /*width: 300px;*/
-         width: 98%;
-         margin-left:0px;
+        width: 98%;
+        margin-left: 0px;
     }
 }
 
 @media (max-width: 768px) {
-    .modal-dialog {        
+    .modal-dialog {
         width: 98%;
         margin-left: 10px;
-        width:96.3%;
+        width: 96.3%;
     }
 }
 
 @media (min-width: 992px) {
     .modal-lg {
         /*width: 900px;*/
-         width: 98.3%;         
-         margin-left:14px;
+        width: 98.3%;
+        margin-left: 14px;
     }
 }
 

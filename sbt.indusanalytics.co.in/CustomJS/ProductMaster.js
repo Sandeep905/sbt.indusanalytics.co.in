@@ -58,12 +58,18 @@ function EnableOrientation() {
         $("#SelOrientations").dxSelectBox({
             disabled: false
         });
+        if (FlagEdit == true) {
+            document.getElementById("IsOffsetProduct").disabled = false;
+        }
         document.getElementById("IsUnitProduct").checked = false;
         document.getElementById("IsUnitProduct").disabled = true;
     } else {
         $("#SelOrientations").dxSelectBox({
             disabled: true
         });
+        if (FlagEdit == true) {
+            document.getElementById("IsOffsetProduct").disabled = true;
+        }
         document.getElementById("IsUnitProduct").disabled = false;
 
     }
@@ -100,7 +106,7 @@ $("#SelCategory").dxSelectBox({
             $.ajax({
                 async: false,
                 type: 'POST',
-                url: "WebServicePlanWindow.asmx/LoadOperations",
+                url: "WebServicePlanWindow.asmx/LoadProcessProduct",
                 dataType: 'json',
                 contentType: "application/json; charset=utf-8",
                 data: "{'CategoryID': '" + JSON.stringify(data.value) + "'}",
@@ -209,6 +215,7 @@ $("#gridProductConfig").dxDataGrid({
     height: function () {
         return window.innerHeight / 2.3;
     },
+
     onToolbarPreparing: function (e) {
         e.toolbarOptions.items.unshift({
             location: "before",
@@ -418,8 +425,29 @@ $("#GridShowlist").dxDataGrid({
     height: function () {
         return window.innerHeight / 1.24;
     },
+
     onRowPrepared: function (e) {
         setDataGridRowCss(e);
+    },
+    export: {
+        enabled: true,
+        fileName: "Product Master",
+        allowExportSelectedData: true
+    },
+    onExporting(e) {
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('ProductMaster_' + new Date());
+
+        DevExpress.excelExporter.exportDataGrid({
+            component: e.component,
+            worksheet,
+            autoFilterEnabled: true,
+        }).then(() => {
+            workbook.xlsx.writeBuffer().then((buffer) => {
+                saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'ProductMaster_' + new Date() + '.xlsx');
+            });
+        });
+        e.cancel = true;
     },
     onSelectionChanged: function (data) {
         document.getElementById("ProductID").value = 0;
@@ -531,6 +559,7 @@ function setGridShowDisplay(FieldCntainerRow, myModal_1) {
 }
 
 $("#BtnSave").click(function () {
+    let ProductFormula = "";
     //var SelCatalogType = $('#SelCatalogType').dxSelectBox('instance').option('value');
     var SelCategoryID = $('#SelCategory').dxSelectBox('instance').option('value');
     var SelProductHSNID = $('#SelProductHSN').dxSelectBox('instance').option('value');
@@ -544,7 +573,7 @@ $("#BtnSave").click(function () {
     let ProductID = Number(document.getElementById("ProductID").value);
 
     //$("#SelCatalogType").dxValidator('instance').validate();
-   
+
     var gridProductConfig = $('#gridProductConfig').dxDataGrid('instance');
 
     if (SelCategoryID === "" || SelCategoryID === null) {
@@ -640,7 +669,7 @@ $("#BtnSave").click(function () {
                 objVendors.push(objVendor);
         }
 
-        let ProductFormula = "";
+
         for (var i = 0; i < gridProductConfig._options.dataSource.length; i++) {
             objProConfig = {};
             if (FlagEdit === true) {
@@ -664,7 +693,7 @@ $("#BtnSave").click(function () {
             }
 
             if (objProConfig.ProductFormula !== "" && objProConfig.ProductFormula !== null) {
-                ProductFormula = objProConfig.ProductFormula;
+                ProductFormula = objProConfig.ProductFormula == undefined ? ProductFormula : objProConfig.ProductFormula;
             }
 
             if (objProConfig.ProductConfigID === undefined && FlagEdit === true) {
@@ -808,7 +837,7 @@ $("#BtnEdit").click(function () {
     document.getElementById("TxtRemark").value = selectedDataShowList[0].Remark;
     document.getElementById("IsOffsetProduct").checked = selectedDataShowList[0].IsOffsetProduct;
     document.getElementById("IsUnitProduct").checked = selectedDataShowList[0].IsUnitProduct;
-
+    $("#SelOrientations").dxSelectBox({ value: selectedDataShowList[0].ContentID, disabled: false });
     let OprIds = [];
     if (selectedDataShowList[0].ProcessIDStr !== "" && selectedDataShowList[0].ProcessIDStr !== null) {
         let op = selectedDataShowList[0].ProcessIDStr.split(",");
@@ -894,12 +923,7 @@ $("#BtnEdit").click(function () {
         }
     });
 
-    //if (selectedDataShowList[0].ProductImagePath !== null) {
-    //    $("#PreviewAttachedFile").fadeIn("fast").attr('src', loadFile("/Files/ProductFiles/"+selectedDataShowList[0].ProductImagePath));
-    //    $('#file').file = selectedDataShowList[0].ProductImagePath;
-    //} else {
-    //    $("#PreviewAttachedFile").fadeIn("fast").attr('src', "");
-    //}
+    EnableOrientation()
 
     setGridShowDisplay('block', 'none');
 });

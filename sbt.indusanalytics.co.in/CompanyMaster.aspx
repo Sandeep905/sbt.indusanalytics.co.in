@@ -65,7 +65,7 @@
                                 </div>
                                 <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
                                     <label>Phone</label>
-                                    <input type="number" id="TxtPhone_1" class="forTextBox" disabled />
+                                    <input type="number" id="TxtPhone_1" class="forTextBox" />
                                     <div><strong id="ValStrTxtPhone_1" style="color: red; font-size: 12px; display: none"></strong></div>
                                 </div>
                                 <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
@@ -77,7 +77,7 @@
 
                                 <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
                                     <label>Email</label>
-                                    <input type="text" id="TxtEmail" class="forTextBox" onchange="EmailValidation(this)" disabled />
+                                    <input type="text" id="TxtEmail" class="forTextBox" onchange="EmailValidation(this)" />
                                     <div><strong id="ValStrTxtEmail" style="color: red; font-size: 12px; display: none"></strong></div>
                                 </div>
                                 <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
@@ -124,7 +124,7 @@
                                     <img id="previewimgheader" style="width: 28em; height: 6em; border: 1px solid #42909A; border-radius: 6px; margin-top: .2em; padding: .2em; opacity: 1; filter: alpha(opacity=100);" />
                                     <input type="text" id="imgpathstringheaderimage" style="display: none" />
                                     <div style="height: 2.5em; width: 100%; margin-top: 15px; padding-left: 5px">
-                                    <span>Picture Quotation Image</span>
+                                        <span>Picture Quotation Image</span>
                                         <input type="file" accept="image/*" id="headerimageupload" name="headerimage" onchange="headerimagepreview(this)" class="file_txt" style="background-color: rgba(0, 0, 0, 0.8); color: white; cursor: pointer" />
                                     </div>
                                 </div>

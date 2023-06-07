@@ -49,12 +49,76 @@ Public Class WebServiceProductionWorkOrder
     End Function
     <WebMethod(EnableSession:=True)>
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function GetPOData(ByVal POID As Int16) As String
+        Try
+            CompanyId = Convert.ToString(HttpContext.Current.Session("CompanyId"))
+            FYear = Convert.ToString(HttpContext.Current.Session("ReportFYear"))
+
+            Dim Dt As New DataTable
+
+            str = "Select distinct Isnull(SPM.Freight,0) as Freight, SPM.ProductCatelogID,  SPM.DelivaryAddress, SPM.LedgerID,SPM.OrderBookingID,SPM.EnquiryID,LM.LedgerName as ScheduleVendorName, SPD.ScheduleVendorId,SPM.Remark, SPM.ProductEstimateID,SPM.JobbookingNo,SPM.JobBookingID,SPM.SalesOrderNo,SPM.PONumber,SPM.NetAmount,SPM.IGSTAmount,EM.EnquiryNo,PQ.EstimateNo,Replace(Convert(Nvarchar(13),JOB.OrderBookingDate,106),' ','-') as BookingDate from ServicePomain as SPM inner Join ServicePODetails As SPD on SPM.POID = SPD.POID inner join ProductQuotation as PQ on PQ.ProductEstimateID = SPM.ProductEstimateID inner join EnquiryMain as EM on EM.EnquiryID = SPM.EnquiryId  inner join JobOrderBooking as JOB on JOB.OrderBookingID = SPM.OrderBookingID inner join LedgerMaster as LM on LM.LedgerID= SPD.ScheduleVendorId Where SPM.POID=" & POID & " And SPM.COmpanyID=" & CompanyId
+            db.FillDataTable(dataTable, str)
+
+            str = "Select distinct  SPD.OrderBookingDetailsID, SPD.POID,PLM.LedgerName as VendorName,LN.LedgerName as Jobcordinator, LM.LedgerName as ClientName,SPM.ProductCatelogID as ProductCatelogID,PQ.EstimateNo as QuotaionNo,PQC.GSTPercantage,SPM.ProductEstimateID,PQC.ProductEstimationContentID as JobContentsID,SPM.JobBookingID,JBS.ProductType,PLM.LedgerName as PlanedVendorName,LMAV.LedgerName ScheduleVendorName, JBS.OrderBookingScheduleID,JBS.OrderBookingID,JBS.ProductEstimateID,SPD.ProductName,JBS.OrderQuantity,JBS.JobType,JBS.JobReference,JBS.JobPriority, convert(CHAR(30),JBS.ExpectedDeliveryDate, 106) ExpectedDeliveryDate,SPD.ProductEstimationContentID,SPD.RateType,SPD.OrderQuantity,SPD.PlannedRate AS Rate,SPD.ScheduleRate,SPD.ScheduleVendorId,SPD.ScheduleQty,SPD.NetAmount,SPD.IGSTAmount as IGSTTaxAmount,SPD.SGSTAmount as SGSTTaxAmount, SPD.CGSTAmount as CGSTTaxAmount,SPD.TotalGSTAmount ToTalGSTAmount,SPD.TotalAmount,SPD.PlannedVendorID VendorID,JBS.SGSTTaxPercentage,JBS.CGSTTaxPercentage,JBS.IGSTTaxPercentage from ServicePODetails as SPD inner join ServicePOMain as SPM on SPM.POID = SPD.POID inner join JobOrderBooking as JOB on JOB.OrderBookingID = SPM.OrderBookingID inner join JobCardSchedule AS JBS ON JBS.JobCardID = SPM.JobBookingID and JBS.OrderBookingDetailsID = SPD.OrderBookingDetailsID inner join JobBookingJobCard AS JBJC ON JBJC.JobBookingID = SPM.JobBookingID inner join LedgerMaster as PLM on PLM.LedgerID = SPD.PlannedVendorID inner Join LedgerMaster as LMAV on LMAV.LedgerID = SPD.ScheduleVendorId left join  LedgerMaster as LN on LN.LedgerID = JBJC.CoordinatorLedgerID inner Join LedgerMaster as LM on LM.LedgerID = SPM.LedgerId inner join ProductQuotation as PQ on PQ.ProductEstimateID = SPM.ProductEstimateID inner join ProductQuotationContents as PQC on  SPD.ProductEstimationContentID = PQC.ProductEstimationContentID where SPD.POID =" & POID & " And isnull(SPD.IsDeletedTransaction,0) <> 1 and SPM.CompanyID =" & CompanyId
+            db.FillDataTable(Dt, str)
+
+            Dt.TableName = "PODetail"
+            dataTable.TableName = "POMain"
+
+            Dim dataset As New DataSet
+            dataset.Merge(Dt)
+            dataset.Merge(dataTable)
+            data.Message = db.ConvertDataSetsTojSonString(dataset)
+            js.MaxJsonLength = 2147483647
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function GridPendingContentsData(ByVal BookingID As String) As String
         CompanyId = Convert.ToString(HttpContext.Current.Session("CompanyID"))
 
-        str = "Select distinct PQC.ProcessIDStr,JOBD.OrderBookingID,JOBD.OrderBookingDetailsID, JOBD.PONo,Replace(Convert(Nvarchar(30),JOBD.DeliveryDate,106),'','-') as DeliveryDate,Replace(Convert(Nvarchar(30),JOBD.PODate,106),'','-') as PODate, JOBD.JobReference, JOBD.JobType,JOBD.JobPriority,JOBD.CategoryID,JOBD.LedgerID, JOBD.ProductHSNID, JOBD.BookingID,JOBD.JobName as ProductName,CM.CategoryName,HM.HSNCode, JOBD.OrderQuantity,JOBD.Rate,JOBD.RateType,JOBD.GSTPercantage,Round(JOBD.GSTAmount,2) as GSTAmount,JOBd.MiscAmount,JOBD.MiscPercantage,JOBD.ShippingCost,JOBD.NetAmount as FinalAmount,LM.LedgerName as VendorName from JobOrderBookingDetails as JOBD inner join CategoryMaster as CM on CM.CategoryID = JOBD.CategoryID and CM.CompanyID = JOBD.CompanyID inner join  ProductHSNMaster  as HM on HM.ProductHSNID = JOBD.ProductHSNID and HM.CompanyID = JOBd.CompanyID inner join LedgerMaster as LM on LM.LedgerID = JOBD.VendorID and LM.CompanyID = JOBD.CompanyID inner join JobOrderBooking as JOB on JOb.CompanyID = JOBD.CompanyID and JOB.OrderBookingID = JOBD.OrderBookingID inner join ProductQuotationContents as PQC on PQC.CompanyID = JOBD.CompanyID and PQC.ProductEstimateID = JOB.ProductEstimateID where JOBD.CompanyID =" & CompanyId & " and Isnull(JOBD.IsDeletedTransaction ,0) = 0 and JOBD.OrderBookingID = " & BookingID
+        str = "Select distinct PQC.ProcessIDStr,PQC.ProductEstimateID, JOBD.SalesEmployeeID,JOBD.OrderBookingID,JOBD.OrderBookingDetailsID, JOBD.PONo,Replace(Convert(Nvarchar(30),JOBD.DeliveryDate,106),'','-') as DeliveryDate,Replace(Convert(Nvarchar(30),JOBD.PODate,106),'','-') as PODate, JOBD.JobReference, JOBD.JobType,JOBD.JobPriority,JOBD.CategoryID,JOBD.LedgerID, JOBD.ProductHSNID, JOBD.BookingID,JOBD.JobName as ProductName,CM.CategoryName,HM.HSNCode, JOBD.OrderQuantity,JOBD.Rate,JOBD.RateType,JOBD.GSTPercantage,Round(JOBD.GSTAmount,2) as GSTAmount,JOBd.MiscAmount,JOBD.MiscPercantage,JOBD.ShippingCost,JOBD.NetAmount as FinalAmount,LM.LedgerName as VendorName from JobOrderBookingDetails as JOBD inner join CategoryMaster as CM on CM.CategoryID = JOBD.CategoryID and CM.CompanyID = JOBD.CompanyID inner join  ProductHSNMaster  as HM on HM.ProductHSNID = JOBD.ProductHSNID and HM.CompanyID = JOBd.CompanyID inner join LedgerMaster as LM on LM.LedgerID = JOBD.VendorID and LM.CompanyID = JOBD.CompanyID inner join JobOrderBooking as JOB on JOb.CompanyID = JOBD.CompanyID and JOB.OrderBookingID = JOBD.OrderBookingID inner join ProductQuotationContents as PQC on PQC.CompanyID = JOBD.CompanyID and PQC.ProductEstimateID = JOB.ProductEstimateID and PQC.ProductEstimationContentID = JOBD.ProductEstimationContentID where JOBD.CompanyID =" & CompanyId & " and Isnull(JOBD.IsDeletedTransaction ,0) = 0 and JOBD.OrderBookingID = " & BookingID
         db.FillDataTable(dataTable, str)
         data.Message = db.ConvertDataTableTojSonString(dataTable)
+        js.MaxJsonLength = 2147483647
+        Return js.Serialize(data.Message)
+    End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function SaveJobSchedule(ByVal Order As Object) As String
+        CompanyId = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+        Dim AddColName = "CompanyId"
+        Dim AddColValue = "" & CompanyId & ""
+        str = db.InsertDatatableToDatabase(Order, "JobcardSchedule", AddColName, AddColValue, "", "")
+        If IsNumeric(str) = True Then
+            Return "Success"
+        Else
+            Return "Fail"
+        End If
+
+    End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function GetJobcardPendingData() As String
+        CompanyId = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+        Dim Dt As New DataTable
+        str = "SELECT JOB.OrderBookingID, JOB.BookingID, JOB.LedgerID, JOB.ProductMasterID, JOB.SalesEmployeeID, JOB.MaxSalesOrderNo, JOB.SalesOrderNo,Replace(Convert(Varchar(13),JOB.OrderBookingDate,106),' ','-') As OrderDate, LM.LedgerName AS ClientName, CM.CategoryName, JOB.ProductMasterCode, JOB.BookingNo, JOB.ProductCode, JOB.JobName, JOB.OrderQuantity,Replace(Convert(Varchar(13),JOB.DeliveryDate,106),' ','-') As DeliveryDate, JOB.PONo,Replace(Convert(Varchar(13),JOB.PODate,106),' ','-') As PODate, EM.LedgerName, JOB.ApprovalNo, UM.UserName AS BookedBy, JOB.IsBooked, JOB.FYear, LM.City, LM.State, ISNULL(JOB.OrderApproved, 0) AS OrderApproved, JOB.HoldRemark, LM.StateTinNo, ISNULL(JOB.IsJobWorkOrder, 0) AS JobWork,  ISNULL(JOB.IsDirectOrder, 0) AS DirectOrder FROM JobOrderBookingDetails AS JOB INNER JOIN (Select A.[LedgerID] AS LedgerID,A.[CompanyID] AS CompanyID,A.[LedgerName],A.[City],A.[State],A.[Country],A.StateTinNo From  (SELECT [LedgerID],[LedgerGroupID],[CompanyID],[LedgerName],[City],[State],[Country],[StateTinNo] FROM  (SELECT [LedgerID],[LedgerGroupID],[CompanyID],[FieldName],nullif([FieldValue],'''') As FieldValue FROM [LedgerMasterDetails] where Isnull(IsDeletedTransaction,0)<>1 AND LedgerGroupID IN(Select Distinct LedgerGroupID From LedgerGroupMaster Where CompanyID=" & CompanyId & " AND LedgerGroupNameID=24))x unpivot (value for name in ([FieldValue])) up pivot (max(value) for FieldName in ([LedgerName],[City],[State],[Country],[StateTinNo])) p) AS A) AS LM ON JOB.LedgerID = LM.LedgerID AND JOB.CompanyID = LM.CompanyID And Isnull(JOB.IsDeletedTransaction,0)=0 INNER JOIN UserMaster AS UM ON UM.UserID = JOB.UserID AND UM.CompanyID = JOB.CompanyID INNER JOIN CategoryMaster AS CM ON JOB.CategoryID = CM.CategoryID AND CM.CompanyID = JOB.CompanyID LEFT OUTER JOIN " &
+                 "LedgerMaster AS EM ON EM.LedgerID = JOB.SalesEmployeeID AND EM.CompanyID = JOB.CompanyID WHERE (JOB.CompanyID = " & CompanyId & ") AND (ISNULL(JOB.IsProofingOrder, 0) = 0) AND (ISNULL(JOB.IsTempOrder, 0) = 0) GROUP BY JOB.OrderBookingID, JOB.BookingID, JOB.LedgerID, JOB.ProductMasterID, JOB.SalesEmployeeID, JOB.MaxSalesOrderNo, JOB.SalesOrderNo, JOB.OrderBookingDate, LM.LedgerName, CM.CategoryName, JOB.ProductMasterCode, JOB.BookingNo, JOB.ProductCode, JOB.JobName, JOB.OrderQuantity, JOB.DeliveryDate, JOB.PONo, JOB.PODate, EM.LedgerName, JOB.ApprovalNo, UM.UserName, JOB.IsBooked, JOB.FYear, LM.City, LM.State, JOB.OrderApproved, JOB.HoldRemark, LM.StateTinNo, JOB.IsJobWorkOrder, JOB.IsDirectOrder ORDER BY JOB.OrderBookingID DESC"
+        db.FillDataTable(dataTable, str)
+
+        'str = "Select distinct PQC.ProcessIDStr,JOBD.OrderBookingID,JOBD.OrderBookingDetailsID, JOBD.PONo,Replace(Convert(Nvarchar(30),JOBD.DeliveryDate,106),'','-') as DeliveryDate,Replace(Convert(Nvarchar(30),JOBD.PODate,106),'','-') as PODate, JOBD.JobReference, JOBD.JobType,JOBD.JobPriority,JOBD.CategoryID,JOBD.LedgerID, JOBD.ProductHSNID, JOBD.BookingID,JOBD.JobName as ProductName,CM.CategoryName,HM.HSNCode, JOBD.OrderQuantity,JOBD.Rate,JOBD.RateType,JOBD.GSTPercantage,Round(JOBD.GSTAmount,2) as GSTAmount,JOBd.MiscAmount,JOBD.MiscPercantage,JOBD.ShippingCost,JOBD.NetAmount as FinalAmount,LM.LedgerName as VendorName from JobOrderBookingDetails as JOBD inner join CategoryMaster as CM on CM.CategoryID = JOBD.CategoryID and CM.CompanyID = JOBD.CompanyID inner join  ProductHSNMaster  as HM on HM.ProductHSNID = JOBD.ProductHSNID and HM.CompanyID = JOBd.CompanyID inner join LedgerMaster as LM on LM.LedgerID = JOBD.VendorID and LM.CompanyID = JOBD.CompanyID inner join JobOrderBooking as JOB on JOb.CompanyID = JOBD.CompanyID and JOB.OrderBookingID = JOBD.OrderBookingID inner join ProductQuotationContents as PQC on PQC.CompanyID = JOBD.CompanyID and PQC.ProductEstimateID = JOB.ProductEstimateID where JOBD.CompanyID =" & CompanyId & " and Isnull(JOBD.IsDeletedTransaction ,0) = 0 "
+        'db.FillDataTable(Dt, str)
+
+        dataTable.TableName = "Projects"
+        'Dt.TableName = "Contents"
+
+        Dim dataset As New DataSet
+        dataset.Merge(dataTable)
+        dataset.Merge(Dt)
+        data.Message = db.ConvertDataSetsTojSonString(dataset)
         js.MaxJsonLength = 2147483647
         Return js.Serialize(data.Message)
     End Function
@@ -63,7 +127,7 @@ Public Class WebServiceProductionWorkOrder
     Public Function LoadProcess(ByVal pids As String) As String
         CompanyId = Convert.ToString(HttpContext.Current.Session("CompanyID"))
 
-        str = "Select distinct ProcessID,Rate,TypeofCharges as RateFactor from ProcessMaster where CompanyId=" & CompanyId & " ProcessID  in (" & pids & ") "
+        str = "Select distinct ProcessName, ProcessID,Rate,TypeofCharges as RateFactor from ProcessMaster where CompanyId=" & CompanyId & " AND ProcessID  in (" & pids & ") "
         db.FillDataTable(dataTable, str)
         data.Message = db.ConvertDataTableTojSonString(dataTable)
         js.MaxJsonLength = 2147483647
@@ -706,6 +770,149 @@ Public Class WebServiceProductionWorkOrder
             Return "Error:500," & ex.Message
         End Try
     End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function SavejobcardSchedule(ByVal JobCardMain As Object, ByVal JobcardContents As Object, ByVal JObCardSchedule As Object, ByVal ProcessArr As Object, ByVal FlagEdit As Boolean, ByVal JobcardId As Int16) As String
+        Try
+            CompanyId = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+            UserId = Convert.ToString(HttpContext.Current.Session("UserID"))
+            FYear = Convert.ToString(HttpContext.Current.Session("FYear"))
+
+            Dim JobBookingNo As String = ""
+            Dim MaxJobBookingNo As Long
+            Dim IndentTransactionID As Long = 0
+            Dim IndentVoucherNo As String
+            Dim IndentPrefix As String = "IND"
+            Dim MaxVoucherNo As Long = 0
+            Dim DTValid As New DataTable
+
+            Dim AddColName = "", AddColValue = "", TableName As String = ""
+            If FlagEdit = True Then
+
+                If db.CheckAuthories("JobCardSchedule.aspx", UserId, CompanyId, "CanEdit") = False Then
+                    Return "You are not authorized to update job card..!"
+                End If
+
+                str = "Select IsRelease From JobBookingJobCardContents Where IsDeletedTransaction=0 And Isnull(IsRelease,0)=1 And JobBookingID=" & JobcardId & " And CompanyID=" & CompanyId
+                db.FillDataTable(dataTable, str)
+                If dataTable.Rows.Count > 0 Then
+                    Return "You can not Modify the Job, Job is scheduled"
+                End If
+
+                'str = "Select JobBookingID From JobScheduleRelease Where IsDeletedTransaction=0 And JobBookingID=" & JobBookingID & " And CompanyID=" & CompanyId
+                'db.FillDataTable(dataTable, str)
+                'If dataTable.Rows.Count > 0 Then
+                '    Return "You can not Modify the Job, Job is scheduled"
+                'End If
+
+                'dataTable = New DataTable()
+                'db.ConvertObjectToDatatable(TblItemPickListDetailData, dataTable)
+                'For i = 0 To dataTable.Rows.Count - 1
+                '    If db.IsDeletable("PicklistTransactionID", "ItemPicklistReleaseDetail", " Where JobBookingID=" & JobBookingID & " And CompanyID=" & CompanyId & " And ItemID=" & dataTable.Rows(i)("ItemID") & " And IsDeletedTransaction=0") = False Then
+                '        Return "You can not Modify the Job, Item is released, please delete all transactions.."
+                '    End If
+                'Next
+                'dataTable = New DataTable()
+            Else
+                If db.CheckAuthories("JobCardSchedule.aspx", UserId, CompanyId, "CanSave") = False Then
+                    Return "You are not authorized to save job card..!"
+                End If
+            End If
+
+            Using updateTransaction As New Transactions.TransactionScope
+
+                TableName = "JobBookingJobCard"
+                If FlagEdit = "False" Or FlagEdit = False Then
+                    JobBookingNo = db.GeneratePrefixedNo(TableName, "J", "MaxJobBookingNo", MaxJobBookingNo, FYear, " Where CompanyID = " & CompanyId & " And FYear='" & FYear & "' AND Isnull(IsDeletedTransaction,0)=0")
+                End If
+                AddColName = "JobBookingNo,MaxJobBookingNo,CompanyID,CreatedBy,FYear,JobBookingDate,CreatedDate,ModifiedDate"
+                AddColValue = "'" & JobBookingNo & "','" & MaxJobBookingNo & "','" & CompanyId & "'," & UserId & ",'" & FYear & "',getdate(),getdate(),getdate()"
+                If FlagEdit = False Then
+                    JobcardId = db.InsertDatatableToDatabase(JobCardMain, TableName, AddColName, AddColValue)
+                Else
+                    db.UpdateDatatableToDatabase(JobCardMain, TableName, "ModifiedDate = Getdate(),ModifiedBy =" & UserId & "", 1, " JobBookingID=" & JobcardId & " And CompanyID=" & CompanyId)
+                    db.ExecuteNonSQLQuery("Delete From JobBookingJobCardProcess Where  JobBookingID=" & JobcardId & " And CompanyID=" & CompanyId & "")
+                    db.ExecuteNonSQLQuery("Delete From JobBookingJobCardContentBookForms Where  JobBookingID=" & JobcardId & " And CompanyID=" & CompanyId & "")
+                    db.ExecuteNonSQLQuery("Delete From JobBookingJobCardProcessMaterialRequirement Where  JobBookingID=" & JobcardId & " And CompanyID=" & CompanyId & "")
+                    db.ExecuteNonSQLQuery("Delete From JobBookingJobCardColorDetails Where  JobBookingID=" & JobcardId & " And CompanyID=" & CompanyId & "")
+
+                    Dim DTRecordDetail As New DataTable
+                    db.FillDataTable(DTRecordDetail, "Select Distinct ItemID From ItemTransactionDetail Where IsDeletedTransaction=0 And JobBookingID=" & JobcardId & " And CompanyID=" & CompanyId)
+
+                    db.ExecuteNonSQLQuery("Delete From ItemTransactionDetail Where JobBookingID=" & JobcardId & " And CompanyID=" & CompanyId)
+                    db.ExecuteNonSQLQuery("Delete From ItemTransactionMain Where JobBookingID=" & JobcardId & " And CompanyID=" & CompanyId)
+
+                    For i = 0 To DTRecordDetail.Rows.Count - 1
+                        db.ExecuteNonSQLQuery("EXEC UPDATE_ITEM_STOCK_VALUES " & CompanyId & ",0," & DTRecordDetail.Rows(i)("ItemID"))
+                    Next
+
+                    db.ExecuteNonSQLQuery("Delete From JobBookingJobCardFormWiseDetails Where  JobBookingID=" & JobcardId & " And CompanyID=" & CompanyId & "")
+                End If
+                If Val(JobcardId) <= 0 Then Return "Error:500"
+                Dim TblObj, TblObjCont As New DataTable
+                TableName = "JobBookingJobCardContents"
+                If FlagEdit = True Then
+                    For i = 0 To JobCardMain.length - 1
+                        JobCardMain(i)("JobCardContentNo") = JobBookingNo & "[" & i + 1 & "_" & JobCardMain.length & "]"
+                    Next
+                    str = db.UpdateContentsDatatableToDatabase(JobcardContents, TableName, "ModifiedDate = Getdate(),ModifiedBy =" & UserId & "", "JobBookingJobCardContentsID", " JobBookingID=" & JobcardId & " And CompanyID=" & CompanyId & "")
+                    If str <> "Success" Then
+                        updateTransaction.Dispose()
+                        Return "Error:500 Contents updating- " & str
+                    End If
+                Else
+                    db.ConvertObjectToDatatable(JobcardContents, TblObjCont, str)
+                    If str <> "Success" Then
+                        updateTransaction.Dispose()
+                        Return "Error:500, Contents saving- " & str
+                    End If
+
+                    TblObjCont.Columns.Add("JobCardContentNo")
+                    For i = 0 To TblObjCont.Rows.Count - 1
+                        TblObjCont.Rows(i)("JobCardContentNo") = JobBookingNo & "[" & i + 1 & "_" & TblObjCont.Rows.Count & "]"
+                    Next
+                    AddColName = "JobBookingID,CreatedDate,CompanyId"
+                    AddColValue = "'" & JobcardId & "',Getdate(),'" & CompanyId & "'"
+                    str = db.InsertSecondaryDataJobCard(TblObjCont, TableName, AddColName, AddColValue, "", "", "")
+                    If IsNumeric(str) = False Then
+                        updateTransaction.Dispose()
+                        Return "Error:500, Contents saving- " & str
+                    End If
+                End If
+
+                AddColName = "JobCardID,ModifiedDate,CompanyId"
+                AddColValue = "'" & JobcardId & "',Getdate(),'" & CompanyId & "'"
+
+                TableName = "JobCardSchedule"
+                str = db.InsertDatatableToDatabase(JObCardSchedule, TableName, AddColName, AddColValue)
+                If Val(str) <= 0 Then
+                    updateTransaction.Dispose()
+                    Return "Error:500," & str
+                    'Else
+                    '    Return "Success," + JobBookingNo
+                End If
+                '' Process
+                AddColName = "JobbookingID,ModifiedDate,CompanyId"
+                AddColValue = "'" & JobcardId & "',Getdate(),'" & CompanyId & "'"
+
+                TableName = "JobbookingJobcardProcess"
+                str = db.InsertDatatableToDatabase(ProcessArr, TableName, AddColName, AddColValue)
+                If Val(str) <= 0 Then
+                    updateTransaction.Dispose()
+                    Return "Error:500," & str
+                    'Else
+                    '    Return "Success," + JobBookingNo
+                End If
+
+
+                updateTransaction.Complete()
+            End Using
+
+            Return JobBookingNo
+        Catch ex As Exception
+            Return "Error:500," & ex.Message
+        End Try
+    End Function
 
     <WebMethod>
     Public Function UploadFileDetails() As String
@@ -890,7 +1097,68 @@ Public Class WebServiceProductionWorkOrder
             Return "Error: " & ex.Message
         End Try
     End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function GetJobCardData() As String
+        Try
+            Dim Dt As New DataTable
+            CompanyId = Convert.ToString(HttpContext.Current.Session("CompanyId"))
+            str = "Select JOB.SalesOrderNo,convert(CHAR(30),JOB.OrderBookingDate, 106) OrderBookingDate,PQ.EstimateNo,EM.EnquiryNo, JBJC.JobBookingID,JBJC.JobBookingNo,JBJC.BookingID,convert(CHAR(30),JBJC.JobBookingDate, 106) JobBookingDate,JBJC.OrderBookingID, convert(CHAR(30),JBJC.PODate, 106) PODate,JBJC.PONo,JBJC.JobName as ProjectName,JBJC.ClientName,JBJC.LedgerID from JobBookingJobCard as JBJC inner join ProductQuotation as PQ on PQ.ProductEstimateID = JBJC.ProductEstimateID inner join EnquiryMain as EM on EM.EnquiryID = PQ.EnquiryID inner join JobOrderBooking as JOB on JBJC.OrderBookingID = JOB.OrderBookingID where JBJC.CompanyID =" & CompanyId & " and Isnull(JBJC.IsdeletedTransaction,0) <> 1 order by JBJC.JobBookingID desc"
+            db.FillDataTable(dataTable, str)
+            str = "Select JCS.ProcessIDStr,JCS.JobContentsID as ProductEstimationContentID, JCS.JobCardID AS JobBookingID,JCS.ProductType,LMV.LedgerName as VendorName,LMAV.LedgerName ScheduleVendorName, JCS.OrderBookingScheduleID,JCS.OrderBookingID,JCS.ProductEstimateID,JCS.JobName as ProductName,JCS.OrderQuantity,JCS.JobType,JCS.JobReference,JCS.JobPriority, convert(CHAR(30),JCS.ExpectedDeliveryDate, 106) ExpectedDeliveryDate,JCS.TotalAmount,JCS.NetAmount,JCS.SGSTTaxAmount,JCS.SGSTTaxPercentage,JCS.CGSTTaxAmount,JCS.CGSTTaxPercentage,JCS.IGSTTaxAmount,JCS.IGSTTaxPercentage,JCS.RateType,JCS.Rate,JCS.ScheduleQty as QTY,JCS.VendorID,JCS.ScheduleVendorId as AllocatedVendorID,JCS.CriticalRemark as CriticalInstructions,EM.LedgerName as JobCoordinator,EM.ledgerId as JobCoordinatorID  from JobCardSchedule as JCS inner Join LedgerMaster as LMV on LMV.LedgerID = JCS.VendorID inner Join LedgerMaster as LMAV on LMAV.LedgerID = JCS.ScheduleVendorId inner join LedgerMaster as EM on EM.LedgerID = JCS.JobCoordinatorID where isnull(JCS.IsDeletedTransaction,0) <> 1 and JCS.CompanyID =" & CompanyId
+            db.FillDataTable(Dt, str)
 
+            Dt.TableName = "JobcardSchedule"
+            dataTable.TableName = "JobcardMain"
+
+            Dim dataset As New DataSet
+            dataset.Merge(Dt)
+            dataset.Merge(dataTable)
+            data.Message = db.ConvertDataSetsTojSonString(dataset)
+            js.MaxJsonLength = 2147483647
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
+
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function LoadSOContents(ByVal OrderbookingID As Integer) As String
+        Try
+            CompanyId = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+            str = "Select JOBD.OrderBookingDetailsID,PQC.ProductDescription,PQC.PackagingDetails,PQC.DescriptionOther, JOBD.ProductEstimationContentID, Isnull(PQC.ProcessIDStr,'') as ProcessIDStr ,PQC.ProductEstimateID, JOBD.CGSTTaxPercentage,JOBD.CGSTTaxAmount,JOBD.SGSTTaxAmount,JOBD.SGSTTaxPercentage,JOBD.IGSTTaxAmount,JOBD.IGSTTaxPercentage,LM.LedgerName as VendorName ,JOBD.ConsigneeID ,JOBD.SalesEmployeeID,JOBD.ProductHSNID,JOBD.VendorID,JOBD.BookingNo,JOBD.OrderBookingId, JOBD.CategoryID,JOBD.ProductHSNID,JOBD.ProductCode,JOBD.JobCoordinatorID, JOBD.JobName as ProductName,OrderQuantity,JOBD.Rate,JOBD.RateType,JobType,JobReference,JobPriority,convert(varchar,JOBD.ExpectedDeliveryDate,106) as ExpectedDeliveryDate,JOBD.NetAmount,JOBD.FinalCost,JOBD.DispatchRemark,JOBD.MiscAmount,JOBD.GSTAmount from JobOrderBookingDetails as JOBD inner join LedgerMaster as LM on LM.LedgerID = JOBD.VendorID INNER join ProductQuotationContents as PQC on PQC.ProductEstimationContentID = JOBD.ProductEstimationContentID where isnull(JOBD.IsDeletedTransaction,0) <> 1 and JOBD.CompanyID =" & CompanyId & " And JOBD.OrderbookingId = " & OrderbookingID
+
+            db.FillDataTable(dataTable, str)
+            data.Message = db.ConvertDataTableTojSonString(dataTable)
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function DeleteJC(ByVal JCID As Integer) As String
+        Try
+            CompanyId = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+            UserId = Convert.ToString(HttpContext.Current.Session("UserId"))
+            Dim KeyField As String = ""
+
+            If db.CheckAuthories("jobcardSchedule.aspx", UserId, CompanyId, "CanDelete") = False Then Return "You are not authorized to delete..!, Can't Delete"
+
+            If db.IsDeletable("JobBookingID", "ServicePOMain", "Where CompanyID = " & CompanyId & " And Isnull(IsdeletedTransaction,0) = 0 And JobBookingID = " & JCID & "") = False Then
+                KeyField = "PO already generated, can't delete this JC "
+                Return KeyField
+                Exit Function
+            End If
+
+            str = "Update Jobbookingjobcard set Isdeletedtransaction= 1 where companyid=" & CompanyId & " and Jobbookingid=" & JCID & "; Update JobBookingJobCardContents set Isdeletedtransaction= 1 where companyid=" & CompanyId & " and Jobbookingid=" & JCID & "; Update JobBookingJobCardProcess set Isdeletedtransaction= 1 where companyid=" & CompanyId & " and Jobbookingid=" & JCID & "; Update JobcardSchedule set Isdeletedtransaction= 1 where companyid=" & CompanyId & " and JObcardID=" & JCID & ";"
+
+            Return db.ExecuteNonSQLQuery(str)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
     <WebMethod(EnableSession:=True)>
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function RecycleProductCatalog(ByVal PCNo As String, ByVal PCId As Integer) As String
@@ -1043,6 +1311,7 @@ Public Class WebServiceProductionWorkOrder
         End Try
     End Function
 
+
     <WebMethod(EnableSession:=True)>
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function ValidateSendIndent(ByVal PaperId As Integer, ByVal JobBKID As Integer) As String
@@ -1056,6 +1325,7 @@ Public Class WebServiceProductionWorkOrder
             Return ex.Message
         End Try
     End Function
+
 
     <WebMethod(EnableSession:=True)>
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
@@ -1071,6 +1341,7 @@ Public Class WebServiceProductionWorkOrder
             Return ex.Message
         End Try
     End Function
+
 
     <WebMethod(EnableSession:=True)>
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
@@ -1094,6 +1365,7 @@ Public Class WebServiceProductionWorkOrder
             Return ex.Message
         End Try
     End Function
+
 
     <WebMethod(EnableSession:=True)>
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
@@ -1120,6 +1392,7 @@ Public Class WebServiceProductionWorkOrder
             Return ex.Message
         End Try
     End Function
+
 
     <WebMethod(EnableSession:=True)>
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
@@ -1205,6 +1478,8 @@ Public Class WebServiceProductionWorkOrder
             Return ex.Message
         End Try
     End Function
+
+
     ''*****************************      Shipper      ********************************
     <WebMethod(EnableSession:=True)>
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
@@ -1220,6 +1495,7 @@ Public Class WebServiceProductionWorkOrder
         End Try
     End Function
 
+
     ''*****************************      JC Form Wise      ********************************
     <WebMethod(EnableSession:=True)>
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
@@ -1234,6 +1510,7 @@ Public Class WebServiceProductionWorkOrder
             Return ex.Message
         End Try
     End Function
+
 
     ''*****************************      Load Job Coordinator      ********************************
     <WebMethod(EnableSession:=True)>
@@ -1251,6 +1528,7 @@ Public Class WebServiceProductionWorkOrder
             Return ex.Message
         End Try
     End Function
+
 
     ''*****************************      Load Client wise Consignee      ********************************
     <WebMethod(EnableSession:=True)>
@@ -1388,6 +1666,25 @@ Public Class WebServiceProductionWorkOrder
         End Try
     End Function
 
+
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function GetInputSizess(ByVal ID As String) As String
+        Try
+
+            Dim GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+
+            str = "Select isnull(ProductInputSizes,'') as ProductInputSizes from ProductQuotationContents where  CompanyID=" & GBLCompanyID & " and ProductEstimationContentID=" & ID
+            db.FillDataTable(dataTable, str)
+
+            data.Message = db.ConvertDataTableTojSonString(dataTable)
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
+
+
     <WebMethod(EnableSession:=True)>
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function RecalculateFormsDetails(ByVal ObjContents As Object, ByVal ObjForms As Object) As String
@@ -1492,6 +1789,7 @@ Public Class WebServiceProductionWorkOrder
         End Try
     End Function
 
+
     '--------------- Get Requisition and purchase order Comment Data---------------------------------
     <WebMethod(EnableSession:=True)>
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
@@ -1551,6 +1849,7 @@ Public Class WebServiceProductionWorkOrder
 
     End Function
 
+
     <WebMethod(EnableSession:=True)>
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function CheckItemStock(ByVal Id As Integer) As String
@@ -1564,6 +1863,7 @@ Public Class WebServiceProductionWorkOrder
             Return ex.Message
         End Try
     End Function
+
 
     ''*****************************    '' Apply Tools   ********************************
     <WebMethod(EnableSession:=True)>
@@ -1581,6 +1881,454 @@ Public Class WebServiceProductionWorkOrder
         Catch ex As Exception
             Return ex.Message
         End Try
+    End Function
+
+
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function GetJobDataPO(ByVal JobBookingID As Integer, ByVal ScheduleVendorId As Integer) As String
+        Try
+            CompanyId = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+            str = "Select distinct PQC.ProductCatalogID as ProductCatelogID,PQ.ProductEstimateID,PQ.EstimateNo as QuotaionNo,JOB.SalesOrderNo,convert(CHAR(30),JOB.OrderBookingDate, 106) OrderBookingDate,PQ.EnquiryID,EM.EnquiryNo,JBJC.JobBookingID,JBJC.JobBookingNo,JBJC.BookingID,convert(CHAR(30),JBJC.JobBookingDate, 106) JobBookingDate,JBJC.OrderBookingID, convert(CHAR(30),JBJC.PODate, 106) PODate,JBJC.PONo,JBJC.JobName as ProjectName,JBJC.ClientName,JBJC.LedgerID,JBS.ScheduleVendorId from JobBookingJobCard as JBJC inner join ProductQuotation as PQ on PQ.ProductEstimateID =JBJC.ProductEstimateID inner join EnquiryMain as EM on EM.EnquiryID= PQ.EnquiryID  inner join JobOrderBooking as JOB on JBJC.OrderBookingID = JOB.OrderBookingID inner join JobCardSchedule AS JBS ON JBS.JobCardID = JBJC.JobBookingID inner join ProductQuotationContents as PQC on PQC.ProductEstimationContentID = JBS.JobContentsID  where JBJC.CompanyID =" & CompanyId & " and  JBJC.JobBookingID =" & JobBookingID & " and   JBS.ScheduleVendorId = " & ScheduleVendorId & " And  Isnull(JBJC.IsdeletedTransaction,0) <> 1 order by JBJC.JobBookingID desc"
+            db.FillDataTable(dataTable, str)
+            data.Message = db.ConvertDataTableTojSonString(dataTable)
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
+
+
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function GetJobbookingDataPO(ByVal JobBookingID As Integer, ByVal ScheduleVendorId As Integer) As String
+        Try
+            CompanyId = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+            str = "Select distinct   (JCS.SGSTTaxAmount + JCS.CGSTTaxAmount + JCS.IGSTTaxAmount) AS ToTalGSTAmount ,JCS.OrderBookingDetailsID,PQC.ProductEstimationContentID,  LMAV.LedgerName as VendorName,LN.LedgerName as Jobcordinator, LM.LedgerName as ClientName, PCM.ProductCatalogID, PQ.EstimateNo as QuotaionNo,PQC.GSTPercantage,JCS.JobContentsID,JCS.JobCardID AS JobBookingID,JCS.ProductType,LMV.LedgerName as PlanedVendorName,LMAV.LedgerName ScheduleVendorName, JCS.OrderBookingScheduleID,JCS.OrderBookingID,JCS.ProductEstimateID,JCS.JobName as ProductName,JCS.OrderQuantity,JCS.JobType,JCS.JobReference,JCS.JobPriority, convert(CHAR(30),JCS.ExpectedDeliveryDate, 106) ExpectedDeliveryDate,JCS.TotalAmount,JCS.NetAmount,JCS.SGSTTaxAmount,JCS.SGSTTaxPercentage,JCS.CGSTTaxAmount,JCS.CGSTTaxPercentage,JCS.IGSTTaxAmount,JCS.IGSTTaxPercentage,JCS.RateType,JCS.Rate,JCS.Rate as ScheduleRate,JCS.ScheduleQty,JCS.VendorID,JCS.ScheduleVendorId,JCS.CriticalRemark  from JobCardSchedule as JCS inner join JobBookingJobCard as JBJC on JBJC.JobBookingID = JCS.JobCardID inner join ProductQuotation as PQ on PQ.ProductEstimateID = JCS.ProductEstimateID inner join ProductQuotationContents as PQC on PQC.ProductEstimateID = JCS.ProductEstimateID and JCS.JobContentsID = PQC.ProductEstimationContentID inner join ProductCatalogMaster as PCM on PCM.ProductCatalogID = PQC.ProductCatalogID inner Join LedgerMaster as LMV on LMV.LedgerID = JCS.VendorID inner Join LedgerMaster as LMAV on LMAV.LedgerID = JCS.ScheduleVendorId inner Join LedgerMaster as LM on LM.LedgerID = PQ.LedgerID left join  LedgerMaster as LN on LN.LedgerID = JBJC.CoordinatorLedgerID inner join ProductHSNMaster as PHM on PHM.ProductHSNID = PCM.ProductHSNID where isnull(JCS.IsDeletedTransaction,0) <> 1 and JCS.CompanyID =" & CompanyId & " And JCS.JOBCARDID = " & JobBookingID & " and  JCS.ScheduleVendorId = " & ScheduleVendorId
+            db.FillDataTable(dataTable, str)
+            data.Message = db.ConvertDataTableTojSonString(dataTable)
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
+
+
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function VendorName(ByVal JobbookingID As Integer) As String
+        Try
+            CompanyId = Convert.ToString(HttpContext.Current.Session("CompanyId"))
+            str = "select distinct JCS.JobCardID as JobBookingID, schedulevendorid as LedgerID ,LedgerName as VendorName,state  from JobCardSchedule as JCS inner join LedgerMaster as LM on JCS.ScheduleVendorId = LM.LedgerID And JCS.CompanyId = " & CompanyId & " where isnull(JCS.IsDeletedTransaction,0) <> 1 and JCS.JobCardID =" & JobbookingID
+            db.FillDataTable(dataTable, str)
+            data.Message = db.ConvertDataTableTojSonString(dataTable)
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
+
+    <WebMethod(EnableSession:=True)>
+    Public Function GetPONo() As String
+        Try
+            Dim CompanyID As String = Convert.ToString(Session("CompanyID"))
+            Dim TableName = "servicepomain"
+            Dim MaxPONo = 0
+            Dim PONumber = ""
+            PONumber = db.GeneratePrefixedNo(TableName, "PO", "MaxPONo", MaxPONo, "", "Where CompanyId=" & CompanyID)
+            Return PONumber
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
+
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function SavePO(ByVal Data As Object, ByVal POData As Object, ByVal IsEdit As Boolean, ByVal GBLPOID As Int16) As String
+        Try
+            Dim UserId As String = Convert.ToString(Session("UserID"))
+            Dim UserName As String = Convert.ToString(HttpContext.Current.Session("UserName"))
+            Dim CompanyID As String = Convert.ToString(Session("CompanyID"))
+            Dim keyField = ""
+            Dim TableName = "servicepomain"
+            Dim AddCol = ""
+            Dim AddVal = ""
+            Dim MaxPONo = 0
+
+            If IsEdit = False Then ''  to save new data
+                ' to save customer data
+                Dim PONumber = db.GeneratePrefixedNo(TableName, "PO", "MaxPONo", MaxPONo, "", "Where CompanyId=" & CompanyID)
+
+                AddCol = "CreatedBy,PODate,CreatedDate,ModifiedDate,CompanyID,PONumber,MaxPONo"
+                AddVal = UserId & ",getdate(),getdate(),getdate()," & CompanyID & ",'" & PONumber & "'," & MaxPONo
+                Dim POID = db.InsertDatatableToDatabase(Data, TableName, AddCol, AddVal)
+                If IsNumeric(POID) Then
+                    ' to save PO data againest PO id
+
+                    AddCol = "CreatedBy,CreatedDate,POID"
+                    AddVal = UserId & ",getdate()," & POID
+
+                    keyField = db.InsertDatatableToDatabase(POData, "servicepodetails", AddCol, AddVal)
+
+                    If IsNumeric(keyField) Then
+                        Return "Success"
+                    Else
+                        db.ExecuteNonSQLQuery("Delete from servicepomain where POID=" & POID)
+                        Return "Failed"
+                    End If
+                Else
+                    Return "Failed"
+                End If
+            Else '' to create new version of the PO
+                Dim GetPOCode = db.GetColumnValue("PONumber", "ServicePoMain", " POID=" & GBLPOID & " and CompanyID=" & CompanyID)
+                Dim Version = db.GetColumnValue("VersionNo", "ServicePoMain", " POID=" & GBLPOID & " and CompanyID=" & CompanyID)
+                Dim MaxPONos = db.GetColumnValue("MaxPONo", "ServicePoMain", " POID=" & GBLPOID & " and CompanyID=" & CompanyID)
+
+                AddCol = "CreatedBy,PODate,CreatedDate,ModifiedDate,CompanyID,PONumber,MaxPONo,VersionNo,IsSentForApproval,ApprovalSentTo,ApprovalSentDate,IsApproved,ApprovedBy,ApprovedDate,ApprovedRemark"
+                AddVal = UserId & ",getdate(),getdate(),getdate()," & CompanyID & ",'" & GetPOCode & "'," & MaxPONos & "," & Version + 1 & ",1," & UserId & ",GetDate(),1," & UserId & ",GetDate(),'Auto Approved, Revised by " & UserName & "'"
+
+                Dim POID = db.InsertDatatableToDatabase(Data, TableName, AddCol, AddVal)
+                If IsNumeric(POID) Then
+                    ' to save PO data againest PO id
+
+                    AddCol = "CreatedBy,CreatedDate,POID"
+                    AddVal = UserId & ",getdate()," & POID
+
+                    keyField = db.InsertDatatableToDatabase(POData, "servicepodetails", AddCol, AddVal)
+
+                    If IsNumeric(keyField) Then
+                        Return "Success"
+                    Else
+                        db.ExecuteNonSQLQuery("Delete from servicepomain where POID=" & POID)
+                        Return "Failed"
+                    End If
+                Else
+                    Return "Failed"
+                End If
+            End If
+
+            Return "Failed"
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+
+
+    End Function
+
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function GetVendorName() As String
+        Try
+            Dim CompanyID As String = Convert.ToString(Session("CompanyID"))
+            Dim Dt As New DataTable
+            Dim STR = "select LedgerID,LedgerName from LedgerMaster where LedgerGroupID =8 and IsDeletedTransaction = 0 and CompanyID =" & CompanyID
+            db.FillDataTable(Dt, STR)
+            data.Message = db.ConvertDataTableTojSonString(Dt)
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+
+
+    End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function GetVendorNamePO() As String
+        Try
+            Dim CompanyID As String = Convert.ToString(Session("CompanyID"))
+            Dim Dt As New DataTable
+            Dim STR = "select LedgerID,LedgerName from LedgerMaster where LedgerGroupID =8 and IsDeletedTransaction = 0 and LedgerId in (Select distinct SchedulevendorID from JobcardSchedule where IsdeletedTransaction = 0) and CompanyID =" & CompanyID
+            db.FillDataTable(Dt, STR)
+            data.Message = db.ConvertDataTableTojSonString(Dt)
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+
+
+    End Function
+
+
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function DropDown(ByVal LedgerID As Integer) As String
+        Try
+            Dim CompanyID As String = Convert.ToString(Session("CompanyID"))
+            Dim Dt As New DataTable
+            Dim STR = "Select distinct JBJC.JobBookingID,JBJC.JobBookingNo,JBS.ScheduleVendorId from JobBookingJobCard as JBJC inner join JobCardSchedule AS JBS ON JBS.JobCardID = JBJC.JobBookingID where JBJC.CompanyID = " & CompanyID & " and JBS.ScheduleVendorId = " & LedgerID & " And Isnull(JBJC.IsdeletedTransaction, 0) <> 1 order by JBJC.JobBookingID desc"
+
+            db.FillDataTable(Dt, STR)
+            data.Message = db.ConvertDataTableTojSonString(Dt)
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function GetJobbookingDataStart(ByVal JobBookingID As Integer, ByVal ScheduleVendorId As Integer) As String
+        Try
+            CompanyId = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+            str = "Select distinct JBJC.JobBookingNo,PQ.EnquiryID,EM.EnquiryNo,LMAV.LedgerName as VendorName,LN.LedgerName as Jobcordinator, LM.LedgerName as ClientName,PCM.ProductCatalogID, PQ.ProductEstimateID,PQ.EstimateNo as QuotaionNo,PQC.ProductEstimateID,JCS.Processidstr,JCS.JobContentsID,JCS.JobCardID AS JobBookingID,JCS.ProductType, JCS.OrderBookingScheduleID,JCS.OrderBookingID,JCS.ProductEstimateID,JCS.JobName as ProductName,JCS.OrderQuantity,JCS.JobType,JCS.JobReference,JCS.JobPriority, convert(CHAR(30),JCS.ExpectedDeliveryDate, 106) ExpectedDeliveryDate,JCS.ScheduleQty,JCS.VendorID,JCS.ScheduleVendorId,JCS.CriticalRemark  from JobCardSchedule as JCS inner join JobBookingJobCard as JBJC on JBJC.JobBookingID = JCS.JobCardID inner join ProductQuotation as PQ on PQ.ProductEstimateID = JCS.ProductEstimateID inner join ProductQuotationContents as PQC on PQC.ProductEstimateID = JCS.ProductEstimateID  and JCS.JobContentsID = PQC.ProductEstimationContentID inner join ProductCatalogMaster as PCM on PCM.ProductCatalogID = PQC.ProductCatalogID inner Join LedgerMaster as LMV on LMV.LedgerID = JCS.VendorID inner Join LedgerMaster as LMAV on LMAV.LedgerID = JCS.ScheduleVendorId inner Join LedgerMaster as LM on LM.LedgerID = PQ.LedgerID left join  LedgerMaster as LN on LN.LedgerID = JBJC.CoordinatorLedgerID inner join ProductHSNMaster as PHM on PHM.ProductHSNID = PCM.ProductHSNID  INNER JOIN EnquiryMain AS EM ON EM.EnquiryID = PQ.EnquiryID  where isnull(JCS.IsDeletedTransaction,0) <> 1 and JCS.CompanyID =" & CompanyId & " And JCS.JOBCARDID = " & JobBookingID & " and  JCS.ScheduleVendorId = " & ScheduleVendorId
+            db.FillDataTable(dataTable, str)
+            data.Message = db.ConvertDataTableTojSonString(dataTable)
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function Operation(ByVal JobBookingID As String) As String
+        Try
+            CompanyId = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+            str = "Select distinct JP.JobBookingID,PM.ProcessId,PM.ProcessName from  ProcessMaster  as PM inner join JobBookingJobCardProcess as JP on jp.processid = PM.ProcessID  where Isnull(PM.IsdeletedTransaction, 0) <> 1 And jp.CompanyID = " & CompanyId & " And jp.JobBookingID = " & JobBookingID
+            db.FillDataTable(dataTable, str)
+            data.Message = db.ConvertDataTableTojSonString(dataTable)
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function JobcardEnd(ByVal LedgerID As Integer) As String
+        Try
+            Dim CompanyID As String = Convert.ToString(Session("CompanyID"))
+            Dim Dt As New DataTable
+            Dim STR = "Select distinct JBJC.JobBookingID,JBJC.JobBookingNo,JBS.ScheduleVendorId from JobBookingJobCard as JBJC INNER JOIN ProductionEntry AS PE on PE.JobBookingID = JBJC.JobBookingID inner join JobCardSchedule AS JBS ON JBS.JobCardID = JBJC.JobBookingID  where JBJC.CompanyID = " & CompanyID & " and JBS.ScheduleVendorId = " & LedgerID & " And Isnull(JBJC.IsdeletedTransaction, 0) <> 1 order by JBJC.JobBookingID desc"
+            db.FillDataTable(Dt, STR)
+            data.Message = db.ConvertDataTableTojSonString(Dt)
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
+    <WebMethod(EnableSession:=True)>
+    Public Function SaveStart(ByVal Data As Object, ByVal IsEdit As Boolean, ByVal JobBookingID As String) As String
+        Try
+            Dim UserId As String = Convert.ToString(Session("UserID"))
+            Dim CompanyID As String = Convert.ToString(Session("CompanyID"))
+            Dim keyField = ""
+            Dim TableName = "ProductionEntry"
+            Dim AddCol = ""
+            Dim AddVal = ""
+            If IsEdit = False Then ''  to save new data
+                AddCol = "GetDate,ModifiedDate,CompanyID"
+                AddVal = "getdate(),getdate()," & CompanyID
+                keyField = db.InsertDatatableToDatabase(Data, TableName, AddCol, AddVal)
+                If IsNumeric(keyField) Then
+                    'to update the data
+                    str = "update JobBookingJobCard set JobStart= '1 ' where JobBookingID= " & JobBookingID
+                    db.ExecuteNonSQLQuery(str)
+
+
+                    Return "Success"
+                Else
+                    Return "Failed"
+                End If
+            Else '' to Update the data
+                AddCol = "ModifiedDate=getdate(),CompanyID=" & CompanyID
+                keyField = db.UpdateDatatableToDatabase(Data, TableName, AddCol, 1)
+                If keyField = "Success" Then
+                    Return "Success"
+                Else
+                    Return "Failed"
+                End If
+
+            End If
+
+            Return "Failed"
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+
+
+    End Function
+
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function RunningJob(ByVal JobBookingID As Integer, ByVal ScheduleVendorId As Integer) As String
+        Try
+            CompanyId = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+            str = "select distinct LM.LedgerName AS VendorName,JBJC.JobBookingNo , PE.ProductionID, jBJC.jobbookingNo,JBJC.JobBookingID,PE.ProcessID,PE.Remark,PE.ProductionQuantity,PE.JobBookingNo,PE.VendorID,PE.Remark,JCS.JobName,JCS.OrderQuantity,JCS.JobType,JCS.JobReference,JCS.JobPriority,JCS.CriticalRemark,PM.ProcessName as Operation,JCS.ScheduleQty as Quantity,Replace(Convert(Nvarchar(13),JCS.ExpectedDeliveryDate,106),' ','-') as ExpectedDeliveryDate from ProductionEntry AS PE INNER jOIN JobCardSchedule as JCS On JCS.VendorID =  PE.VendorID inner Join ProcessMaster as PM on PM.ProcessID = PE.ProcessID inner join JobBookingJobcard as JBJC on JBJC.JobBookingID = PE.JobBookingID inner join LedgerMaster as LM on LM.LedgerID = JBJC.LedgerID   where isnull(JCS.IsDeletedTransaction,0) <> 1 and JCS.CompanyID =" & CompanyId & " And JCS.JOBCARDID = " & JobBookingID & " and  JCS.ScheduleVendorId = " & ScheduleVendorId
+
+            db.FillDataTable(dataTable, str)
+            data.Message = db.ConvertDataTableTojSonString(dataTable)
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function Process(ByVal JobBookingID As Integer, ByVal ScheduleVendorId As Integer, ByVal ProcessId As Integer) As String
+        Try
+            CompanyId = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+            'str = "select JCS.orderQuantity, PE.ProductionQuantity,(Isnull(JCS.orderQuantity,0) - Isnull(PE.ProductionQuantity,0)) as remainingValue From JobCardSchedule as JCS left Join ProductionEntry as PE on PE.JobBookingID = JCS.JobCardID and PE.VendorID = JCS.ScheduleVendorId AND PE.ProcessID in ( SELECT id FROM dbo.CSVToTable((SELECT ProcessIDStr AS ID FROM JobCardSchedule WHERE ScheduleVendorId = " & ScheduleVendorId & " and JobCardID =  " & JobBookingID & " ))) where JCS.ScheduleVendorId = " & ScheduleVendorId & " and JCS.JobCardID = " & JobBookingID & " AND  " & ProcessId & "  in ( SELECT id FROM dbo.CSVToTable((SELECT ProcessIDStr AS ID FROM JobCardSchedule WHERE  ScheduleVendorId = " & ScheduleVendorId & " and JobCardID = " & JobBookingID & "   ))) "
+            str = "select Isnull(PE.ProcessID,0) ProcessID, JCS.orderQuantity, isnull(PE.ProductionQuantity,0) ProductionQuantity,(Isnull(JCS.orderQuantity,0) - Isnull(PE.ProductionQuantity,0)) as remainingValue From JobCardSchedule as JCS left Join ProductionEntry as PE on PE.JobBookingID = JCS.JobCardID and PE.VendorID = JCS.ScheduleVendorId AND PE.ProcessID in (" & ProcessId & ") where JCS.ScheduleVendorId = " & ScheduleVendorId & " and JCS.JobCardID =" & JobBookingID
+            db.FillDataTable(dataTable, str)
+            data.Message = db.ConvertDataTableTojSonString(dataTable)
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
+
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function ENDJOB(ByVal JobBookingID As Integer, ByVal ScheduleVendorId As Integer) As String
+        Try
+            CompanyId = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+            str = "select distinct	PS.JobBookingNo,PQ.EnquiryID,EM.EnquiryNo,PQ.EstimateNo as QuotaionNo,PQC.ProductEstimateID,JCS.Processidstr,JCS.JobContentsID,JCS.JobCardID AS JobBookingID,PS.ProductionQuantity,JCS.ProductEstimateID,JCS.JobName as ProductName,JCS.OrderQuantity,JCS.JobType,JCS.JobReference,JCS.JobPriority, convert(CHAR(30),JCS.ExpectedDeliveryDate, 106)ExpectedDeliveryDate,JCS.ScheduleQty,JCS.VendorID,JCS.ScheduleVendorId,JCS.CriticalRemark,PCM.ProductCatalogID, PQ.ProductEstimateID from JobCardSchedule as JCS INNER JOIN  JobBookingJobCard as JBJC on JBJC.JobBookingID = JCS.JobCardID inner join ProductQuotation as PQ on PQ.ProductEstimateID = JCS.ProductEstimateID inner join ProductQuotationContents as PQC on PQC.ProductEstimateID = JCS.ProductEstimateID and JCS.JobCardID = PQC.ProductEstimationContentID inner join ProductCatalogMaster as PCM on PCM.ProductCatalogID = PQC.ProductCatalogID inner Join LedgerMaster as LMV on LMV.LedgerID = JCS.VendorID inner Join LedgerMaster as LMAV on LMAV.LedgerID = JCS.ScheduleVendorId inner Join LedgerMaster as LM on LM.LedgerID = PQ.LedgerID left join  LedgerMaster as LN on LN.LedgerID = JBJC.CoordinatorLedgerID inner join ProductHSNMaster as PHM on PHM.ProductHSNID = PCM.ProductHSNID INNER JOIN EnquiryMain AS EM ON EM.EnquiryID = PQ.EnquiryID inner Join ProductionEntry as PE on PE.JobBookingID = JBJC.jobbookingid INNER JOIN ProductionEntry as PS on PS.JobBookingID = JBJC.JobBookingID where isnull(JCS.IsDeletedTransaction,0) <> 1 and JCS.CompanyID =" & CompanyId & " And JCS.JOBCARDID = " & JobBookingID & " and  JCS.ScheduleVendorId = " & ScheduleVendorId
+
+            db.FillDataTable(dataTable, str)
+            data.Message = db.ConvertDataTableTojSonString(dataTable)
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function ProductionQuantity(ByVal JobBookingID As Integer, ByVal ScheduleVendorId As Integer) As String
+        Try
+            CompanyId = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+            str = "select distinct	PS.JobBookingNo,PQ.EnquiryID,EM.EnquiryNo,PQ.EstimateNo as QuotaionNo,PQC.ProductEstimateID,JCS.Processidstr,JCS.JobContentsID,JCS.JobCardID AS JobBookingID,PS.ProductionQuantity,JCS.ProductEstimateID,JCS.JobName as ProductName,JCS.OrderQuantity,JCS.JobType,JCS.JobReference,JCS.JobPriority, convert(CHAR(30),JCS.ExpectedDeliveryDate, 106)ExpectedDeliveryDate,JCS.ScheduleQty,JCS.VendorID,JCS.ScheduleVendorId,JCS.CriticalRemark,PCM.ProductCatalogID, PQ.ProductEstimateID from JobCardSchedule as JCS INNER JOIN  JobBookingJobCard as JBJC on JBJC.JobBookingID = JCS.JobCardID inner join ProductQuotation as PQ on PQ.ProductEstimateID = JCS.ProductEstimateID inner join ProductQuotationContents as PQC on PQC.ProductEstimateID = JCS.ProductEstimateID and JCS.JobCardID = PQC.ProductEstimationContentID inner join ProductCatalogMaster as PCM on PCM.ProductCatalogID = PQC.ProductCatalogID inner Join LedgerMaster as LMV on LMV.LedgerID = JCS.VendorID inner Join LedgerMaster as LMAV on LMAV.LedgerID = JCS.ScheduleVendorId inner Join LedgerMaster as LM on LM.LedgerID = PQ.LedgerID left join  LedgerMaster as LN on LN.LedgerID = JBJC.CoordinatorLedgerID inner join ProductHSNMaster as PHM on PHM.ProductHSNID = PCM.ProductHSNID INNER JOIN EnquiryMain AS EM ON EM.EnquiryID = PQ.EnquiryID inner Join ProductionEntry as PE on PE.JobBookingID = JBJC.jobbookingid INNER JOIN ProductionEntry as PS on PS.JobBookingID = JBJC.JobBookingID where isnull(JCS.IsDeletedTransaction,0) <> 1 and JCS.CompanyID =" & CompanyId & " And JCS.JOBCARDID = " & JobBookingID & " and  JCS.ScheduleVendorId = " & ScheduleVendorId
+
+            db.FillDataTable(dataTable, str)
+            data.Message = db.ConvertDataTableTojSonString(dataTable)
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
+
+
+
+    <WebMethod(EnableSession:=True)>
+    Public Function SaveEnd(ByVal Data As Object, ByVal IsEdit As Boolean, ByVal JobBookingID As String) As String
+        Try
+            Dim UserId As String = Convert.ToString(Session("UserID"))
+            Dim CompanyID As String = Convert.ToString(Session("CompanyID"))
+            Dim keyField = ""
+            Dim TableName = "Productionentry"
+            Dim AddCol = ""
+            Dim AddVal = ""
+
+
+            If IsEdit = False Then ''  to save new data
+                AddCol = "GetDate,ModifiedDate,CompanyID"
+                AddVal = "getdate(),getdate()," & CompanyID
+                keyField = db.InsertDatatableToDatabase(Data, TableName, AddCol, AddVal)
+                If IsNumeric(keyField) Then
+
+
+
+                    'to update the data
+                    str = "update JobBookingJobCard set JobStart= '1 ' where JobBookingID= " & JobBookingID
+                    db.ExecuteNonSQLQuery(str)
+
+
+                    Return "Success"
+                Else
+                    Return "Failed"
+                End If
+            Else '' to Update the data
+                AddCol = "ModifiedDate=getdate(),CompanyID=" & CompanyID
+                keyField = db.UpdateDatatableToDatabase(Data, TableName, AddCol, 1)
+                If keyField = "Success" Then
+                    Return "Success"
+                Else
+                    Return "Failed"
+                End If
+
+            End If
+
+            Return "Failed"
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+
+
+    End Function
+
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function GetRunningJobDt(ByVal ScheduleVendorid As Integer) As String
+        Try
+            CompanyId = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+            str = "Select distinct PE.JobBookingID, PQ.EnquiryID,EM.EnquiryNo,PQ.EstimateNo as QuotaionNo,JCS.JobName as ProductName,JCS.ScheduleQty as OrderQuantity,convert(CHAR(30),JCS.ExpectedDeliveryDate, 106)ExpectedDeliveryDate,JCS.VendorID,JCS.ScheduleVendorId from ProductionEntry as PE INNER JOIN JobCardSchedule AS JCS ON JCS.VendorID = PE.VendorID inner join ProductQuotation as PQ on PQ.ProductEstimateID = JCS.ProductEstimateID left join EnquiryMain AS EM ON EM.EnquiryID = PQ.EnquiryID inner join JobBookingJobCard as JBJC ON JBJC.JobBookingID = PE.JobBookingID where isnull(PE.IsDeletedTransaction,0) <> 1 and PE.CompanyID = " & CompanyId & "  and   isnull(PE.VENDORID,0) = " & ScheduleVendorid
+            db.FillDataTable(dataTable, str)
+            data.Message = db.ConvertDataTableTojSonString(dataTable)
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function AllocatedDT(ByVal ScheduleVendorid As Integer) As String
+        Try
+            CompanyId = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+            str = "Select distinct PQ.EnquiryID,EM.EnquiryNo,PQ.EstimateNo as QuotaionNo,JCS.JobName as ProductName,JCS.ScheduleQty as OrderQuantity,convert(CHAR(30),JCS.ExpectedDeliveryDate, 106)ExpectedDeliveryDate,JCS.VendorID,JCS.ScheduleVendorId from ProductionEntry as PE INNER JOIN JobCardSchedule AS JCS ON JCS.VendorID = PE.VendorID inner join ProductQuotation as PQ on PQ.ProductEstimateID = JCS.ProductEstimateID left join EnquiryMain AS EM ON EM.EnquiryID = PQ.EnquiryID inner join JobBookingJobCard as JBJC ON JBJC.JobBookingID != PE.JobBookingID where isnull(PE.IsDeletedTransaction,0) <> 1 and PE.CompanyID = " & CompanyId & "  and   isnull(PE.VENDORID,0) = " & ScheduleVendorid
+            db.FillDataTable(dataTable, str)
+            data.Message = db.ConvertDataTableTojSonString(dataTable)
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function GetDataGrid2(ByVal ScheduleVendorid As Integer) As String
+        Try
+            CompanyId = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+            str = "Select distinct PE.ProductionQuantity,LM.LedgerName ScheduleVendorName,PM.ProcessName,PQ.EnquiryID,EM.EnquiryNo,PQ.EstimateNo as QuotaionNo,JCS.JobName as ProductName,JCS.OrderQuantity,convert(CHAR(30),JCS.ExpectedDeliveryDate, 106)ExpectedDeliveryDate,JCS.ScheduleQty,JCS.VendorID,JCS.ScheduleVendorId from JobCardSchedule as JCS inner join ProductQuotation as PQ on PQ.ProductEstimateID = JCS.ProductEstimateID inner Join LedgerMaster as LM on LM.LedgerID = JCS.ScheduleVendorId left join  EnquiryMain AS EM ON EM.EnquiryID = PQ.EnquiryID inner join ProductionEntry as PE on PE.VendorID = JCS.VendorID inner Join ProcessMaster as PM on PM.ProcessID = PE.ProcessID where isnull(JCS.IsDeletedTransaction,0) <> 1 and JCS.CompanyID = " & CompanyId & "  and   isnull(JCS.ScheduleVendorId,0) = " & ScheduleVendorid
+            db.FillDataTable(dataTable, str)
+            data.Message = db.ConvertDataTableTojSonString(dataTable)
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function NewRunningJob(ByVal JobBookingID As Integer) As String
+        Try
+            CompanyId = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+            str = "Select distinct  LM.LedgerName ScheduleVendorName,JCS.JobName as ProductName,PM.ProcessName,PQ.EnquiryID,EM.EnquiryNo,PQ.EstimateNo as QuotaionNo,JCS.JobName as ProductName,JCS.ScheduleQty as OrderQuantity,convert(CHAR(30),JCS.ExpectedDeliveryDate, 106)ExpectedDeliveryDate,JCS.VendorID,PE.ProductionQuantity from ProductionEntry as PE INNER JOIN JobCardSchedule AS JCS ON JCS.VendorID = PE.VendorID INNER JOIN LedgerMaster AS LM ON LM.LedgerID = PE.VendorID inner Join ProcessMaster as PM on PM.ProcessID = PE.ProcessID inner join ProductQuotation as PQ on PQ.ProductEstimateID = JCS.ProductEstimateID left join EnquiryMain AS EM ON EM.EnquiryID = PQ.EnquiryID inner join JobBookingJobCard as JBJC ON JBJC.JobBookingID = PE.JobBookingID  where isnull(PE.IsDeletedTransaction,0) <> 1  and	PE.CompanyID =" & CompanyId & " and PE.JobBookingID = " & JobBookingID
+            db.FillDataTable(dataTable, str)
+            data.Message = db.ConvertDataTableTojSonString(dataTable)
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function GetAllProcess(ByVal JobBookingID As Integer) As String
+        Try
+            CompanyId = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+            str = "select distinct PM.ProcessName,PM.ProcessID from ProductionEntry as PE inner join ProcessMaster as PM on PE.ProcessId = PM.ProcessID where PE.CompanyID = " & CompanyId & " and PE.JobbookingId = " & JobBookingID
+            db.FillDataTable(dataTable, str)
+            data.Message = db.ConvertDataTableTojSonString(dataTable)
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
+
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function GetDelAddress(ByVal LedgerId As String) As String
+        CompanyId = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+
+        str = "Select LedgerId,LedgerName,MailingAddress as Address from LedgerMaster Where RefClientID = " & LedgerId & "And LedgerGroupID = 4 UNION ALL Select CompanyID as LedgerId,CompanyName As LedgerName,Address1 as Address fROM CompanyMaster Where CompanyID = " & CompanyId & " order By LedgerID"
+        db.FillDataTable(dataTable, str)
+        data.Message = db.ConvertDataTableTojSonString(dataTable)
+        js.MaxJsonLength = 2147483647
+        Return js.Serialize(data.Message)
     End Function
 
     Private Function RoundUP(value As Double, decimals As Integer) As Double

@@ -12,7 +12,7 @@
     <meta http-equiv="cache-control" content="no-cache, must-revalidate, post-check=0, pre-check=0" />
     <meta http-equiv="cache-control" content="max-age=0" />
 
-    <title>MIS</title>
+    <title></title>
     <!-- Favicon-->
     <link rel="icon" href="images/Indus%20logo.ico" type="image/x-icon">
 
@@ -37,11 +37,20 @@
     <!-- Custom Css -->
     <link href="css/style.css" rel="stylesheet">
 
-    <!-- AdminBSB Themes. You can choose a theme from css/themes instead of get all themes -->
-    <link href="css/themes/all-themes.css" rel="stylesheet" />
-
+   
     <!-- Jquery Core Js -->
     <script type="text/javascript" src="js/jquery3.js"></script>
+
+     <!-- Bootstrap Core Css -->
+    <link href="plugins/bootstrap/css/bootstrap.css" rel="stylesheet">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="dist/css/adminlte.min.css">
+
+    <!-- Waves Effect Css -->
+    <%--<link href="plugins/node-waves/waves.css" rel="stylesheet" />--%>
+
+    <!-- Animation Css -->
+    <link href="plugins/animate-css/animate.css" rel="stylesheet" />
 
     <asp:ContentPlaceHolder ID="head" runat="server">
     </asp:ContentPlaceHolder>
@@ -108,7 +117,7 @@
         <section>
             <!-- left Sidebar -->
 
-            <div id="MYbackgroundOverlay"></div>
+            <%-- <div id="MYbackgroundOverlay"></div>
             <div id="mySidenav" class="MYsidenav" style="margin-left: -60px;">
                 <div class="row clearfix" style="height: auto; padding-bottom: 0em; margin-right: -15px">
                     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="margin-top: 0em">
@@ -130,18 +139,64 @@
                     </div>
                 </div>
 
+            </div>--%>
+
+            <div id="MYbackgroundOverlay"></div>
+            <div id="mySidenav" class="MYsidenav" style="margin-left: -60px;">
+                <div class="row clearfix" style="height: auto; padding-bottom: 0em; margin-right: -15px">
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="margin-top: 0em">
+                        <div class="DialogBoxCustom" style="float: left;">
+                            <strong id="displayStatus"></strong>
+                            <a href="javascript:void(0);" class="iconRightDbox btn-danger" onclick="closeNavLeft()">
+                                <span onclick="closeNavLeft()" style="font-weight: 900; margin-right: 8px">X</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rowcontents clearfix">
+                    <div id="Master_Div">
+                        <nav class="mt-2" style="height: calc(100vh - 80px); overflow-y: auto;">
+                            <input type="search" id="myInput" class="searchInputText" onkeyup="searchInputMenu()" placeholder="Search for menu.." title="Type menu name">
+                            <ul id="DynamicMenuDiv" class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false"></ul>
+                        </nav>
+                    </div>
+                </div>
             </div>
 
+            <aside id="Customrightsidebar" class="RIGHTsidebar" style="width: 30px; border-left: 1px groove #eee; padding: 0px; display: none;">
+                <ul class="MYRIGHTnav MYRIGHTnav-tabs tab-col-red" role="tablist" style="width: 30px; margin-left: 0px">
+                    <li role="presentation" id="RightSETTINGS_LI">
+                        <a id="Settings" href="#RightTabBar" data-toggle="tab" onclick="Righttabbar(this);" style="cursor: pointer">SETTINGS</a>
+                    </li>
+                </ul>
+            </aside>
+
+            <div id="RightTabBar" class="MYRightsidenav">
+                <div class="row clearfix" style="height: auto; margin-right: -15px">
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                        <div class="DialogBoxCustom" style="float: left;">
+                            <strong id="displayStatusRight"></strong>
+                            <a href="javascript:void(0);" class="iconRightDbox btn-danger" onclick="closeRightTabBar()">
+                                <span onclick="closeRightTabBar()" style="font-weight: 900; margin-right: 8px">X</span>
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
         </section>
         <%-- Merge Menu Bar --%>
         <%--<link href="Merge_Menubar/css/demo.css" rel="stylesheet" />--%>
-        <link href="Merge_Menubar/css/component.css" rel="stylesheet" />
+      <%--  <link href="Merge_Menubar/css/component.css" rel="stylesheet" />
         <script src="Merge_Menubar/js/modernizr-custom.js"></script>
 
-        <script src="Merge_Menubar/js/classie.js"></script>
-        <script src="CustomJS/DynamicMenu.js"></script>
+        <script src="Merge_Menubar/js/classie.js"></script>--%>
+        <!-- Menu from Admin LTE -->
+        <script src="dist/js/adminlte.js"></script>
+        <script src="CustomJS/DrawMenu.js"></script>
 
-        <script src="Merge_Menubar/js/main.js"></script>
+        <%--<script src="Merge_Menubar/js/main.js"></script>--%>
         <%-- Merge Menu Bar --%>
 
         <%-- DevExpress Control Grid --%>
@@ -373,12 +428,12 @@
             $('a[href="' + activeTab + '"]').addClass('menu__link menu__link--current');
         }
 
-        (function () {
-            var menuEl = document.getElementById('ml-menu'),
-                mlmenu = new MLMenu(menuEl, {
-                    backCtrl: false, // show back button
-                });
-        })();
+        //(function () {
+        //    var menuEl = document.getElementById('ml-menu'),
+        //        mlmenu = new MLMenu(menuEl, {
+        //            backCtrl: false, // show back button
+        //        });
+        //})();
 
         var commentType = ["High", "Low", "Medium"];
         $("#selCommentType").dxSelectBox({

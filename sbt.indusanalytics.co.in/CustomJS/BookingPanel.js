@@ -1,6 +1,9 @@
 ﻿"use strict";
 var LedgerID = 0;
 var GBLContents = [];
+var IsReworkDone = 0;
+var FilterSTR = "";
+var ProfitValue = 0;
 $("#LoadIndicator").dxLoadPanel({
     shadingColor: "rgba(0,0,0,0.4)",
     indicatorSrc: "images/Indus logo.png",
@@ -11,10 +14,22 @@ $("#LoadIndicator").dxLoadPanel({
     closeOnOutsideClick: false,
     visible: false
 });
-
+$("#PendingProcess").dxRadioGroup({
+    items: ["Pending", "Processed"],
+    layout: "horizontal",
+    value: "Pending",
+    onValueChanged: function (data) {
+        if (data.value != null) {
+            if (data.value === "Pending")
+                IsReworkDone = 0
+            else
+                IsReworkDone = 1
+        }
+        LoadData();
+    }
+});
 var gblquotatioNo = 0;
-var toolTip = $("#tooltip").dxTooltip({
-}).dxTooltip("instance");
+var toolTip = $("#tooltip").dxTooltip({}).dxTooltip("instance");
 
 try {
 
@@ -40,62 +55,38 @@ try {
                 showPageSizeSelector: true,
                 allowedPageSizes: [100, 200, 500, 1000]
             },
+            onExporting: function (e) {
+                var workbook = new ExcelJS.Workbook();
+                var worksheet = workbook.addWorksheet('Main sheet');
+                DevExpress.excelExporter.exportDataGrid({
+                    worksheet: worksheet,
+                    component: e.component,
+                    customizeCell: function (options) {
+                        var excelCell = options;
+                        excelCell.font = { name: 'Arial', size: 12 };
+                        excelCell.alignment = { horizontal: 'left' };
+                    }
+                }).then(function () {
+                    workbook.xlsx.writeBuffer().then(function (buffer) {
+                        saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'BookingPanel.xlsx');
+                    });
+                });
+                e.cancel = true;
+            },
             filterRow: { visible: true },
             showBorders: true,
             loadPanel: {
                 enabled: true,
                 text: 'Data is loading...'
             },
-            selection: { mode: "multiple", showCheckBoxesMode: "always", allowSelectAll: false },
+            selection: { mode: "single", showCheckBoxesMode: "always", allowSelectAll: false },
             sorting: { mode: 'multiple' },
             height: function () {
                 return window.innerHeight / 1.25;
             },
             columnAutoWidth: true,
-            onContextMenuPreparing: function (e) {
-                if (e.target === "content" && e.column) {
 
-                    gblquotatioNo = e.row.QuotationNo
-                    // e.items can be undefined
-                    if (!e.items) e.items = [];
-
-                    // Add a custom menu item
-                    e.items.push({
-                        text: "Review",
-                        onItemClick: function () {
-
-                            QuotesLinkClick(e.row.key, "Review");
-                        }
-                    });
-                    e.items.push({
-                        text: "Revise",
-                        onItemClick: function () {
-                            QuotesLinkClick(e.row.key, false);
-                        }
-                    });
-                    //e.items.push({
-                    //    text: "Clone",
-                    //    onItemClick: function () {
-                    //        QuotesLinkClick(e.row.key, true);
-                    //    }
-                    //});
-                    //e.items.push({
-                    //    text: "Delete",
-                    //    onItemClick: function () {
-                    //        deleteQuotationDetails(e.row.key);
-                    //    }
-                    //});
-                    if (e.row.key.IsInternalApproved === false) return;
-                    e.items.push({
-                        text: "Print",
-                        onItemClick: function () {
-                            if (e.row.key.BookingID <= 0) return;
-                            var url = "QuotePreview.aspx?BKID=" + e.row.key.BookingID;///ReportQuotation.aspx?BookingID
-                            window.open(url, "_blank", "location=yes,height=" + window.innerHeight + ",width=" + window.innerWidth + ",scrollbars=yes,status=no", true);
-                        }
-                    });
-                }
-            }, masterDetail: {
+            masterDetail: {
                 enabled: true,
                 template(container, options) {
                     const currentProjectData = options.data;
@@ -109,7 +100,8 @@ try {
                             columnAutoWidth: true,
                             showBorders: true,
                             columns: [
-                                { dataField: "ProductName" },
+                                { dataField: "ProductName", caption: "Content Name" },
+                                { dataField: "ProductName1", caption: "Product Name" },
                                 { dataField: "CategoryName" },
                                 { dataField: "HSNCode" },
                                 { dataField: "Quantity" },
@@ -138,27 +130,37 @@ try {
             },
             onRowPrepared: function (e) {
                 setDataGridRowCss(e);
+                var selOption = $("#selectStatus").dxRadioGroup('instance').option('value');
+                if (selOption !== "All") return;
                 if (e.rowType === "data") {
-                    if (e.data.JobApproved === true) {
+
+                    if (e.data.IsPriceApproved === true) {
                         e.rowElement.addClass('jobapproved');
+                        // e.rowElement.css('color', 'white');
                     }
-                    else if (e.data.IsSendForInternalApproval === false && e.data.IsInternalApproved === false && e.data.IsCancelled === false && e.data.IsRework === false) {
+                    else if (e.data.IsSendForInternalApproval === false && e.data.IsInternalApproved === false && e.data.IsCancelled === false && e.data.IsSendRework === false) {
                         e.rowElement.addClass('newquotes');
                     }
-                    else if (e.data.IsSendForInternalApproval === true && e.data.IsInternalApproved === false && e.data.IsCancelled === false && e.data.IsRework === false) {
-                        e.rowElement.addClass('pendingforpriceapproval');
+                    else if (e.data.IsSendInternalApproval === true && e.data.IsInternalApproved === false && e.data.IsCancelled === false && e.data.IsSendRework === false) {
+                        e.rowElement.addClass('sentforintenalappproval');
                     }
                     else if (e.data.IsMailSent === true) {
                         e.rowElement.addClass('ismailsent');
                     }
+                    else if (e.data.IsCancelled === true) {
+                        e.rowElement.addClass('iscancelled');
+                    }
+                    else if (e.data.IsSendForPriceApproval === true) {
+                        e.rowElement.addClass('pendingforpriceapproval');
+                    }
                     else if (e.data.IsInternalApproved === true) {
                         e.rowElement.addClass('isinternalapproved');
                     }
-                    else if (e.data.IsRework === true) {
+                    else if (e.data.IsSendRework === true) {
                         e.rowElement.addClass('isrework');
                     }
-                    else if (e.data.IsCancelled === true) {
-                        e.rowElement.addClass('iscancelled');
+                    else {
+                        e.rowElement.addClass('newquotes');
                     }
 
                     //e.rowElement.mousemove(function () {
@@ -169,83 +171,7 @@ try {
                     //});
                 }
             },
-            //columns: [{ dataField: "ClientName", caption: "Client Name", width: 180 }, { dataField: "CategoryName", caption: "Category Name" },
-            //{ dataField: "JobName", caption: "Job Name", width: 200 }, { dataField: "BookingNo", caption: "Quote No" },
-            //{ dataField: "CreatedDate", caption: "Date" }, { dataField: "OrderQuantity", caption: "Order Qty" },
-            //{ dataField: "UserName", caption: "Quote By" }, { dataField: "QuotedCost", caption: "Quoted Cost" },
-            //{ dataField: "TypeOfCost", caption: "Unit" },
-            //{ dataField: "ProductCode", caption: "ArtWork Code" },
-            //{ dataField: "EnquiryID", caption: "Enquiry No", visible: false }, { dataField: "ApprovalSendTo", caption: "Approval Send To", visible: true },
-            //{ dataField: "InternalApprovedDate", caption: "IA Date" },
-            //{
-            //    caption: "", fixedPosition: "right", fixed: true,
-            //    cellTemplate: function (container, options) {
-            //        if (options.key.CommentCount > 0) {
-            //            $('<div title="Quote Comments">').addClass('fa fa-bell customgridbtn dx-link').append('<span class="bg-deep-orange badge font-10">' + options.key.CommentCount + '</span>')
-            //                .on('dxclick', function () {
-            //                    FnNotification(options.key.BookingID);
 
-            //                    this.setAttribute("data-toggle", "modal");
-            //                    this.setAttribute("data-target", "#CommentModal");
-            //                }).appendTo(container);
-            //        }
-
-            //    }
-            //},
-            //{
-            //    caption: "", fixedPosition: "right", fixed: true,
-            //    cellTemplate: function (container, options) {
-            //        $('<a title="Review Quote">').addClass('fa fa-eye dx-link')
-            //            .on('dxclick', function () {
-            //                QuotesLinkClick(options.key, "Review");
-            //            }).appendTo(container);
-            //    }
-            //}, {
-            //    caption: "", fixedPosition: "right", fixed: true,
-            //    cellTemplate: function (container, options) {
-            //        $('<a title="Revise Quote">').addClass('fa fa-edit dx-link')
-            //            //                        .text('Revise')
-            //            .on('dxclick', function () {
-            //                QuotesLinkClick(options.key, false);
-            //            }).appendTo(container);
-            //    }
-            //},
-            //{
-            //    caption: "", fixedPosition: "right", fixed: true,
-            //    cellTemplate: function (container, options) {
-            //        $('<a title="Clone Quote">').addClass('customgridbtn fa fa-copy dx-link')
-            //            //.text('Clone')
-            //            .on('dxclick', function () {
-            //                QuotesLinkClick(options.key, true);
-            //                //this.href = "DYnamicQty.aspx?BookingID=" + options.key.BookingID + "&FG=true";
-            //            }).appendTo(container);
-            //    }
-            //},
-            //{
-            //    caption: "", fixedPosition: "right", fixed: true,
-            //    cellTemplate: function (container, options) {
-            //        $('<a title="Print Quote">').addClass('fa fa-print dx-link customgridbtn')
-            //            .on('dxclick', function () {
-            //                if (options.key.BookingID <= 0 || options.key.IsInternalApproved === false) return;
-            //                //var url = "Print_Quotation.aspx?BN=" + options.key.BookingID + "&BookingNo=" + encodeURIComponent(options.key.BookingNo);
-            //                var url = "QuotePreview.aspx?BKID=" + options.key.BookingID;//ReportQuotation.aspx?BookingID
-            //                window.open(url, "_blank", "location=yes,height=" + window.innerHeight + ",width=" + window.innerWidth + ",scrollbars=yes,status=no", true);
-            //            }).appendTo(container);
-
-            //    }
-            //},
-            //{ dataField: "ReasonsofQuote", caption: "Reasons of Quote Failure", visible: false }, { dataField: "ReworkRemark", caption: "Rework Remark", visible: true, width: 200 },
-            //{ dataField: "RemarkInternalApproved", caption: "IA Remark", visible: true },
-            //{
-            //    caption: "", fixedPosition: "right", fixed: true, width: 30,
-            //    cellTemplate: function (container, options) {
-            //        $('<div title="Delete Quote" style="color:red;">').addClass('fa fa-trash customgridbtn dx-link')
-            //            .on('dxclick', function () {
-            //                deleteQuotationDetails(options.key);
-            //            }).appendTo(container);
-
-            //    }
-            //}],
             onSelectionChanged: function (selectedItems) {
                 var data = selectedItems.selectedRowsData;
                 var selOption = $("#selectStatus").dxRadioGroup('instance').option('value');
@@ -283,73 +209,11 @@ try {
                         }).join(','));
                 }
             }
-            ////summary: {
-            ////    totalItems: [{
-            ////        showInColumn: "ClientName",
-            ////        column: "ProductEstimateID",
-            ////        summaryType: "count"
-            ////    }, {
-            ////        showInColumn: "JobName",
-            ////        column: "IsCancelled",
-            ////        displayFormat: "Rejected Quotes: {0}",
-            ////        summaryType: "sum"
-            ////    }]
-            ////}
 
-            //onToolbarPreparing: function (e) {
-            //    var dataGrid = e.component;
-            //    e.toolbarOptions.items.unshift({
-            ////        location: "before",
-            ////        widget: "dxRadioGroup",
-            ////        options: {
-            ////            items: [{
-            ////                value: "All",
-            ////                text: "All Quotes"
-            ////            }, {
-            ////                value: "SendForApproval",
-            ////                text: "Pending For Appproval"
-            ////            }, {
-            ////                value: "IsMailSent",
-            ////                text: "Sent Quotes"
-            ////            }, {
-            ////                value: "IsInternalApproved",
-            ////                text: "Intenal Appproved"
-            ////            }, {
-            ////                value: "JobApproved",
-            ////                text: "Appproved"
-            ////            }, {
-            ////                value: "IsRework",
-            ////                text: "Rework"
-            ////            }, {
-            ////                value: "IsCancelled",
-            ////                text: "Rejected"
-            ////            }],
-            ////            displayExpr: "text",
-            ////            valueExpr: "value",
-            ////            layout: "horizontal",
-            ////            value: "All",
-            ////            itemTemplate: function (itemData, _, itemElement) {
-            ////                itemElement
-            ////                    .parent().addClass(itemData.value.toLowerCase())
-            ////                    .text(itemData.text);
-            ////            },
-            ////            onValueChanged: function (data) {
-            ////                if (data.value === "All") {
-            ////                    dataGrid.clearFilter();
-            ////                } else if (data.value === "IsInternalApproved") {
-            ////                    dataGrid.clearFilter();
-            ////                    dataGrid.filter([data.value, "=", 1], "or", ["IsCancelled", "=", 0], "or", ["PendingForPriceApproval", "=", 0]);
-            ////                //} else if (data.value === "PendingForPriceApproval") {
-            ////                //    dataGrid.clearFilter();
-            ////                //    dataGrid.filter(["IsInternalApproved", "=", 0], "or", ["IsCancelled", "=", 0], "or", ["IsRework", "=", 0]);
-            ////                } else
-            ////                    dataGrid.filter([data.value, "=", 1]);
-            ////            }
-            ////        }
-            ////    });
-            ////}
         });
     };
+
+
 
     $("#selectStatus").dxRadioGroup({
         items: [{
@@ -359,11 +223,14 @@ try {
             value: "NewQuotes",
             text: "New Quotes"
         }, {
-            value: "PendingForApproval",
+            value: "sentforintenalappproval",
             text: "Pending For Internal Approval"
         }, {
             value: "IsInternalApproved",
             text: "Internal Approved"
+        }, {
+            value: "pendingforpriceapproval",
+            text: "Pending For Price Approval"
         }, {
             value: "IsRework",
             text: "Rework"
@@ -386,144 +253,17 @@ try {
                 .text(itemData.text);
         },
         onValueChanged: function (data) {
+            if (data.value == null) return;
             //var dataGrid = $("#GridBooingPanel").dxDataGrid('instance');
-            $("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
 
-            document.getElementById("BtnSendForApproval").style.display = "none";
-            document.getElementById("BtnDisApproval").style.display = "none";
-            document.getElementById("BtnSendForInternalApproval").style.display = "none";
-            document.getElementById("DivSendToUser").style.display = "none";
-            document.getElementById("BtnDisInternalApproval").style.display = "none";
 
-            var FilterSTR = "";
-            if (data.value === "All") {
-                //dataGrid.clearFilter();
-                FilterSTR = data.value;
-            } else if (data.value === "NewQuotes") {
-                FilterSTR = " And PQ.IsSendForInternalApproval=0 And PQ.IsInternalApproved=0 And PQ.IsCancelled=0 And PQ.IsRework=0 And PQ.IsApproved=0 ";
-                document.getElementById("BtnSendForInternalApproval").style.display = "block";
-                document.getElementById("DivSendToUser").style.display = "block";
-            } else if (data.value === "PendingForApproval") {
-                //dataGrid.filter(["IsInternalApproved", "=", false], "or", ["IsCancelled", "=", 0], "or", ["IsRework", "=", 0], "or", ["JobApproved", "=", 0]);
-                FilterSTR = " And PQ.IsSendForInternalApproval=1 And IsInternalApproved=0 And PQ.IsCancelled=0 And PQ.IsRework=0 And PQ.IsApproved=0 ";
-                document.getElementById("BtnDisInternalApproval").style.display = "block";
-            } else if (data.value === "IsInternalApproved") {
-                document.getElementById("BtnSendForApproval").style.display = "block";
-                //dataGrid.filter([data.value, "=", 1], "or", ["IsCancelled", "=", 0], "or", ["PendingForPriceApproval", "=", 0]);
-                FilterSTR = " And PQ.IsInternalApproved=1 And PQ.IsCancelled=0 And PQ.IsSendForPriceApproval=0 ";
-            } else {
-                FilterSTR = " And " + data.value + "= 1 ";
-                //dataGrid.filter([data.value, "=", 1]);
-            }
-
-            if (data.value === "JobApproved") {
-                FilterSTR = " And PQ.IsApproved = 1 ";
-                document.getElementById("BtnDisApproval").style.display = "block";
-            }
-
-            $.ajax({
-                type: 'post',
-                url: 'WebServicePlanWindow.asmx/GetBookingData',
-                data: '{FilterSTR:' + JSON.stringify(FilterSTR) + '}',
-                dataType: 'json',
-                contentType: "application/json; charset=utf-8",
-                crossDomain: true,
-                success: function (results) {
-                    var res = results.d.replace(/\\/g, '');
-                    res = res.replace(/u0026/g, ' & ');
-                    res = res.substr(1);
-                    res = res.slice(0, -1);
-                    var RES1 = JSON.parse(res);
-                    $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
-                    GBLContents = RES1.Contents;
-                    $("#GridBooingPanel").dxDataGrid({
-                        dataSource: RES1.Projects,
-                        columns: [
-                            { dataField: "QuotationNo" },
-                            { dataField: "ProjectName" },
-                            { dataField: "ClientName" },
-                            { dataField: "CreatedDate" },
-                            { dataField: "SalesPerson" },
-                            { dataField: "FreightAmount" },
-                            { dataField: "Remark" },
-                            { dataField: "EstimateBy" },
-                            {
-                                caption: "", fixedPosition: "right", fixed: true,
-                                cellTemplate: function (container, options) {
-                                    if (options.key.CommentCount > 0) {
-                                        $('<div title="Quote Comments">').addClass('fa fa-bell customgridbtn dx-link').append('<span class="bg-deep-orange badge font-10">' + options.key.CommentCount + '</span>')
-                                            .on('dxclick', function () {
-                                                FnNotification(options.key.BookingID);
-
-                                                this.setAttribute("data-toggle", "modal");
-                                                this.setAttribute("data-target", "#CommentModal");
-                                            }).appendTo(container);
-                                    }
-
-                                }
-                            },
-                            {
-                                caption: "", fixedPosition: "right", fixed: true,
-                                cellTemplate: function (container, options) {
-                                    $('<a title="Review Quote">').addClass('fa fa-eye dx-link')
-                                        .on('dxclick', function () {
-                                            QuotesLinkClick(options.data, "Review");
-                                        }).appendTo(container);
-                                }
-                            }, {
-                                caption: "", fixedPosition: "right", fixed: true,
-                                cellTemplate: function (container, options) {
-                                    $('<a title="Revise Quote">').addClass('fa fa-edit dx-link')
-                                        //                        .text('Revise')
-                                        .on('dxclick', function () {
-                                            QuotesLinkClick(options.data, false);
-                                        }).appendTo(container);
-                                }
-                            },
-                            //{
-                            //    caption: "", fixedPosition: "right", fixed: true,
-                            //    cellTemplate: function (container, options) {
-                            //        $('<a title="Clone Quote">').addClass('customgridbtn fa fa-copy dx-link')
-                            //            //.text('Clone')
-                            //            .on('dxclick', function () {
-                            //                QuotesLinkClick(options.data, true);
-                            //                //this.href = "DYnamicQty.aspx?BookingID=" + options.key.BookingID + "&FG=true";
-                            //            }).appendTo(container);
-                            //    }
-                            //},
-                            //{
-                            //    caption: "", fixedPosition: "right", fixed: true,
-                            //    cellTemplate: function (container, options) {
-                            //        $('<a title="Print Quote">').addClass('fa fa-print dx-link customgridbtn')
-                            //            .on('dxclick', function () {
-                            //                if (options.key.BookingID <= 0 || options.key.IsInternalApproved === false) return;
-                            //                //var url = "Print_Quotation.aspx?BN=" + options.key.BookingID + "&BookingNo=" + encodeURIComponent(options.key.BookingNo);
-                            //                var url = "QuotePreview.aspx?BKID=" + options.key.BookingID;//ReportQuotation.aspx?BookingID
-                            //                window.open(url, "_blank", "location=yes,height=" + window.innerHeight + ",width=" + window.innerWidth + ",scrollbars=yes,status=no", true);
-                            //            }).appendTo(container);
-
-                            //    }
-                            //},
-                            { dataField: "ReasonsofQuote", caption: "Reasons of Quote Failure", visible: false }, { dataField: "ReworkRemark", caption: "Rework Remark", visible: true, width: 200 },
-                            { dataField: "RemarkInternalApproved", caption: "IA Remark", visible: true },
-                            //{
-                            //    caption: "", fixedPosition: "right", fixed: true, width: 30,
-                            //    cellTemplate: function (container, options) {
-                            //        $('<div title="Delete Quote" style="color:red;">').addClass('fa fa-trash customgridbtn dx-link')
-                            //            .on('dxclick', function () {
-                            //                deleteQuotationDetails(options.key);
-                            //            }).appendTo(container);
-
-                            //    }
-                            //}
-                        ],
-
-                    });
-                },
-                error: function errorFunc(jqXHR) {
-                    //DevExpress.ui.notify(jqXHR.statusText, "error", 500);
-                }
-            });
+            LoadData();
+            //if (data.value == "IsRework") {
+            //    $('#PendingProcess').removeClass('hidden');
+            //} else {
+            //    $('#PendingProcess').addClass('hidden');
+            //    IsReworkDone = 0;
+            //}
 
         }
     });
@@ -536,6 +276,611 @@ try {
     console.log(e);
 }
 
+$("#HistoryGrid").dxDataGrid({
+    keyExpr: 'ProductEstimateID',
+    dataSource: [],
+    export: {
+        enabled: true,
+        fileName: "Quotes_History",
+        allowExportSelectedData: true
+    },
+    allowColumnReordering: true,
+    allowColumnResizing: true,
+    showRowLines: true,
+    //wordWrapEnabled: true,
+    paging: {
+        enabled: true,
+        pageSize: 100
+    },
+    pager: {
+        showPageSizeSelector: true,
+        allowedPageSizes: [100, 200, 500, 1000]
+    },
+    onExporting: function (e) {
+        var workbook = new ExcelJS.Workbook();
+        var worksheet = workbook.addWorksheet('Main sheet');
+        DevExpress.excelExporter.exportDataGrid({
+            worksheet: worksheet,
+            component: e.component,
+            customizeCell: function (options) {
+                var excelCell = options;
+                excelCell.font = { name: 'Arial', size: 12 };
+                excelCell.alignment = { horizontal: 'left' };
+            }
+        }).then(function () {
+            workbook.xlsx.writeBuffer().then(function (buffer) {
+                saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'BookingPanel_History.xlsx');
+            });
+        });
+        e.cancel = true;
+
+    }, onRowPrepared: function (e) {
+        setDataGridRowCss(e);
+    },
+    filterRow: { visible: true },
+    showBorders: true,
+    loadPanel: {
+        enabled: true,
+        text: 'Data is loading...'
+    },
+    selection: { mode: "single", showCheckBoxesMode: "always", allowSelectAll: false },
+    sorting: { mode: 'multiple' },
+    height: function () {
+        return window.innerHeight / 1.25;
+    },
+    columnAutoWidth: true,
+
+    masterDetail: {
+        enabled: true,
+        template(container, options) {
+            const currentProjectData = options.data;
+
+            $('<div>')
+                .addClass('master-detail-caption')
+                .text(`${currentProjectData.ClientName} 's Products:`)
+                .appendTo(container);
+            $('<div>')
+                .dxDataGrid({
+                    columnAutoWidth: true,
+                    showBorders: true,
+                    columns: [
+                        { dataField: "ProductName", caption: "Content Name" },
+                        { dataField: "ProductName1", caption: "Product Name" },
+                        { dataField: "CategoryName" },
+                        { dataField: "HSNCode" },
+                        { dataField: "Quantity" },
+                        { dataField: "Rate" },
+                        { dataField: "RateType" },
+                        { dataField: "UnitCost" },
+                        { dataField: "GSTPercantage" },
+                        { dataField: "GSTAmount" },
+                        { dataField: "MiscPercantage" },
+                        { dataField: "MiscAmount" },
+                        { dataField: "ShippingCost" },
+                        { dataField: "ProfitPer" },
+                        { dataField: "ProfitCost" },
+                        { dataField: "FinalAmount" },
+                        { dataField: "VendorName" }
+                    ],
+                    dataSource: new DevExpress.data.DataSource({
+                        store: new DevExpress.data.ArrayStore({
+                            //key: 'ID',
+                            data: GBLContents,
+                        }),
+                        filter: ['ProductEstimateID', '=', options.key],
+                    }),
+                }).appendTo(container);
+        },
+    },
+});
+function LoadData() {
+    var data = $("#selectStatus").dxRadioGroup('instance').option('value');
+    $("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
+
+    document.getElementById("BtnSendForApproval").style.display = "none";
+    document.getElementById("BtnDisApproval").style.display = "none";
+    document.getElementById("BtnSendForInternalApproval").style.display = "none";
+    document.getElementById("DivSendToUser").style.display = "none";
+    document.getElementById("BtnDisInternalApproval").style.display = "none";
+    $('#PrintButton').addClass('hidden');
+
+    if (data === "All") {
+        //dataGrid.clearFilter();
+        FilterSTR = data;
+    } else if (data === "NewQuotes") {
+        FilterSTR = " And PQ.IsSendForInternalApproval=0 And PQ.IsInternalApproved=0 And PQ.IsCancelled=0 And PQ.IsRework=0 And PQ.IsApproved=0 ";
+        document.getElementById("BtnSendForInternalApproval").style.display = "block";
+        document.getElementById("DivSendToUser").style.display = "block";
+    } else if (data === "sentforintenalappproval") {
+        FilterSTR = " And PQ.IsSendForInternalApproval=1 And PQ.IsInternalApproved=0 And PQ.IsCancelled=0 And PQ.IsRework=0 And PQ.IsApproved=0 ";
+        document.getElementById("BtnDisInternalApproval").style.display = "block";
+    } else if (data === "IsInternalApproved") {
+        document.getElementById("BtnSendForApproval").style.display = "block";
+
+        $('#PrintButton').removeClass('hidden');
+
+        FilterSTR = " And PQ.IsInternalApproved=1 And PQ.IsCancelled=0 and PQ.IsApproved =0  ";
+    } else if (data === "pendingforpriceapproval") {
+        //document.getElementById("BtnSendForApproval").style.display = "block";
+        $('#PrintButton').removeClass('hidden');
+        FilterSTR = " And PQ.IsInternalApproved=1 And PQ.IsCancelled=0 And PQ.IsSendForPriceApproval=1 and Isnull(PQ.Isapproved,0) <> 1 ";
+    } else {
+        FilterSTR = " And PQ." + data + "= 1 " //and isnull(IsReworkDone,0) =" + IsReworkDone;
+        //dataGrid.filter([data, "=", 1]);
+    }
+
+    if (data === "JobApproved") {
+        FilterSTR = " And PQ.IsApproved = 1 ";
+        document.getElementById("BtnDisApproval").style.display = "none";
+    }
+    $.ajax({
+        type: 'post',
+        url: 'WebServicePlanWindow.asmx/GetBookingData',
+        data: '{FilterSTR:' + JSON.stringify(FilterSTR) + '}',
+        dataType: 'json',
+        contentType: "application/json; charset=utf-8",
+        crossDomain: true,
+        success: function (results) {
+            var res = results.d.replace(/\\/g, '');
+            res = res.replace(/u0026/g, ' & ');
+            res = res.substr(1);
+            res = res.slice(0, -1);
+            var RES1 = JSON.parse(res);
+            $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+            GBLContents = RES1.Contents;
+
+            var cols = [];
+            switch (data) {
+                case "All":
+                    cols = [
+                        { dataField: "QuotationNo" },
+                        { dataField: "EnquiryNo" },
+                        { dataField: "ProjectName" },
+                        { dataField: "ClientName" },
+                        { dataField: "CreatedDate" },
+                        { dataField: "SalesManager" },
+                        { dataField: "SalesCordinator" },
+                        { dataField: "SalesPerson", caption: 'Sales Executive' },
+                        { dataField: "FreightAmount" },
+                        { dataField: "Remark" },
+                        { dataField: "EstimateBy" },
+                        { dataField: "ApprovalSendTo" },
+                        { dataField: "IsSendInternalApproval" },
+                        { dataField: "IsInternalApproved" },
+                        { dataField: "IsSendRework" },
+                        { dataField: "IsCancelled" },
+                        { dataField: "IsSendForPriceApproval" },
+                        { dataField: "IsPriceApproved" },
+                        //{ dataField: "ApprovedDate" },
+                        //{ dataField: "RemarkInternalApproved", caption: "IA Remark", visible: true },
+                        //{ dataField: "ReworkDate" },
+                        //{ dataField: "ReworkRemark", caption: "Rework Remark", visible: true, width: 200 },
+                        //{ dataField: "CancelledDate" },
+                        //{ dataField: "CancelledRemark", caption: "Reasons of Quote Failure", visible: true },
+
+                        {
+                            caption: "", fixedPosition: "right", fixed: true,
+                            cellTemplate: function (container, options) {
+                                $('<a title="See History">').addClass('fa fa-history dx-link')
+                                    .on('dxclick', function () {
+                                        QuotesLinkClick(options.data, "History");
+                                    }).appendTo(container);
+                            }
+                        }, {
+                            caption: "", fixedPosition: "right", fixed: true,
+                            cellTemplate: function (container, options) {
+                                $('<a title="Review Quote">').addClass('fa fa-eye dx-link')
+                                    .on('dxclick', function () {
+                                        QuotesLinkClick(options.data, "Review");
+                                    }).appendTo(container);
+                            }
+                        }, {
+                            visible: false,
+                            caption: "", fixedPosition: "right", fixed: true,
+                            cellTemplate: function (container, options) {
+                                $('<a title="Revise Quote">').addClass('fa fa-edit dx-link')
+                                    //                        .text('Revise')
+                                    .on('dxclick', function () {
+                                        QuotesLinkClick(options.data, false);
+                                    }).appendTo(container);
+                            }
+                        },
+
+                    ]
+
+                    break;
+                case "NewQuotes":
+                    cols = [
+                        { dataField: "QuotationNo" },
+                        { dataField: "EnquiryNo" },
+                        { dataField: "ProjectName" },
+                        { dataField: "ClientName" },
+                        { dataField: "CreatedDate" },
+                        { dataField: "SalesManager" },
+                        { dataField: "SalesCordinator" },
+                        { dataField: "SalesPerson", caption: 'Sales Executive' },
+                        { dataField: "FreightAmount" },
+                        { dataField: "Remark" },
+                        { dataField: "EstimateBy" },
+                        {
+                            caption: "", fixedPosition: "right", fixed: true,
+                            cellTemplate: function (container, options) {
+                                $('<a title="See History">').addClass('fa fa-history dx-link')
+                                    .on('dxclick', function () {
+                                        QuotesLinkClick(options.data, "History");
+                                    }).appendTo(container);
+                            }
+                        },
+                        {
+                            caption: "", fixedPosition: "right", fixed: true,
+                            cellTemplate: function (container, options) {
+                                $('<a title="Review Quote">').addClass('fa fa-eye dx-link')
+                                    .on('dxclick', function () {
+                                        QuotesLinkClick(options.data, "Review");
+                                    }).appendTo(container);
+                            }
+                        }, {
+                            visible: false,
+                            caption: "", fixedPosition: "right", fixed: true,
+                            cellTemplate: function (container, options) {
+                                $('<a title="Revise Quote">').addClass('fa fa-edit dx-link')
+                                    .on('dxclick', function () {
+                                        QuotesLinkClick(options.data, false);
+                                    }).appendTo(container);
+                            }
+                        },
+                    ]
+                    break;
+                case "sentforintenalappproval":
+                    cols = [
+                        { dataField: "QuotationNo" },
+                        { dataField: "EnquiryNo" },
+                        { dataField: "ProjectName" },
+                        { dataField: "ClientName" },
+                        { dataField: "CreatedDate" },
+                        { dataField: "SalesManager" },
+                        { dataField: "SalesCordinator" },
+                        { dataField: "SalesPerson", caption: 'Sales Executive' },
+                        { dataField: "FreightAmount" },
+                        { dataField: "Remark" },
+                        { dataField: "EstimateBy" },
+                        { dataField: "ApprovalSendTo" },
+                        { dataField: "ApprovalSendDate" },
+                        {
+                            caption: "", fixedPosition: "right", fixed: true,
+                            cellTemplate: function (container, options) {
+                                $('<a title="See History">').addClass('fa fa-history dx-link')
+                                    .on('dxclick', function () {
+                                        QuotesLinkClick(options.data, "History");
+                                    }).appendTo(container);
+                            }
+                        },
+                        {
+                            caption: "", fixedPosition: "right", fixed: true,
+                            cellTemplate: function (container, options) {
+                                if (options.key.CommentCount > 0) {
+                                    $('<div title="Quote Comments">').addClass('fa fa-bell customgridbtn dx-link').append('<span class="bg-deep-orange badge font-10">' + options.key.CommentCount + '</span>')
+                                        .on('dxclick', function () {
+                                            FnNotification(options.key.BookingID);
+
+                                            this.setAttribute("data-toggle", "modal");
+                                            this.setAttribute("data-target", "#CommentModal");
+                                        }).appendTo(container);
+                                }
+
+                            }
+                        },
+                        {
+                            caption: "", fixedPosition: "right", fixed: true,
+                            cellTemplate: function (container, options) {
+                                $('<a title="Review Quote">').addClass('fa fa-eye dx-link')
+                                    .on('dxclick', function () {
+                                        QuotesLinkClick(options.data, "Review");
+                                    }).appendTo(container);
+                            }
+                        }, {
+                            visible: true,
+                            caption: "", fixedPosition: "right", fixed: true,
+                            cellTemplate: function (container, options) {
+                                $('<a title="Revise Quote">').addClass('fa fa-edit dx-link')
+                                    //                        .text('Revise')
+                                    .on('dxclick', function () {
+                                        QuotesLinkClick(options.data, false);
+                                    }).appendTo(container);
+                            }
+                        },
+
+                    ]
+                    break;
+                case "IsInternalApproved":
+                    cols = [
+                        { dataField: "QuotationNo" },
+                        { dataField: "EnquiryNo" },
+                        { dataField: "ProjectName" },
+                        { dataField: "ClientName" },
+                        { dataField: "CreatedDate" },
+                        { dataField: "SalesManager" },
+                        { dataField: "SalesCordinator" },
+                        { dataField: "SalesPerson", caption: 'Sales Executive' },
+                        { dataField: "FreightAmount" },
+                        { dataField: "Remark" },
+                        { dataField: "EstimateBy" },
+                        { dataField: "ApprovalSendTo" },
+                        { dataField: "InternalApprovedDate" },
+                        { dataField: "RemarkInternalApproved", caption: "IA Remark", visible: true },
+                        {
+                            caption: "", fixedPosition: "right", fixed: true,
+                            cellTemplate: function (container, options) {
+                                $('<a title="See History">').addClass('fa fa-history dx-link')
+                                    .on('dxclick', function () {
+                                        QuotesLinkClick(options.data, "History");
+                                    }).appendTo(container);
+                            }
+                        },
+                        {
+                            caption: "", fixedPosition: "right", fixed: true,
+                            cellTemplate: function (container, options) {
+                                $('<a title="Review Quote">').addClass('fa fa-eye dx-link')
+                                    .on('dxclick', function () {
+                                        QuotesLinkClick(options.data, "Review");
+                                    }).appendTo(container);
+                            }
+                        }, {
+                            visible: true,
+                            caption: "", fixedPosition: "right", fixed: true,
+                            cellTemplate: function (container, options) {
+                                $('<a title="Revise Quote">').addClass('fa fa-edit dx-link')
+                                    //                        .text('Revise')
+                                    .on('dxclick', function () {
+                                        QuotesLinkClick(options.data, false);
+                                    }).appendTo(container);
+                            }
+                        }
+                    ]
+
+                    break;
+                case "pendingforpriceapproval":
+                    cols = [
+                        { dataField: "QuotationNo" },
+                        { dataField: "EnquiryNo" },
+                        { dataField: "ProjectName" },
+                        { dataField: "ClientName" },
+                        { dataField: "CreatedDate" },
+                        { dataField: "SalesManager" },
+                        { dataField: "SalesCordinator" },
+                        { dataField: "SalesPerson", caption: 'Sales Executive' },
+                        { dataField: "FreightAmount" },
+                        { dataField: "Remark" },
+                        { dataField: "EstimateBy" },
+                        { dataField: "ApprovalSendTo" },
+                        { dataField: "InternalApprovedDate" },
+                        { dataField: "RemarkInternalApproved", caption: "IA Remark", visible: true },
+                        {
+                            caption: "", fixedPosition: "right", fixed: true,
+                            cellTemplate: function (container, options) {
+                                $('<a title="See History">').addClass('fa fa-history dx-link')
+                                    .on('dxclick', function () {
+                                        QuotesLinkClick(options.data, "History");
+                                    }).appendTo(container);
+                            }
+                        },
+                        {
+                            caption: "", fixedPosition: "right", fixed: true,
+                            cellTemplate: function (container, options) {
+                                $('<a title="Review Quote">').addClass('fa fa-eye dx-link')
+                                    .on('dxclick', function () {
+                                        QuotesLinkClick(options.data, "Review");
+                                    }).appendTo(container);
+                            }
+                        }, {
+                            visible: true,
+                            caption: "", fixedPosition: "right", fixed: true,
+                            cellTemplate: function (container, options) {
+                                $('<a title="Revise Quote">').addClass('fa fa-edit dx-link')
+                                    //                        .text('Revise')
+                                    .on('dxclick', function () {
+                                        QuotesLinkClick(options.data, false);
+                                    }).appendTo(container);
+                            }
+                        }
+                    ]
+
+                    break;
+                case "IsRework":
+                    cols = [
+                        { dataField: "QuotationNo" },
+                        { dataField: "EnquiryNo" },
+                        { dataField: "ProjectName" },
+                        { dataField: "ClientName" },
+                        { dataField: "CreatedDate" },
+                        { dataField: "SalesManager" },
+                        { dataField: "SalesCordinator" },
+                        { dataField: "SalesPerson", caption: 'Sales Executive' },
+                        { dataField: "FreightAmount" },
+                        { dataField: "Remark" },
+                        { dataField: "EstimateBy" },
+                        { dataField: "ApprovalSendTo" },
+                        { dataField: "ReworkDate" },
+                        { dataField: "ReworkRemark", caption: "Rework Remark", visible: true, width: 200 },
+                        {
+                            caption: "", fixedPosition: "right", fixed: true,
+                            cellTemplate: function (container, options) {
+                                $('<a title="See History">').addClass('fa fa-history dx-link')
+                                    .on('dxclick', function () {
+                                        QuotesLinkClick(options.data, "History");
+                                    }).appendTo(container);
+                            }
+                        },
+
+                        {
+                            caption: "", fixedPosition: "right", fixed: true,
+                            cellTemplate: function (container, options) {
+                                $('<a title="Review Quote">').addClass('fa fa-eye dx-link')
+                                    .on('dxclick', function () {
+                                        QuotesLinkClick(options.data, "Review");
+                                    }).appendTo(container);
+                            }
+                        }, {
+                            caption: "", fixedPosition: "right", fixed: true,
+                            cellTemplate: function (container, options) {
+                                $('<a title="Revise Quote">').addClass('fa fa-edit dx-link')
+                                    //                        .text('Revise')
+                                    .on('dxclick', function () {
+                                        QuotesLinkClick(options.data, false);
+                                    }).appendTo(container);
+                            }
+                        },
+                    ]
+                    break;
+                case "IsCancelled":
+                    cols = [
+                        { dataField: "QuotationNo" },
+                        { dataField: "EnquiryNo" },
+                        { dataField: "ProjectName" },
+                        { dataField: "ClientName" },
+                        { dataField: "CreatedDate" },
+                        { dataField: "SalesManager" },
+                        { dataField: "SalesCordinator" },
+                        { dataField: "SalesPerson", caption: 'Sales Executive' },
+                        { dataField: "FreightAmount" },
+                        { dataField: "Remark" },
+                        { dataField: "EstimateBy" },
+                        { dataField: "ApprovalSendTo" },
+                        {
+                            caption: "", fixedPosition: "right", fixed: true,
+                            cellTemplate: function (container, options) {
+                                $('<a title="See History">').addClass('fa fa-history dx-link')
+                                    .on('dxclick', function () {
+                                        QuotesLinkClick(options.data, "History");
+                                    }).appendTo(container);
+                            }
+                        },
+                        {
+                            caption: "", fixedPosition: "right", fixed: true,
+                            cellTemplate: function (container, options) {
+                                $('<a title="Review Quote">').addClass('fa fa-eye dx-link')
+                                    .on('dxclick', function () {
+                                        QuotesLinkClick(options.data, "Review");
+                                    }).appendTo(container);
+                            }
+                        }, {
+                            visible: false,
+                            caption: "", fixedPosition: "right", fixed: true,
+                            cellTemplate: function (container, options) {
+                                $('<a title="Revise Quote">').addClass('fa fa-edit dx-link')
+                                    //                        .text('Revise')
+                                    .on('dxclick', function () {
+                                        QuotesLinkClick(options.data, false);
+                                    }).appendTo(container);
+                            }
+                        },
+                        { dataField: "CancelledDate" },
+                        { dataField: "CancelledRemark", caption: "Reasons of Quote Failure", visible: true },
+
+
+                    ]
+
+                    break;
+                case "IsMailSent":
+                    cols = [
+                        { dataField: "QuotationNo" },
+                        { dataField: "EnquiryNo" },
+                        { dataField: "ProjectName" },
+                        { dataField: "ClientName" },
+                        { dataField: "CreatedDate" },
+                        { dataField: "SalesManager" },
+                        { dataField: "SalesCordinator" },
+                        { dataField: "SalesPerson", caption: 'Sales Executive' },
+                        { dataField: "FreightAmount" },
+                        { dataField: "Remark" },
+                        { dataField: "EstimateBy" },
+                        { dataField: "ApprovalSendTo" },
+                        { dataField: "RemarkInternalApproved", caption: "IA Remark", visible: true },
+                        {
+                            caption: "", fixedPosition: "right", fixed: true,
+                            cellTemplate: function (container, options) {
+                                $('<a title="See History">').addClass('fa fa-history dx-link')
+                                    .on('dxclick', function () {
+                                        QuotesLinkClick(options.data, "History");
+                                    }).appendTo(container);
+                            }
+                        },
+                        {
+                            caption: "", fixedPosition: "right", fixed: true,
+                            cellTemplate: function (container, options) {
+                                $('<a title="Review Quote">').addClass('fa fa-eye dx-link')
+                                    .on('dxclick', function () {
+                                        QuotesLinkClick(options.data, "Review");
+                                    }).appendTo(container);
+                            }
+                        }, {
+                            caption: "", fixedPosition: "right", fixed: true,
+                            cellTemplate: function (container, options) {
+                                $('<a title="Revise Quote">').addClass('fa fa-edit dx-link')
+                                    //                        .text('Revise')
+                                    .on('dxclick', function () {
+                                        QuotesLinkClick(options.data, false);
+                                    }).appendTo(container);
+                            }
+                        }
+                    ]
+
+                    break;
+                case "JobApproved":
+                    cols = [
+                        { dataField: "QuotationNo" },
+                        { dataField: "EnquiryNo" },
+                        { dataField: "ProjectName" },
+                        { dataField: "ClientName" },
+                        { dataField: "CreatedDate" },
+                        { dataField: "SalesManager" },
+                        { dataField: "SalesCordinator" },
+                        { dataField: "SalesPerson", caption: 'Sales Executive' },
+                        { dataField: "FreightAmount" },
+                        { dataField: "Remark" },
+                        { dataField: "EstimateBy" },
+                        { dataField: "ApprovalSendTo" },
+                        { dataField: "ApprovedDate" },
+
+                        {
+                            caption: "", fixedPosition: "right", fixed: true,
+                            cellTemplate: function (container, options) {
+                                $('<a title="Review Quote">').addClass('fa fa-eye dx-link')
+                                    .on('dxclick', function () {
+                                        QuotesLinkClick(options.data, "Review");
+                                    }).appendTo(container);
+                            }
+                        }, {
+                            visible: false,
+                            caption: "", fixedPosition: "right", fixed: true,
+                            cellTemplate: function (container, options) {
+                                $('<a title="Revise Quote">').addClass('fa fa-edit dx-link')
+                                    //                        .text('Revise')
+                                    .on('dxclick', function () {
+                                        QuotesLinkClick(options.data, false);
+                                    }).appendTo(container);
+                            }
+                        },
+                        { dataField: "RemarkInternalApproved", caption: "IA Remark", visible: true },
+
+                    ]
+
+                    break;
+
+                default:
+                // code block
+            }
+            $("#GridBooingPanel").dxDataGrid({
+                dataSource: RES1.Projects,
+                columns: cols
+
+            });
+        },
+        error: function errorFunc(jqXHR) {
+            //DevExpress.ui.notify(jqXHR.statusText, "error", 500);
+        }
+    });
+}
 $("#PrintButton").click(function () {
     // var bid = document.getElementById("txtBookingID").value;
     var bid = document.getElementById("QuoteIDId").value;
@@ -544,7 +889,7 @@ $("#PrintButton").click(function () {
         swal("Empty Selection", "Please select quote first...!", "warning");
     }
     else {
-        var url = "QuotePreview.aspx?BKID=" + bid; //// "Print_Quotation.aspx?BN=" + document.getElementById("QuoteIDId").value + "&BookingNo=" + encodeURIComponent(document.getElementById("BookingNo").value);
+        var url = "ProjectQuotationReportViewer.aspx?t=" + bid; //// "Print_Quotation.aspx?BN=" + document.getElementById("QuoteIDId").value + "&BookingNo=" + encodeURIComponent(document.getElementById("BookingNo").value);
         window.open(url, "_blank", "location=yes,height=1100,width=1050,scrollbars=yes,status=no", true);
     }
 });
@@ -655,6 +1000,32 @@ $("#BtnDisApproval").click(function () {
     }
 });
 
+$("#Sendmail").click(function () {
+
+
+    $("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
+    $.ajax({
+        type: "POST",
+        url: "WebServicePlanWindow.asmx/Sendmail",
+        data: '{}',
+        contentType: "application/json; charset=utf-8",
+        dataType: 'text',
+        success: function (results) {
+            var res = results.replace(/"/g, '');
+            res = res.replace(/d:/g, '');
+            res = res.replace(/{/g, '');
+            res = res.replace(/}/g, '');
+            $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+            alert(res);
+        },
+        error: function errorFunc(jqXHR) {
+            //$("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+            alert(jqXHR.message);
+        }
+    });
+
+});
+
 //Internal Approval User Name List
 $.ajax({
     type: "POST",
@@ -761,8 +1132,84 @@ function deleteQuotationDetails(ObjBK) {
 }
 
 function QuotesLinkClick(rowData, Flag) {
-    var BKID = rowData.ProductEstimateID;
 
+    if (Flag == "History") {
+
+        $.ajax({
+            type: 'post',
+            url: 'WebServicePlanWindow.asmx/GetBookingDataHistory',
+            data: '{ID:' + JSON.stringify(rowData.EnquiryID) + '}',
+            dataType: 'json',
+            contentType: "application/json; charset=utf-8",
+            crossDomain: true,
+            success: function (results) {
+                var res = results.d.replace(/\\/g, '');
+                res = res.replace(/u0026/g, ' & ');
+                res = res.substr(1);
+                res = res.slice(0, -1);
+                var RES1 = JSON.parse(res);
+                $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+                GBLContents = RES1.Contents;
+
+                var cols = [
+                    { dataField: "QuotationNo" },
+                    { dataField: "EnquiryNo" },
+                    { dataField: "ProjectName" },
+                    { dataField: "ClientName" },
+                    { dataField: "CreatedDate" },
+                    { dataField: "SalesManager" },
+                    { dataField: "SalesCordinator" },
+                    { dataField: "SalesPerson", caption: 'Sales Executive' },
+                    { dataField: "FreightAmount" },
+                    { dataField: "Remark" },
+                    { dataField: "EstimateBy" },
+                    { dataField: "ApprovalSendTo" },
+                    { dataField: "IsSendInternalApproval" },
+                    { dataField: "IsInternalApproved" },
+                    { dataField: "IsSendRework" },
+                    { dataField: "IsCancelled" },
+                    { dataField: "IsSendForPriceApproval" },
+                    { dataField: "IsPriceApproved" },
+                    { dataField: "ApprovedDate" },
+                    { dataField: "RemarkInternalApproved", caption: "IA Remark", visible: true },
+                    { dataField: "ReworkDate" },
+                    { dataField: "ReworkRemark", caption: "Rework Remark", visible: true, width: 200 },
+                    { dataField: "CancelledDate" },
+                    { dataField: "CancelledRemark", caption: "Reasons of Quote Failure", visible: true },
+
+                ]
+                $("#HistoryGrid").dxDataGrid({
+                    dataSource: RES1.Projects,
+                    columns: cols
+                });
+
+                $('#modalHistory').modal('show');
+            }
+        });
+
+        return
+    }
+
+
+    var IsDirectApproved = 0;
+    var IsDirectPriceApproved = 0;
+    var data = $("#selectStatus").dxRadioGroup('instance').option('value');
+    var BKID = rowData.ProductEstimateID;
+    if (data = "IsInternalApproved") {
+        IsDirectApproved = 1
+        IsDirectPriceApproved = 0
+    } else {
+        IsDirectApproved = 0
+        IsDirectPriceApproved = 0
+    }
+    if (data = "pendingforpriceapproval") {
+        IsDirectPriceApproved = 1
+        IsDirectApproved = 0
+    }
+    else {
+        IsDirectPriceApproved = 0
+        IsDirectApproved = 0
+    }
     var Captitle = "";
     if (Flag === true) {
         Captitle = "Clone Quote Of: ";
@@ -772,7 +1219,7 @@ function QuotesLinkClick(rowData, Flag) {
         Captitle = "Review Quote No: ";
     }
     swal({
-        title: Captitle + rowData.QuotationNo ,
+        title: Captitle + rowData.QuotationNo,
         text: "Are you sure to continue..?",
         type: "warning",
         showCancelButton: true,
@@ -781,7 +1228,7 @@ function QuotesLinkClick(rowData, Flag) {
         closeOnConfirm: false
     },
         function () {
-            window.location.href = "ProjectQuotation.aspx?BookingID=" + BKID + "&FG=" + Flag + "";
+            window.location.href = "ProjectQuotation.aspx?BookingID=" + BKID + "&FG=" + Flag + "&IsDirectApproved=" + IsDirectApproved + "&IsDirectPriceApproved=" + IsDirectPriceApproved;
             window.location.href.reload(true);
         });
 }

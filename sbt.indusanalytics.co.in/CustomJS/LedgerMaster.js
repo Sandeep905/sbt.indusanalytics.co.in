@@ -4,6 +4,9 @@ var GblStatus = "", ConcernPerson = "";
 var LedgerGrNID = "";
 var DynamicColPush = [];
 
+var ItemSelectionKeys = '';
+
+var SalesCordiantorArray = [], SALESEXECUTIVEARRAY = [];
 $("#LoadIndicator").dxLoadPanel({
     shadingColor: "rgba(0,0,0,0.4)",
     indicatorSrc: "images/Indus logo.png",
@@ -36,6 +39,47 @@ function OpenPopup(PU) {
     document.getElementById(PU.id).setAttribute("data-target", "#largeModal");
 }
 
+$("#ListIfItemsGrid").dxDataGrid({
+    keyExpr: 'ItemId',
+    dataSource: [],
+    columns: [
+        { dataField: "ItemCode" },
+        { dataField: "ItemName" },
+        { dataField: "Quality" },
+        { dataField: "StockCategory" },
+        { dataField: "GSM" },
+        { dataField: "ItemSize" },
+        { dataField: "ItemDescription" },
+        { dataField: "ItemType" },
+        { dataField: "StockUnit" },
+
+    ],
+    scrolling: {
+        mode: 'infinite',
+    },
+    showBorders: true,
+    showRowLines: true,
+    allowColumnReordering: true,
+    allowColumnResizing: true,
+    columnResizingMode: "widget",
+    selection: { mode: "multiple" },
+    filterRow: { visible: true, applyFilter: "auto" },
+    headerFilter: { visible: true },
+    searchPanel: { visible: true },
+    loadPanel: {
+        enabled: true,
+        height: 90,
+        width: 200,
+        text: 'Data is loading...'
+    },
+    height: function () {
+        return window.innerHeight / 1.3;
+    },
+    onRowPrepared: function (e) {
+        setDataGridRowCss(e);
+    },
+
+});
 getMasterLIST();
 
 $("#MasterGrid").dxDataGrid({
@@ -89,6 +133,79 @@ $("#MasterGrid").dxDataGrid({
 
         document.getElementById("txtGetGridRow").value = data[0].LedgerID; /// grid.cellValue(Row, 0);        
         UnderGroupID = data[0].LedgerGroupID; ///grid.cellValue(Row, 1);
+        $.ajax({
+            async: false,
+            type: "POST",
+            url: "WebService_LedgerMaster.asmx/GetSalesCordnators",
+            data: '{ID:' + JSON.stringify(data[0].RefSalesRepresentativeID) + '}',
+            contentType: "application/json; charset=utf-8",
+            dataType: "text",
+            success: function (results) {
+                var res = results.replace(/\\/g, '');
+                res = res.replace(/"d":""/g, '');
+                res = res.replace(/""/g, '');
+                res = res.replace(/u0026/g, '&');
+                res = res.substr(1);
+                res = res.slice(0, -1);
+                SalesCordiantorArray = JSON.parse(res);
+
+            }
+        });
+        $.ajax({
+            async: false,
+            type: "POST",
+            url: "WebService_LedgerMaster.asmx/GetSalesPerson",
+            data: '{ID:' + JSON.stringify(data[0].RefSalesRepresentativeID) + '}',
+            contentType: "application/json; charset=utf-8",
+            dataType: "text",
+            success: function (results) {
+                var res = results.replace(/\\/g, '');
+                res = res.replace(/"d":""/g, '');
+                res = res.replace(/""/g, '');
+                res = res.replace(/u0026/g, '&');
+                res = res.substr(1);
+                res = res.slice(0, -1);
+                SALESEXECUTIVEARRAY = JSON.parse(res);
+
+            }
+
+        });
+
+        $("#GridPerson").dxDataGrid({
+            columns: [
+                { dataField: "Name", visible: true, caption: "Name", validationRules: [{ type: "required" }] },
+                { dataField: "Designation", visible: true, caption: "Designation" },
+                {
+                    dataField: "Mobile", visible: true, caption: "Mobile No",
+                    validationRules: [{ type: "required" }, {
+                        type: "numeric",
+                        message: 'You must enter only numeric value..!'
+                    }]
+                },
+                { dataField: "Email", visible: true, caption: "Email", validationRules: [{ type: "required" }, { type: "email" }] },
+                {
+                    dataField: "SalesCordinatorID", visible: true, caption: "Sales Cordinator",
+                    lookup: {
+                        dataSource: SalesCordiantorArray,
+                        displayExpr: "LedgerName",
+                        valueExpr: "SalesCordinatorID",
+
+                    }
+                },
+                {
+                    dataField: "LedgerIDSE", visible: true, caption: "POC",
+                    lookup: {
+                        dataSource: SALESEXECUTIVEARRAY,
+                        displayExpr: "LedgerName",
+                        valueExpr: "LedgerIDSE",
+
+                    }
+                },
+                { dataField: "IsPrimaryConcernPerson", visible: true, caption: "Is Primary ConcernPerson", dataType: "boolean" }
+            ],
+        });
+
+        ExistCosernPerson();
     }
 });
 
@@ -124,10 +241,13 @@ function getMasterLIST() {
                     layout: 'horizontal',
                     onValueChanged: function (e) {
                         CurrentMaster(e);
+                        $('#ShowListButton').click();
                     }
                 });
 
                 $("#RadioMasterList").dxRadioGroup({ value: RES1[0].LedgerGroupID });
+
+
             }
         });
     } catch (e) {
@@ -188,7 +308,8 @@ function CurrentMaster(e) {
     DynamicControlls();
 }
 
-var selID = ""; var selQuery = ""; var selDefault = "";
+
+var selID = ""; var selQuery = ""; var selDefault = ""; var tagQuery = ""; var tgID = "";
 var GBLField = "";
 
 $("#ShowListButton").click(function () {
@@ -199,16 +320,17 @@ $("#ShowListButton").click(function () {
         url: "WebService_LedgerMaster.asmx/MasterGrid",
         data: '{masterID:' + JSON.stringify(masterID) + '}',
         contentType: "application/json; charset=utf-8",
-        dataType: "text",
+        dataType: "Json",
         success: function (results) {
-            var res = results.replace(/\\/g, '');
+            var res = results.d.replace(/\\/g, '');
             res = res.replace(/"d":""/g, '');
-            res = res.replace(/""/g, '');
+            res = res.replace(/"d":null/g, '');
             res = res.replace(/u0026/g, '&');
             res = res.replace(/:,/g, ':null,');
             res = res.replace(/:}/g, ':null}');
             res = res.substr(1);
             res = res.slice(0, -1);
+            $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
             var RES1 = JSON.parse(res);
 
             $("#MasterGrid").dxDataGrid({
@@ -224,9 +346,32 @@ $("#ShowListButton").click(function () {
                     }
                     $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
                 },
-                columns: DynamicColPush
+                columns: DynamicColPush,
+                onExporting: function (e) {
+                    var workbook = new ExcelJS.Workbook();
+                    var worksheet = workbook.addWorksheet('Main sheet');
+                    DevExpress.excelExporter.exportDataGrid({
+                        worksheet: worksheet,
+                        component: e.component,
+                        customizeCell: function (options) {
+                            var excelCell = options;
+                            excelCell.font = { name: 'Arial', size: 12 };
+                            excelCell.alignment = { horizontal: 'left' };
+                        }
+                    }).then(function () {
+                        workbook.xlsx.writeBuffer().then(function (buffer) {
+                            saveAs(new Blob([buffer], { type: 'application/octet-stream' }), localStorage.getItem('activeName') + '.xlsx');
+                        });
+                    });
+                    e.cancel = true;
+                }
+                //onFileSaving: function (e) {
+                //    saveAs(new Blob([$('#MasterGrid').dxDataGrid('instance')._options.dataSource], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }), localStorage.getItem('activeName'));
+
+                //    e.cancel = true;
+                //},
             });
-            $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+
         }
     });
 
@@ -432,6 +577,81 @@ function DynamicControlls() {
 
                     }
 
+                } else if (RES1[i].FieldType === "tagbox") {
+                    DEselID = "";
+                    DEselID = RES1[i].FieldName;
+                    var DEselQuery = "";
+                    DEselQuery = RES1[i].SelectBoxQueryDB;
+
+                    var DEselDefault = "";
+                    DEselDefault = RES1[i].SelectBoxDefault;
+
+                    if (DEselQuery === "" || DEselQuery === "null" || DEselQuery === null || DEselQuery === undefined) {
+
+                        fieldContainer = "";
+                        fieldContainer = '<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12" style="float:left;margin-bottom:0px;display:' + IsDisplayCol + '">' +
+                            '<label style="float: left; width: 100%;">' + RES1[i].FieldDisplayName + '</label><br />' +
+                            '<div id="' + RES1[i].FieldName + '"  style="float: left; width: 100%;height:30px;border: 1px solid #d3d3d3"></div><br />' +
+                            '<div style="min-height:15px;float:left;width:100%"><strong id=ValStr' + RES1[i].FieldName + ' style="color:red;font-size:10px"></strong>  <textarea id=ValCh' + RES1[i].FieldName + ' style="display: none" >' + RES1[i].FieldFormulaString + '</textarea><strong id=Formula' + RES1[i].FieldName + ' style="display: none">' + RES1[i].FieldFormula + '</strong>  </div></div>';
+                        $("#FieldCntainerRow").append(fieldContainer);
+
+                        var LedgerPush = [];
+                        var LedgerLength = 0;
+                        if (DEselDefault !== null && DEselDefault !== "null" && DEselDefault !== undefined) {
+
+                            var Ledger = DEselDefault.split(',');
+                            LedgerLength = Ledger.length;
+                        }
+
+
+                        if (LedgerLength > 0) {
+                            for (var k = 0; k < LedgerLength; k++) {
+                                LedgerPush.push(Ledger[k]);
+                            }
+                        }
+                        var SID = "#" + DEselID;
+                        if (RES1[i].FieldFormula === "" || RES1[i].FieldFormula === null || RES1[i].FieldFormula === undefined) {
+                            $(SID).dxTagBox({
+                                items: LedgerPush,
+                                //showSelectionControls: true,
+                                //applyValueMode: 'useButtons',
+                            });
+                        } else {
+                            $(SID).dxTagBox({
+                                items: LedgerPush,
+                                //showSelectionControls: true,
+                                //applyValueMode: 'useButtons',
+                            });
+                        }
+
+                    }
+                    else {
+
+                        fieldContainer = "";
+                        fieldContainer = '<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12" style="float:left;margin-bottom:0px;display:' + IsDisplayCol + '">' +
+                            '<label style="float: left; width: 100%;">' + RES1[i].FieldDisplayName + '</label><br />' +
+                            '<div id="' + RES1[i].FieldName + '" style="float: left; width: 100%;height:30px;border: 1px solid #d3d3d3"></div><br />' +
+                            '<div style="min-height:15px;float:left;width:100%"><strong id=ValStr' + RES1[i].FieldName + ' style="color:red;font-size:10px"></strong>   <textarea id=ValCh' + RES1[i].FieldName + ' style="display: none" >' + RES1[i].FieldFormulaString + '</textarea><strong id=Formula' + RES1[i].FieldName + ' style="display: none">' + RES1[i].FieldFormula + '</strong>  </div></div>';
+                        $("#FieldCntainerRow").append(fieldContainer);
+
+                        if (tgID === "" || tgID === null || tgID === undefined) {
+                            tgID = RES1[i].FieldName;
+                        }
+                        else {
+                            tgID = tgID + ' ? ' + RES1[i].FieldName;
+                        }
+
+                        if (tagQuery === "" || tagQuery === null || tagQuery === tagQuery) {
+                            // selQuery = RES1[i].SelectboxQueryDB;
+                            tagQuery = RES1[i].LedgerGroupFieldID;
+                        }
+                        else {
+                            //selQuery = selQuery + ' ? ' + RES1[i].SelectboxQueryDB;
+                            tagQuery = tagQuery + ' ? ' + RES1[i].LedgerGroupFieldID;
+                        }
+
+                    }
+
                 }
             }
 
@@ -443,6 +663,9 @@ function DynamicControlls() {
 
             if (selQuery !== "") {
                 selctbox();
+            }
+            if (tagQuery !== "") {
+                tagbox();
             }
             document.getElementById("BtnSave").disabled = false;
         }
@@ -510,6 +733,7 @@ function selctbox() {
                             searchEnabled: true,
                             showClearButton: true,
                             onValueChanged: function (data) {
+
                                 if (data) {
                                     var currentID = data.element.context.id;
                                     FarmulaChangeSELECTBX(currentID);
@@ -571,6 +795,129 @@ function selctbox() {
                                     FarmulaChangeSELECTBX(currentID);
                                 }
                             }
+                        });
+                    }
+                }
+                $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+
+            } catch (e) {
+                $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+            }
+        }
+    });
+}
+function tagbox() {
+    var selbox = "";
+    $("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
+    $.ajax({
+        type: "POST",
+        url: "WebService_LedgerMaster.asmx/SelectBoxLoad",
+        data: '{Qery:' + JSON.stringify(tagQuery) + ',selID:' + JSON.stringify(tgID) + '}',
+        contentType: "application/json; charset=utf-8",
+        dataType: "text",
+        success: function (results) {
+            var res = results.replace(/\\/g, '');
+            res = res.replace(/"d":""/g, '');
+            res = res.replace(/""/g, '');
+            res = res.replace(/u0026/g, '&');
+            res = res.substr(1);
+            res = res.slice(0, -1);
+            try {
+                if (res === "") {
+                    selbox = [];
+                } else {
+                    selbox = "";
+                    selbox = JSON.parse(res);
+                }
+                var TBLName = Object.getOwnPropertyNames(selbox);
+
+                for (var t in selbox) {
+                    var Tblobj = selbox[t];
+                    var selA = Object.getOwnPropertyNames(Tblobj[0]);
+                    selA = JSON.stringify(selA);
+                    selA = selA.substr(1);
+                    selA = selA.slice(0, -1);
+                    selA = selA.replace(/"/g, '');
+                    selA = selA.split(",");
+
+                    var Displayxpr = "";
+                    var Valuexpr = "";
+                    if (selA.length > 1) {
+                        ///////////////////////////////////////With  valueExpr/////////////////////////////////////////////
+                        Displayxpr = selA[1];
+                        Valuexpr = selA[0];
+
+                        var selectID = JSON.stringify(Tblobj[Tblobj.length - 1]);
+
+                        selectID = selectID.substr(1);
+                        selectID = selectID.slice(0, -1);
+                        selectID = selectID.replace(/"/g, '');
+                        selectID = selectID.replace(/ /g, '');
+                        selectID = selectID.split(":");
+                        selectID = "#" + selectID[2];
+
+                        Tblobj = Tblobj.slice(0, -1);
+
+                        $(selectID).dxTagBox({
+                            items: Tblobj,
+                            placeholder: "Select--",
+                            displayExpr: Displayxpr,
+                            valueExpr: Valuexpr,
+                            searchEnabled: true,
+                            showClearButton: true,
+                            showSelectionControls: true,
+                            //applyValueMode: 'useButtons',
+                            //onCustomItemCreating: function (e) {
+                            //    //Add a new item to your data store based on the e.text value
+                            //    var NewLedger = e.value;
+                            //    Tblobj.push(NewLedger);
+                            //    editableProduct.option("Ledgers", Tblobj);
+                            //    e.customItem = NewLedger;
+                            //   // return NewLedger;
+                            //}
+                        });
+
+                    }
+                    else {
+                        Displayxpr = selA[0];
+                        Valuexpr = selA[0];
+                        ///////////////////////////////////////WithOut  valueExpr/////////////////////////////////////////////
+
+                        var selectelseID = JSON.stringify(Tblobj[Tblobj.length - 1]);
+                        selectelseID = selectelseID.substr(1);
+                        selectelseID = selectelseID.slice(0, -1);
+                        selectelseID = selectelseID.replace(/"/g, '');
+                        selectelseID = selectelseID.replace(/ /g, '');
+                        selectelseID = selectelseID.split(":");
+                        var replaceText = selectelseID[1];
+                        selectelseID = "#" + selectelseID[1];
+
+                        Tblobj = Tblobj.slice(0, -1);
+
+                        var ReplaceTblobj = JSON.stringify(Tblobj);
+                        ReplaceTblobj = ReplaceTblobj.replace(new RegExp(replaceText, 'g'), '');
+                        ReplaceTblobj = ReplaceTblobj.replace(/"":/g, '');
+                        ReplaceTblobj = ReplaceTblobj.replace(/{/g, '');
+                        ReplaceTblobj = ReplaceTblobj.replace(/}/g, '');
+                        ReplaceTblobj = ReplaceTblobj.substr(1);
+                        ReplaceTblobj = ReplaceTblobj.slice(0, -1);
+                        ReplaceTblobj = ReplaceTblobj = ReplaceTblobj.replace(/"/g, '');
+
+                        ReplaceTblobj = ReplaceTblobj.split(',');
+                        var simpleProducts = [];
+                        for (var Ledgertxt in ReplaceTblobj) {
+                            simpleProducts.push(ReplaceTblobj[Ledgertxt]);
+                        }
+
+                        $(selectelseID).dxTagBox({
+                            items: simpleProducts,
+                            //placeholder: "Select--",
+                            //displayExpr: Displayxpr,
+                            //valueExpr: Valuexpr,
+                            searchEnabled: true,
+                            showClearButton: true,
+                            showSelectionControls: true,
+                                //applyValueMode: 'useButtons',
                         });
                     }
                 }
@@ -779,6 +1126,19 @@ $("#BtnSave").click(function () {
                         OperationLedgerMasterDetailRecord.ParentFieldValue = pval;//text
                         OperationLedgerMasterDetailRecord.FieldValue = pval;//text
                     }
+                    if (columnlength[j].FieldType === "tagbox") {
+
+                        OperationLedgerMasterDetailRecord.ParentLedgerID = 0;
+                        // OperationLedgerMasterDetailRecord.ParentLedgerID =$("#" + columnlength[j].FieldName).dxSelectBox("instance").option('value').trim();
+                        var pval = $("#" + columnlength[j].FieldName).dxTagBox("instance").option('value');
+                        if (pval !== "" && pval !== "null" && pval !== null && pval !== undefined) {
+                            if (isNaN(pval)) {
+                                pval = pval.toString();
+                            }
+                        }
+                        OperationLedgerMasterDetailRecord.ParentFieldValue = pval.toString();//text
+                        OperationLedgerMasterDetailRecord.FieldValue = pval.toString();//text
+                    }
                     if (columnlength[j].FieldType === "checkbox") {
                         OperationLedgerMasterDetailRecord.ParentFieldValue = document.getElementById(columnlength[j].FieldName).checked;
                         OperationLedgerMasterDetailRecord.FieldValue = document.getElementById(columnlength[j].FieldName).checked;
@@ -789,6 +1149,8 @@ $("#BtnSave").click(function () {
                         OperationLedgerMasterRecord.TallyCode = OperationLedgerMasterDetailRecord.FieldValue;
                     } else if (columnlength[j].FieldName.trim() === "VendorID") {
                         OperationLedgerMasterRecord.VendorID = OperationLedgerMasterDetailRecord.FieldValue;
+                    } else if (columnlength[j].FieldName.trim() === "UnderUserID") {
+                        OperationLedgerMasterRecord.UnderUserID = OperationLedgerMasterDetailRecord.FieldValue;
                     }
                     OperationLedgerMasterDetailRecord.SequenceNo = j + 1;
                     OperationLedgerMasterDetailRecord.LedgerGroupID = document.getElementById("MasterID").innerHTML.trim();
@@ -796,6 +1158,24 @@ $("#BtnSave").click(function () {
                     jsonObjectsLedgerMasterDetailRecord.push(OperationLedgerMasterDetailRecord);
 
                 }
+
+
+                // FOR SUPPLIER AND VENDOR ONLY for item allocation
+
+                if (document.getElementById("MasterID").innerHTML.trim() == "2" || document.getElementById("MasterID").innerHTML.trim() == "8") {
+                    OperationLedgerMasterDetailRecord = {}
+                    OperationLedgerMasterDetailRecord.FieldName = 'SelectedItemIds';
+                    OperationLedgerMasterDetailRecord.ParentFieldName = 'SelectedItemIds';
+
+                    OperationLedgerMasterDetailRecord.ParentFieldValue = ItemSelectionKeys.toString();//text
+                    OperationLedgerMasterDetailRecord.FieldValue = ItemSelectionKeys.toString();//text
+                    OperationLedgerMasterDetailRecord.SequenceNo = jsonObjectsLedgerMasterDetailRecord.length + 1;
+                    OperationLedgerMasterDetailRecord.LedgerGroupID = document.getElementById("MasterID").innerHTML.trim();
+
+                    jsonObjectsLedgerMasterDetailRecord.push(OperationLedgerMasterDetailRecord);
+                }
+
+
 
                 jsonObjectsLedgerMasterRecord.push(OperationLedgerMasterRecord);
                 var CostingDataLedgerMaster = JSON.stringify(jsonObjectsLedgerMasterRecord);
@@ -822,17 +1202,19 @@ $("#BtnSave").click(function () {
                         OperationSlabDetailRecord.Email = GridDataSource[k].Email;
                         OperationSlabDetailRecord.Designation = GridDataSource[k].Designation;
                         OperationSlabDetailRecord.IsPrimaryConcernPerson = GridDataSource[k].IsPrimaryConcernPerson;
+                        OperationSlabDetailRecord.SalesCordinatorID = GridDataSource[k].SalesCordinatorID;
+                        OperationSlabDetailRecord.SalesPersonId = GridDataSource[k].LedgerIDSE;
 
                         jsonObjectsSlabDetailRecord.push(OperationSlabDetailRecord);
-                    }
-                    else {
+                    } else {
                         OperationSlabDetailRecordUpadate.ConcernPersonID = GridDataSource[k].ConcernPersonID;
                         OperationSlabDetailRecordUpadate.Name = GridDataSource[k].Name;
                         OperationSlabDetailRecordUpadate.Mobile = GridDataSource[k].Mobile;
                         OperationSlabDetailRecordUpadate.Email = GridDataSource[k].Email;
                         OperationSlabDetailRecordUpadate.Designation = GridDataSource[k].Designation;
                         OperationSlabDetailRecordUpadate.IsPrimaryConcernPerson = GridDataSource[k].IsPrimaryConcernPerson;
-
+                        OperationSlabDetailRecordUpadate.SalesCordinatorID = GridDataSource[k].SalesCordinatorID;
+                        OperationSlabDetailRecordUpadate.SalesPersonId = GridDataSource[k].LedgerIDSE;
                         jsonObjectsSlabDetailRecordUpadate.push(OperationSlabDetailRecordUpadate);
                     }
                 }
@@ -859,7 +1241,7 @@ $("#BtnSave").click(function () {
                             $.ajax({
                                 type: "POST",
                                 url: "WebService_LedgerMaster.asmx/UpdateData",
-                                data: '{CostingDataLedgerMaster:' + CostingDataLedgerMaster + ',CostingDataLedgerDetailMaster:' + CostingDataLedgerDetailMaster + ',MasterName:' + JSON.stringify(MasterName) + ',LedgerID:' + JSON.stringify(document.getElementById("txtGetGridRow").value) + ',UnderGroupID:' + JSON.stringify(UnderGroupID) + ',ActiveLedger:' + JSON.stringify(document.getElementById("Isactivledgerstatic").checked) + ',CostingDataSlab:' + CostingDataSlab + ',CostingDataSlabUpdate:' + CostingDataSlabUpdate + '}',
+                                data: '{CostingDataLedgerMaster:' + CostingDataLedgerMaster + ',CostingDataLedgerDetailMaster:' + CostingDataLedgerDetailMaster + ',MasterName:' + JSON.stringify(MasterName) + ',LedgerID:' + JSON.stringify(document.getElementById("txtGetGridRow").value) + ',UnderGroupID:' + JSON.stringify(UnderGroupID) + ',ActiveLedger:' + JSON.stringify(document.getElementById("Isactivledgerstatic").checked) + ',CostingDataSlab:' + CostingDataSlab + ',CostingDataSlabUpdate:' + CostingDataSlabUpdate + ',ItemStringArray:' + JSON.stringify(ItemSelectionKeys.toString()) + '}',
                                 contentType: "application/json; charset=utf-8",
                                 dataType: "json",
                                 success: function (results) {
@@ -875,6 +1257,10 @@ $("#BtnSave").click(function () {
                                         swal("Updated!", "Your data has been updated successfully", "success");
                                         $("#ShowListButton").click();
                                         $("#largeModal").modal('hide');
+                                        $("#ListIfItemsGrid").dxDataGrid({
+                                            dataSource: []
+                                        })
+                                        ItemSelectionKeys = "";
                                     } else if (res.includes("not authorized")) {
                                         swal("Access Denied..!", res, "error");
                                     } else if (res.includes("Error:")) {
@@ -890,7 +1276,7 @@ $("#BtnSave").click(function () {
                             $.ajax({
                                 type: "POST",
                                 url: "WebService_LedgerMaster.asmx/SaveData",
-                                data: '{CostingDataLedgerMaster:' + CostingDataLedgerMaster + ',CostingDataLedgerDetailMaster:' + CostingDataLedgerDetailMaster + ',MasterName:' + JSON.stringify(MasterName) + ',ActiveLedger:' + JSON.stringify(document.getElementById("Isactivledgerstatic").checked) + ',LedgerGroupID:' + JSON.stringify(document.getElementById("MasterID").innerHTML.trim()) + ',CostingDataSlab:' + CostingDataSlab + '}',
+                                data: '{CostingDataLedgerMaster:' + CostingDataLedgerMaster + ',CostingDataLedgerDetailMaster:' + CostingDataLedgerDetailMaster + ',MasterName:' + JSON.stringify(MasterName) + ',ActiveLedger:' + JSON.stringify(document.getElementById("Isactivledgerstatic").checked) + ',LedgerGroupID:' + JSON.stringify(document.getElementById("MasterID").innerHTML.trim()) + ',CostingDataSlab:' + CostingDataSlab + ',ItemStringArray:' + JSON.stringify(ItemSelectionKeys) + '}',
                                 contentType: "application/json; charset=utf-8",
                                 dataType: "json",
                                 success: function (results) {
@@ -977,6 +1363,12 @@ function FillGrid() {
                     } else {
                         $("#btnApMachineAllo").addClass("hidden");
                     }
+
+                    if (masterID == 2 || masterID == 8) { //Supplier and AP for Item Allocation
+                        $("#btnAllocateItems").removeClass("hidden");
+                    } else {
+                        $("#btnAllocateItems").addClass("hidden");
+                    }
                     //Create Dril Down Of Masters
                     document.getElementById("TabDiv").innerHTML = "";
 
@@ -1059,6 +1451,7 @@ $("#EditButton").click(function () {
     }
 
     $.ajax({
+        async: false,
         type: "POST",
         url: "WebService_LedgerMaster.asmx/MasterGridLoadedData",
         data: '{masterID:' + JSON.stringify(UnderGroupID) + ',Ledgerid:' + JSON.stringify(txtGetGridRow) + '}',
@@ -1085,13 +1478,13 @@ $("#EditButton").click(function () {
                 for (var e = 0; e < GBLField.length; e++) {
 
                     if (GBLField[e].FieldType === "text") {
-                        document.getElementById(GBLField[e].FieldName).value = LoadedData[GBLField[e].FieldName];
+                        document.getElementById(GBLField[e].FieldName).value = LoadedData[GBLField[e].FieldName] == undefined ? '' : LoadedData[GBLField[e].FieldName];
                     }
                     else if (GBLField[e].FieldType === "number") {
-                        document.getElementById(GBLField[e].FieldName).value = Number(LoadedData[GBLField[e].FieldName]);
+                        document.getElementById(GBLField[e].FieldName).value = Number(LoadedData[GBLField[e].FieldName] == undefined ? 0 : LoadedData[GBLField[e].FieldName]);
                     }
                     else if (GBLField[e].FieldType === "textarea") {
-                        document.getElementById(GBLField[e].FieldName).value = LoadedData[GBLField[e].FieldName];
+                        document.getElementById(GBLField[e].FieldName).value = LoadedData[GBLField[e].FieldName] == undefined ? '' : LoadedData[GBLField[e].FieldName];
                     }
                     else if (GBLField[e].FieldType === "checkbox") {
                         var chkStatus = "";
@@ -1126,8 +1519,30 @@ $("#EditButton").click(function () {
                         });
 
                     }
-                }
+                    else if (GBLField[e].FieldType === "tagbox") {
+                        var UPSID = "#" + GBLField[e].FieldName;
 
+                        var selValue = "";
+                        if (isNaN(LoadedData[GBLField[e].FieldName])) {
+                            selValue = LoadedData[GBLField[e].FieldName];
+                        }
+                        else {
+                            selValue = JSON.parse(LoadedData[GBLField[e].FieldName]);
+                        }
+
+                        $(UPSID).dxTagBox({
+                            value: selValue.split(',')
+                        });
+
+                    }
+                }
+                $('#ListIfItemsGrid').dxDataGrid('instance').clearSelection();
+                ItemSelectionKeys = "";
+                if (LoadedData.SelectedItemIds != undefined)
+                    ItemSelectionKeys = LoadedData.SelectedItemIds.split(',');
+                $("#ListIfItemsGrid").dxDataGrid({
+                    selectedRowKeys: ItemSelectionKeys
+                });
                 $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
             } catch (e) {
                 $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
@@ -1728,11 +2143,48 @@ $("#btnConvertToConsignee").click(function () {
 });
 
 $("#btnConcernPerson").click(function () {
-    $("#GridPerson").dxDataGrid({ dataSource: [] });
 
-    ExistCosernPerson();
     document.getElementById("ConcernPersonBtnDeletePopUp").disabled = false;
-    if (GblStatus === "") { document.getElementById("ConcernPersonBtnDeletePopUp").disabled = true; }
+    if (GblStatus === "") {
+        document.getElementById("ConcernPersonBtnDeletePopUp").disabled = true;
+        $("#GridPerson").dxDataGrid({ dataSource: [] });
+    }
+
+    if (document.getElementById("MasterName").innerHTML == "ASSOCIATE PARTNER" || document.getElementById("MasterName").innerHTML == "SUPPLIERS") {
+        $("#GridPerson").dxDataGrid({
+            columns: [
+                { dataField: "Name", visible: true, caption: "Name", validationRules: [{ type: "required" }] },
+                { dataField: "Designation", visible: true, caption: "Designation" },
+                {
+                    dataField: "Mobile", visible: true, caption: "Mobile No",
+                    validationRules: [{ type: "required" }, {
+                        type: "numeric",
+                        message: 'You must enter only numeric value..!'
+                    }]
+                },
+                { dataField: "Email", visible: true, caption: "Email", validationRules: [{ type: "required" }, { type: "email" }] },
+                {
+                    dataField: "SalesCordinatorID", visible: false, caption: "Sales Cordinator",
+                    lookup: {
+                        dataSource: SalesCordiantorArray,
+                        displayExpr: "LedgerName",
+                        valueExpr: "SalesCordinatorID",
+
+                    }
+                },
+                {
+                    dataField: "LedgerIDSE", visible: false, caption: "POC",
+                    lookup: {
+                        dataSource: SALESEXECUTIVEARRAY,
+                        displayExpr: "LedgerName",
+                        valueExpr: "LedgerIDSE",
+
+                    }
+                },
+                { dataField: "IsPrimaryConcernPerson", visible: true, caption: "Is Primary ConcernPerson", dataType: "boolean" }
+            ],
+        });
+    }
 
     document.getElementById("btnConcernPerson").setAttribute("data-toggle", "modal");
     document.getElementById("btnConcernPerson").setAttribute("data-target", "#ConcernPersonModal");
@@ -1740,6 +2192,41 @@ $("#btnConcernPerson").click(function () {
 
 $("#GridPerson").dxDataGrid({
     dataSource: [],
+    columns: [
+        { dataField: "Name", visible: true, caption: "Name", validationRules: [{ type: "required" }] },
+        { dataField: "Designation", visible: true, caption: "Designation" },
+        {
+            dataField: "Mobile", visible: true, caption: "Mobile No",
+            validationRules: [{ type: "required" }, {
+                type: "numeric",
+                message: 'You must enter only numeric value..!'
+            }]
+        },
+        { dataField: "Email", visible: true, caption: "Email", validationRules: [{ type: "required" }, { type: "email" }] },
+        {
+            dataField: "LedgerID", visible: true, caption: "Sales Cordinator",
+            lookup: {
+                dataSource: SalesCordiantorArray,
+                displayExpr: "LedgerName",
+                valueExpr: "LedgerID",
+                load: function (e) {
+                    console.log(e);
+                }
+            }
+        },
+        {
+            dataField: "LedgerIDSE", visible: true, caption: "Sales Excutive",
+            lookup: {
+                dataSource: SALESEXECUTIVEARRAY,
+                displayExpr: "LedgerName",
+                valueExpr: "LedgerID",
+                load: function (e) {
+                    console.log(e);
+                }
+            }
+        },
+        { dataField: "IsPrimaryConcernPerson", visible: true, caption: "Is Primary ConcernPerson", dataType: "boolean" }
+    ],
     showBorders: true,
     paging: {
         enabled: false
@@ -1748,14 +2235,16 @@ $("#GridPerson").dxDataGrid({
         return window.innerHeight / 1.5;
     },
     showRowLines: true,
+
     editing: {
-        mode: "cell",
+        mode: "row",
         allowDeleting: true,
         allowAdding: true,
-        allowUpdating: true
+        allowUpdating: true,
     },
     onRowPrepared: function (e) {
         setDataGridRowCss(e);
+
     },
     export: {
         enabled: true,
@@ -1769,18 +2258,7 @@ $("#GridPerson").dxDataGrid({
             }
         }
     },
-    columns: [
-        { dataField: "Name", visible: true, caption: "Name", validationRules: [{ type: "required" }] },
-        { dataField: "Designation", visible: true, caption: "Designation" },
-        {
-            dataField: "Mobile", visible: true, caption: "Mobile No",
-            validationRules: [{ type: "required" }, {
-                type: "numeric",
-                message: 'You must enter only numeric value..!'
-            }]
-        },
-        { dataField: "Email", visible: true, caption: "Email", validationRules: [{ type: "required" }, { type: "email" }] },
-        { dataField: "IsPrimaryConcernPerson", visible: true, caption: "Is Primary ConcernPerson", dataType: "boolean" }],
+
     onRowRemoving: function (select) {
         var txtGetGridRow = document.getElementById("txtGetGridRow").value;
         if (txtGetGridRow === "" || txtGetGridRow === null || txtGetGridRow === undefined) return false;
@@ -1800,7 +2278,9 @@ $("#GridPerson").dxDataGrid({
                 res = res.slice(0, -1);
             }
         });
-    }
+    },
+
+
 });
 
 $("#ConcernPersonBtnDeletePopUp").click(function () {
@@ -2844,31 +3324,114 @@ function GetExistSpareGrpString(SupplierID) {
 }
 
 function getCountryStateByPincode(pincode) {
-    //if (pincode.length < 6) return;
+
+
+
+    if (pincode.length < 6) {
+
+        return;
+    };
+    //$("#Country").dxSelectBox({ items: [], value: null, disabled: false });
+    $("#State").dxSelectBox({ items: [], value: null, disabled: false });
+    $("#City").dxSelectBox({ items: [], value: null });
+    $("#District").dxSelectBox({ items: [], value: null });
     var CountryCode = $("#Country").dxSelectBox("instance").option('value');
     //if (CountryCode === null) CountryCode = "IN";
-    const url = "http://api.worldpostallocations.com/pincode?postalcode=" + pincode + "&countrycode=" + CountryCode;
+    //const url = "http://api.worldpostallocations.com/pincode?postalcode=" + pincode + "&countrycode=" + CountryCode;
+    const url = "https://api.postalpincode.in/pincode/" + pincode
     $("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
     try {
         $.getJSON(url, function (data) {
-            console.log(data);
-            let values = data.result;
-            if (data.status === true) {
-                //$("#Country").dxSelectBox({ value: values[0].country, disabled: true });
-                var Stateitems = $("#State").dxSelectBox("instance").option('items');
-                Stateitems.push({ State: values[0].state, A: values[0].state });
-                $("#State").dxSelectBox({ item: Stateitems, value: values[0].state, disabled: true });
-                $("#City").dxSelectBox({ items: values, displayExpr: "postalLocation", valueExpr: "postalLocation", value: values[0].postalLocation });
-                $("#District").dxSelectBox({ value: values[0].province });
+
+            let values = data[0].PostOffice;
+            $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+            if (data[0].Status === "Success") {
+                //var statearr = []
+                //statearr.push(values[0].State);
+
+                $("#Country").dxSelectBox({ value: values[0].Country, disabled: true });
+
+                $("#City").dxSelectBox({
+                    items: values, displayExpr: "Name", valueExpr: "Name", value: values[0].Name
+                });
+                $("#State").dxSelectBox({
+                    items: [{ "State": values[0].State }],
+                    displayExpr: "State",
+                    valueExpr: "State",
+                    value: values[0].State,
+
+                });
+                $("#City").focus();
+                document.getElementById
+                //$("#State").dxSelectBox({
+                //    items: values,
+                //    value: values[0].State
+                //});
+
+                $("#District").dxSelectBox({ items: [{ "District": values[0].District }], displayExpr: "District", valueExpr: "District", value: values[0].District });
             } else {
-                //$("#Country").dxSelectBox({ value: null, disabled: false });
-                $("#State").dxSelectBox({ value: null, disabled: false });
-                $("#City").dxSelectBox({ value: null });
-                $("#District").dxSelectBox({ value: null });
+                alert("Invalid Pincode or Somthing Went Wrong. Please Try Again")
+                $("#Country").dxSelectBox({ items: [], value: null, disabled: false });
+                $("#State").dxSelectBox({ items: [], value: null, disabled: false });
+                $("#City").dxSelectBox({ items: [], value: null });
+                $("#Pincode").dxSelectBox({ items: [], value: null });
+                $("#Pincode").focus();
             }
-        });
+
+            return;
+
+
+        }).fail(function () {
+            alert("Invalid Pincode or Somthing Went Wrong. Please Try Again")
+            $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+        })
     } catch (e) {
+
         console.log(e);
-    } finally { $("#LoadIndicator").dxLoadPanel("instance").option("visible", false); }
+        alert("Invalid Pincode or Somthing Went Wrong. Please Try Again")
+        $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+    }
 
 }
+
+
+$('#btnAllocateItems').click(function () {
+    //var data = $('#MasterGrid').dxDataGrid('instance').getSelectedRowsData();
+    //if (data.length <= 0) return;
+    //var SupplierID = data[0].LedgerID;
+    $.ajax({
+        type: "POST",
+        url: "WebService_LedgerMaster.asmx/GetItemsList",
+        data: '{}',
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function (results) {
+            var res = results.d.replace(/\\/g, '');
+            res = res.replace(/"d":""/g, '');
+            res = res.replace(/"d":null/g, '');
+            res = res.replace(/u0026/g, '&');
+            res = res.replace(/:,/g, ':null,');
+            res = res.replace(/:}/g, ':null}');
+            res = res.substr(1);
+            res = res.slice(0, -1);
+            $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+            var RES1 = JSON.parse(res);
+
+            $("#ListIfItemsGrid").dxDataGrid({
+                dataSource: RES1,
+                selectedRowKeys: ItemSelectionKeys,
+                columnAutoWidth: true,
+            });
+        }
+    });
+
+    document.getElementById("btnAllocateItems").setAttribute("data-toggle", "modal");
+    document.getElementById("btnAllocateItems").setAttribute("data-target", "#ItemAllocationModal");
+})
+
+$('#BtnItmeApply').click(function () {
+    var data = $('#ListIfItemsGrid').dxDataGrid('instance').getSelectedRowKeys();
+    ItemSelectionKeys = data;
+    $('#clodeItmeModal').click();
+    $('#ListIfItemsGrid').dxDataGrid('instance').clearSelection();
+});

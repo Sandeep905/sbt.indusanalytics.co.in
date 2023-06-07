@@ -54,6 +54,9 @@ $("#BtnLoadBooking").click(function () {
             let RES1 = JSON.parse(res.toString());
             const Gbl_Columns = [
                 { dataField: "QuotationNo" },
+                { dataField: "Quotationdate" },
+                { dataField: "EnquiryNo" },
+                { dataField: "Enquirydate" },
                 { dataField: "ProjectName" },
                 { dataField: "ClientName" },
                 { dataField: "SalesPerson" },
@@ -240,12 +243,14 @@ function Fill_Job_Details_Grid() {
     var grid_Job = $('#GridJobDetails').dxDataGrid('instance');
     grid_Job.cellValue(0, 1, OBJ_Grid[0].ClientName);
     grid_Job.cellValue(1, 1, OBJ_Grid[0].Address1);
-    grid_Job.cellValue(2, 1, OBJ_Grid[0].PhoneNo);
+    grid_Job.cellValue(2, 1, OBJ_Grid[0].MobileNo);
     grid_Job.cellValue(3, 1, OBJ_Grid[0].ProjectName);
-    grid_Job.cellValue(4, 1, OBJ_Grid[0].ProductCode);
-    grid_Job.cellValue(5, 1, OBJ_Grid[0].QuotationNo);
-    grid_Job.cellValue(6, 1, OBJ_Grid[0].JobDate);
-    grid_Job.cellValue(7, 1, OBJ_Grid[0].Remark);
+    grid_Job.cellValue(4, 1, OBJ_Grid[0].EnquiryNo);
+    grid_Job.cellValue(5, 1, OBJ_Grid[0].Enquirydate);
+    grid_Job.cellValue(6, 1, OBJ_Grid[0].QuotationNo);
+    grid_Job.cellValue(7, 1, OBJ_Grid[0].Quotationdate);
+    grid_Job.cellValue(8, 1, OBJ_Grid[0].SalesPerson);
+    grid_Job.cellValue(9, 1, OBJ_Grid[0].Remark);
 
     grid_Job.saveEditData();
 
@@ -387,8 +392,8 @@ var Row_No, Col_No;
 //{ "Quantity": "Discount % Cost" }, { "Quantity": "GST % Cost" }, { "Quantity": "Grand Total" },
 //{ "Quantity": "Unit Cost" }, { "Quantity": "Unit Cost/1000" }, { "Quantity": "Approved Price" }, { "Quantity": "Quoted Cost" }];
 
-var GridCostAmtData = [{ "Name": "Total Cost" }, { "Name": "Misc.Cost" }, { "Name": "Profit % Cost" },
-{ "Name": "Discount % Cost" }, { "Name": "GST Total" },
+var GridCostAmtData = [{ "Name": "Total Cost" }, { "Name": "Misc.Cost" }, { "Name": "Profit  Cost" },
+{ "Name": "Discount  Cost" }, { "Name": "GST Total" },
 { "Name": "Final Cost" }, { "Name": "Quoted Cost" }, { "Name": "Approved Price" }];
 
 $("#GridApprovalWindow").dxDataGrid({
@@ -520,8 +525,8 @@ $("#GridApprovalWindow").dxDataGrid({
     }
 });
 
-var Grid_Job_Data = [{ "Name": "Client Name" }, { "Name": "Mailing Address" }, { "Name": "Contact No" }, { "Name": "Job Name" }, { "Name": "Product Code" },
-{ "Name": "Quote No" }, { "Name": "Quote Date" }, { "Name": "Remark" }];
+var Grid_Job_Data = [{ "Name": "Client Name" }, { "Name": "Mailing Address" }, { "Name": "Contact No" }, { "Name": "Project Name" }, { "Name": "Enquiry No" }, { "Name": "Enquiry Date" },
+{ "Name": "Quotation No" }, { "Name": "Quotation Date" }, { "Name": "POC" }, { "Name": "Remark" }];
 
 $("#GridJobDetails").dxDataGrid({
     dataSource: Grid_Job_Data,
@@ -540,6 +545,38 @@ $("#GridJobDetails").dxDataGrid({
     }
 });
 
+$("#BtnCancel").click(function () {
+    if ($('#txtRemark').val() == "") {
+        alert("Please enter reson of cancellation")
+        $('#txtRemark').focus()
+        return;
+    }
+    try {
+        $.ajax({
+            type: "POST",
+            url: "WebServiceOthers.asmx/CancelJob",
+            data: '{ProjectQuotationId:' + Number(GblBookingIDSelect) + ',TxtRemark:' + JSON.stringify($('#txtRemark').val()) + '}',
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (results) {
+                var res = results.d.replace(/\\/g, '');
+                if (res === "Success") {
+                    DevExpress.ui.notify(res, "success", 1500);
+                    location.reload();
+                } else
+                    DevExpress.ui.notify(res, "warning", 1500);
+
+            },
+            error: function errorFunc(jqXHR) {
+                alert("error occured!");
+            }
+
+        });
+    } catch (e) {
+        console.log(e);
+    }
+
+});
 $("#BtnDeleteCostApp").click(function () {
 
     if (FlagEdit === false) {
@@ -633,13 +670,14 @@ $("#BtnSaveCostApp").click(function () {
     var Obj_Price_App = [];
     var Price_Approval = {};
 
+
     for (var i = 1; i < GridApprovalWindow.columnCount(); i++) {
         Price_Approval = {};
 
         if (FlagEdit === false) {
             Price_Approval.JobName = grid_Job.cellValue(3, 1);
-            Price_Approval.BookingNo = grid_Job.cellValue(5, 1);
-            Price_Approval.Quantity = grid_Job.cellValue(7, 1);
+            Price_Approval.BookingNo = grid_Job.cellValue(6, 1);
+            Price_Approval.Quantity = 0//grid_Job.cellValue(7, 1);
             Price_Approval.LedgerID = LID;
             Price_Approval.CategoryID = 0;
         } else if (FlagEdit === true) {
@@ -949,3 +987,29 @@ $("#BtnBack").click(function () {
     $("#myModal").removeClass("hidden");
     $("#myModal_1").addClass("hidden");
 });
+
+$("#Revise").click(function () {
+       if (GblBookingIDSelect <= 0 || GblBookingIDSelect === null || GblBookingIDSelect === undefined) {
+        swal("Empty Selection", "Please select quote first...!", "warning");
+    }
+    else {
+        var url = "";
+           url = "ProjectQuotation.aspx?BookingID=" + GblBookingIDSelect + "&FG=false&IsDirectApproved=0&IsDirectPriceApproved=1";
+
+        window.open(url, "_blank", "", true);
+    }
+});
+
+$("#PrintButton").click(function () {
+
+    var bid = GblBookingIDSelect;
+
+    if (bid === "" || bid === null || bid === undefined) {
+        swal("Empty Selection", "Please select quote first...!", "warning");
+    }
+    else {
+        var url = "ProjectQuotationReportViewer.aspx?t=" + bid; //// "Print_Quotation.aspx?BN=" + document.getElementById("QuoteIDId").value + "&BookingNo=" + encodeURIComponent(document.getElementById("BookingNo").value);
+        window.open(url, "_blank", "location=yes,height=1100,width=1050,scrollbars=yes,status=no", true);
+    }
+});
+

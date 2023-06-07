@@ -119,10 +119,9 @@ Public Class Api_shiring_service
             ElseIf k = "Operation_Slabs" Then
                 str = "SELECT DISTINCT PM.TypeofCharges, Case When ISNULL(PMS.Rate, 0)=0 Then Round(ISNULL(PM.Rate, 0),4) Else Round(ISNULL(PMS.Rate, 0),4) End AS Rate, Case When PMS.MinimumCharges=0 Then PM.MinimumCharges Else PMS.MinimumCharges End As MinimumCharges, PM.SetupCharges, PM.SizeToBeConsidered, PM.ChargeApplyOnSheets, PM.PrePress, PM.ProcessID, PM.ProcessName,Isnull(PMS.FromQty,0) AS FromQty,IsNull(PMS.ToQty,0) As ToQty,Isnull(PMS.RateFactor,'') As RateFactor FROM ProcessMaster AS PM Left JOIN ProcessMasterSlabs AS PMS ON PMS.ProcessID = PM.ProcessID And PMS.IsLocked=0 And PM.CompanyID=PMS.CompanyID Where PM.ProcessId In (" & GblOperId & ") And PM.CompanyId = " & CompanyID & " And Isnull(PM.IsDeletedTransaction,0)<>1 " & TempVendorID
             ElseIf k = "Vendor_Process_Rate_Setting" Then
-
                 str = "Select PM.ProcessID,PM.ProcessName,VWPR.RateFactor,VWPR.Rate,VWPR.RateType,VWPR.MinimumCharges" &
-                      " From VendorWiseProcessRates VWPR Inner Join ProcessMaster PM on VWPR.ProcessID=PM.ProcessID And VWPR.CompanyID=PM.CompanyID  " &
-                      " Where VWPR.ProcessId In (" & GblOperId & ") And PM.CompanyID=" & CompanyID & " And (VWPR.IsDeletedTransaction=0) And (PM.IsDeletedTransaction=0)" & TempVendorID.Replace("VendorID", "VWPR.VendorID")
+                                      " From VendorWiseProcessRates VWPR Inner Join ProcessMaster PM on VWPR.ProcessID=PM.ProcessID And VWPR.CompanyID=PM.CompanyID  " &
+                                      " Where VWPR.ProcessId In (" & GblOperId & ") And PM.CompanyID=" & CompanyID & " And (VWPR.IsDeletedTransaction=0) And (PM.IsDeletedTransaction=0)" & TempVendorID.Replace("VendorID", "VWPR.VendorID")
 
             End If
 
@@ -169,6 +168,7 @@ Public Class Api_shiring_service
             Dim dt As New DataTable
             Dim Job_Pasting_Flap As Double
             Dim PlanContName As String
+            Dim PrintingStyle As String = ""
 
             db.ConvertObjectToDatatable(ObjOprJson, GblDTOprFactors)
             db.ConvertObjectToDatatable(ObjJSJson, dt)
@@ -192,6 +192,7 @@ Public Class Api_shiring_service
             Gbl_ColorStrip = Val(dt.Rows(0)(15))
             Gbl_Gripper = Val(dt.Rows(0)(16))
             Gbl_Printing_Style = Trim(dt.Rows(0)(17))
+            PrintingStyle = Trim(dt.Rows(0)(17))
             Gbl_Flat_Wastage_Value = Val(dt.Rows(0)(18))
             'Job_Trimming_L = Val(dt.Rows(0)(19))
             Gbl_Job_Trimming_LR = Val(dt.Rows(0)(19)) + Val(dt.Rows(0)(20))
@@ -321,7 +322,7 @@ Public Class Api_shiring_service
                 GblVendorID = DTVendorList.Rows(i)("VendorID")
                 GblVendorName = DTVendorList.Rows(i)("VendorName")
                 LoadAllGrids()
-                If Gbl_Printing_Style = "Choose Best" Then
+                If PrintingStyle = "Choose Best" Then
                     Gbl_Printing_Style = "Work & Turn"
                     Plan_Job_Pre()
                     Gbl_Printing_Style = "Work & Tumble"

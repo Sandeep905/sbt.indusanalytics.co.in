@@ -787,7 +787,8 @@ Public Class WebService_PurchaseOrder
         GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
 
-        str = "Select Distinct Isnull(LM.LedgerID,0) as LedgerID,Nullif(LM.LedgerName,'') as LedgerName from SupplierWisePurchaseSetting as STGA inner join LedgerMaster as LM on STGA.LedgerID=LM.LedgerID And STGA.CompanyID=LM.CompanyID where STGA.ItemGroupID='" & ItemGroupID & "'  AND STGA.CompanyID='" & GBLCompanyID & "' and Isnull(STGA.IsDeletedTransaction,0)<>1 "
+        'str = "Select Distinct Isnull(LM.LedgerID,0) as LedgerID,Nullif(LM.LedgerName,'') as LedgerName from SupplierWisePurchaseSetting as STGA inner join LedgerMaster as LM on STGA.LedgerID=LM.LedgerID And STGA.CompanyID=LM.CompanyID where STGA.ItemGroupID='" & ItemGroupID & "'  AND STGA.CompanyID='" & GBLCompanyID & "' and Isnull(STGA.IsDeletedTransaction,0)<>1 "
+        str = "Select Distinct Isnull(LM.LedgerID,0) as LedgerID,Nullif(LM.LedgerName,'') as LedgerName from  LedgerMaster as LM  where LM.CompanyID='" & GBLCompanyID & "' and LM.LedgerGroupId=2 and Isnull(LM.IsDeletedTransaction,0)<>1 "
 
         db.FillDataTable(dataTable, str)
         data.Message = ConvertDataTableTojSonString(dataTable)

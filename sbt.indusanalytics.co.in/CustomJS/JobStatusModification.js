@@ -807,6 +807,7 @@ function ShowOperationGrid(dataSource, slabNames) {
                     newdata.ProcessName = clickedCell.data.ProcessName;
                     newdata.Rate = Number(clickedCell.data.Rate).toFixed(3);
                     newdata.RateFactor = clickedCell.data.RateFactor;
+                    newdata.TypeofCharges = clickedCell.data.TypeofCharges;
 
                     var clonedItem = $.extend({}, newdata);
                     dataGrid._options.dataSource.splice(dataGrid.totalCount(), 0, clonedItem);

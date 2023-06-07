@@ -19,6 +19,26 @@ $("#PGHMShowListGrid").dxDataGrid({
     sorting: {
         mode: "none" // or "multiple" | "single"
     },
+    export: {
+        enabled: true,
+        fileName: "HSN Master",
+        allowExportSelectedData: true
+    },
+    onExporting(e) {
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('HSNMaster_' + new Date());
+
+        DevExpress.excelExporter.exportDataGrid({
+            component: e.component,
+            worksheet,
+            autoFilterEnabled: true,
+        }).then(() => {
+            workbook.xlsx.writeBuffer().then((buffer) => {
+                saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'HSNMaster_' + new Date() + '.xlsx');
+            });
+        });
+        e.cancel = true;
+    },
     loadPanel: {
         enabled: true,
         height: 90,

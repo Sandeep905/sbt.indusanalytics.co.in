@@ -130,7 +130,8 @@ $("#GridData").dxDataGrid({
                     columnAutoWidth: true,
                     showBorders: true,
                     columns: [
-                        { dataField: "ProductName" },
+                        { dataField: "ProductName", caption: "Content Name" },
+                        { dataField: "ProductName1", caption: "Product Name" },
                         { dataField: "CategoryName" },
                         { dataField: "HSNCode" },
                         { dataField: "Quantity" },
@@ -174,9 +175,46 @@ $("#BtnReviewQuote").click(function () {
     }
     else {
         var url = "DYnamicQty.aspx?BookingID=" + BKID + "&FG=Review";
+        url = "ProjectQuotation.aspx?BookingID=" + BKID + "&FG=Review&IsDirectApproved=0";
+
         window.open(url, "_blank", "", true);
     }
 });
+
+function QuotesLinkClick(rowData, Flag) {
+
+     
+
+    var IsDirectApproved = 0;
+    var data = $("#selectStatus").dxRadioGroup('instance').option('value');
+    var BKID = rowData.ProductEstimateID;
+    if (data = "IsInternalApproved")
+        IsDirectApproved = 1
+    else
+        IsDirectApproved = 0
+
+    var Captitle = "";
+    if (Flag === true) {
+        Captitle = "Clone Quote Of: ";
+    } else if (Flag === false) {
+        Captitle = "Revise Quote No: ";
+    } else if (Flag === "Review") {
+        Captitle = "Review Quote No: ";
+    }
+    swal({
+        title: Captitle + rowData.QuotationNo,
+        text: "Are you sure to continue..?",
+        type: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#DD6B55",
+        confirmButtonText: "Continue",
+        closeOnConfirm: false
+    },
+        function () {
+            window.location.href = "ProjectQuotation.aspx?BookingID=" + BKID + "&FG=" + Flag + "&IsDirectApproved=" + IsDirectApproved;
+            window.location.href.reload(true);
+        });
+}
 
 $("#BtnPrintJobDetails").click(function () {
     if (BKID <= 0 || BKID === null || BKID === undefined) {

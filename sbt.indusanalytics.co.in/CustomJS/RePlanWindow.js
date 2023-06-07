@@ -1,6 +1,7 @@
 ﻿var FlagSave = true;
 var ParentBookingID = 0;
-
+var IsDirectApproved = 0;
+var IsDirectPriceApproved = 0;
 var queryString = new Array();
 $(function () {
 
@@ -17,9 +18,12 @@ $(function () {
 
     if (queryString["BookingID"] !== null && queryString["BookingID"] !== undefined) {
         BookingID = Number(queryString["BookingID"]);
+        IsDirectApproved = Number(queryString["IsDirectApproved"]);
+        IsDirectPriceApproved = Number(queryString["IsDirectPriceApproved"]);
         if (BookingID <= 0) return;
 
         document.getElementById('BtnLoadFromEnquiry').style.display = 'none';
+
         ParentBookingID = BookingID;
         if (!db) {
             window.setTimeout(function () {
@@ -34,14 +38,28 @@ $(function () {
 
             } else if (queryString["FG"] === "Review") {
                 document.getElementById("BtnSave").style.display = "none";
+                document.getElementById("IsDirectApproveddiv").style.display = "none";
                 document.getElementById("BtnShowList").style.display = "none";
+                document.getElementById("IsDirectApproved").checked = IsDirectApproved;
+                document.getElementById("IsDirectPriceApproved").checked = IsDirectPriceApproved;
+                document.getElementById('BtnDelete').style.display = 'none';
+                document.getElementById('BtnPrint').style.display = 'none';
             } else {
                 FlagSave = false;
+                document.getElementById('BtnDelete').style.display = 'none';
+                document.getElementById('BtnPrint').style.display = 'none';
+                document.getElementById("IsDirectApproveddiv").style.display = "block";
+                document.getElementById("IsDirectApproved").checked = IsDirectApproved;
+                document.getElementById("IsDirectPriceApproved").checked = IsDirectPriceApproved;
             }
-        }
-    } else {
-        FlagSave = true;
+        } else {
+            FlagSave = true;
+            //document.getElementById("IsDirectApproveddiv").style.display = "block";
+            document.getElementById("IsDirectApproved").checked = IsDirectApproved;
+            document.getElementById("IsDirectPriceApproved").checked = IsDirectPriceApproved;
 
+
+        }
     }
 });
 
@@ -76,13 +94,27 @@ function GetItems() {
                 $("#SelClient").dxSelectBox({
                     value: RES1.Projects[0].LedgerID
                 });
+                $("#ClientCordinator").dxSelectBox({
+                    value: RES1.Projects[0].ClientCordinatorID
+                });
+                $("#SalesCordinator").dxSelectBox({
+                    value: RES1.Projects[0].SalesCordinatorId
+                });
                 $("#SelSalesPerson").dxSelectBox({
                     value: RES1.Projects[0].SalesPersonID
                 });
+
+
                 document.getElementById('TxtProjectName').value = RES1.Projects[0].ProjectName;
                 document.getElementById('TxtFreightAmount').value = RES1.Projects[0].FreightAmount;
                 document.getElementById('TxtRemark').value = RES1.Projects[0].Narration;
                 document.getElementById('TxtQuoteNo').value = RES1.Projects[0].EstimateNo;
+                document.getElementById('enqtext').innerText = "Quotation No.";
+
+                document.getElementById('TxtValidUpto').value = RES1.Projects[0].ValidUpto;
+                document.getElementById('TxtDeliveryUpto').value = RES1.Projects[0].DeliveryUpto;
+                document.getElementById('TxtPaymentTerms').value = RES1.Projects[0].PaymentTerms;
+                EnquiryID = RES1.Projects[0].EnquiryID;
 
                 $("#gridProductList").dxDataGrid({
                     dataSource: RES1.Contents
@@ -95,7 +127,12 @@ function GetItems() {
                     } else if (RES1.Contents[i].IsOffsetProduct === true) {
                         ProjectBookingID = RES1.Contents[i].BookingID;
                         if (queryString["FG"] === "Review" || queryString["FG"] === "false") {
-                            GetAllPlans(ProjectBookingID)
+                            if (RES1.Contents[i].IsManualCosting != true) {
+                                GetAllPlans(ProjectBookingID)
+                            }
+                            else {
+                                Getinputsizess(RES1.Contents[i].EnquiryIDDetail, "Offset")
+                            }
                         }
                     }
                 }
@@ -510,3 +547,5 @@ function addContentReplan(JobCont) {
         alert(e);
     }
 }
+
+

@@ -87,7 +87,7 @@ Public Class UserAuthentication
             GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
             GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
 
-            str = "Select Distinct isnull(MM.SetGroupIndex, 0) as SetGroupIndex,isnull(MM.ModuleID, 0) as ModuleID,isnull(MM.ModuleHeadDisplayOrder, 0) as ModuleHeadDisplayOrder,Nullif(MM.ModuleHeadName,'') AS ModuleHeadName,nullif(MM.ModuleName,'') as ModuleName,nullif(MM.ModuleDisplayName,'') as ModuleDisplayName,0 as CanView,0 as CanSave,0 as CanEdit,0 as CanDelete,0 as CanExport,0 as CanPrint,(Select Count(Distinct(SetGroupIndex)) from ModuleMaster Where CompanyID=MM.CompanyID) As SectionCount From ModuleMaster As MM Where MM.CompanyID=" & GBLCompanyID
+            str = "Select Distinct isnull(MM.SetGroupIndex, 0) as SetGroupIndex,isnull(MM.ModuleID, 0) as ModuleID,isnull(MM.ModuleHeadDisplayOrder, 0) as ModuleHeadDisplayOrder,Nullif(MM.ModuleHeadName,'') AS ModuleHeadName,nullif(MM.ModuleName,'') as ModuleName,nullif(MM.ModuleDisplayName,'') as ModuleDisplayName,0 as CanView,0 as CanSave,0 as CanEdit,0 as CanDelete,0 as CanExport,0 as CanPrint,(Select Count(Distinct(SetGroupIndex)) from ModuleMaster Where CompanyID=MM.CompanyID) As SectionCount From ModuleMaster As MM Where MM.IsDeletedTransaction <> 1 and MM.CompanyID=" & GBLCompanyID
 
             db.FillDataTable(dataTable, str)
             data.Message = ConvertDataTableTojSonString(dataTable)

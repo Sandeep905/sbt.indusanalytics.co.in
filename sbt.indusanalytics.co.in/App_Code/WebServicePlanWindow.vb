@@ -211,6 +211,19 @@ Public Class WebServicePlanWindow
             Return ex.Message
         End Try
     End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function LoadProcessProduct(ByVal CategoryID As Integer) As String
+        Context.Response.Clear()
+        Context.Response.ContentType = "application/json"
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+        str = Convert.ToString(HttpContext.Current.Session("Version"))
+        str = "SELECT DISTINCT 0 As IsDefaultProcess,0 As IsDisplayInEnquiry,PM.ProcessID, REPLACE(NULLIF (ProcessName, ''), '""', '') AS ProcessName, NULLIF (PrePress, '') AS PrePress, NULLIF (TypeofCharges, '') AS TypeofCharges, NULLIF (SizeToBeConsidered, '') AS SizeToBeConsidered, ROUND(ISNULL(NULLIF (Rate, ''), 0), 4) AS Rate, NULLIF (MinimumCharges, '') AS MinimumCharges, NULLIF (SetupCharges, '') AS SetupCharges, NULLIF (IsDisplay, '') AS IsDisplay, REPLACE(NULLIF (ChargeApplyOnSheets, ''), '""', '') AS ChargeApplyOnSheets, REPLACE(NULLIF (DisplayProcessName, ''), '""', '') AS DisplayProcessName, 0 AS Amount, '' AS RateFactor, '' AS AddRow FROM ProcessMaster AS PM where (ISNULL(PM.IsDeletedTransaction, 0) = 0) AND (PM.CompanyID = " & GBLCompanyID & " ) and PM.ProcessID in (Select * from  dbo.CSVToTable((Select ProcessIDString from CategoryMaster where isnull(IsDeletedTransaction,0) <> 1 and CategoryID =" & CategoryID & ")))  ORDER BY ProcessName"
+        db.FillDataTable(dataTable, str)
+
+        data.Message = db.ConvertDataTableTojSonString(dataTable)
+        Return js.Serialize(data.Message)
+    End Function
 
     ''---------------------------- Plan Operations  ------------------------------------------
     <WebMethod(EnableSession:=True)>
@@ -249,6 +262,19 @@ Public Class WebServicePlanWindow
         Context.Response.ContentType = "application/json"
         GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         str = "Select ProcessID, REPLACE(NULLIF (ProcessName, ''), '""', '') AS ProcessName, NULLIF (PrePress, '') AS PrePress, NULLIF (TypeofCharges, '') AS TypeofCharges, NULLIF (SizeToBeConsidered, '') AS SizeToBeConsidered, ROUND(ISNULL(NULLIF (Rate, ''), 0), 4) AS Rate, NULLIF (MinimumCharges, '') AS MinimumCharges, NULLIF (SetupCharges, '') AS SetupCharges, NULLIF (IsDisplay, '') AS IsDisplay, REPLACE(NULLIF (ChargeApplyOnSheets, ''), '""', '') AS ChargeApplyOnSheets, REPLACE(NULLIF (DisplayProcessName, ''), '""', '') AS DisplayProcessName, 0 AS Amount, '' AS RateFactor FROM ProcessMaster where ProcessID in (" & processids & ")"
+        db.FillDataTable(dataTable, str)
+        data.Message = db.ConvertDataTableTojSonString(dataTable)
+        Return js.Serialize(data.Message)
+    End Function
+    '// Get Vendore List With Rates
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function GetVendoreListWithRates() As String
+        Context.Response.Clear()
+        Context.Response.ContentType = "application/json"
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+        '    str = "Select ProcessID, REPLACE(NULLIF (ProcessName, ''), '""', '') AS ProcessName, NULLIF (PrePress, '') AS PrePress, NULLIF (TypeofCharges, '') AS TypeofCharges, NULLIF (SizeToBeConsidered, '') AS SizeToBeConsidered, ROUND(ISNULL(NULLIF (Rate, ''), 0), 4) AS Rate, NULLIF (MinimumCharges, '') AS MinimumCharges, NULLIF (SetupCharges, '') AS SetupCharges, NULLIF (IsDisplay, '') AS IsDisplay, REPLACE(NULLIF (ChargeApplyOnSheets, ''), '""', '') AS ChargeApplyOnSheets, REPLACE(NULLIF (DisplayProcessName, ''), '""', '') AS DisplayProcessName, 0 AS Amount, '' AS RateFactor FROM ProcessMaster where ProcessID in (" & processids & ")"
+        str = "Select * from LedgerMaster where LedgerGroupID = 8"
         db.FillDataTable(dataTable, str)
         data.Message = db.ConvertDataTableTojSonString(dataTable)
         Return js.Serialize(data.Message)
@@ -544,11 +570,182 @@ Public Class WebServicePlanWindow
         Try
             If FilterSTR = "All" Then FilterSTR = ""
             GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
-            'str = "SELECT Replace(JE.ClientName,'""','') As ClientName, CM.CategoryName, Replace(JE.JobName,'""',' inch') As JobName, JE.BookingNo,convert(varchar, JE.CreatedDate, 103) As CreatedDate, JE.OrderQuantity, JE.BookingID, JE.MAXBookingNo, JE.LedgerID, UM.UserName, Cast(JE.QuotedCost AS Nvarchar(50))+' '+Isnull(JE.CurrencySymbol,'INR') AS QuotedCost,JE.FinalCost,JE.TypeOfCost, JE.EnquiryID,ISNULL(JE.IsApproved,0) As JobApproved,ISNULL(JE.IsSendForPriceApproval,0) As PendingForPriceApproval,ISNULL(JE.IsInternalApproved,0) AS IsInternalApproved,JE.InternalApprovedUserID,ISNULL(JE.IsRework,0) AS IsRework ,ISNULL(JE.IsMailSent,0) AS IsMailSent,JE.IsBooked,(Case When Isnull(JE.ReworkRemark ,'') ='' then REPLACE(JE.Remark,'""','') Else ISNULL(REPLACE(JE.ReworkRemark,'""',''),'') End) As ReworkRemark,JE.IsSendForInternalApproval,Isnull(JE.IsCancelled,0) As IsCancelled, JE.ReasonsofQuote,Nullif(JE.ProductCode,'') As ProductCode,(SELECT DISTINCT A.FieldValue FROM dbo.LedgerMasterDetails A Where A.CompanyID=LM.CompanyID And A.LedgerID=LM.LedgerID And FieldName In ('MailingAddress') And Isnull(A.IsDeletedTransaction,0)=0) As Address,(Select UserName From UserMaster Where UserID=ApprovalSendTo And CompanyID=LM.CompanyID) As ApprovalSendTo,Convert(varchar, JE.InternalApprovedDate, 103) As InternalApprovedDate,JE.RemarkInternalApproved,(Select Count(*) From CommentChainMaster Where ModuleName='Estimation' And BookingID=JE.BookingID And CompanyID=LM.CompanyID) As CommentCount FROM JobBooking As JE, CategoryMaster As CM , UserMaster As UM,LedgerMaster AS LM Where UM.UserID = JE.CreatedBy And  JE.CategoryID = CM.CategoryID AND LM.LedgerID = JE.LedgerID AND IsEstimate=1 And Isnull(JE.IsDeletedTransaction,0)=0  And JE.COMPANYID=" & GBLCompanyID & " " & FilterSTR & " Group By JE.ClientName, CM.CategoryName, JE.JobName, JE.BookingNo, JE.CreatedDate, JE.OrderQuantity, JE.BookingID, JE.MAXBookingNo, JE.LedgerID, UM.UserName,JE.FinalCost,JE.QuotedCost , JE.CurrencySymbol,JE.TypeOfCost, JE.EnquiryID, JE.IsApproved,JE.IsSendForPriceApproval,JE.IsCancelled, JE.InternalApprovedUserID,JE.IsInternalApproved,JE.IsRework,JE.IsMailSent,JE.IsBooked,JE.ReworkRemark,JE.Remark,JE.IsSendForInternalApproval, JE.ReasonsofQuote ,JE.ProductCode,LM.LedgerID,LM.CompanyID,JE.ApprovalSendTo,JE.InternalApprovedDate,JE.RemarkInternalApproved Order By JE.BookingID Desc"
+            GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
+            Dim LId = db.GetColumnValue("EmployeeId", "UserMaster", "UserId = " & GBLUserID)
+            Dim Designation = db.GetColumnValue("Designation", "LedgerMaster", " LedgerGroupID =3 And Isnull(IsDeletedTransaction,0) = 0 And LedgerId = " & LId)
+
+            Dim ConStr = ""
+
+            If Designation.ToUpper() = "SALES CORDINATOR" Then
+                ConStr = " And PQ.SalesCordinatorId = " & LId
+            ElseIf Designation.ToUpper() = "SALES EXECUTIVE" Then
+                ConStr = " And PQ.SalesPersonID = " & LId
+            ElseIf Designation.ToUpper() = "SALES MANAGER" Then
+                ConStr = " And PQ.SalesManagerId = " & LId
+            End If
+
+            FilterSTR = FilterSTR + ConStr
+
             Dim DT As New DataTable
-            str = "Select PQ.EstimateNo as QuotationNo,convert(varchar, PQ.CreatedDate, 103) As CreatedDate,PQ.ProjectName, LM.LedgerName as ClientName,LMS.LedgerName as SalesPerson,PQ.FreightAmount,UM.UserName as EstimateBy,PQ.Narration as Remark,PQ.ProductEstimateID from ProductQuotation as PQ inner Join LedgerMaster as LM on LM.CompanyID = PQ.CompanyID and LM.LedgerID = PQ.LedgerID and LM.LedgerGroupID = 1 inner Join LedgerMaster as LMS on LMS.CompanyID = PQ.CompanyID and LMS.LedgerID = PQ.SalesPersonID and LMS.LedgerGroupID =3 inner Join UserMaster as UM on UM.CompanyID = PQ.CompanyID and UM.UserID = PQ.CreatedBy  where PQ.CompanyID =" & GBLCompanyID & " and PQ.IsDeletedTransaction = 0 " & FilterSTR & " order by PQ.CreatedDate desc"
+            str = "Select PQ.EnquiryID, Isnull(PQ.IsSendForInternalApproval,0) as IsSendInternalApproval,Isnull(PQ.IsSendForPriceApproval,0) as IsSendForPriceApproval,Isnull(PQ.IsRework,0) as IsSendRework,Isnull(PQ.IsInternalApproved,0) as IsInternalApproved,Isnull(PQ.Isapproved,0) as IsPriceApproved,Isnull(PQ.IsCancelled,0) as IsCancelled, Isnull(EQ.EnquiryNo,'') as EnquiryNo,Isnull(UMA.UserName,'') as ApprovalSendTo, PQ.ApprovalSendTo,Isnull(convert(varchar,PQ.ApprovalSendDate,106),'') as ApprovalSendDate, PQ.EstimateNo as QuotationNo,convert(varchar, PQ.CreatedDate, 103) As CreatedDate,PQ.ProjectName, LM.LedgerName as ClientName,LMS.LedgerName as SalesPerson,LMSM.LedgerName as SalesManager,LMSC.LedgerName as SalesCordinator,PQ.FreightAmount,UM.UserName as EstimateBy,PQ.Narration as Remark, PQ.ProductEstimateID,Isnull(convert(varchar,PQ.CancelledDate,106),'') as CancelledDate,PQ.CancelledRemark,Isnull(convert(varchar,PQ.ApprovedDate,106),'') as ApprovedDate,PQ.ApprovedRemark,Isnull(convert(varchar,PQ.ReworkDate,106),'') as ReworkDate,PQ.ReworkRemark,PQ.RemarkInternalApproved,Isnull(convert(varchar,PQ.InternalApprovedDate,106),'') as InternalApprovedDate from ProductQuotation as PQ inner Join LedgerMaster as LM on LM.CompanyID = PQ.CompanyID and LM.LedgerID = PQ.LedgerID and LM.LedgerGroupID = 1 inner Join LedgerMaster as LMS on LMS.CompanyID = PQ.CompanyID and LMS.LedgerID = PQ.SalesPersonID  and LMS.LedgerGroupID =3 inner Join LedgerMaster as LMSC on LMSC.CompanyID = PQ.CompanyID and LMSC.LedgerID = PQ.SalesCordinatorId and LMSC.LedgerGroupID =3 inner Join LedgerMaster as LMSM on LMSM.CompanyID = PQ.CompanyID and LMSM.LedgerID = PQ.SalesManagerId  and LMSM.LedgerGroupID = 3 inner Join UserMaster as UM on UM.CompanyID = PQ.CompanyID and UM.UserID = PQ.CreatedBy left join UserMaster as UMA on UMA.CompanyID = PQ.CompanyID and PQ.ApprovalSendTo = UMA.UserID inner join EnquiryMain as EQ on EQ.EnquiryID = PQ.EnquiryID and EQ.CompanyID = PQ.CompanyID  inner JOIN (Select Max(RevisionNo) as RevisionNo, EnquiryID,CompanyID From ProductQuotation Group By EnquiryID,CompanyID) as Q ON Q.EnquiryID = PQ.EnquiryID AND Q.RevisionNo = PQ.RevisionNo AND Q.CompanyID = EQ.CompanyID   where PQ.CompanyID =" & GBLCompanyID & " and PQ.IsDeletedTransaction = 0 " & FilterSTR & " order by PQ.CreatedDate desc"
             db.FillDataTable(dataTable, str)
-            str = "Select PQC.ProductEstimateID,PCM.ProductName,CM.CategoryName,PHM.HSNCode,PQC.Quantity,PQC.Rate,PQC.RateType,PQC.UnitCost,PQC.GSTPercantage,PQC.GSTAmount,PQC.MiscPercantage,PQC.MiscAmount,Isnull(PQC.ShippingCost,0) as ShippingCost,PQC.ProfitPer,PQC.ProfitCost,PQC.FinalAmount,LM.LedgerName as VendorName from ProductQuotationContents as PQC inner Join ProductCatalogMaster as PCM on PCM.CompanyID = PQC.CompanyID and PQC.ProductCatalogID = PCM.ProductCatalogID Inner Join CategoryMaster as CM on CM.CompanyID = PQC.CompanyID and PQC.CategoryID = CM.CategoryID inner join LedgerMaster as LM on LM.CompanyID = PQC.CompanyID and PQC.VendorID = LM.LedgerID AND lm.LedgerGroupID = 8 Inner join ProductHSNMaster as PHM on PHM.CompanyID = PQC.CompanyID and PHM.ProductHSNID = PQC.ProductHSNID  where  PQC.IsDeletedTransaction = 0 and PQC.CompanyID = " & GBLCompanyID
+            str = "Select PQC.ProductName as ProductName1, PQC.ProductEstimateID,PCM.ProductName,CM.CategoryName,PHM.HSNCode,PQC.Quantity,PQC.Rate,PQC.RateType,PQC.UnitCost,PQC.GSTPercantage,PQC.GSTAmount,PQC.MiscPercantage,PQC.MiscAmount,Isnull(PQC.ShippingCost,0) as ShippingCost,PQC.ProfitPer,PQC.ProfitCost,PQC.FinalAmount,LM.LedgerName as VendorName from ProductQuotationContents as PQC inner Join ProductCatalogMaster as PCM on PCM.CompanyID = PQC.CompanyID and PQC.ProductCatalogID = PCM.ProductCatalogID Inner Join CategoryMaster as CM on CM.CompanyID = PQC.CompanyID and PQC.CategoryID = CM.CategoryID inner join LedgerMaster as LM on LM.CompanyID = PQC.CompanyID and PQC.VendorID = LM.LedgerID AND lm.LedgerGroupID = 8 Inner join ProductHSNMaster as PHM on PHM.CompanyID = PQC.CompanyID and PHM.ProductHSNID = PQC.ProductHSNID  where  PQC.IsDeletedTransaction = 0 and PQC.CompanyID = " & GBLCompanyID
+            db.FillDataTable(DT, str)
+
+            DT.TableName = "Contents"
+            dataTable.TableName = "Projects"
+
+            Dim dataset As New DataSet
+            dataset.Merge(DT)
+            dataset.Merge(dataTable)
+            data.Message = db.ConvertDataSetsTojSonString(dataset)
+            js.MaxJsonLength = 2147483647
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function GetPoBookingData(ByVal FilterSTR As String) As String
+        Try
+            If FilterSTR = "All" Then FilterSTR = ""
+            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+            GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
+            Dim LId = db.GetColumnValue("EmployeeId", "UserMaster", "UserId = " & GBLUserID)
+            Dim Designation = db.GetColumnValue("Designation", "LedgerMaster", " LedgerGroupID =3 And Isnull(IsDeletedTransaction,0) = 0 And LedgerId = " & LId)
+
+            Dim ConStr = ""
+            'FilterSTR = ""
+            'If Designation.ToUpper() = "SALES CORDINATOR" Then
+            '    ConStr = " And PQ.SalesCordinatorId = " & LId
+            'ElseIf Designation.ToUpper() = "SALES EXECUTIVE" Then
+            '    ConStr = " And PQ.SalesPersonID = " & LId
+            'ElseIf Designation.ToUpper() = "SALES MANAGER" Then
+            '    ConStr = " And PQ.SalesManagerId = " & LId
+            'End If
+
+            FilterSTR = FilterSTR + ConStr
+
+            Dim DT As New DataTable
+            str = "Select distinct PQ.EstimateNo,EM.EnquiryNo,LM.LedgerName, PO.POID,Isnull(convert(varchar,PO.PoDate,106),'') PoDate, PO.PONumber + '.' + CONVERT(varchar,PO.VersionNo) as PONumber, PO.JobbookingNo,PO.salesOrderNo,PO.NetAmount,PO.IGSTAmount,PO.SGSTAmount,PO.CGSTAmount,PO.TotalGSTAmount,PO.TotalAmount,PO.IsRework,Isnull(PO.IsSentForApproval,0) IsSentForApproval,Isnull(PO.IsApproved,0) IsApproved,Isnull(PO.IsCancel,0) IsCancel,Isnull(convert(varchar,PO.ApprovalSentDate,106),'') as ApprovalSentDate,Isnull(convert(varchar,PO.ApprovedDate,106),'') as ApprovedDate ,Isnull(convert(varchar,PO.CanceledDate,106),'') as CanceledDate,Isnull(convert(varchar,PO.ReworkDate,106),'') as ReworkDate,isnull(UM.UserName,'') as ApprovalSentTo,Isnull(PO.ApprovedRemark,'') ApprovedRemark,Isnull(PO.ReworkRemark,'') ReworkRemark,Isnull(PO.CanceledRemark,'') CanceledRemark ,Isnull(UMA.UserName,'') ApprovedBy from ServicePOMain as PO inner join  JobBookingJobCard as JBJC on JBJC.JobBookingID = PO.JobBookingID inner join LedgerMaster as LM on LM.LedgerID = PO.LedgerID left join UserMaster UM on UM.UserID = PO.ApprovalSentTo left join UserMaster UMA on UMA.UserID = PO.ApprovedBy inner join ProductQuotation as PQ  on PQ.ProductEstimateID = PO.ProductEstimateID inner join EnquiryMain as EM  on EM.EnquiryID = PO.EnquiryId inner join (Select Max(VersionNo) as V,PONumber from ServicePOMain Group by PONumber) as Q on Q.PONumber = PO.PONumber and Q.V = PO.VersionNo  where PO.isDeletedTransaction = 0  and PO.companyID =" & GBLCompanyID & FilterSTR & " order By POID desc"
+            db.FillDataTable(dataTable, str)
+            str = "Select Distinct SPD.POID, VM.LedgerName as PlanedVendor,SVM.LedgerName as ScheduleVendorName, SPD.OrderQuantity,SPD.ProductName,SPD.ScheduleQty,SPD.PlannedRate as Rate,SPD.ScheduleRate,SPD.NetAmount,SPD.IGSTAmount,SPD.CGSTAmount,SPD.SGSTAmount,SPD.TotalGSTAmount,SPD.TotalAmount from ServicePODetails as SPD inner Join LedgerMaster as VM on VM.LedgerID = SPD.PlannedVendorID inner Join LedgerMaster as SVM on SVM.LedgerID = SPD.ScheduleVendorId where ISNULL(SPD.IsdeletedTransaction,0)<>1 "
+            db.FillDataTable(DT, str)
+
+            DT.TableName = "Contents"
+            dataTable.TableName = "Projects"
+
+            Dim dataset As New DataSet
+            dataset.Merge(DT)
+            dataset.Merge(dataTable)
+            data.Message = db.ConvertDataSetsTojSonString(dataset)
+            js.MaxJsonLength = 2147483647
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function GetPoBookingHistoryData(ByVal PONumber As String) As String
+        Try
+            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+            GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
+            Dim LId = db.GetColumnValue("EmployeeId", "UserMaster", "UserId = " & GBLUserID)
+            Dim Designation = db.GetColumnValue("Designation", "LedgerMaster", " LedgerGroupID =3 And Isnull(IsDeletedTransaction,0) = 0 And LedgerId = " & LId)
+
+            Dim ConStr = ""
+
+            Dim DT As New DataTable
+            str = "Select distinct PQ.EstimateNo,EM.EnquiryNo,LM.LedgerName, PO.POID,Isnull(convert(varchar,PO.PoDate,106),'') PoDate, PO.PONumber + '.' + CONVERT(varchar,PO.VersionNo) as PONumber, PO.JobbookingNo,PO.salesOrderNo,PO.NetAmount,PO.IGSTAmount,PO.SGSTAmount,PO.CGSTAmount,PO.TotalGSTAmount,PO.TotalAmount,PO.IsRework,Isnull(PO.IsSentForApproval,0) IsSentForApproval,Isnull(PO.IsApproved,0) IsApproved,Isnull(PO.IsCancel,0) IsCancel,Isnull(convert(varchar,PO.ApprovalSentDate,106),'') as ApprovalSentDate,Isnull(convert(varchar,PO.ApprovedDate,106),'') as ApprovedDate ,Isnull(convert(varchar,PO.CanceledDate,106),'') as CanceledDate,Isnull(convert(varchar,PO.ReworkDate,106),'') as ReworkDate,isnull(UM.UserName,'') as ApprovalSentTo,Isnull(PO.ApprovedRemark,'') ApprovedRemark,Isnull(PO.ReworkRemark,'') ReworkRemark,Isnull(PO.CanceledRemark,'') CanceledRemark ,Isnull(UMA.UserName,'') ApprovedBy from ServicePOMain as PO inner join  JobBookingJobCard as JBJC on JBJC.JobBookingID = PO.JobBookingID inner join LedgerMaster as LM on LM.LedgerID = PO.LedgerID left join UserMaster UM on UM.UserID = PO.ApprovalSentTo left join UserMaster UMA on UMA.UserID = PO.ApprovedBy inner join ProductQuotation as PQ  on PQ.ProductEstimateID = PO.ProductEstimateID inner join EnquiryMain as EM  on EM.EnquiryID = PO.EnquiryId  where PO.isDeletedTransaction = 0  and PO.PONumber = '" & PONumber & "' and PO.companyID =" & GBLCompanyID & " order By POID desc"
+            db.FillDataTable(dataTable, str)
+            str = "Select Distinct SPD.POID, VM.LedgerName as PlanedVendor,SVM.LedgerName as ScheduleVendorName, SPD.OrderQuantity,SPD.ProductName,SPD.ScheduleQty,SPD.PlannedRate as Rate,SPD.ScheduleRate,SPD.NetAmount,SPD.IGSTAmount,SPD.CGSTAmount,SPD.SGSTAmount,SPD.TotalGSTAmount,SPD.TotalAmount from ServicePODetails as SPD inner Join LedgerMaster as VM on VM.LedgerID = SPD.PlannedVendorID inner Join LedgerMaster as SVM on SVM.LedgerID = SPD.ScheduleVendorId where ISNULL(SPD.IsdeletedTransaction,0)<>1 "
+            db.FillDataTable(DT, str)
+
+            DT.TableName = "Contents"
+            dataTable.TableName = "Projects"
+
+            Dim dataset As New DataSet
+            dataset.Merge(DT)
+            dataset.Merge(dataTable)
+            data.Message = db.ConvertDataSetsTojSonString(dataset)
+            js.MaxJsonLength = 2147483647
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
+
+
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function UpdatePOStatus(ByVal Type As String, ByVal Remark As String, ByVal ID As Int16) As String
+        Try
+
+            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+            GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
+            Dim Keyfield As String = ""
+            Dim DT As New DataTable
+
+            If Type = "Approved" Then
+                str = "Update ServicePoMain set IsRework=0,ReworkRemark='',IsCancel=0,CanceledRemark='', IsApproved= 1,ApprovedBy=" + GBLUserID + ",ApprovedDate=Getdate(),ApprovedRemark='" & Remark & "' where POID= " & ID
+            ElseIf Type = "Rework" Then
+                str = "Update ServicePoMain set IsRework=1,ReworkRemark='" + Remark + "',ReworkDate= getdate(),IsCancel=0,CanceledRemark='', IsApproved= 0,ApprovedBy=0,ApprovedRemark='' where POID= " & ID
+            Else
+                str = "Update ServicePoMain set IsRework=0,ReworkRemark='',IsCancel=1,CanceledDate=GetDate(),CanceledRemark='" + Remark + "', IsApproved= 0,ApprovedBy=0,ApprovedRemark='' where POID= " & ID
+            End If
+
+            Keyfield = db.ExecuteNonSQLQuery(str)
+            Return Keyfield
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function DeletePO(ByVal POID As Int16) As String
+        Try
+
+            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+            GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
+            Dim Keyfield As String = ""
+            Dim DT As New DataTable
+
+            str = "Update ServicePoMain set IsDeletedTransaction = 1 , DeletedDate=GetDate() where POID=" & POID & "; Update ServicePoDetails set IsDeletedTransaction = 1 , DeletedDate=GetDate() where POID=" & POID
+
+            Keyfield = db.ExecuteNonSQLQuery(str)
+            Return Keyfield
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function GetBookingDataHistory(ByVal ID As String) As String
+        Try
+            Dim FilterSTR = ""
+            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+            GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
+            Dim LId = db.GetColumnValue("EmployeeId", "UserMaster", "UserId = " & GBLUserID)
+            Dim Designation = db.GetColumnValue("Designation", "LedgerMaster", " LedgerGroupID =3 And Isnull(IsDeletedTransaction,0) = 0 And LedgerId = " & LId)
+
+            Dim ConStr = ""
+
+            'If Designation.ToUpper() = "SALES CORDINATOR" Then
+            '    ConStr = " And PQ.SalesCordinatorId = " & LId
+            'ElseIf Designation.ToUpper() = "SALES EXECUTIVE" Then
+            '    ConStr = " And PQ.SalesPersonID = " & LId
+            'ElseIf Designation.ToUpper() = "SALES MANAGER" Then
+            '    ConStr = " And PQ.SalesManagerId = " & LId
+            'End If
+
+            FilterSTR = FilterSTR + ConStr
+
+            Dim DT As New DataTable
+            str = "Select Isnull(PQ.IsSendForInternalApproval,0) as IsSendInternalApproval,Isnull(PQ.IsSendForPriceApproval,0) as IsSendForPriceApproval,Isnull(PQ.IsRework,0) as IsSendRework,Isnull(PQ.IsInternalApproved,0) as IsInternalApproved,Isnull(PQ.Isapproved,0) as IsPriceApproved,Isnull(PQ.IsCancelled,0) as IsCancelled, Isnull(EQ.EnquiryNo,'') as EnquiryNo,Isnull(UMA.UserName,'') as ApprovalSendTo, PQ.ApprovalSendTo,Isnull(convert(varchar,PQ.ApprovalSendDate,106),'') as ApprovalSendDate, PQ.EstimateNo as QuotationNo,convert(varchar, PQ.CreatedDate, 103) As CreatedDate,PQ.ProjectName, LM.LedgerName as ClientName,LMS.LedgerName as SalesPerson,LMSM.LedgerName as SalesManager,LMSC.LedgerName as SalesCordinator,PQ.FreightAmount,UM.UserName as EstimateBy,PQ.Narration as Remark, PQ.ProductEstimateID,Isnull(convert(varchar,PQ.CancelledDate,106),'') as CancelledDate,PQ.CancelledRemark,Isnull(convert(varchar,PQ.ApprovedDate,106),'') as ApprovedDate,PQ.ApprovedRemark,Isnull(convert(varchar,PQ.ReworkDate,106),'') as ReworkDate,PQ.ReworkRemark,PQ.RemarkInternalApproved,Isnull(convert(varchar,PQ.InternalApprovedDate,106),'') as InternalApprovedDate from ProductQuotation as PQ inner Join LedgerMaster as LM on LM.CompanyID = PQ.CompanyID and LM.LedgerID = PQ.LedgerID and LM.LedgerGroupID = 1 inner Join LedgerMaster as LMS on LMS.CompanyID = PQ.CompanyID and LMS.LedgerID = PQ.SalesPersonID  and LMS.LedgerGroupID =3 inner Join LedgerMaster as LMSC on LMSC.CompanyID = PQ.CompanyID and LMSC.LedgerID = PQ.SalesCordinatorId and LMSC.LedgerGroupID =3 inner Join LedgerMaster as LMSM on LMSM.CompanyID = PQ.CompanyID and LMSM.LedgerID = PQ.SalesManagerId  and LMSM.LedgerGroupID = 3 inner Join UserMaster as UM on UM.CompanyID = PQ.CompanyID and UM.UserID = PQ.CreatedBy inner join UserMaster as UMA on UMA.CompanyID = PQ.CompanyID and PQ.ApprovalSendTo = UMA.UserID inner join EnquiryMain as EQ on EQ.EnquiryID = PQ.EnquiryID and EQ.CompanyID = PQ.CompanyID where PQ.CompanyID =" & GBLCompanyID & " and PQ.IsDeletedTransaction = 0 " & FilterSTR & " and PQ.EnquiryID= " & ID & " order by PQ.CreatedDate desc"
+            db.FillDataTable(dataTable, str)
+            str = "Select PQC.ProductName as ProductName1, PQC.ProductEstimateID,PCM.ProductName,CM.CategoryName,PHM.HSNCode,PQC.Quantity,PQC.Rate,PQC.RateType,PQC.UnitCost,PQC.GSTPercantage,PQC.GSTAmount,PQC.MiscPercantage,PQC.MiscAmount,Isnull(PQC.ShippingCost,0) as ShippingCost,PQC.ProfitPer,PQC.ProfitCost,PQC.FinalAmount,LM.LedgerName as VendorName from ProductQuotationContents as PQC inner Join ProductCatalogMaster as PCM on PCM.CompanyID = PQC.CompanyID and PQC.ProductCatalogID = PCM.ProductCatalogID Inner Join CategoryMaster as CM on CM.CompanyID = PQC.CompanyID and PQC.CategoryID = CM.CategoryID inner join LedgerMaster as LM on LM.CompanyID = PQC.CompanyID and PQC.VendorID = LM.LedgerID AND lm.LedgerGroupID = 8 Inner join ProductHSNMaster as PHM on PHM.CompanyID = PQC.CompanyID and PHM.ProductHSNID = PQC.ProductHSNID  where  PQC.IsDeletedTransaction = 0  and PQC.CompanyID = " & GBLCompanyID
             db.FillDataTable(DT, str)
 
             DT.TableName = "Contents"
@@ -573,7 +770,7 @@ Public Class WebServicePlanWindow
             Dim DT As New DataTable
             str = "Select * from ProductQuotation where CompanyID=" & GBLCompanyID & " and ProductEstimateID=" & ProjectEstimateID
             db.FillDataTable(dataTable, str)
-            str = "Select PQ.BookingID,LM.LedgerName as VendorName,LM.City,PCM.IsOffsetProduct,PCM.IsUnitProduct, PCM.ProductCatalogCode,PCM.ProductDescription,ProductEstimationContentID,PQC.ProductEstimateID,Quantity as RequiredQuantity ,Quantity,PQC.CategoryID,PQC.ProductCatalogID,PQC.VendorID,MiscAmount,MiscPercantage as MiscPer,ShippingCost,GSTAmount,GSTPercantage as GSTTaxPercentage,ProfitCost,ProfitPer,Rate,Rate as VendorRate,Amount,ProcessCost,FinalAmount,UnitCost,RateType,PQC.ProcessIDStr,PQC.ProductHSNID,PQC.DefaultProcessStr from ProductQuotationContents as PQC inner join ProductCatalogMaster as PCM on PCM.ProductCatalogID = PQC.ProductCatalogID and PCM.CompanyID =PQC.CompanyID inner join LedgerMaster as LM on LM.LedgerID = PQC.VendorID  and PQC.CompanyID = LM.CompanyID Inner Join ProductQuotation as PQ on PQ.ProductEstimateID = PQC.ProductEstimateID and PQ.CompanyID = PQC.CompanyID where PQC.IsDeletedTransaction=0 and LM.LedgerGroupID=8 and PQC.CompanyID=" & GBLCompanyID & " and PQC.ProductEstimateID=" & ProjectEstimateID
+            str = "Select     ROW_NUMBER()   OVER (ORDER BY ED.EnquiryIDDetail) AS SequenceNo   , ED.EnquiryIDDetail, PQC.IsManualCosting, PQC.CGSTAmount,PQC.CGSTPercantage,PQC.SGSTAmount,PQC.SGSTPercantage,PQC.IGSTAmount,PQC.IGSTPercantage, PQC.ProductName as ProductName1, PQ.BookingID,LM.LedgerName as VendorName,LM.City,PCM.IsOffsetProduct,PCM.IsUnitProduct, PCM.ProductCatalogCode,PCM.ProductDescription,ProductEstimationContentID,PQC.ProductEstimateID,PQC.Quantity as RequiredQuantity ,PQC.Quantity,PQC.CategoryID,PQC.ProductCatalogID,PQC.VendorID,PQC.MiscAmount,PQC.MiscPercantage as MiscPer,PQC.ShippingCost,PQC.GSTAmount,PQC.GSTPercantage as GSTTaxPercentage,PQC.ProfitCost,PQC.ProfitPer,PQC.Rate,PQC.Rate as VendorRate,PQC.Amount,PQC.ProcessCost,PQC.FinalAmount,PQC.UnitCost,PQC.RateType,PQC.ProcessIDStr,isnull(PQC.UnitCostVendor,0) UnitCostVendor,PQC.ProductHSNID,PQC.DefaultProcessStr,PQC.ProductDescription as ProductDescriptions,PQC.PackagingDetails,PQC.DescriptionOther from ProductQuotationContents as PQC inner join ProductCatalogMaster as PCM on PCM.ProductCatalogID = PQC.ProductCatalogID and PCM.CompanyID =PQC.CompanyID inner join LedgerMaster as LM on LM.LedgerID = PQC.VendorID  and PQC.CompanyID = LM.CompanyID Inner Join ProductQuotation as PQ on PQ.ProductEstimateID = PQC.ProductEstimateID and PQ.CompanyID = PQC.CompanyID inner join EnquiryDetails as ED on PQ.EnquiryID = ED.EnquiryID and PQC.ProductCatalogID = ED.ProductCatalogID and PQC.ProductName = ED.ProductName where PQC.IsDeletedTransaction=0 and LM.LedgerGroupID=8 and PQC.CompanyID=" & GBLCompanyID & " and PQC.ProductEstimateID=" & ProjectEstimateID
             db.FillDataTable(DT, str)
 
             DT.TableName = "Contents"
@@ -733,7 +930,7 @@ Public Class WebServicePlanWindow
 
             GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
             GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
-            str = "Update ProductQuotation Set IsApproved=0 Where CompanyId = " & GBLCompanyID & " And ProductEstimateID In (" & BKID & ")"
+            str = "Update ProductQuotation Set IsApproved=0 Where CompanyId = " & GBLCompanyID & " And ProductEstimateID In (" & BKID & ");Update JobApprovedCost Set IsDeletedTransaction=1 Where CompanyId = " & GBLCompanyID & " And BookingID In (" & BKID & ")"
             db.ExecuteNonSQLQuery(str)
 
             Return "Save"
@@ -749,15 +946,93 @@ Public Class WebServicePlanWindow
         Try
 
             GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
-            str = "Update ProductQuotation Set IsSendForInternalApproval=" & flag & ",ApprovalSendTo=" & SendTo & " Where CompanyId = " & GBLCompanyID & " And ProductEstimateID In (" & BKID & ")"
+            GBLUserName = Convert.ToString(HttpContext.Current.Session("UserName"))
+            str = "Update ProductQuotation Set IsSendForInternalApproval=" & flag & ",ApprovalSendTo=" & SendTo & ",ApprovalSendDate = GETDATE() Where CompanyId = " & GBLCompanyID & " And ProductEstimateID In (" & BKID & ")"
             db.ExecuteNonSQLQuery(str)
+
+
+            If flag = 1 Then
+
+
+                '' get Quotation Details
+                'str = "Select  Isnull(EQ.EnquiryNo,'') as EnquiryNo,convert(varchar, EQ.CreatedDate, 103) As EnquiryCreationDate,convert(varchar, EQ.CreatedDate, 8) As EnquiryTime, PQ.EstimateNo as QuotationNo,convert(varchar, PQ.CreatedDate, 103) As QuoteCreatedDate,PQ.ProjectName, LM.LedgerName as ClientName,LMS.LedgerName as SalesPerson,LMSM.LedgerName as SalesManager,LMSC.LedgerName as SalesCordinator,UM.UserName as EstimateBy, PQ.ProductEstimateID,UME.UserName as EnquiryBy   from ProductQuotation as PQ inner Join LedgerMaster as LM on LM.CompanyID = PQ.CompanyID and LM.LedgerID = PQ.LedgerID and LM.LedgerGroupID = 1 inner Join LedgerMaster as LMS on LMS.CompanyID = PQ.CompanyID and LMS.LedgerID = PQ.SalesPersonID  and LMS.LedgerGroupID =3 inner Join LedgerMaster as LMSC on LMSC.CompanyID = PQ.CompanyID and LMSC.LedgerID = PQ.SalesCordinatorId and LMSC.LedgerGroupID =3 inner Join LedgerMaster as LMSM on LMSM.CompanyID = PQ.CompanyID and LMSM.LedgerID = PQ.SalesManagerId  and LMSM.LedgerGroupID = 3 inner Join UserMaster as UM on UM.CompanyID = PQ.CompanyID and UM.UserID = PQ.CreatedBy inner join EnquiryMain as EQ on EQ.EnquiryID = PQ.EnquiryID and EQ.CompanyID = PQ.CompanyID inner Join UserMaster as UME on UME.CompanyID = PQ.CompanyID and UME.UserID = EQ.CreatedBy inner JOIN (Select Max(RevisionNo) as RevisionNo, EnquiryID,CompanyID From ProductQuotation Group By EnquiryID,CompanyID) as Q ON Q.EnquiryID = PQ.EnquiryID AND Q.RevisionNo = PQ.RevisionNo AND Q.CompanyID = EQ.CompanyID  where PQ.CompanyID =1 and PQ.ProductEstimateID = " & BKID & " and PQ.IsDeletedTransaction = 0 order by PQ.CreatedDate desc"
+                'Dim Dt As New DataTable
+                'db.FillDataTable(Dt, str)
+
+                'If Dt.Rows.Count > 0 Then
+
+                '    Dim ToMail = db.GetColumnValue("EmailID", "UserMaster", "  companyID=" & GBLCompanyID & " and UserId=" & SendTo)
+                '    db.FillDataTable(Dt, str)
+                '    '' Sending Notification Bty Mail To User(SendTo)
+                '    Dim Subject = "Need Internal Approval on Quotation No. " + Dt.Rows(0)("QuotationNo").ToString
+
+                '    If ToMail = "" Then
+                '        Return "Save"
+                '    End If
+                '    Dim Body = "Dear Sir/ mam,<br/><br/>" &
+                '               " Greetings For the day!<br/><br/>" &
+                '               " Need internal approval on Quotation No. <b>" + Dt.Rows(0)("QuotationNo").ToString + "</b><br/>" &
+                '               " <b>Job detail mention below :- </b><br/><br/>" &
+                '               "<b> Enquiry no.:</b> " + Dt.Rows(0)("EnquiryNo").ToString + "<br/>" &
+                '               "<b> punched by:</b> " + Dt.Rows(0)("EnquiryBy").ToString + " , on dated " + Dt.Rows(0)("EnquiryCreationDate").ToString + " , time " + Dt.Rows(0)("EnquiryTime").ToString + " <br/>" &
+                '               "<b> Sales executive:</b> " + Dt.Rows(0)("SalesPerson").ToString + "  <br/>" &
+                '               "<b> Sales Manager:</b> " + Dt.Rows(0)("SalesManager").ToString + " <br/>" &
+                '               "<b> Client Name:</b> " + Dt.Rows(0)("ClientName").ToString + " <br/>" &
+                '               " Quotation <b>" + Dt.Rows(0)("QuotationNo").ToString + " </b> has been generated by <b>" + Dt.Rows(0)("EstimateBy").ToString + "</b> .<br/><br/>" &
+                '               " Please review the quotation and provide internal approval. <br/>" &
+                '               " I am available to answer any questions and provide any clarification you may need. <br/>" &
+                '               " If there are likely to be any delays or holdups, let me know. I'll do everything I can to help " &
+                '               " accelerate the process.<br/>" &
+                '               " Thank You <br/>" &
+                '               " " + GBLUserName + ""
+
+                '    db.SendEmail(Subject, Body, ToMail)
+
+                'End If
+
+            End If
 
             Return "Save"
         Catch ex As Exception
             Return ex.Message
         End Try
     End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function UpdateSendForApprovalPO(ByVal BKID As String, ByVal flag As Integer, ByVal SendTo As Integer) As String
+        Try
 
+            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+            GBLUserName = Convert.ToString(HttpContext.Current.Session("UserName"))
+            str = "Update ServicePoMain Set IsSentForApproval=" & flag & ",ApprovalSentTo=" & SendTo & ",ApprovalSentDate = GETDATE() Where CompanyId = " & GBLCompanyID & " And POID In (" & BKID & ")"
+            db.ExecuteNonSQLQuery(str)
+            Return "Save"
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
+
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function Sendmail() As String
+        GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
+        Dim ToMail = "sandeep.indusanalytics@gmail.com" 'db.GetColumnValue("EmailID", "UserMaster", "  companyID=" & GBLCompanyID & " and UserId=" & GBLUserID)
+
+        '' Sending Notification Bty Mail To User(SendTo)
+        Dim Subject = "Need Internal Approval on Quotation No"
+
+        If ToMail = "" Then
+            Return "Save"
+        End If
+        Dim Body = "Dear Sir/ mam,<br/><br/>" &
+                   " Greetings For the day!<br/><br/>" &
+                   " Need internal approval on Quotation No. <b></b><br/>" &
+                   " <b>Job detail mention below :- </b><br/><br/>" &
+                   " Thank You <br/>"
+
+
+        Return db.SendEmails(ToMail, "Sandeep")
+    End Function
     <WebMethod(EnableSession:=True)>
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function DeleteQuotation(ByVal BKId As Integer) As String
@@ -786,7 +1061,7 @@ Public Class WebServicePlanWindow
             Dim trans As SqlTransaction = con.BeginTransaction()
             Try
                 cmd.Transaction = trans
-                str = "Update JobBooking Set IsDeletedTransaction=1,DeletedDate=getdate(),DeletedBy=" & GBLUserID & " where BookingId = '" & BKId & "' And CompanyID = " & GBLCompanyID & " "
+                str = "Update JobBooking Set IsDeletedTransaction=1, DeletedDate = getdate(), DeletedBy = " & GBLUserID & " where BookingId = '" & BKId & "' And CompanyID = " & GBLCompanyID & " "
                 cmd = New SqlCommand(str, con, trans)
                 cmd.CommandType = CommandType.Text
                 cmd.ExecuteNonQuery()
@@ -1089,7 +1364,49 @@ Public Class WebServicePlanWindow
         End Try
         Return Key_Field
     End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function GetBookingdashboarddata(ByVal FilterSTR As String) As String
+        Try
+            If FilterSTR = "All" Then FilterSTR = ""
+            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+            GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
+            Dim LId = db.GetColumnValue("EmployeeId", "UserMaster", "UserId = " & GBLUserID)
+            Dim Designation = db.GetColumnValue("Designation", "LedgerMaster", " LedgerGroupID =3 And Isnull(IsDeletedTransaction,0) = 0 And LedgerId = " & LId)
 
+            Dim ConStr = ""
+
+
+
+            If Designation.ToUpper() = "SALES CORDINATOR" Then
+                ConStr = " And PQ.SalesCordinatorId = " & LId
+            ElseIf Designation.ToUpper() = "SALES EXECUTIVE" Then
+                ConStr = " And PQ.SalesPersonID = " & LId
+            ElseIf Designation.ToUpper() = "SALES MANAGER" Then
+                ConStr = " And PQ.SalesManagerId = " & LId
+            End If
+
+            FilterSTR = FilterSTR + ConStr
+
+            Dim DT As New DataTable
+            str = "Select PQ.EnquiryID, Isnull(PQ.IsSendForInternalApproval,0) as IsSendInternalApproval,Isnull(PQ.IsSendForPriceApproval,0) as IsSendForPriceApproval,Isnull(PQ.IsRework,0) as IsSendRework,Isnull(PQ.IsInternalApproved,0) as IsInternalApproved,Isnull(PQ.Isapproved,0) as IsPriceApproved,Isnull(PQ.IsCancelled,0) as IsCancelled, Isnull(EQ.EnquiryNo,'') as EnquiryNo,Isnull(UMA.UserName,'') as ApprovalSendTo, PQ.ApprovalSendTo,Isnull(convert(varchar,PQ.ApprovalSendDate,106),'') as ApprovalSendDate, PQ.EstimateNo as QuotationNo,convert(varchar, PQ.CreatedDate, 103) As CreatedDate,PQ.ProjectName, LM.LedgerName as ClientName,LMS.LedgerName as SalesPerson,LMSM.LedgerName as SalesManager,LMSC.LedgerName as SalesCordinator,PQ.FreightAmount,UM.UserName as EstimateBy,PQ.Narration as Remark, PQ.ProductEstimateID,Isnull(convert(varchar,PQ.CancelledDate,106),'') as CancelledDate,PQ.CancelledRemark,Isnull(convert(varchar,PQ.ApprovedDate,106),'') as ApprovedDate,PQ.ApprovedRemark,Isnull(convert(varchar,PQ.ReworkDate,106),'') as ReworkDate,PQ.ReworkRemark,PQ.RemarkInternalApproved,Isnull(convert(varchar,PQ.InternalApprovedDate,106),'') as InternalApprovedDate from ProductQuotation as PQ inner Join LedgerMaster as LM on LM.CompanyID = PQ.CompanyID and LM.LedgerID = PQ.LedgerID and LM.LedgerGroupID = 1 inner Join LedgerMaster as LMS on LMS.CompanyID = PQ.CompanyID and LMS.LedgerID = PQ.SalesPersonID  and LMS.LedgerGroupID =3 inner Join LedgerMaster as LMSC on LMSC.CompanyID = PQ.CompanyID and LMSC.LedgerID = PQ.SalesCordinatorId and LMSC.LedgerGroupID =3 inner Join LedgerMaster as LMSM on LMSM.CompanyID = PQ.CompanyID and LMSM.LedgerID = PQ.SalesManagerId  and LMSM.LedgerGroupID = 3 inner Join UserMaster as UM on UM.CompanyID = PQ.CompanyID and UM.UserID = PQ.CreatedBy left join UserMaster as UMA on UMA.CompanyID = PQ.CompanyID and PQ.ApprovalSendTo = UMA.UserID inner join EnquiryMain as EQ on EQ.EnquiryID = PQ.EnquiryID and EQ.CompanyID = PQ.CompanyID  inner JOIN (Select Max(RevisionNo) as RevisionNo, EnquiryID,CompanyID From ProductQuotation Group By EnquiryID,CompanyID) as Q ON Q.EnquiryID = PQ.EnquiryID AND Q.RevisionNo = PQ.RevisionNo AND Q.CompanyID = EQ.CompanyID   where PQ.CompanyID =" & GBLCompanyID & " and PQ.IsDeletedTransaction = 0 " & FilterSTR & "  order by PQ.CreatedDate desc"
+            db.FillDataTable(dataTable, str)
+            str = "Select PQC.ProductName as ProductName1, PQC.ProductEstimateID,PCM.ProductName,CM.CategoryName,PHM.HSNCode,PQC.Quantity,PQC.Rate,PQC.RateType,PQC.UnitCost,PQC.GSTPercantage,PQC.GSTAmount,PQC.MiscPercantage,PQC.MiscAmount,Isnull(PQC.ShippingCost,0) as ShippingCost,PQC.ProfitPer,PQC.ProfitCost,PQC.FinalAmount,LM.LedgerName as VendorName from ProductQuotationContents as PQC inner Join ProductCatalogMaster as PCM on PCM.CompanyID = PQC.CompanyID and PQC.ProductCatalogID = PCM.ProductCatalogID Inner Join CategoryMaster as CM on CM.CompanyID = PQC.CompanyID and PQC.CategoryID = CM.CategoryID inner join LedgerMaster as LM on LM.CompanyID = PQC.CompanyID and PQC.VendorID = LM.LedgerID AND lm.LedgerGroupID = 8 Inner join ProductHSNMaster as PHM on PHM.CompanyID = PQC.CompanyID and PHM.ProductHSNID = PQC.ProductHSNID   where  PQC.IsDeletedTransaction = 0 and PQC.CompanyID = " & GBLCompanyID
+            db.FillDataTable(DT, str)
+
+            DT.TableName = "Contents"
+            dataTable.TableName = "Projects"
+
+            Dim dataset As New DataSet
+            dataset.Merge(DT)
+            dataset.Merge(dataTable)
+            data.Message = db.ConvertDataSetsTojSonString(dataset)
+            js.MaxJsonLength = 2147483647
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
     '' Send Quote Mail
     <WebMethod(EnableSession:=True)>
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>

@@ -58,6 +58,16 @@ $("#SelectBoxUnderUser").dxSelectBox({
     }
 });
 
+$("#SelectEmployeeUser").dxSelectBox({
+    items: [],
+    placeholder: "Select--",
+    valueExpr: 'LedgerID',
+    displayExpr: 'LedgerName',
+    searchEnabled: true,
+    showClearButton: true,
+
+});
+
 $("#SelectBoxSMTPAuthenticate").dxSelectBox({
     items: ["True", "False"],
     placeholder: "Select --",
@@ -219,6 +229,26 @@ $.ajax({
         res = res.slice(0, -1);
         var RES1 = JSON.parse(res);
         $("#SelectBoxUnderUser").dxSelectBox({
+            items: RES1
+        });
+    }
+});
+
+$.ajax({
+    type: "POST",
+    url: "WebService_OtherMaster.asmx/EmployeeUser",
+    data: '{}',
+    contentType: "application/json; charset=utf-8",
+    dataType: "text",
+    success: function (results) {
+        //console.debug(results);
+        var res = results.replace(/\\/g, '');
+        res = res.replace(/"d":""/g, '');
+        res = res.replace(/""/g, '');
+        res = res.substr(1);
+        res = res.slice(0, -1);
+        var RES1 = JSON.parse(res);
+        $("#SelectEmployeeUser").dxSelectBox({
             items: RES1
         });
     }
@@ -497,7 +527,7 @@ $("#CreateButton").click(function () {
             res = res.substr(1);
             res = res.slice(0, -1);
             SupportSystemGridData = JSON.parse(res);
-            SectionCount = SupportSystemGridData[0].SectionCount;
+            //     SectionCount = SupportSystemGridData[0].SectionCount;
 
             $("#SupportSystemGrid").dxDataGrid({
                 dataSource: SupportSystemGridData
@@ -511,26 +541,6 @@ $("#CreateButton").click(function () {
     document.getElementById("CreateButton").setAttribute("data-target", "#largeModal");
 });
 
-//$.ajax({
-//    type: "POST",
-//    url: "UserAuthentication.asmx/GetAllForm",
-//    data: '{}',
-//    contentType: "application/json; charset=utf-8",
-//    dataType: 'text',
-//    success: function (results) {
-//        var res = results.replace(/\\/g, '');
-//        res = res.replace(/"d":/g, '');
-//        res = res.replace(/""/g, '');
-//        res = res.substr(1);
-//        res = res.slice(0, -1);
-//        SupportSystemGridData = JSON.parse(res);
-//        SectionCount = SupportSystemGridData[0].SectionCount;
-
-//        $("#SupportSystemGrid").dxDataGrid({
-//            dataSource: SupportSystemGridData
-//        });
-//    }
-//});
 $("#EditButton").click(function () {
 
     var txtGetGridRow = document.getElementById("UserGetGridRow").value;
@@ -564,6 +574,7 @@ $("#EditButton").click(function () {
     $("#SelectBoxUnderUser").dxSelectBox({ value: selectedUserRows[0].UnderUserID });
     $("#SelectBoxDesignation").dxSelectBox({ value: selectedUserRows[0].Designation });
     $("#SelectBoxVendor").dxSelectBox({ value: selectedUserRows[0].VendorID });
+    $("#SelectEmployeeUser").dxSelectBox({ value: selectedUserRows[0].EmployeeId });
 
     $("#SelectBoxCountry").dxSelectBox({ value: selectedUserRows[0].Country });
     $("#SelectBoxState").dxSelectBox({ value: selectedUserRows[0].State });
@@ -575,9 +586,9 @@ $("#EditButton").click(function () {
     document.getElementById("RESMTPPassword").value = selectedUserRows[0].smtpUserPassword;
     document.getElementById("SMTPServer").value = selectedUserRows[0].smtpServer;
     document.getElementById("SMTPServerPort").value = selectedUserRows[0].smtpServerPort;
-    document.getElementById("TxtMessage").value = selectedUserRows[0].EmailMessage;
-    document.getElementById("TxtEmailHeader").value = selectedUserRows[0].HeaderText;
-    document.getElementById("TxtEmailFooter").value = selectedUserRows[0].FooterText.replace(/<br >/g,'\n');
+    document.getElementById("TxtMessage").value = selectedUserRows[0].EmailMessage == null ? selectedUserRows[0].EmailMessage : selectedUserRows[0].EmailMessage.replace(/<br >/g, '\n');
+    document.getElementById("TxtEmailHeader").value = selectedUserRows[0].HeaderText == null ? selectedUserRows[0].HeaderText : selectedUserRows[0].HeaderText.replace(/<br >/g, '\n');
+    document.getElementById("TxtEmailFooter").value = selectedUserRows[0].FooterText == null ? selectedUserRows[0].FooterText : selectedUserRows[0].FooterText.replace(/<br >/g, '\n');
     ///////////////////ReSelect operators list
     $("#TxtOperatorID").text(selectedUserRows[0].UserWiseOperatorsIDStr);
     try {
@@ -1165,7 +1176,7 @@ function ProfileParameter() {
     var UserProfilePic = document.getElementById("imgpathstring").value;
     var UserSignPic = document.getElementById("imgpathstringsign").value;
     var SelectBoxVendorID = $("#SelectBoxVendor").dxSelectBox('instance').option('value');
-
+    var EmpID = $('#SelectEmployeeUser').dxSelectBox('instance').option('value');
     //var CHKCreateuser = document.getElementById("CHKCreateuser").checked;
     //var CHKAdministrativeRights = document.getElementById("CHKAdministrativeRights").checked;
     //var CHKPaperIssue = document.getElementById("CHKPaperIssue").checked;
@@ -1195,6 +1206,7 @@ function ProfileParameter() {
     OperationUserMasterRecord.smtpAuthenticate = SelectBoxSMTPAuthenticate;
     OperationUserMasterRecord.smtpUseSSL = SelectBoxSMTPUseSSL;
     OperationUserMasterRecord.Details = Details;
+    OperationUserMasterRecord.EmployeeId = EmpID;
 
     OperationUserMasterRecord.ProfilePicHref = UserProfilePic;//document.getElementById("imgpathstring").value=ProfilePicHref;
     OperationUserMasterRecord.SignPicHref = UserSignPic;

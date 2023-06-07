@@ -53,7 +53,7 @@ Public Class WebService_PurchaseRequisition
         Context.Response.Clear()
         Context.Response.ContentType = "application/json"
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
 
         If RadioValue = "Indent List" Then
@@ -100,7 +100,7 @@ Public Class WebService_PurchaseRequisition
         Context.Response.Clear()
         Context.Response.ContentType = "application/json"
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
 
         str = ""
@@ -134,7 +134,7 @@ Public Class WebService_PurchaseRequisition
         Context.Response.Clear()
         Context.Response.ContentType = "application/json"
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
 
         str = ""
@@ -156,7 +156,7 @@ Public Class WebService_PurchaseRequisition
         Context.Response.ContentType = "application/json"
         Dim str1 As String
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
         If ItemGroupID <> "" Then
             str1 = " AND IM.ItemGroupID=" & ItemGroupID & ""
@@ -165,7 +165,7 @@ Public Class WebService_PurchaseRequisition
         End If
         str = ""
         str = " SELECT Isnull(IM.ItemID,0) As ItemID,Isnull(IM.ItemGroupID,0) As ItemGroupID,Isnull(IGM.ItemGroupNameID,0) As ItemGroupNameID,Isnull(IM.ItemSubGroupID,0) As ItemSubGroupID,Nullif(IGM.ItemGroupName,'') AS ItemGroupName,Nullif(ISGM.ItemSubGroupName,'') AS ItemSubGroupName,nullif(IM.ItemCode,'') as ItemCode,nullif(IM.ItemName,'') as ItemName,nullif(IM.ItemDescription,'') as ItemDescription,Isnull(IM.BookedStock,0) as BookedStock, " &
-            " Isnull(IM.AllocatedStock,0) as AllocatedStock ,Isnull(IM.PhysicalStock,0) AS PhysicalStock,nullif(IM.StockUnit,'') as StockUnit,Isnull(UOM.DecimalPlace,0) AS UnitDecimalPlace,nullif(IM.PurchaseUnit,'') as PurchaseUnit,Isnull(IM.WtPerPacking,0) AS WtPerPacking,Isnull(IM.UnitPerPacking,0) AS UnitPerPacking,Isnull(IM.ConversionFactor,0) AS ConversionFactor,Isnull(IM.SizeW,0) AS SizeW,Nullif(C.ConversionFormula,'') AS ConversionFormula,Isnull(C.ConvertedUnitDecimalPlace,0) AS ConvertedUnitDecimalPlace,(Select Top 1 Replace(Convert(Varchar(13),A.VoucherDate,106),' ','-') FRom ItemTransactionMain AS A INNER JOIN ItemTransactionDetail as B ON A.TransactionID=B.TransactionID AND A.CompanyID=B.CompanyID AND B.ItemID=IM.ItemID Where A.VoucherID=-11 AND A.CompanyID =IM.CompanyID AND Isnull(A.IsDeletedTransaction,0)=0 Order By A.VoucherDate Desc) AS LastPurchaseDate " &
+            " Isnull(IM.AllocatedStock,0) as AllocatedStock ,Isnull(IM.PhysicalStock,0) AS PhysicalStock,nullif(IM.StockUnit,'') as StockUnit,Isnull(UOM.DecimalPlace,0) AS UnitDecimalPlace,nullif(IM.PurchaseUnit,'') as PurchaseUnit,Isnull(IM.WtPerPacking,0) AS WtPerPacking,Isnull(IM.UnitPerPacking,0) AS UnitPerPacking,Isnull(IM.ConversionFactor,0) AS ConversionFactor,Isnull(IM.SizeW,0) AS SizeW,nullif(C.ConversionFormula,'') AS ConversionFormula,Isnull(C.ConvertedUnitDecimalPlace,0) AS ConvertedUnitDecimalPlace,(Select Top 1 Replace(Convert(Varchar(13),A.VoucherDate,106),' ','-') FRom ItemTransactionMain AS A INNER JOIN ItemTransactionDetail as B ON A.TransactionID=B.TransactionID AND A.CompanyID=B.CompanyID AND B.ItemID=IM.ItemID Where A.VoucherID=-11 AND A.CompanyID =IM.CompanyID AND Isnull(A.IsDeletedTransaction,0)=0 Order By A.VoucherDate Desc) AS LastPurchaseDate " &
             " FROM ItemMaster AS IM INNER JOIN ItemGroupMaster As IGM ON IGM.ItemGroupID=IM.ItemGroupID  AND IGM.CompanyID=IM.CompanyID LEFT JOIN ItemSubGroupMaster As ISGM ON ISGM.ItemSubGroupID=IM.ItemSubGroupID  AND ISGM.CompanyID=IM.CompanyID  LEFT JOIN UnitMaster As UOM ON UOM.UnitSymbol=IM.StockUnit  AND UOM.CompanyID=IM.CompanyID  LEFT JOIN ConversionMaster AS C ON IM.StockUnit=C.BaseUnitSymbol AND IM.PurchaseUnit=C.ConvertedUnitSymbol And IM.CompanyID=C.CompanyID " &
             " Where IM.CompanyID=" & GBLCompanyID & "  " & str1 & " And Isnull(IM.IsDeletedTransaction,0)<>1 Order By ItemGroupID,ItemSubGroupName,ItemCode,ItemName "
 
@@ -183,7 +183,7 @@ Public Class WebService_PurchaseRequisition
         Dim MaxVoucherNo As Long
         Dim KeyField As String
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
         GBLFYear = Convert.ToString(HttpContext.Current.Session("FYear"))
 
@@ -212,7 +212,7 @@ Public Class WebService_PurchaseRequisition
         AddColName = ""
         AddColValue = ""
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
         GBLUserName = Convert.ToString(HttpContext.Current.Session("UserName"))
         GBLFYear = Convert.ToString(HttpContext.Current.Session("FYear"))
@@ -228,8 +228,8 @@ Public Class WebService_PurchaseRequisition
             TransactionID = db.InsertDatatableToDatabase(jsonObjectsRecordMain, TableName, AddColName, AddColValue)
 
             TableName = "ItemTransactionDetail"
-            AddColName = "ModifiedDate,CreatedDate,UserID,CompanyID,FYear,CreatedBy,ModifiedBy,TransactionID"
-            AddColValue = "'" & DateTime.Now & "','" & DateTime.Now & "','" & GBLUserID & "','" & GBLCompanyID & "','" & GBLFYear & "','" & GBLUserID & "','" & GBLUserID & "','" & TransactionID & "'"
+            AddColName = "ModifiedDate,CreatedDate,UserID,CompanyID,FYear,CreatedBy,ModifiedBy,TransactionID,IsVoucherItemApproved,VoucherItemApprovedBy,VoucherItemApprovedDate"
+            AddColValue = "'" & DateTime.Now & "','" & DateTime.Now & "','" & GBLUserID & "','" & GBLCompanyID & "','" & GBLFYear & "','" & GBLUserID & "','" & GBLUserID & "','" & TransactionID & "',1," & GBLUserID & ",'" & DateTime.Now & "'"
             db.InsertDatatableToDatabase(jsonObjectsRecordDetail, TableName, AddColName, AddColValue)
 
             TableName = "ItemTransactionDetail"
@@ -258,7 +258,7 @@ Public Class WebService_PurchaseRequisition
         Dim AddColName, AddColValue, wherecndtn, TableName As String
         AddColName = ""
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
         GBLFYear = Convert.ToString(HttpContext.Current.Session("FYear"))
 
@@ -274,8 +274,8 @@ Public Class WebService_PurchaseRequisition
             db.ExecuteNonSQLQuery("Delete from ItemTransactionDetail WHERE CompanyID='" & GBLCompanyID & "' and TransactionID='" & TransactionID & "' ")
 
             TableName = "ItemTransactionDetail"
-            AddColName = "ModifiedDate,CreatedDate,UserID,CompanyID,FYear,CreatedBy,ModifiedBy,TransactionID"
-            AddColValue = "'" & DateTime.Now & "','" & DateTime.Now & "','" & GBLUserID & "','" & GBLCompanyID & "','" & GBLFYear & "','" & GBLUserID & "','" & GBLUserID & "','" & TransactionID & "'"
+            AddColName = "ModifiedDate,CreatedDate,UserID,CompanyID,FYear,CreatedBy,ModifiedBy,TransactionID,IsVoucherItemApproved,VoucherItemApprovedBy,VoucherItemApprovedDate"
+            AddColValue = "'" & DateTime.Now & "','" & DateTime.Now & "','" & GBLUserID & "','" & GBLCompanyID & "','" & GBLFYear & "','" & GBLUserID & "','" & GBLUserID & "','" & TransactionID & "',1," & GBLUserID & ",'" & DateTime.Now & "'"
             db.InsertDatatableToDatabase(jsonObjectsRecordDetail, TableName, AddColName, AddColValue)
 
             str = ""
@@ -305,7 +305,7 @@ Public Class WebService_PurchaseRequisition
 
         Dim KeyField As String
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
 
         Try
@@ -338,7 +338,7 @@ Public Class WebService_PurchaseRequisition
         Dim KeyField As String
         KeyField = ""
         Try
-            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
 
             Dim dtExist As New DataTable
             Dim dtExist1 As New DataTable
@@ -367,7 +367,7 @@ Public Class WebService_PurchaseRequisition
         Context.Response.Clear()
         Context.Response.ContentType = "application/json"
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
 
         str = ""
@@ -393,7 +393,7 @@ Public Class WebService_PurchaseRequisition
         Context.Response.Clear()
         Context.Response.ContentType = "application/json"
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
         str = ""
         If PurchaseTransactionID <> "0" Then
@@ -419,7 +419,7 @@ Public Class WebService_PurchaseRequisition
         AddColName = ""
         AddColValue = ""
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
         GBLUserName = Convert.ToString(HttpContext.Current.Session("UserName"))
         GBLFYear = Convert.ToString(HttpContext.Current.Session("FYear"))
@@ -446,7 +446,7 @@ Public Class WebService_PurchaseRequisition
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function GetJobCardList() As String
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
 
         str = "Select Distinct JobCardContentNo As RefJobCardContentNo,JobBookingJobCardContentsID As RefJobBookingJobCardContentsID From JobBookingJobCardContents Where CompanyID=" & GBLCompanyID & " And Isnull(IsDeletedTransaction,0)=0"

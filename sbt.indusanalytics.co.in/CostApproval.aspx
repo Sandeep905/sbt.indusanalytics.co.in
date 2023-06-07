@@ -1,6 +1,6 @@
 ﻿<%@ Page Title="" Language="VB" MasterPageFile="~/MasterPage_Main.master" AutoEventWireup="false" CodeFile="CostApproval.aspx.vb" Inherits="CostApproval" %>
 
-<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="Server">   
+<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="Server">
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="Server">
     <div class="row clearfix" style="padding: 0px; margin: 0px">
@@ -9,7 +9,7 @@
             <div id="image-indicator"></div>
             <input id="BtnLoadBooking" type="button" class="btn btn-primary" value="Load From Quotes" />
             <input id="BtnShowListCostApp" type="button" class="btn btn-primary hidden" value="Show List" />
-            <input type="button" class="btn btn-danger waves-effect" onclick="showdetailsContainer()" value="Close"/>
+            <input type="button" class="btn btn-danger waves-effect" onclick="showdetailsContainer()" value="Close" />
             <div id="FieldCntainerRow" class="rowcontents clearfix tab-pane animated fadeInRight active">
                 <div class="col-xs-6 col-sm-3 col-md-2 col-lg-2">
                     <b class="font-11">Approval No</b>
@@ -35,17 +35,23 @@
                 <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
                     <div id="GridApprovalWindow"></div>
                 </div>
-
                 <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
                     <textarea id="txtRemark" placeholder="Enter your remark here" class="forTextBox"></textarea>
                 </div>
-                <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
-                    <button id="BtnRemoveQuantity" type="button" class="btn btn-info hidden">Remove Qty</button>
-                    <button id="BtnSaveCostApp" type="button" class="btn btn-success">Save</button>
-                    <button id="BtnDeleteCostApp" type="button" class="btn btn-danger">Delete</button>
-                    <button id="BtnNewCostApp" type="button" class="btn btn-primary">New</button>
-                    <input id="CategoryID" style="display: none" />
+
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                    <button id="PrintButton" type="button" style="float: left;margin:5px" class="btn btn-outline">Print</button>
+                    <button id="Revise" type="button" style="float: left;margin:5px" class="btn btn-info">Revise</button>
+                    <div style="float: right">
+                        <button id="BtnRemoveQuantity" type="button" class="btn btn-info hidden">Remove Qty</button>
+                        <button id="BtnSaveCostApp" type="button" class="btn btn-success">Approve</button>
+                        <button id="BtnDeleteCostApp" type="button" class="btn btn-danger hidden">Delete</button>
+                        <button id="BtnCancel" type="button" class="btn btn-danger">Reject</button>
+                        <button id="BtnNewCostApp" type="button" class="btn btn-primary">New</button>
+                        <input id="CategoryID" style="display: none" />
+                    </div>
                 </div>
+
             </div>
 
             <div id="myModal" class="rowcontents clearfix tab-pane animated fadeInRight hidden">

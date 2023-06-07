@@ -9,10 +9,10 @@
       </DataSource>
     </xs:appinfo>
   </xs:annotation>
-  <xs:element name="QuoteDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true" msprop:Generator_DataSetName="QuoteDataSet" msprop:Generator_UserDSName="QuoteDataSet">
+  <xs:element name="QuoteDataSet" msdata:IsDataSet="true" msdata:UseCurrentLocale="true" msprop:Generator_UserDSName="QuoteDataSet" msprop:Generator_DataSetName="QuoteDataSet">
     <xs:complexType>
       <xs:choice minOccurs="0" maxOccurs="unbounded">
-        <xs:element name="QuotationDetails" msprop:Generator_TableClassName="QuotationDetailsDataTable" msprop:Generator_TableVarName="tableQuotationDetails" msprop:Generator_TablePropName="QuotationDetails" msprop:Generator_RowDeletingName="QuotationDetailsRowDeleting" msprop:Generator_RowChangingName="QuotationDetailsRowChanging" msprop:Generator_RowEvHandlerName="QuotationDetailsRowChangeEventHandler" msprop:Generator_RowDeletedName="QuotationDetailsRowDeleted" msprop:Generator_UserTableName="QuotationDetails" msprop:Generator_RowChangedName="QuotationDetailsRowChanged" msprop:Generator_RowEvArgName="QuotationDetailsRowChangeEvent" msprop:Generator_RowClassName="QuotationDetailsRow">
+        <xs:element name="QuotationDetails" msprop:Generator_TableClassName="QuotationDetailsDataTable" msprop:Generator_TableVarName="tableQuotationDetails" msprop:Generator_RowChangedName="QuotationDetailsRowChanged" msprop:Generator_TablePropName="QuotationDetails" msprop:Generator_RowDeletingName="QuotationDetailsRowDeleting" msprop:Generator_RowChangingName="QuotationDetailsRowChanging" msprop:Generator_RowEvHandlerName="QuotationDetailsRowChangeEventHandler" msprop:Generator_RowDeletedName="QuotationDetailsRowDeleted" msprop:Generator_RowClassName="QuotationDetailsRow" msprop:Generator_UserTableName="QuotationDetails" msprop:Generator_RowEvArgName="QuotationDetailsRowChangeEvent">
           <xs:complexType>
             <xs:sequence>
               <xs:element name="ProductCode" msprop:Generator_ColumnVarNameInTable="columnProductCode" msprop:Generator_ColumnPropNameInRow="ProductCode" msprop:Generator_ColumnPropNameInTable="ProductCodeColumn" msprop:Generator_UserColumnName="ProductCode" type="xs:string" minOccurs="0" />
@@ -42,7 +42,7 @@
             </xs:sequence>
           </xs:complexType>
         </xs:element>
-        <xs:element name="PriceDetails" msprop:Generator_TableClassName="PriceDetailsDataTable" msprop:Generator_TableVarName="tablePriceDetails" msprop:Generator_TablePropName="PriceDetails" msprop:Generator_RowDeletingName="PriceDetailsRowDeleting" msprop:Generator_RowChangingName="PriceDetailsRowChanging" msprop:Generator_RowEvHandlerName="PriceDetailsRowChangeEventHandler" msprop:Generator_RowDeletedName="PriceDetailsRowDeleted" msprop:Generator_UserTableName="PriceDetails" msprop:Generator_RowChangedName="PriceDetailsRowChanged" msprop:Generator_RowEvArgName="PriceDetailsRowChangeEvent" msprop:Generator_RowClassName="PriceDetailsRow">
+        <xs:element name="PriceDetails" msprop:Generator_TableClassName="PriceDetailsDataTable" msprop:Generator_TableVarName="tablePriceDetails" msprop:Generator_RowChangedName="PriceDetailsRowChanged" msprop:Generator_TablePropName="PriceDetails" msprop:Generator_RowDeletingName="PriceDetailsRowDeleting" msprop:Generator_RowChangingName="PriceDetailsRowChanging" msprop:Generator_RowEvHandlerName="PriceDetailsRowChangeEventHandler" msprop:Generator_RowDeletedName="PriceDetailsRowDeleted" msprop:Generator_RowClassName="PriceDetailsRow" msprop:Generator_UserTableName="PriceDetails" msprop:Generator_RowEvArgName="PriceDetailsRowChangeEvent">
           <xs:complexType>
             <xs:sequence>
               <xs:element name="ProductCode" msprop:Generator_ColumnVarNameInTable="columnProductCode" msprop:Generator_ColumnPropNameInRow="ProductCode" msprop:Generator_ColumnPropNameInTable="ProductCodeColumn" msprop:Generator_UserColumnName="ProductCode" type="xs:string" minOccurs="0" />
@@ -59,7 +59,7 @@
             </xs:sequence>
           </xs:complexType>
         </xs:element>
-        <xs:element name="ProductDetails" msprop:Generator_TableClassName="ProductDetailsDataTable" msprop:Generator_TableVarName="tableProductDetails" msprop:Generator_TablePropName="ProductDetails" msprop:Generator_RowDeletingName="ProductDetailsRowDeleting" msprop:Generator_RowChangingName="ProductDetailsRowChanging" msprop:Generator_RowEvHandlerName="ProductDetailsRowChangeEventHandler" msprop:Generator_RowDeletedName="ProductDetailsRowDeleted" msprop:Generator_UserTableName="ProductDetails" msprop:Generator_RowChangedName="ProductDetailsRowChanged" msprop:Generator_RowEvArgName="ProductDetailsRowChangeEvent" msprop:Generator_RowClassName="ProductDetailsRow">
+        <xs:element name="ProductDetails" msprop:Generator_TableClassName="ProductDetailsDataTable" msprop:Generator_TableVarName="tableProductDetails" msprop:Generator_RowChangedName="ProductDetailsRowChanged" msprop:Generator_TablePropName="ProductDetails" msprop:Generator_RowDeletingName="ProductDetailsRowDeleting" msprop:Generator_RowChangingName="ProductDetailsRowChanging" msprop:Generator_RowEvHandlerName="ProductDetailsRowChangeEventHandler" msprop:Generator_RowDeletedName="ProductDetailsRowDeleted" msprop:Generator_RowClassName="ProductDetailsRow" msprop:Generator_UserTableName="ProductDetails" msprop:Generator_RowEvArgName="ProductDetailsRowChangeEvent">
           <xs:complexType>
             <xs:sequence>
               <xs:element name="Content_Name" msprop:Generator_ColumnVarNameInTable="columnContent_Name" msprop:Generator_ColumnPropNameInRow="Content_Name" msprop:Generator_ColumnPropNameInTable="Content_NameColumn" msprop:Generator_UserColumnName="Content_Name" type="xs:string" minOccurs="0" />
@@ -68,6 +68,63 @@
               <xs:element name="Printing" msprop:Generator_ColumnVarNameInTable="columnPrinting" msprop:Generator_ColumnPropNameInRow="Printing" msprop:Generator_ColumnPropNameInTable="PrintingColumn" msprop:Generator_UserColumnName="Printing" type="xs:string" minOccurs="0" />
               <xs:element name="Paper" msprop:Generator_ColumnVarNameInTable="columnPaper" msprop:Generator_ColumnPropNameInRow="Paper" msprop:Generator_ColumnPropNameInTable="PaperColumn" msprop:Generator_UserColumnName="Paper" type="xs:string" minOccurs="0" />
               <xs:element name="BookingID" msprop:Generator_ColumnVarNameInTable="columnBookingID" msprop:Generator_ColumnPropNameInRow="BookingID" msprop:Generator_ColumnPropNameInTable="BookingIDColumn" msprop:Generator_UserColumnName="BookingID" type="xs:int" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="SalesOrderBookingMain">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="OrderBookingID" type="xs:string" minOccurs="0" />
+              <xs:element name="SalesOrderNo" type="xs:string" minOccurs="0" />
+              <xs:element name="OrderBookingDate" type="xs:string" minOccurs="0" />
+              <xs:element name="MailingAddress" type="xs:string" minOccurs="0" />
+              <xs:element name="PONo" type="xs:string" minOccurs="0" />
+              <xs:element name="PODate" type="xs:string" minOccurs="0" />
+              <xs:element name="UserName" type="xs:string" minOccurs="0" />
+              <xs:element name="OfficeAddress" type="xs:string" minOccurs="0" />
+              <xs:element name="Name" type="xs:string" minOccurs="0" />
+              <xs:element name="CustomerDetails" type="xs:string" minOccurs="0" />
+              <xs:element name="EstimateNo" type="xs:string" minOccurs="0" />
+              <xs:element name="EnquiryNo" type="xs:string" minOccurs="0" />
+              <xs:element name="POMailAddress" type="xs:string" minOccurs="0" />
+              <xs:element name="POMailDate" type="xs:string" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="SalesOrderBookingDetails">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="OrderBookingID" type="xs:string" minOccurs="0" />
+              <xs:element name="SalesOrderNo" type="xs:string" minOccurs="0" />
+              <xs:element name="JobName" type="xs:string" minOccurs="0" />
+              <xs:element name="OrderQuantity" type="xs:string" minOccurs="0" />
+              <xs:element name="Rate" type="xs:string" minOccurs="0" />
+              <xs:element name="Total" type="xs:string" minOccurs="0" />
+              <xs:element name="DeliveryDate" type="xs:string" minOccurs="0" />
+              <xs:element name="HSNCode" type="xs:string" minOccurs="0" />
+              <xs:element name="CGSTTaxPercentage" type="xs:string" minOccurs="0" />
+              <xs:element name="SGSTTaxPercentage" type="xs:string" minOccurs="0" />
+              <xs:element name="IGSTTaxPercentage" type="xs:string" minOccurs="0" />
+              <xs:element name="CGSTTaxAmount" type="xs:string" minOccurs="0" />
+              <xs:element name="SGSTTaxAmount" type="xs:string" minOccurs="0" />
+              <xs:element name="IGSTTaxAmount" type="xs:string" minOccurs="0" />
+              <xs:element name="GSTAmount" type="xs:string" minOccurs="0" />
+              <xs:element name="ProductCode" type="xs:string" minOccurs="0" />
+              <xs:element name="NetAmt" type="xs:string" minOccurs="0" />
+              <xs:element name="ProductDescription" type="xs:string" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="TransporterDetails">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="DeliveryDate" type="xs:string" minOccurs="0" />
+              <xs:element name="JobName" type="xs:string" minOccurs="0" />
+              <xs:element name="TransporterName" type="xs:string" minOccurs="0" />
+              <xs:element name="ScheduleQuantity" type="xs:string" minOccurs="0" />
+              <xs:element name="ConsigneeName" type="xs:string" minOccurs="0" />
+              <xs:element name="ConsigneeAddress" type="xs:string" minOccurs="0" />
+              <xs:element name="ID" type="xs:string" minOccurs="0" />
             </xs:sequence>
           </xs:complexType>
         </xs:element>

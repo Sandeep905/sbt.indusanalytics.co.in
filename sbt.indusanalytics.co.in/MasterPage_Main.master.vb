@@ -11,21 +11,6 @@ Partial Class MasterPage_Main
 
     Protected Sub Page_Load(sender As Object, e As EventArgs) Handles Me.Load
 
-        'Response.Cache.SetCacheability(HttpCacheability.NoCache)
-        '  If Not Me.IsPostBack Then
-        '' Session("Reset") = True
-        '' Dim config As Configuration = WebConfigurationManager.OpenWebConfiguration("~/Web.Config")
-        '' Dim section As SessionStateSection = DirectCast(config.GetSection("system.web/sessionState"), SessionStateSection)
-        '' Dim timeout As Integer = CInt(section.Timeout.TotalMinutes) * 1000 * 60
-        'Dim timeout As Integer = 1 * 1000 * 60
-        '' Page.ClientScript.RegisterStartupScript(Me.GetType(), "SessionAlert", "SessionExpireAlert(" & timeout & ");", True)
-        '  Session("Reset") = True
-        'Dim timeout As Integer = GetSessionTimeout()
-        '' Page.ClientScript.RegisterStartupScript(Me.[GetType](), "SessionAlert", "SessionExpireAlert(" & timeout & ");", True)
-        'Page.ClientScript.RegisterStartupScript(Me.GetType(), "SessionAlert", "SessionExpireAlert(" & timeout & ");", True)
-
-        ' End If
-
         Dim str As String = ""
         Dim UserId As String = Convert.ToString(Session("UserID"))
         Dim BranchId As String = Convert.ToString(Session("BranchId"))

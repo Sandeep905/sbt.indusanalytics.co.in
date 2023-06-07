@@ -88,10 +88,12 @@ function CreateObjectStore(thisDB) {
         console.dir(e);
     }
 }
+
 /**
  * //local store job sizes content type wise
  * @param {Array} Save_Sizes as array
  */
+
 function saveContentsSizes(Save_Sizes) {
     //store job size details content name wise
     var transaction = db.transaction(["JobContentsSizes"], "readwrite");
@@ -462,6 +464,8 @@ let GblCategoryID = 0; ///for the case of iframe we need filtered contents proce
         $("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
 
         var PlanContName = document.getElementById("PlanContName").innerHTML;
+      
+        ContentName = PlanContName;
         var PlanContQty = Number(document.getElementById("PlanContQty").innerHTML);
         //var ChkPlanMaster = $("#ChkUseFirstPlanAsMaster").dxCheckBox('instance').option('value');
 
@@ -524,12 +528,9 @@ let GblCategoryID = 0; ///for the case of iframe we need filtered contents proce
         });
         document.getElementById("PlanColorStrip").value = 0;
         document.getElementById("PlanGripper").value = 0;
-
         var objectStore = db.transaction(["ContentsSizeValues"]).objectStore("ContentsSizeValues");
-
         objectStore.openCursor().onsuccess = function (event) {
             var cursor = event.target.result;
-
             if (cursor) {
                 var request = objectStore.get(ContentName);
                 request.onsuccess = function (event) {
@@ -540,21 +541,22 @@ let GblCategoryID = 0; ///for the case of iframe we need filtered contents proce
                                 reloadKeyValues();
                                 flagReloaded = true;
                                 return;
-                            } else {//if (document.getElementById("Plan" + GblPlanID).innerHTML.includes("Click Me to plan..") === true && PlanContName === cursor.value["PlanContName"] && /*ChkPlanMaster === true &&*/ ContId === cursor.value["PlanContentType"]) {
-                                //GblInputValues = cursor.value;                        
-                                //                        GblInputValues.Id = 0;
-                                for (var key in cursor.value) {
-                                    if (cursor.value.hasOwnProperty(key)) {
-                                        if (key !== "Id") {
-                                            GblInputValues[key] = cursor.value[key];
-                                        }
-                                    }
-                                }
-                                GblInputValues.PlanContQty = PlanContQty;
-                                reloadKeyValues();
-                                flagReloaded = true;
-                                return;
                             }
+                            //else {//if (document.getElementById("Plan" + GblPlanID).innerHTML.includes("Click Me to plan..") === true && PlanContName === cursor.value["PlanContName"] && /*ChkPlanMaster === true &&*/ ContId === cursor.value["PlanContentType"]) {
+                            //    //GblInputValues = cursor.value;                        
+                            //    //                        GblInputValues.Id = 0;
+                            //    for (var key in cursor.value) {
+                            //        if (cursor.value.hasOwnProperty(key)) {
+                            //            if (key !== "Id") {
+                            //                GblInputValues[key] = cursor.value[key];
+                            //            }
+                            //        }
+                            //    }
+                            //    GblInputValues.PlanContQty = PlanContQty;
+                            //    reloadKeyValues();
+                            //    flagReloaded = true;
+                            //    return;
+                            //}
                         }
                         cursor.continue();
                     }

@@ -1,73 +1,327 @@
 ﻿<%@ Page Title="" Language="VB" MasterPageFile="~/IndusAnalytic.master" AutoEventWireup="false" CodeFile="Enquiry.aspx.vb" Inherits="Enquiry" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="Server">
+    <style>
+        html {
+            height: 100%
+        }
+
+        p {
+            color: grey
+        }
+
+        .modal-backdrop {
+            display: none;
+        }
+
+        h1 {
+            text-transform: uppercase;
+            color: green;
+            font-weight: normal;
+            text-align: center;
+            margin: 10px;
+            padding: 10px
+        }
+
+        #heading {
+            text-transform: uppercase;
+            color: green;
+            font-weight: normal
+        }
+
+        #msform {
+            text-align: center;
+            position: relative;
+            margin-top: 20px
+        }
+
+            #msform fieldset {
+                background: white;
+                border: 0 none;
+                border-radius: 0.5rem;
+                box-sizing: border-box;
+                width: 100%;
+                margin: 0;
+                padding-bottom: 20px;
+                position: relative
+            }
+
+        .form-card {
+            text-align: left
+        }
+
+        #msform fieldset:not(:first-of-type) {
+            display: none
+        }
+
+        #msform input {
+            padding: 8px 15px 8px 15px;
+            border: 1px solid #ccc;
+            border-radius: 0px;
+            margin-bottom: 15px;
+            margin-top: 2px;
+            width: 100%;
+            box-sizing: border-box;
+            font-family: montserrat;
+            color: #2C3E50;
+            background-color: #ECEFF1;
+            font-size: 16px;
+            letter-spacing: 1px
+        }
+
+        #msform textarea {
+            padding: 8px 15px 8px 15px;
+            border: 1px solid #ccc;
+            border-radius: 0px;
+            margin-bottom: 15px;
+            margin-top: 2px;
+            width: 100%;
+            box-sizing: border-box;
+            font-family: montserrat;
+            color: #2C3E50;
+            background-color: #ECEFF1;
+            font-size: 16px;
+            letter-spacing: 1px
+        }
+
+        #msform input:focus {
+            -moz-box-shadow: none !important;
+            -webkit-box-shadow: none !important;
+            box-shadow: none !important;
+            border: 1px solid green;
+            outline-width: 0
+        }
+
+        #msform textarea:focus {
+            -moz-box-shadow: none !important;
+            -webkit-box-shadow: none !important;
+            box-shadow: none !important;
+            border: 1px solid green;
+            outline-width: 0
+        }
+
+        #msform .action-button {
+            width: 100px;
+            background: green;
+            font-weight: bold;
+            color: white;
+            border: 0 none;
+            border-radius: 0px;
+            cursor: pointer;
+            padding: 10px 5px;
+            margin: 10px 0px 10px 5px;
+            float: right
+        }
+
+            #msform .action-button:hover {
+                background-color: #311B92
+            }
+
+            #msform .action-button:focus {
+                background-color: #311B92
+            }
+
+        #msform .action-button-pre {
+            width: 100px;
+            background: #616161;
+            font-weight: bold;
+            color: white;
+            border: 0 none;
+            border-radius: 0px;
+            cursor: pointer;
+            padding: 10px 5px;
+            margin: 10px 5px 10px 0px;
+            float: right
+        }
+
+            #msform .action-button-pre:hover {
+                background-color: #000000
+            }
+
+            #msform .action-button-pre:focus {
+                background-color: #000000
+            }
+
+        .card {
+            z-index: 0;
+            border: none;
+            position: relative
+        }
+
+        .fs-title {
+            font-size: 25px;
+            color: green;
+            margin-bottom: 15px;
+            font-weight: normal;
+            text-align: left
+        }
+
+        .purple-text {
+            color: green;
+            font-weight: normal
+        }
+
+        .steps {
+            font-size: 15px;
+            color: gray;
+            margin-bottom: 1px;
+            font-weight: normal;
+            text-align: right
+        }
+
+        .fieldlabels {
+            color: gray;
+            text-align: left
+        }
+
+        #progressbar {
+            margin-bottom: 20px;
+            overflow: hidden;
+            color: lightgrey
+        }
+
+            #progressbar .active {
+                color: green
+            }
+
+            #progressbar li {
+                list-style-type: none;
+                /*font-size: 15px;*/
+                width: 25%;
+                float: left;
+                position: relative;
+                font-weight: 400
+            }
+
+            #progressbar #account:before {
+                font-family: FontAwesome;
+                content: "\f13e"
+            }
+
+            #progressbar #personal:before {
+                font-family: FontAwesome;
+                content: "\f007"
+            }
+
+            #progressbar #payment:before {
+                font-family: FontAwesome;
+                content: "\f030"
+            }
+
+            #progressbar #confirm:before {
+                font-family: FontAwesome;
+                content: "\f00c"
+            }
+
+            #progressbar li:before {
+                width: 50px;
+                height: 50px;
+                line-height: 45px;
+                display: block;
+                font-size: 20px;
+                color: #ffffff;
+                background: lightgray;
+                border-radius: 50%;
+                margin: 0 auto 10px auto;
+                padding: 2px
+            }
+
+            #progressbar li:after {
+                content: '';
+                width: 100%;
+                height: 2px;
+                background: lightgray;
+                position: absolute;
+                left: 0;
+                top: 25px;
+                z-index: -1
+            }
+
+            #progressbar li.active:before {
+                background: green
+            }
+
+            #progressbar li.active:after {
+                background: green
+            }
+
+        .progress {
+            height: 20px
+        }
+
+        .pbar {
+            background-color: green
+        }
+
+        .fit-image {
+            width: 100%;
+            object-fit: cover
+        }
+    </style>
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="Server">
     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-0 margin-0">
         <div id="image-indicator"></div>
         <div id="FieldCntainerRow" class="clearfix tab-pane animated fadeInRight active">
-            <div class="col-xs-12 col-sm-3 col-md-2 col-lg-2">
+            <div class="col-xs-12 col-sm-3 col-md-1 col-lg-1">
                 <b class="font-11">Enquiry No.</b>
                 <input type="text" id="TxtQuoteNo" class="forTextBox disabled" style="float: left; width: 100%;" readonly="" />
             </div>
-            <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3">
-                <b class="font-11">Client Name</b><i class="fa fa-plus btn btn-link font-12 padding-0 reloadclient btnnewmaster" style="color: green"></i>
-                <div id="SelClient"></div>
+            <div class="col-xs-12 col-sm-12 col-md-3 col-lg-3">
+                <b class="font-11">Client Name<i style="color: red">*</i></b><i class="fa fa-plus btn btn-link font-12 padding-0 reloadclient btnnewmaster" style="color: green"></i>
+                <div id="SelClient" tabindex="1"></div>
+                <label id="SalesManager"></label>
             </div>
-            <div class="col-xs-12 col-sm-3 col-md-2 col-lg-1">
+            <div class="col-xs-12 col-sm-12 col-md-2 col-lg-2">
+                <b class="font-11">Client Cordinator<i style="color: red">*</i></b>
+                <div id="ClientCordinator" tabindex="3"></div>
+            </div>
+            <div class="col-xs-12 col-sm-12 col-md-2 col-lg-2">
+                <b class="font-11">Sales Cordinator<i style="color: red">*</i></b>
+                <div id="SalesCordinator" tabindex="3"></div>
+            </div>
+            <div class="col-xs-12 col-sm-12 col-md-2 col-lg-2">
+                <b class="font-11">Sales Executive<i style="color: red">*</i></b>
+                <div id="SelSalesPerson" tabindex="3"></div>
+            </div>
+            <div class="col-xs-12 col-sm-12 col-md-2 col-lg-2">
+                <b class="font-11">Project Name<i style="color: red">*</i></b>
+                <input type="text" tabindex="2" id="TxtProjectName" class="forTextBox" />
+            </div>
+            <div class="col-xs-12 col-sm-12 col-md-2 col-lg-1">
                 <b class="font-11">City</b>
                 <input type="text" name="TxtClientCity" id="TxtClientCity" class="forTextBox" value="" readonly="readonly" disabled />
             </div>
-            <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4">
-                <b class="font-11">Project Name</b>
-                <input type="text" id="TxtProjectName" class="forTextBox" />
-            </div>
-            <div class="col-xs-12 col-sm-3 col-md-2 col-lg-2">
-                <b class="font-11">Sales Person</b>
-                <div id="SelSalesPerson"></div>
-            </div>
+
+
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                <b class="font-11" onclick="AddRow()">Add Product <i onclick="AddRow()" class="fa fa-plus-circle" style="font-size: 20px; color: green"></i></b>
+                <b class="font-11" onclick="AddRow()">Add Product <i tabindex="4" onclick="AddRow()" class="fa fa-plus-circle" style="font-size: 20px; color: green"></i></b>
                 <div id="gridProductList"></div>
             </div>
             <div class="col-xs-12 col-sm-3 col-md-2 col-lg-2">
                 <b class="font-11">Freight Amount</b>
-                <input id="TxtFreightAmount" placeholder="Enter Freight" type="number" class="forTextBox" />
+                <input id="TxtFreightAmount" tabindex="5" placeholder="Enter Freight" type="number" class="forTextBox" />
             </div>
             <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
                 <b class="font-11">Remark</b>
-                <textarea id="TxtRemark" placeholder="Enter your remark here" class="forTextBox"></textarea>
+                <textarea id="TxtRemark" tabindex="6" placeholder="Enter your remark here" class="forTextBox"></textarea>
             </div>
             <div class="modal-footer col-xs-12 col-sm-12 col-md-12 col-lg-12">
                 <button id="BtnSave" type="button" class="btn btn-success">Save</button>
                 <input type="button" class="btn btn-primary" value="Show List" id="BtnShowList" onclick="setGridDisplay('none', 'block')" />
                 <input id="EstimateID" style="display: none" />
                 <input id="BookingID" style="display: none" />
+                <div id="IsDirectApproveddiv" class="hidden" style="height: 0"></div>
+                <input type="checkbox" class="hidden" id="IsDirectApproved" />
             </div>
         </div>
     </div>
-      <!-- The Modal for new masters-->
-    <div class="modal fade" id="ModaliFrame" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content" style="border-radius: 4px; padding-bottom: 0em; padding-right: 0px; padding-left: 1px;">
-                <div class="DialogBoxCustom" style="float: left; border-top-left-radius: 4px; border-top-right-radius: 4px;">
-                    <strong>Add New Master</strong>
-                    <a href="javascript:void(0);" id="btnCloseiFrame" class="iconRightDbox btn-danger" data-dismiss="modal">
-                        <span data-dismiss="modal" style="font-weight: 900; margin-right: 8px">X</span>
-                    </a>
-                </div>
-                <label id="LbliFrame" hidden></label>
-                <div class="modal-body" style="position: initial; padding-right: 0px; padding-left: 6px; padding-right: 6px;">
-                    <iframe id="iFrameMasters" style="width: 100%;"></iframe>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="modal clearfix" id="modalEstimateProduct" tabindex="-1" role="dialog">
+
+    <div class="modal clearfix" id="modalEstimateProduct" tabindex="-1" role="dialog" style="margin-top: 50px">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="DialogBoxCustom" style="float: left; border-top-left-radius: 4px; border-top-right-radius: 4px;">
-                    <strong>Product Estimation</strong>
+                    <strong>Product Requirments</strong>
                     <a href="javascript:void(0);" class="iconRightDbox btn-danger" data-dismiss="modal">
                         <span data-dismiss="modal" style="font-weight: 900; margin-right: 8px">X</span>
                     </a>
@@ -89,8 +343,18 @@
                     </div>
                     <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
                         <b class="font-12">Operation List</b>
+                        <a id="BtnSelectOperation" class="fa fa-plus btn btn-link" style="color: green" title="For Select Operation"></a>
                         <div id="gridOperation"></div>
                         <textarea id="OperId" class="hidden"></textarea>
+                    </div>
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                        <label>Other Details :</label>
+                        <textarea class="forTextBox" rows="5" id="FlexRemark"></textarea>
+                    </div>
+                    <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 hidden">
+                        <b class="font-11">Artwork/Ref/ doc :</b>
+                        <input type="file" id="fileflex" />
+                        <a class="hidden" id="fileDownloadflex">Download file</a>
                     </div>
 
                     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 hidden">
@@ -121,11 +385,48 @@
                             <input class='text-right forTextBox' type='text' id='FinalTotal' readonly="readOnly" style='width: 80%; float: right; text-align: right' />
                             <input class='text-right forTextBox hidden' type='text' id='finalCost1' readonly="readOnly" style='width: 80%; float: right; text-align: right' />
                         </div>
-
                     </div>
                     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 modal-footer" style="border-top: 1px solid #42909A; padding: 5px">
-                        <button type="button" id="BtnApplyPlan" class="btn btn-primary waves-effect">Add</button>
+                        <a id="BtnApplyPlan" class="btn btn-primary waves-effect">Add</a>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="ModaliFrame" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content" style="border-radius: 4px; padding-bottom: 0em; padding-right: 0px; padding-left: 1px;">
+                <div class="DialogBoxCustom" style="float: left; border-top-left-radius: 4px; border-top-right-radius: 4px;">
+                    <strong>Add New Master</strong>
+                    <a href="javascript:void(0);" id="btnCloseiFrame" class="iconRightDbox btn-danger" data-dismiss="modal">
+                        <span data-dismiss="modal" style="font-weight: 900; margin-right: 8px">X</span>
+                    </a>
+                </div>
+                <label id="LbliFrame" hidden></label>
+                <div class="modal-body" style="position: initial; padding-right: 0px; padding-left: 6px; padding-right: 6px;">
+                    <iframe id="iFrameMasters" style="width: 100%;"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal clearfix" id="SelectOperation" tabindex="-1" role="dialog" style="margin-top: 50px">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="DialogBoxCustom" style="float: left; border-top-left-radius: 4px; border-top-right-radius: 4px;">
+
+                    <strong id="caption1">Suggest Process</strong>
+                </div>
+                <div class="modal-body">
+                    <div class="rowcontents clearfix" style="padding: 20px; overflow: auto;">
+                        <div style="padding: 5px">
+                            <b class="font-12">Select Operation</b>
+                            <div id="gridSelOperation"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 modal-footer" style="border-top: 1px solid #42909A; padding: 5px; background: #fff; border-bottom: 1px solid black">
+                    <button id="BtnApplyOp" type="button" class="btn btn-secondary" data-dismiss="modal">Apply Operation</button>
                 </div>
             </div>
         </div>
@@ -134,37 +435,30 @@
 
     <div id="myModal_1" class="clearfix tab-pane animated fadeInLeft">
         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-            <div role="tabpanel">
-                <div id="RadioEnquiry" style="width:100%"></div>
-                <div id="GridShowlist"></div>
-            </div>
-
-            <div class="modal-footer" style="border-top: 1px solid #42909A;">
-                <%--<button type="button" id="BtnLinkToQuote" class="btn btn-secondary waves-effect">Link To Quote</button>--%>
-                <%--<button id="BtnPrint" type="button" class="btn btn-warning">Print</button>--%>
-                <button type="button" id="BtnEdit" class="btn btn-warning waves-effect">Edit</button>
-                <button id="BtnDelete" type="button" class="btn btn-danger">Delete</button>
-                <input type="button" value="Close" class="btn btn-secondary" onclick="setGridDisplay('block', 'none')" />
-            </div>
+            <div id="RadioEnquiry" style="width: 100%"></div>
+            <div id="GridShowlist"></div>
+            <div class="container-fluid"></div>
         </div>
+        <div class="modal-footer" style="border-top: 1px solid #42909A;">
+            <%--<button type="button" id="BtnLinkToQuote" class="btn btn-secondary waves-effect">Link To Quote</button>--%>
+            <%--<button id="BtnPrint" type="button" class="btn btn-warning">Print</button>--%>
+            <button type="button" id="BtnEdit" class="btn btn-warning waves-effect">Edit</button>
+            <button id="BtnDelete" type="button" class="btn btn-danger">Delete</button>
+            <input type="button" value="Close" class="btn btn-secondary" onclick="setGridDisplay('block', 'none')" />
+        </div>
+
     </div>
-
-
 
     <%--for offfset plan window--%>
 
     <div id="BottomTabBar" class="MYBottomsidenav" style="padding-right: 1px">
         <div class="DialogBoxCustom" style="float: left">
-            <strong>Plan Window</strong>&nbsp;                            
+            <strong>Product Requirments</strong>&nbsp;                            
             <strong style="border: 1px dashed;" id="PlanContQty">0</strong>
             <a href="javascript:void(0);" class="iconRightDbox btn-danger" data-dismiss="BottomTabBar" onclick="closeBottomTabBar()">
                 <span data-dismiss="BottomTabBar" onclick="closeBottomTabBar()" style="font-weight: 900; margin-right: 8px">X</span>
             </a>
-         <%--   <a class="btn myButton" style="float: right; display: block; cursor: pointer; margin-right: 5px" onclick="fnplnhideshow()">
-                <span id="PlanButtonHide" style="margin-right: 9px;">Modify</span>
-            </a>--%>
         </div>
-
         <div class="rowcontents clearfix" style="border-bottom: 1px solid #42909A; height: auto; padding-bottom: 0em; height: calc(100vh - 83px); overflow-y: auto;">
             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12" style="padding-right: 0px;">
                 <div style="width: auto; float: left; display: none;">
@@ -181,12 +475,19 @@
                                         <div class='content_div' style='height: auto; text-align: center'>
                                             <img src="#" id="PlanContImg" style='height: 8em; width: 8em; left: 0' onmouseover='Planshow(this);' onmouseout='Planhide(this);' />
                                             <b id="PlanContName" style='display: none; border: 1px dashed; background-color: azure'></b>
-                                            <textarea rows="3" cols="3" class="forTextBox" id="TxtPlanContName"></textarea>
+                                            <input type="text" class="forTextBox" id="TxtPlanContName" />
                                             <b id="ContentOrientation" style='display: none'></b>
                                         </div>
                                     </div>
                                     <div id="planJob_Size" class="col-xs-12 col-sm-7 col-md-7 col-lg-7">
-                                        <b class="font-12" style="width: auto;">Job Size</b><br />
+                                        <b class="font-12" style="width: auto;">Job Size
+                                            <label style="color: red">in MM</label>
+                                        </b>
+                                        <br />
+                                        <label style="color: red; font-size: 10px">
+                                            To convert Inch to MM,<br />
+                                            Use shift + "</label>
+                                        <br />
                                         <div id="SelJobSizeTemplate"></div>
                                         <div style="width: auto;">
                                             <input type='text' id='JobFoldedH' oninput="onInputChangeFolds(this);" name="FH" placeholder='Folded H' class='forTextBox' style="float: left; width: 40%; margin: .2em; display: none;" onchange="myvalidation(this)" />
@@ -329,9 +630,18 @@
                             <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 padding-0 margin-0" style="padding-right: 2px; padding-left: 2px">
                                 <div id="GridOperationAllocated"></div>
                             </div>
+                            <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 hidden">
+                                <b class="font-11">Artwork/Ref/ doc :</b>
+                                <input type="file" id="fileOffset" />
+                                <a class="hidden" id="fileDownloadoffset">Download file</a>
+                            </div>
+                            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                <label>Other Details :</label>
+                                <textarea class="forTextBox" rows="5" id="OffsetRemark"></textarea>
+                            </div>
                             <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 m-t-5" style="float: right;">
                                 <div class="DialogBoxCustom">
-                                      <a id="btnApplyCostPQ" name="btnApplyCostPQ" class="btn myButton" style="color: #fff; float: right">Add</a>
+                                    <a id="btnApplyCostPQ" name="btnApplyCostPQ" class="btn myButton" style="color: #fff; float: right">Add</a>
                                     <%--<a id="PlanButton" class="btn myButton" style="float: right; width: auto; cursor: pointer; margin-top: 5px;">Show Cost </a>--%>
                                 </div>
                             </div>
@@ -444,71 +754,98 @@
 
         </div>
     </div>
-   
-    <div class="modal clearfix-sm" id="modalEstimateProductUnit" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document" style="display: flex; justify-content: center; align-items: center; height: 100vh;">
-            <div class="modal-content" style="width: 600px">
+
+
+    <div class="modal clearfix" id="modalEstimateProductUnit" tabindex="-1" role="dialog" style="margin-top: 50px">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
                 <div class="DialogBoxCustom" style="float: left; border-top-left-radius: 4px; border-top-right-radius: 4px;">
-                    <strong>Product Estimation</strong>
+                    <strong>Product Requirments</strong>
                     <a href="javascript:void(0);" class="iconRightDbox btn-danger" data-dismiss="modal">
                         <span data-dismiss="modal" style="font-weight: 900; margin-right: 8px">X</span>
                     </a>
                 </div>
                 <div class="modal-header padding-0">
-                    <div class="col-xs-12 col-sm-12 col-md-8 col-lg-8">
+                    <div class="col-xs-12 col-sm-9 col-md-10 col-lg-10">
                         <strong class="font-11">Product Name</strong>
                         <input type="text" id="TxtProductNameUnit" class="forTextBox disabled" readonly="" />
                     </div>
-                    <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
+                    <div class="col-xs-12 col-sm-3 col-md-2 col-lg-2">
                         <b class="font-11">Quantity</b>
                         <input type="text" id="TxtPlanQtyUnit" class="forTextBox disabled" readonly="" />
                     </div>
-                    <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
-                        <b class="font-11">Rate</b>
-                        <input class='text-right forTextBox' onchange="CalculateUnitCost()" type='text' id='VendorRate' />
-                    </div>
-                    <div class="col-xs-12 col-sm-12 col-md-8 col-lg-8">
-                        <b class="font-11">Vendor Name</b>
-                        <div id="Selvendor" />
-                    </div>
                 </div>
                 <div class="clearfix tab-pane">
-                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 padding-1" style="margin-bottom: 0px; border-top: 1px solid #42909A; padding: 5px">
-                        <div class="col-lg-12 col-md-12 col-sm-12 col-sm-12" style='display: flex; flex-direction: row; align-items: center; justify-content: flex-start'>
-                            <label>Misc.Cost(%):&nbsp&nbsp&nbsp </label>
-                            <input class='text-right forTextBox' style='float: left; width: 20%;' type='number' min='0' id='FinalMiscPerUnit' onchange='CalculateUnitCost()' />
-                            <b>% </b>
-                            <input class='text-right forTextBox' type='text' id='FinalMiscCostUnit' onchange='CalculateUnitCost(this.id)' style='width: 50%; float: right; text-align: right' />
+                    <div class="clearfix tab-pane">
+                        <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
+                            <label>Select Processes :</label>
+                            <div id="UnitProcessSuggestion"></div>
                         </div>
-                        <div class="col-lg-12 col-md-12 col-sm-12 col-sm-12" style='display: flex; flex-direction: row; align-items: center; justify-content: flex-start'>
-                            <label>Shipping Cost:&nbsp</label>
-                            <input class='text-right forTextBox' type='text' id='FinalShipperCostUnit' onchange='CalculateUnitCost()' style='width: 72%; text-align: right; display: flex; flex-direction: row; align-items: center; justify-content: space-between' />
+                        <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
+                            <label>Processes :</label>
+                            <div id="UnitProcessDefault"></div>
                         </div>
-                        <div class="col-lg-12 col-md-12 col-sm-12 col-sm-12" style='display: flex; flex-direction: row; align-items: center; justify-content: flex-start'>
-                            <label>Tax Cost(%):&nbsp&nbsp&nbsp&nbsp&nbsp </label>
-                            <input class='text-right forTextBox' style='float: left; width: 20%;' type='number' min='0' id='FinalTaxPerUnit' onchange='CalculateUnitCost()' /><b>%</b><input class='text-right forTextBox' type='text' id='FinalTaxCostUnit' readonly="readOnly" style='width: 50%; float: right; text-align: right' />
+                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                            <label>Other Details :</label>
+                            <textarea class="forTextBox" rows="5" id="UnitRemark"></textarea>
                         </div>
-                        <div class="col-lg-12 col-md-12 col-sm-12 col-sm-12" style='display: flex; flex-direction: row; align-items: center; justify-content: flex-start'>
-                            <label>Profit(%):&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp</label>
-                            <input class='text-right forTextBox' style='float: left; width: 20%;' type='number' min='0' id='ProfitPerUnit' onchange='CalculateUnitCost()' /><b>%</b><input class='text-right forTextBox' type='text' id='ProfitCostUnit' style='width: 50%; float: right; text-align: right' onchange='CalculateUnitCost(this.id)' />
+                        <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 hidden">
+                            <b class="font-11">Artwork/Ref/ doc :</b>
+                            <input type="file" id="fileUnit" />
+                            <a class="hidden" id="fileDownloadunit">Download file</a>
                         </div>
-                        <div class="col-lg-12 col-md-12 col-sm-12 col-sm-12" style='display: flex; flex-direction: row; align-items: center; justify-content: flex-start'>
-                            <label>Unit Cost:&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp</label>
-                            <input class='text-right forTextBox' type='text' readonly="readOnly" id='FinalUnitCostUnit' onchange='CalculateUnitCost()' style='width: 72%; text-align: right; display: flex; flex-direction: row; align-items: center; justify-content: space-between' />
+                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 modal-footer" style="border-top: 1px solid #42909A; padding: 5px">
+                            <a id="BtnApplyPlanUnit" class="btn btn-primary waves-effect">Add</a>
                         </div>
-                        <div class="col-lg-12 col-md-12 col-sm-12 col-sm-12" style='display: flex; flex-direction: row; align-items: center; justify-content: flex-start'>
-                            <label>Total:&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp </label>
-                            <input class='text-right forTextBox' type='text' id='FinalTotalUnit' readonly="readOnly" style='width: 72%; float: right; text-align: right' />
-                            <input class='text-right forTextBox hidden' type='text' id='finalCostUnit' readonly="readOnly" style='width: 80%; float: right; text-align: right' />
+                        <div class="modal-header padding-0 hidden">
+
+                            <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
+                                <b class="font-11">Rate</b>
+                                <input class='text-right forTextBox' onchange="CalculateUnitCost()" type='text' id='VendorRate' />
+                            </div>
+                            <div class="col-xs-12 col-sm-12 col-md-8 col-lg-8">
+                                <b class="font-11">Vendor Name</b>
+                                <div id="Selvendor" />
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 modal-footer" style="border-top: 1px solid #42909A; padding: 5px">
-                        <button type="button" id="BtnApplyPlanUnit" class="btn btn-primary waves-effect">Apply Plan</button>
+                        <div class="clearfix tab-pane hidden">
+                            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 padding-1" style="margin-bottom: 0px; border-top: 1px solid #42909A; padding: 5px">
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-sm-12" style='display: flex; flex-direction: row; align-items: center; justify-content: flex-start'>
+                                    <label>Misc.Cost(%):&nbsp&nbsp&nbsp </label>
+                                    <input class='text-right forTextBox' style='float: left; width: 20%;' type='number' min='0' id='FinalMiscPerUnit' onchange='CalculateUnitCost()' />
+                                    <b>% </b>
+                                    <input class='text-right forTextBox' type='text' id='FinalMiscCostUnit' onchange='CalculateUnitCost(this.id)' style='width: 50%; float: right; text-align: right' />
+                                </div>
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-sm-12" style='display: flex; flex-direction: row; align-items: center; justify-content: flex-start'>
+                                    <label>Shipping Cost:&nbsp</label>
+                                    <input class='text-right forTextBox' type='text' id='FinalShipperCostUnit' onchange='CalculateUnitCost()' style='width: 72%; text-align: right; display: flex; flex-direction: row; align-items: center; justify-content: space-between' />
+                                </div>
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-sm-12" style='display: flex; flex-direction: row; align-items: center; justify-content: flex-start'>
+                                    <label>Tax Cost(%):&nbsp&nbsp&nbsp&nbsp&nbsp </label>
+                                    <input class='text-right forTextBox' style='float: left; width: 20%;' type='number' min='0' id='FinalTaxPerUnit' onchange='CalculateUnitCost()' /><b>%</b><input class='text-right forTextBox' type='text' id='FinalTaxCostUnit' readonly="readOnly" style='width: 50%; float: right; text-align: right' />
+                                </div>
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-sm-12" style='display: flex; flex-direction: row; align-items: center; justify-content: flex-start'>
+                                    <label>Profit(%):&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp</label>
+                                    <input class='text-right forTextBox' style='float: left; width: 20%;' type='number' min='0' id='ProfitPerUnit' onchange='CalculateUnitCost()' /><b>%</b><input class='text-right forTextBox' type='text' id='ProfitCostUnit' style='width: 50%; float: right; text-align: right' onchange='CalculateUnitCost(this.id)' />
+                                </div>
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-sm-12" style='display: flex; flex-direction: row; align-items: center; justify-content: flex-start'>
+                                    <label>Unit Cost:&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp</label>
+                                    <input class='text-right forTextBox' type='text' readonly="readOnly" id='FinalUnitCostUnit' onchange='CalculateUnitCost()' style='width: 72%; text-align: right; display: flex; flex-direction: row; align-items: center; justify-content: space-between' />
+                                </div>
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-sm-12" style='display: flex; flex-direction: row; align-items: center; justify-content: flex-start'>
+                                    <label>Total:&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp </label>
+                                    <input class='text-right forTextBox' type='text' id='FinalTotalUnit' readonly="readOnly" style='width: 72%; float: right; text-align: right' />
+                                    <input class='text-right forTextBox hidden' type='text' id='finalCostUnit' readonly="readOnly" style='width: 80%; float: right; text-align: right' />
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+
     <!-- The Layout ZoomModal -->
     <div class="modal fade" id="myModalZoom" tabindex="-1" role="dialog" style="padding: 0px; margin-top: 0px; margin-left: 0px">
         <div class="modal-dialog modal-lg" role="document" style="">
@@ -755,11 +1092,64 @@
     <div id="ChkUseFirstPlanAsMaster" style="display: none"></div>
 
     <script src="CustomJS/LocalStorage.js?<%=System.Configuration.ConfigurationManager.AppSettings("Version")%>" type="text/javascript"></script>
-    <script src="CustomJS/DynamicQty.js?<%=System.Configuration.ConfigurationManager.AppSettings("Version")%>"></script>
-    <script src="CustomJS/PlanWindow.js?<%=System.Configuration.ConfigurationManager.AppSettings("Version")%>"></script>
-    <script src="CustomJS/Enquiry.js"?<%=System.Configuration.ConfigurationManager.AppSettings("Version")%>></script>
-    <script src="CustomJS/LayoutDraw.js?<%=System.Configuration.ConfigurationManager.AppSettings("Version")%>"></script>
+    <script src="CustomJS/DynamicQty.js?<%=System.Configuration.ConfigurationManager.AppSettings("Version")%>" type="text/javascript"></script>
+    <script src="CustomJS/PlanWindow.js?<%=System.Configuration.ConfigurationManager.AppSettings("Version")%>" type="text/javascript"></script>
+    <script src="CustomJS/Enquiry.js?<%=System.Configuration.ConfigurationManager.AppSettings("Version")%>" type="text/javascript"></script>
+    <script src="CustomJS/LayoutDraw.js?<%=System.Configuration.ConfigurationManager.AppSettings("Version")%>" type="text/javascript"></script>
     <script src="CustomJS/RePlanWindow.js?<%=System.Configuration.ConfigurationManager.AppSettings("Version")%>" type="text/javascript"></script>
-
+    <script>  
+        $(document).ready(function () {
+            var current_fs, next_fs, pre_fs;
+            var opacity;
+            var current = 1;
+            var steps = $("fieldset").length;
+            setProgressBar(current);
+            $(".next").click(function () {
+                current_fs = $(this).parent();
+                next_fs = $(this).parent().next();
+                $("#progressbar li").eq($("fieldset").index(next_fs)).addClass("active");
+                next_fs.show();
+                current_fs.animate({ opacity: 0 }, {
+                    step: function (now) {
+                        opacity = 1 - now;
+                        current_fs.css({
+                            'display': 'none',
+                            'position': 'relative'
+                        });
+                        next_fs.css({ 'opacity': opacity });
+                    },
+                    duration: 500
+                });
+                setProgressBar(++current);
+            });
+            $(".pre").click(function () {
+                current_fs = $(this).parent();
+                pre_fs = $(this).parent().prev();
+                $("#progressbar li").eq($("fieldset").index(current_fs)).removeClass("active");
+                pre_fs.show();
+                current_fs.animate({ opacity: 0 }, {
+                    step: function (now) {
+                        opacity = 1 - now;
+                        current_fs.css({
+                            'display': 'none',
+                            'position': 'relative'
+                        });
+                        pre_fs.css({ 'opacity': opacity });
+                    },
+                    duration: 500
+                });
+                setProgressBar(--current);
+            });
+            function setProgressBar(curStep) {
+                var percent = parseFloat(100 / steps) * curStep;
+                percentpercent = percent.toFixed();
+                $(".pbar")
+                    .css("width", percent + "%")
+            }
+            $(".submit").click(function () {
+                return false;
+            })
+        });
+    </script>
 </asp:Content>
 

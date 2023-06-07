@@ -243,8 +243,7 @@ function FillGrid() {
 
                     document.getElementById("TxtCategoryID").value = "";
                     document.getElementById("TxtCategoryID").value = e.row.data.CategoryID;
-
-                    if (e.row.data.CategoryID === "") {
+                     if (e.row.data.CategoryID === "") {
                         document.getElementById("BtnDeletePopUp").disabled = true;
                         document.getElementById("BtnSave").disabled = true;
                         document.getElementById("BtnSaveAS").disabled = true;
@@ -318,7 +317,7 @@ $("#EditButton").click(function () {
             Objid.push(selectMIDSplit[s]);
         }
     }
-
+    ObjidContent = [];
     ///////// Contents Allocation Id Strings ////////////////
     var IDString = selectedCategoryRows[0].ContentsIDString;
     if (IDString === "" || IDString === null || IDString === undefined) {
@@ -332,7 +331,7 @@ $("#EditButton").click(function () {
     }
     //////////////////
 
-    $("#GridProcessAllocation").dxDataGrid({ dataSource: { store: { type: "array", key: "ProcessID", data: processgrid } } });
+    $("#GridProcessAllocation").dxDataGrid({ dataSource: { store: { type: "array", key: "ProcessID", data: processgrid } }, selectedRowKeys: Objid });
     ContentGridGrid();
 
     if (selectedCategoryRows[0].CategoryName === "" && selectedCategoryRows[0].Orientation === "") {
@@ -507,6 +506,8 @@ function SaveBtnFun() {
 
                 if (SplitGridRow.length > 0) {
                     for (var m = 0; m < SplitGridRow.length; m++) {
+                        if (SplitGridRow[m] == "")
+                            continue;
                         OperationProcessAllocationDetailRecord = {};
                         OperationProcessAllocationDetailRecord.ProcessID = SplitGridRow[m];
                         OperationProcessAllocationDetailRecord.ContentID = SplitGridRowContent[cm];

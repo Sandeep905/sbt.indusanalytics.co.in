@@ -10890,34 +10890,61 @@ html.ie11 .bs-searchbox .form-control {
 
 .pendingforpriceapproval {
     background-color: #f5cf54 !important;
+    border-radius: 5px;
+    padding: 2px 5px 2px 2px;
 }
 
 .pendingforapproval {
     background-color: #f5cf54 !important;
+    border-radius: 5px;
+    padding: 2px 5px 2px 2px;
 }
 
 .sentforintenalappproval {
     background-color: #2196F3 !important;
+    border-radius: 5px;
+    padding: 2px 5px 2px 2px;
+}
+.sentforapproval {
+    background-color: #2196F3 !important;
+    border-radius: 5px;
+    padding: 2px 5px 2px 2px;
 }
 
 .isinternalapproved {
     background-color: #c27ff7 !important;
+    border-radius: 5px;
+    padding: 2px 5px 2px 2px;
+}
+
+.isapproved {
+    background-color: #c27ff7 !important;
+    border-radius: 5px;
+    padding: 2px 5px 2px 2px;
 }
 
 .isrework {
     background-color: #64d6e6 !important;
+    border-radius: 5px;
+    padding: 2px 5px 2px 2px;
 }
 
 .jobapproved {
     background-color: #4CAF50 !important;
+    border-radius: 5px;
+    padding: 2px 5px 2px 2px;
 }
 
 .ismailsent {
     background-color: #88a7a5 !important;
+    border-radius: 5px;
+    padding: 2px 5px 2px 2px;
 }
 
 .iscancelled {
     background-color: #ea8384 !important;
+    border-radius: 5px;
+    padding: 2px 5px 2px 2px;
 }
 
 .machinefolds {
@@ -10926,4 +10953,11 @@ html.ie11 .bs-searchbox .form-control {
 
 .newquotes {
     background-color: #e8f403 !important;
+    border-radius: 5px;
+    padding: 2px 5px 2px 2px;
+}
+.newpo {
+    background-color: #e8f403 !important;
+    border-radius:5px;
+    padding:2px 5px 2px 2px;
 }

@@ -18,7 +18,7 @@
 
     <!-- Bootstrap Core Js -->
     <script src="../../plugins/bootstrap/js/bootstrap.js"></script>
-    <script src="CustomJS/DrawKeyLineDiagram.js?<%=System.Configuration.ConfigurationManager.AppSettings("Version")%>" type="text/javascript"></script>
+    <script src="CustomJS/DrawKeyLine.js?<%=System.Configuration.ConfigurationManager.AppSettings("Version")%>" type="text/javascript"></script>
 
 </body>
 </html>

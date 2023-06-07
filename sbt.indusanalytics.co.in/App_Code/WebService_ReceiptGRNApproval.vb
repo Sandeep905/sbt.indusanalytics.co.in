@@ -23,10 +23,10 @@ Public Class WebService_ReceiptGRNApproval
 
     Dim GBLUserID As String
     Dim GBLUserName As String
-    Dim GBLBranchID As String
+    ReadOnly GBLBranchID As String
     Dim GBLCompanyID As String
     Dim GBLFYear As String
-    Dim UserName As String
+    ReadOnly UserName As String
 
 
     '---------------Open Master code---------------------------------
@@ -35,7 +35,7 @@ Public Class WebService_ReceiptGRNApproval
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function FillGrid(ByVal RadioValue As String) As String
         Try
-            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
             If RadioValue = "Pending Receipt Note" Then
                 str = "Select Isnull(ITM.TransactionID,0) AS TransactionID,Isnull(ITD.PurchaseTransactionID,0) AS PurchaseTransactionID,Isnull(ITM.LedgerID,0) AS LedgerID,Isnull(ITM.MaxVoucherNo,0) AS MaxVoucherNo,NullIf(LM.LedgerName,'') AS LedgerName,NullIf(ITM.VoucherNo,'') AS ReceiptVoucherNo,Replace(Convert(Varchar(13),ITM.VoucherDate,106),' ','-') AS ReceiptVoucherDate,NullIf(ITMP.VoucherNo,'') AS PurchaseVoucherNo, " &
                         "Replace(Convert(Varchar(13),ITMP.VoucherDate,106),' ','-') AS PurchaseVoucherDate,ROUND(SUM(Isnull(ITD.ChallanQuantity,0)),2) AS ChallanQuantity,NullIf(ITM.DeliveryNoteNo,'') AS DeliveryNoteNo,Replace(Convert(Varchar(13),ITM.DeliveryNoteDate,106),' ','-') AS DeliveryNoteDate,NullIf(ITM.GateEntryNo,'') AS GateEntryNo,Replace(Convert(Varchar(13),ITM.GateEntryDate,106),' ','-') AS GateEntryDate,NullIf(ITM.LRNoVehicleNo,'') AS LRNoVehicleNo, " &
@@ -66,7 +66,7 @@ Public Class WebService_ReceiptGRNApproval
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function GetReceiptVoucherBatchDetail(ByVal TransactionID As String, ByVal RadioValue As String) As String
         Try
-            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
             If RadioValue = "Pending Receipt Note" Then
                 str = "Select Isnull(ITD.PurchaseTransactionID,0) AS PurchaseTransactionID,Isnull(ITM.LedgerID,0) AS LedgerID,Isnull(ITD.TransID,0) AS TransID,Isnull(ITD.ItemID,0) AS ItemID,Isnull(IM.ItemGroupID,0) AS ItemGroupID,Isnull(IGM.ItemGroupNameID,0) AS ItemGroupNameID,NullIf(ITMP.VoucherNo,'') AS PurchaseVoucherNo,Replace(Convert(Varchar(13),ITMP.VoucherDate,106),' ','-') AS PurchaseVoucherDate,NullIf(IM.ItemCode,'') AS ItemCode,NullIf(IGM.ItemGroupName,'') AS ItemGroupName,NullIf(ISGM.ItemSubGroupName,'') AS ItemSubGroupName,NullIf(IM.ItemName,'') AS ItemName,NullIf(IM.ItemDescription,'') AS ItemDescription,Isnull(ITMPD.PurchaseOrderQuantity,0) AS PurchaseOrderQuantity,NullIf(ITMPD.PurchaseUnit,'') AS PurchaseUnit,Isnull(ITD.ChallanQuantity,0) AS ChallanQuantity,Isnull(ITD.ChallanQuantity,0) AS ApprovedQuantity,0 AS RejectedQuantity,NullIf(ITD.BatchNo,'') AS BatchNo,NullIf(ITD.StockUnit,'') AS StockUnit,Isnull(ITD.ReceiptWtPerPacking,0) AS ReceiptWtPerPacking,Isnull(ITMPD.PurchaseTolerance,0) AS PurchaseTolerance,Isnull(IM.WtPerPacking,0) AS WtPerPacking,Isnull(IM.UnitPerPacking,1) AS UnitPerPacking,Isnull(IM.ConversionFactor,1) AS ConversionFactor,0 AS SizeW,Isnull(ITD.WarehouseID,0) AS WarehouseID,Nullif(WM.WarehouseName,'') AS Warehouse,Nullif(WM.BinName,'') AS Bin,Isnull(UOM.DecimalPlace,0)  AS UnitDecimalPlace  " &
                       " From ItemTransactionMain AS ITM INNER JOIN ItemTransactionDetail AS ITD ON ITM.TransactionID=ITD.TransactionID AND ITM.CompanyID=ITD.CompanyID INNER JOIN ItemMaster AS IM ON IM.ItemID=ITD.ItemID AND IM.CompanyID=ITD.CompanyID INNER JOIN ItemGroupMaster AS IGM ON IGM.ItemGroupID=IM.ItemGroupID AND IGM.CompanyID=IM.CompanyID INNER JOIN ItemTransactionMain AS ITMP ON ITMP.TransactionID=ITD.PurchaseTransactionID AND ITMP.CompanyID=ITD.CompanyID INNER JOIN ItemTransactionDetail AS ITMPD ON ITMPD.TransactionID=ITMP.TransactionID AND ITMPD.ItemID=IM.ItemID AND ITMPD.TransactionID=ITD.PurchaseTransactionID AND ITMPD.CompanyID=ITMP.CompanyID INNER JOIN WarehouseMaster AS WM ON WM.WarehouseID=ITD.WarehouseID AND WM.CompanyID=ITD.CompanyID LEFT JOIN ItemSubGroupMaster AS ISGM ON ISGM.ItemSubGroupID=IM.ItemSubGroupID AND ISGM.CompanyID=IM.CompanyID LEFT JOIN UnitMaster AS UOM ON UOM.UnitSymbol=IM.StockUnit AND UOM.CompanyID=IM.CompanyID  " &
@@ -97,7 +97,7 @@ Public Class WebService_ReceiptGRNApproval
         Dim AddColName, wherecndtn, TableName As String
         AddColName = ""
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
         GBLUserName = Convert.ToString(HttpContext.Current.Session("UserName"))
         GBLFYear = Convert.ToString(HttpContext.Current.Session("FYear"))
@@ -133,7 +133,7 @@ Public Class WebService_ReceiptGRNApproval
         Context.Response.Clear()
         Context.Response.ContentType = "application/json"
 
-        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
 
         str = ""
@@ -173,7 +173,7 @@ Public Class WebService_ReceiptGRNApproval
         KeyField = ""
         Try
 
-            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
 
             Dim dtExist As New DataTable
             Dim dtExist1 As New DataTable

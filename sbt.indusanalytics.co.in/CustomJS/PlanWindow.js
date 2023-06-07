@@ -1036,6 +1036,42 @@ $("#PlanButton").click(function () {
     GblInputOpr = GDOprstore;
     var ObjOprJson = JSON.stringify(GDOprstore);
 
+    if (document.getElementById('vehicle1').checked == true) {
+        $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+        if (Number(document.getElementById("MannualUnitRate").value) <= 0) {
+            document.getElementById("MannualUnitRate").focus();
+            alert("Please unit enter rate");
+            return;
+        }
+        if ($("#SelvendorOffset").dxSelectBox("instance").option('value') <= 0) {
+            alert("Please select vendor");
+            return;
+        }
+        $("#PlanButtonHide").removeClass("fa fa-arrow-circle-up");
+        $("#PlanSizeContainer").slideUp(800);
+        $("#PlanContainer").slideDown(800);
+        $("#PlanButtonHide").addClass("fa fa-arrow-circle-down");
+        $("#PlanSizeContainer").animate({ scrollTop: 0 }, "slow");
+        document.getElementById('PlanMain').style.display = 'none';
+        document.getElementById('tabDetailsMain').style.display = 'none';
+        document.getElementById('PlanMain1').style.display = 'none';
+        document.getElementById('TabOperations').style.display = 'none';
+        document.getElementById('PlanChartLayout').style.display = 'none';
+        document.getElementById('TxtFinalQuantity').value = document.getElementById("PlanContQty").innerHTML;
+        document.getElementById('finalUnitCost').value = document.getElementById("MannualUnitRate").value;
+        NetcostOffset = Number(document.getElementById('TxtFinalQuantity').value) * Number(document.getElementById('finalUnitCost').value);
+        onChangeCalcAmountp();
+        //document.getElementById("finalCost").value
+        //  }
+        var contOrientation = document.getElementById("ContentOrientation").innerHTML;
+        return;
+    } else {
+        document.getElementById('PlanMain').style.display = 'block';
+        document.getElementById('tabDetailsMain').style.display = 'block';
+        document.getElementById('PlanMain1').style.display = 'block';
+        document.getElementById('TabOperations').style.display = 'block';
+        document.getElementById('PlanChartLayout').style.display = 'block';
+    }
     try {
         $.ajax({
             type: "POST",
@@ -1307,7 +1343,7 @@ function ShowShirinReport(gridData) {
             // Variable *NetcostOffset* from ProjectQuotation.js
             NetcostOffset = finalcost.toFixed(3);
             //document.getElementById("finalUnitCost").value = finalcost / Number(document.getElementById("PlanContQty").innerHTML);
-            //document.getElementById("finalUnitCost").value = Number(document.getElementById("finalUnitCost").value).toFixed(3);
+            document.getElementById("VendorUnitCostOffset").value = (parseFloat(NetcostOffset) / parseFloat(document.getElementById("PlanContQty").innerHTML)).toFixed(2).toString();
             document.getElementById("TxtFinalQuantity").value = Number(value.FinalQuantity);
 
             var PrintingImp = value.ImpressionsToBeCharged / value.NoOfSets; // value.NoOfSets;
@@ -2350,6 +2386,7 @@ function ShowOperationGrid(dataSource, slabNames) {
                     newdata.ProcessName = clickedCell.data.ProcessName;
                     newdata.Rate = Number(clickedCell.data.Rate).toFixed(3);
                     newdata.RateFactor = clickedCell.data.RateFactor;
+                    newdata.TypeofCharges = clickedCell.data.TypeofCharges;
 
                     var clonedItem = $.extend({}, newdata);
                     dataGrid._options.dataSource.splice(dataGrid.totalCount(), 0, clonedItem);
@@ -2516,6 +2553,7 @@ $("#GridOperationAllocated").dxDataGrid({
                 newdata.ProcessName = clickedCell.data.ProcessName;
                 newdata.Rate = Number(clickedCell.data.Rate).toFixed(3);
                 newdata.RateFactor = clickedCell.data.RateFactor;
+                newdata.TypeofCharges = clickedCell.data.TypeofCharges;
 
                 var clonedItem = $.extend({}, newdata);
                 dataGrid._options.dataSource.store.data.splice(dataGrid.totalCount(), 0, clonedItem);

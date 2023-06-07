@@ -145,8 +145,29 @@ Public Class WebService_LedgerMaster
     Public Function MasterGridColumnHide(ByVal masterID As String) As String
 
         GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
-
         str = "SELECT  nullif(GridColumnHide,'') as GridColumnHide,nullif(TabName,'') as TabName,IsNull(ConcernPerson,0) as ConcernPerson,IsNull(EmployeeMachineAllocation,0) as EmployeeMachineAllocation FROM LedgerGroupMaster Where CompanyID = " & GBLCompanyID & "  and LedgerGroupID= '" & masterID & "' and isnull(IsDeletedTransaction,0)<>1"
+        db.FillDataTable(dataTable, str)
+        data.Message = ConvertDataTableTojSonString(dataTable)
+        Return js.Serialize(data.Message)
+    End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function GetSalesCordnators(ByVal ID As String) As String
+
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+        str = "Select LedgerID as SalesCordinatorID,LedgerName from LedgerMaster Where LedgerGroupID= 3 and Designation ='SALES CORDINATOR' and " & ID & " in (SELECT value FROM STRING_SPLIT(UnderUserID, ','))  and CompanyId =" & GBLCompanyID
+
+        db.FillDataTable(dataTable, str)
+        data.Message = ConvertDataTableTojSonString(dataTable)
+        Return js.Serialize(data.Message)
+    End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function GetSalesPerson() As String
+
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+        str = "Select LedgerID as LedgerIDSE,LedgerName from LedgerMaster Where LedgerGroupID= 3 and Designation in('SALES EXECUTIVE','SALES MANAGER') and CompanyId =" & GBLCompanyID
+
         db.FillDataTable(dataTable, str)
         data.Message = ConvertDataTableTojSonString(dataTable)
         Return js.Serialize(data.Message)
@@ -171,7 +192,7 @@ Public Class WebService_LedgerMaster
     ''----------------------------Open Master  Save Data  ------------------------------------------
     <WebMethod(EnableSession:=True)>
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
-    Public Function SaveData(ByVal CostingDataLedgerMaster As Object, ByVal CostingDataLedgerDetailMaster As Object, ByVal MasterName As String, ByVal ActiveLedger As String, ByVal LedgerGroupID As String, ByVal CostingDataSlab As Object) As String
+    Public Function SaveData(ByVal CostingDataLedgerMaster As Object, ByVal CostingDataLedgerDetailMaster As Object, ByVal MasterName As String, ByVal ActiveLedger As String, ByVal LedgerGroupID As String, ByVal CostingDataSlab As Object, ByVal ItemStringArray As String) As String
 
         Dim dt As New DataTable
         Dim KeyField, LedgerID As String
@@ -197,8 +218,8 @@ Public Class WebService_LedgerMaster
             If db.CheckAuthories("LedgerMaster.aspx", GBLUserID, GBLCompanyID, "CanSave", LedgerCode) = False Then Return "You are not authorized to save"
             Using updateTransaction As New Transactions.TransactionScope
                 TableName = "LedgerMaster"
-                AddColName = "ModifiedDate,CreatedDate,UserID,CompanyID,FYear,CreatedBy,ModifiedBy,LedgerCode,LedgerCodeprefix,MaxLedgerNo"
-                AddColValue = "'" & DateTime.Now & "','" & DateTime.Now & "','" & GBLUserID & "'," & GBLCompanyID & ",'" & GBLFYear & "','" & GBLUserID & "','" & GBLUserID & "','" & LedgerCode & "','" & LedgerCodePrefix & "'," & MaxLedgerID & ""
+                AddColName = "SelectedItemIds,ModifiedDate,CreatedDate,UserID,CompanyID,FYear,CreatedBy,ModifiedBy,LedgerCode,LedgerCodeprefix,MaxLedgerNo"
+                AddColValue = "'" & ItemStringArray & "','" & DateTime.Now & "','" & DateTime.Now & "','" & GBLUserID & "'," & GBLCompanyID & ",'" & GBLFYear & "','" & GBLUserID & "','" & GBLUserID & "','" & LedgerCode & "','" & LedgerCodePrefix & "'," & MaxLedgerID & ""
                 LedgerID = db.InsertDatatableToDatabase(CostingDataLedgerMaster, TableName, AddColName, AddColValue)
 
                 If IsNumeric(LedgerID) = False Then
@@ -266,7 +287,7 @@ Public Class WebService_LedgerMaster
     ''----------------------------Open Master  Update Data  ------------------------------------------
     <WebMethod(EnableSession:=True)>
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
-    Public Function UpdateData(ByVal CostingDataLedgerMaster As Object, ByVal CostingDataLedgerDetailMaster As Object, ByVal MasterName As String, ByVal LedgerID As String, ByVal UnderGroupID As String, ByVal ActiveLedger As String, ByVal CostingDataSlab As Object, ByVal CostingDataSlabUpdate As Object) As String
+    Public Function UpdateData(ByVal CostingDataLedgerMaster As Object, ByVal CostingDataLedgerDetailMaster As Object, ByVal MasterName As String, ByVal LedgerID As String, ByVal UnderGroupID As String, ByVal ActiveLedger As String, ByVal CostingDataSlab As Object, ByVal CostingDataSlabUpdate As Object, ByVal ItemStringArray As String) As String
 
         Dim dt As New DataTable
         Dim KeyField, str2 As String
@@ -286,7 +307,7 @@ Public Class WebService_LedgerMaster
         Try
 
             TableName = "LedgerMaster"
-            AddColName = "ModifiedDate='" & DateTime.Now & "',UserID=" & GBLUserID & ",CompanyID=" & GBLCompanyID & ",ModifiedBy='" & GBLUserID & "'"
+            AddColName = "SelectedItemIds='" & ItemStringArray & "',ModifiedDate='" & DateTime.Now & "',UserID=" & GBLUserID & ",CompanyID=" & GBLCompanyID & ",ModifiedBy='" & GBLUserID & "'"
             wherecndtn = "CompanyID=" & GBLCompanyID & " And LedgerID=" & LedgerID & " And LedgerGroupID=" & UnderGroupID & ""
             db.UpdateDatatableToDatabase(CostingDataLedgerMaster, TableName, AddColName, 0, wherecndtn)
 
@@ -804,7 +825,7 @@ Public Class WebService_LedgerMaster
 
         GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
 
-        str = "Select Distinct ConcernPersonID, LedgerID, Name, NULLIF (Address1, '') AS Address1, NULLIF (Address2, '') AS Address2, NULLIF (Mobile, '') AS Mobile, NULLIF (Email, '') AS Email, NULLIF (Designation, '') AS Designation,IsPrimaryConcernPerson From ConcernPersonMaster Where CompanyID=" & GBLCompanyID & " And IsDeletedTransaction=0 And LedgerID=" & LID
+        str = "Select Distinct SalesCordinatorID ,SalesPersonId as LedgerIDSE,ConcernPersonID, LedgerID, Name, NULLIF (Address1, '') AS Address1, NULLIF (Address2, '') AS Address2, NULLIF (Mobile, '') AS Mobile, NULLIF (Email, '') AS Email, NULLIF (Designation, '') AS Designation,IsPrimaryConcernPerson From ConcernPersonMaster Where CompanyID=" & GBLCompanyID & " And IsDeletedTransaction=0 And LedgerID=" & LID
 
         db.FillDataTable(dataTable, str)
         data.Message = ConvertDataTableTojSonString(dataTable)
@@ -1187,7 +1208,172 @@ Public Class WebService_LedgerMaster
         data.Message = ConvertDataTableTojSonString(dataTable)
         Return js.Serialize(data.Message)
     End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function FieldTypeLoadData() As String
+        Dim cmd As New SqlCommand
+        Dim str As String
+        Dim dt As New DataTable
 
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+
+        str = "select distinct FieldType from LedgerGroupFieldMaster where CompanyID=" & GBLCompanyID
+        db.FillDataTable(dt, str)
+
+        data.Message = db.ConvertDataTableTojSonString(dt)
+        js.MaxJsonLength = 2147483647
+        Return js.Serialize(data.Message)
+    End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function ITEMFieldTypeLoadData() As String
+        Dim cmd As New SqlCommand
+        Dim str As String
+        Dim dt As New DataTable
+
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+
+        str = "select distinct FieldType from ItemGroupFieldMaster where CompanyID=" & GBLCompanyID
+        db.FillDataTable(dt, str)
+
+        data.Message = db.ConvertDataTableTojSonString(dt)
+        js.MaxJsonLength = 2147483647
+        Return js.Serialize(data.Message)
+    End Function
+
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function LedgerMasterLoadList() As String
+        Dim cmd As New SqlCommand
+        Dim str As String
+        Dim dt As New DataTable
+
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+
+        str = "select LedgerGroupID,LedgerGroupNameDisplay from LedgerGroupMaster where CompanyID=" & GBLCompanyID
+        db.FillDataTable(dt, str)
+
+        data.Message = db.ConvertDataTableTojSonString(dt)
+        js.MaxJsonLength = 2147483647
+        Return js.Serialize(data.Message)
+    End Function
+
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function ItemMasterLoadList() As String
+        Dim cmd As New SqlCommand
+        Dim str As String
+        Dim dt As New DataTable
+
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+
+        str = "Select ItemGroupID,ItemGroupName from ItemGroupMaster where CompanyID=" & GBLCompanyID
+        db.FillDataTable(dt, str)
+
+        data.Message = db.ConvertDataTableTojSonString(dt)
+        js.MaxJsonLength = 2147483647
+        Return js.Serialize(data.Message)
+    End Function
+
+
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function LedgerGroupIDWiseData(ByVal LedgerGroupID As String) As String
+        Dim cmd As New SqlCommand
+        Dim str As String
+        Dim dt As New DataTable
+
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+
+        str = "select LGFM.FieldType, LGFM.LedgerGroupFieldID,LGFM.LedgerGroupID,LGFM.FieldName,LGFM.FieldDataType,LGFM.FieldDescription,LGFM.IsDisplay,LGFM.IsCalculated,LGFM.FieldFormula,LGFM.FieldTabIndex,LGFM.FieldDrawSequence,LGFM.FieldDefaultValue,LGFM.IsActive,LGFM.FieldDisplayName,LGFM.SelectBoxQueryDB,LGFM.SelectBoxDefault,LGFM.ControllValidation,LGFM.FieldFormulaString,LGFM.IsLocked,LGFM.IsDeletedTransaction from LedgerGroupFieldMaster as LGFM Inner Join LedgerGroupMaster as LGM on LGM.LedgerGroupID = LGFM.LedgerGroupID and LGM.CompanyID = LGFM.CompanyID and isnull(LGM.IsDeleted,0)=0 where LGFM.LedgerGroupID = '" & LedgerGroupID & "'  and LGFM.CompanyID = " & GBLCompanyID & " and ISNULL(LGFM.IsDeleted,0)=0 order by LGFM.FieldDrawSequence"
+        db.FillDataTable(dt, str)
+
+        data.Message = db.ConvertDataTableTojSonString(dt)
+        js.MaxJsonLength = 2147483647
+        Return js.Serialize(data.Message)
+    End Function
+
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function ItemGroupIDWiseData(ByVal LedgerGroupID As String) As String
+        Dim cmd As New SqlCommand
+        Dim str As String
+        Dim dt As New DataTable
+
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+
+        str = "select LGFM.FieldType, LGFM.ItemGroupFieldID,LGFM.ItemGroupID,LGFM.FieldName,LGFM.FieldDataType,LGFM.FieldDescription,LGFM.IsDisplay,LGFM.IsCalculated,LGFM.FieldFormula,LGFM.FieldTabIndex,LGFM.FieldDrawSequence,LGFM.FieldDefaultValue,LGFM.IsActive,LGFM.FieldDisplayName,LGFM.SelectBoxQueryDB,LGFM.SelectBoxDefault,LGFM.ControllValidation,LGFM.FieldFormulaString,LGFM.IsLocked,LGFM.IsDeletedTransaction from ItemGroupFieldMaster as LGFM Inner Join ItemGroupMaster as LGM on LGM.ItemGroupID = LGFM.ItemGroupID and LGM.CompanyID = LGFM.CompanyID and isnull(LGM.IsDeleted,0)=0 where LGFM.ItemGroupID =" & LedgerGroupID & "and LGFM.CompanyID = " & GBLCompanyID & " and ISNULL(LGFM.IsDeleted,0)=0 order by LGFM.FieldDrawSequence"
+        db.FillDataTable(dt, str)
+
+        data.Message = db.ConvertDataTableTojSonString(dt)
+        js.MaxJsonLength = 2147483647
+        Return js.Serialize(data.Message)
+    End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function GetItemsList() As String
+        Dim cmd As New SqlCommand
+        Dim str As String
+        Dim dt As New DataTable
+
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+
+        str = "Select ItemId,ItemCode,ItemName,Quality,StockCategory,GSM,ItemSize,ItemDescription,ItemType,StockUnit,EstimationUnit from ItemMaster where isnull(IsDeletedTransaction,0) <> 1 and CompanyID =" & GBLCompanyID
+        db.FillDataTable(dt, str)
+
+        data.Message = db.ConvertDataTableTojSonString(dt)
+        js.MaxJsonLength = 2147483647
+        Return js.Serialize(data.Message)
+    End Function
+
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function SaveConfiguration(ByVal Data As Object) As String
+
+        Dim dt As New DataTable
+        Dim KeyField, LedgerID As String
+        Dim AddColName, AddColValue, TableName As String
+
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+        GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
+        GBLFYear = Convert.ToString(HttpContext.Current.Session("FYear"))
+        Dim ToUpdateQuery = ""
+        ConvertObjectToDatatableNEW(Data, dt)
+        Try
+            For index = 0 To dt.Rows.Count - 1
+                ToUpdateQuery += "Update LedgerGroupFieldMaster set FieldDisplayName = '" & dt.Rows(index)("FieldDisplayName") & "',IsDisplay = '" & dt.Rows(index)("IsDisplay") & "',FieldDrawSequence = '" & dt.Rows(index)("FieldDrawSequence") & "',IsActive = '" & dt.Rows(index)("IsActive") & "',FieldType = '" & dt.Rows(index)("FieldType") & "',IsLocked = '" & dt.Rows(index)("IsLocked") & "'where LedgerGroupFieldID =" & dt.Rows(index)("LedgerGroupFieldID") & ";"
+            Next
+            KeyField = db.ExecuteNonSQLQuery(ToUpdateQuery)
+
+        Catch ex As Exception
+            KeyField = "fail"
+        End Try
+        Return KeyField
+    End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function SaveItemConfiguration(ByVal Data As Object) As String
+
+        Dim dt As New DataTable
+        Dim KeyField, LedgerID As String
+        Dim AddColName, AddColValue, TableName As String
+
+        GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+        GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
+        GBLFYear = Convert.ToString(HttpContext.Current.Session("FYear"))
+        Dim ToUpdateQuery = ""
+        ConvertObjectToDatatableNEW(Data, dt)
+        Try
+            For index = 0 To dt.Rows.Count - 1
+                ToUpdateQuery += "Update ItemGroupFieldMaster set FieldDisplayName = '" & dt.Rows(index)("FieldDisplayName") & "',IsDisplay = '" & dt.Rows(index)("IsDisplay") & "',FieldDrawSequence = '" & dt.Rows(index)("FieldDrawSequence") & "',IsActive = '" & dt.Rows(index)("IsActive") & "',FieldType = '" & dt.Rows(index)("FieldType") & "',IsLocked = '" & dt.Rows(index)("IsLocked") & "'where ItemGroupFieldID =" & dt.Rows(index)("ItemGroupFieldID") & ";"
+            Next
+            KeyField = db.ExecuteNonSQLQuery(ToUpdateQuery)
+
+        Catch ex As Exception
+            KeyField = "fail"
+        End Try
+        Return KeyField
+    End Function
     '---------------Close Master code---------------------------------
 
     Public Class HelloWorldData

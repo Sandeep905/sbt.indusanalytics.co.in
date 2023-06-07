@@ -75,11 +75,11 @@
                                 </div>
 
                                 <div class="col-xs-12 col-sm-3 col-md-2 col-lg-2">
-                                    <b class="font-11">D.N.No./Invoice No. :</b>
+                                    <b class="font-11">Purchase D.N.No./Invoice No. :</b>
                                     <input class="forTextBox" type="text" id="TxtDnNo" name="TxtDnNo" readonly="" placeholder="Delivery Note No." value="" />
                                 </div>
                                 <div class="col-xs-12 col-sm-3 col-md-2 col-lg-2">
-                                    <b class="font-11">D.N.No./Invoice Date :</b>
+                                    <b class="font-11">Purchase D.N.No./Invoice Date :</b>
                                     <div id="DtPickerDnDate"></div>
                                 </div>
                                 <div class="col-xs-12 col-sm-3 col-md-2 col-lg-2">

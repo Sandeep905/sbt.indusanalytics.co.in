@@ -6,7 +6,7 @@
     <div class="row clearfix padding-0 margin-0">
         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-0 margin-0">
             <div class="dialogboxContainerMainMAster">
-                <div class="DialogBoxCustom" style="background-color: #fff; padding-left: 0px; padding-bottom: 2px">
+                <div class="DialogBoxCustom" style="background-color: #fff; padding-left: 0px; padding-bottom: 2px;margin-top:20px">
 
                     <button type="button" id="CreateButton" class="btn btn-primary btn-sm waves-effect">Create</button>
                     <button type="button" id="EditButton" class="btn btn-info btn-sm waves-effect">Edit</button>

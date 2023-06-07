@@ -298,6 +298,21 @@ $("#ProcessMasterGrid").dxDataGrid({
         fileName: "Process Master",
         allowExportSelectedData: true
     },
+    onExporting(e) {
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('ProcessMaster_' + new Date());
+
+        DevExpress.excelExporter.exportDataGrid({
+            component: e.component,
+            worksheet,
+            autoFilterEnabled: true,
+        }).then(() => {
+            workbook.xlsx.writeBuffer().then((buffer) => {
+                saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'ProcessMaster_' + new Date() + '.xlsx');
+            });
+        });
+        e.cancel = true;
+    },
     onRowPrepared: function (e) {
         setDataGridRowCss(e);
     },

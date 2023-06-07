@@ -170,7 +170,7 @@
                 <i id="Customleftsidebar1_Span" class="fa fa-bars" style="font-size: 14px;"></i>
                 <%--<span id="Customleftsidebar1_Span" style="writing-mode: vertical-lr; transform: rotate(180deg); font-weight: 900; margin-left: -10px;">|||</span>--%>
             </a>
-            <a href="#" id="CompanyName" runat="server" class="cut-text">Indus Analytics</a>
+            <a href="/home.aspx" id="CompanyName" runat="server" class="cut-text">Indus Analytics</a>
             <a class="iconCustom dropdown-toggle" title="Sign Out" id="Btn_Logout" style="cursor: pointer"><i class="fa fa-sign-out fa-2x fa-fw" style="font-size: 14px;"></i></a>
             <a title="Contents list" id="BottobTabReplaceBtn" href="javascript:void(0);" class="iconCustom dropdown-toggle hidden" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
                 <i class="fa fa-list-ul" style="margin-right: 8px; margin-left: 8px"></i>

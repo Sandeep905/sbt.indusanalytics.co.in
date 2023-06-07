@@ -3,6 +3,7 @@
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="Server">
     <style>
     </style>
+
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="Server">
     <div class="row clearfix" style="padding: 0px; margin: 0px; margin-right: -15px">
@@ -50,6 +51,7 @@
                     </div>
                 </div>
                 <div class="modal-footer" style="border-top: 1px solid #42909A;">
+                    <button type="button" id="btnAllocateItems" style="float: left" class="btn btn-warning btn-sm waves-effect hidden">Allocate Items</button>
                     <button type="button" id="btnConcernPerson" class="btn btn-dark btn-sm waves-effect hidden">Contact Person</button>
                     <button type="button" id="BtnNew" class="btn btn-primary waves-effect" style="color: none">New</button>
                     <button type="button" id="BtnSave" class="btn btn-success waves-effect">Save</button>
@@ -81,6 +83,30 @@
                 </div>
                 <div id="btnDivTab" class="modal-footer" style="border-top: 1px solid #42909A;">
                     <button type="button" class="btn btn-link waves-effect" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <%--Item Allocation--%>
+    <div class="modal col-lg-7 modal-m-l-15 fade" id="ItemAllocationModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content" style="border-radius: 4px; padding-bottom: .5em; padding-right: 0px">
+                <div class="DialogBoxCustom" style="float: left; border-top-left-radius: 4px; border-top-right-radius: 4px;">
+                    <strong id="ItemAllocationtag">Item Allocation</strong>
+                    <a href="javascript:void(0);" class="iconRightDbox btn-danger" data-dismiss="modal">
+                        <span data-dismiss="modal" id="clodeItmeModal" style="font-weight: 900; margin-right: 8px">X</span>
+                    </a>
+                </div>
+                <div class="modal-body" style="position: initial; padding-right: 0px">
+                    <div class="tab-content" style="margin-bottom: 0em">
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                            <div id="ListIfItemsGrid"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid #42909A;">
+                    <button type="button" id="BtnItmeApply" style="float: left" class="btn btn-warning btn-sm waves-effect ">Apply</button>
                 </div>
             </div>
         </div>
@@ -140,7 +166,7 @@
             </div>
         </div>
     </div>
-    
+
     <%--MachineAllocation Model PopUp (Edit update delete) --%>
     <div class="modal col-lg-7 modal-m-l-15 fade" id="MachineAllocationModal" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-lg" role="document">

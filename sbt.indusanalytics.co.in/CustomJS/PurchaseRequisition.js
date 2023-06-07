@@ -1439,7 +1439,7 @@ $("#BtnNext").click(function () {
             if (Groupdata[i].StockUnit.toString().toUpperCase() === Groupdata[i].PurchaseUnit.toString().toUpperCase()) {
                 Groupdata[i].PhysicalStockInPurchaseUnit = Groupdata[i].PhysicalStock;
             } else {
-                Groupdata[i].PhysicalStockInPurchaseUnit = StockUnitConversion(Groupdata[i].ConversionFormula.toString(), Number(Groupdata[i].PhysicalStock), Number(Groupdata[i].UnitPerPacking), Number(Groupdata[i].WtPerPacking), Groupdata[i].ConversionFactor, Number(Groupdata[i].SizeW), Number(Groupdata[i].ConvertedUnitDecimalPlace));
+                Groupdata[i].PhysicalStockInPurchaseUnit = StockUnitConversion(Groupdata[i].ConversionFormula == null ? '' : Groupdata[i].ConversionFormula.toString(), Number(Groupdata[i].PhysicalStock), Number(Groupdata[i].UnitPerPacking), Number(Groupdata[i].WtPerPacking), Groupdata[i].ConversionFactor, Number(Groupdata[i].SizeW), Number(Groupdata[i].ConvertedUnitDecimalPlace));
             }
 
             var found = false;
@@ -1520,6 +1520,7 @@ $("#BtnSave").click(function () {
                 OperationRecordMain.TransactionID = document.getElementById("TxtPRID").value;
             }
             OperationRecordMain.VoucherID = -9;
+
             OperationRecordMain.VoucherDate = $('#VoucherDate').dxDateBox('instance').option('value');
             OperationRecordMain.TotalQuantity = dataGrid.getTotalSummaryValue("PurchaseQty");
             OperationRecordMain.Narration = document.getElementById("textNaretion").value;

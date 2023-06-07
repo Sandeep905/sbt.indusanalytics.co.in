@@ -96,7 +96,7 @@
                                     </div>
 
                                     <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
-                                        <label class="font-11">Designation</label>
+                                        <label class="font-11">Role</label>
                                         <div id="SelectBoxDesignation"></div>
                                         <div style="min-height: 20px; float: left; width: 100%"><strong id="ValStrSelectBoxDesignation" style="color: red; font-size: 12px; display: none"></strong></div>
                                     </div>
@@ -177,6 +177,10 @@
                                         <div id="SelectBoxVendor"></div>
                                         <strong id="ValStrSelectBoxVendor" style="color: red; font-size: 12px; display: none"></strong>
                                     </div>
+                                      <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+                                        <label class="font-11">Employee</label>
+                                        <div id="SelectEmployeeUser"></div>
+                                     </div>
 
                                     <%--<div class="col-lg-3 col-md-3 col-sm-3 col-xs-12" >
                                                 <div style="float: left; width: 100%; height: auto">

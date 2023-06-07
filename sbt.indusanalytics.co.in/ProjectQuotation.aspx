@@ -10,28 +10,37 @@
             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                 <button id="BtnLoadFromEnquiry" type="button" class="btn btn-success">Load From Enquiry</button>
             </div>
-            <div class="col-xs-12 col-sm-3 col-md-2 col-lg-2">
-                <b class="font-11">Quote No.</b>
+            <div class="col-xs-12 col-sm-3 col-md-1 col-lg-1">
+                <b class="font-11" id="enqtext">Enquiry No.</b>
                 <input type="text" id="TxtQuoteNo" class="forTextBox disabled" style="float: left; width: 100%;" readonly="" />
             </div>
-            <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3">
-                <b class="font-11">Client Name</b><i class="fa fa-plus btn btn-link font-12 padding-0 reloadclient btnnewmaster" style="color: green"></i>
-                <div id="SelClient"></div>
+            <div class="col-xs-12 col-sm-12 col-md-3 col-lg-3">
+                <b class="font-11">Client Name<i style="color: red">*</i></b><i class="fa fa-plus btn btn-link font-12 padding-0 reloadclient btnnewmaster" style="color: green"></i>
+                <div id="SelClient" tabindex="1"></div>
+                <label id="SalesManager"></label>
             </div>
-            <div class="col-xs-12 col-sm-3 col-md-2 col-lg-1">
+            <div class="col-xs-12 col-sm-12 col-md-2 col-lg-2">
+                <b class="font-11">Client Cordinator<i style="color: red">*</i></b>
+                <div id="ClientCordinator" tabindex="3"></div>
+            </div>
+            <div class="col-xs-12 col-sm-12 col-md-2 col-lg-2">
+                <b class="font-11">Sales Cordinator<i style="color: red">*</i></b>
+                <div id="SalesCordinator" tabindex="3"></div>
+            </div>
+            <div class="col-xs-12 col-sm-12 col-md-2 col-lg-2">
+                <b class="font-11">Sales Executive<i style="color: red">*</i></b>
+                <div id="SelSalesPerson" tabindex="3"></div>
+            </div>
+            <div class="col-xs-12 col-sm-12 col-md-2 col-lg-2">
+                <b class="font-11">Project Name<i style="color: red">*</i></b>
+                <input type="text" tabindex="2" id="TxtProjectName" class="forTextBox" />
+            </div>
+            <div class="col-xs-12 col-sm-12 col-md-2 col-lg-1">
                 <b class="font-11">City</b>
                 <input type="text" name="TxtClientCity" id="TxtClientCity" class="forTextBox" value="" readonly="readonly" disabled />
             </div>
-            <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4">
-                <b class="font-11">Project Name</b>
-                <input type="text" id="TxtProjectName" class="forTextBox" />
-            </div>
-            <div class="col-xs-12 col-sm-3 col-md-2 col-lg-2">
-                <b class="font-11">Sales Person</b>
-                <div id="SelSalesPerson"></div>
-            </div>
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                <b class="font-11" onclick="AddRow()">Add Product <i onclick="AddRow()" class="fa fa-plus-circle" style="font-size: 20px; color: green"></i></b>
+                <b class="font-11 hidden" onclick="AddRow()">Add Product <i onclick="AddRow()" class="fa fa-plus-circle" style="font-size: 20px; color: green"></i></b>
                 <div id="gridProductList"></div>
             </div>
             <div class="col-xs-12 col-sm-3 col-md-2 col-lg-2">
@@ -42,11 +51,34 @@
                 <b class="font-11">Remark</b>
                 <textarea id="TxtRemark" placeholder="Enter your remark here" class="forTextBox"></textarea>
             </div>
+            <div class="col-xs-12 col-sm-6 col-md-2 col-lg-2">
+                <b class="font-11">Valid Upto (Days)<i style="color: red">*</i></b>
+                <input type="number" id="TxtValidUpto" min="0" class="forTextBox" />
+            </div>
+
+            <div class="col-xs-12 col-sm-6 col-md-2 col-lg-2">
+                <b class="font-11">Delivery Days<i style="color: red">*</i></b>
+                <input type="number" id="TxtDeliveryUpto" min="0" class="forTextBox" />
+            </div>
+            <div class="col-xs-12 col-sm-6 col-md-2 col-lg-2">
+                <b class="font-11">Payment Term (Days)<i style="color: red">*</i></b>
+                <input type="number" id="TxtPaymentTerms" min="0" class="forTextBox" />
+            </div>
             <div class="modal-footer col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                <button id="BtnSave" type="button" class="btn btn-success">Save</button>
-                <input type="button" class="btn btn-primary" value="Show List" id="BtnShowList" onclick="setGridDisplay('none', 'block')" />
-                <input id="EstimateID" style="display: none" />
-                <input id="BookingID" style="display: none" />
+                <div id="IsDirectApproveddiv" style="float: left; display: none">
+                    <input type="checkbox" id="IsDirectApproved" />
+                    <label for="IsDirectApproved" style="color: red">Is Direct Internal Approved </label>
+                </div>
+                <div id="IsDirectApproveddivp" style="float: left; display: none">
+                    <input type="checkbox" id="IsDirectPriceApproved" />
+                    <label for="IsDirectPriceApproved" style="color: red">Is Direct Price Approved</label>
+                </div>
+                <div>
+                    <button id="BtnSave" type="button" class="btn btn-success">Save</button>
+                    <input type="button" class="btn btn-primary" value="Show List" id="BtnShowList" onclick="setGridDisplay('none', 'block')" />
+                    <input id="EstimateID" style="display: none" />
+                    <input id="BookingID" style="display: none" />
+                </div>
             </div>
         </div>
     </div>
@@ -77,8 +109,26 @@
                     </div>
                     <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
                         <b class="font-12">Operation List</b>
+                        <a id="BtnSelectOperation" class="fa fa-plus btn btn-link" style="color: green" title="For Select Operation"></a>
                         <div id="gridOperation"></div>
                         <textarea id="OperId" class="hidden"></textarea>
+                    </div>
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 m-t-5" style="float: left;">
+                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 m-t-5" style="float: left;">
+                            <div class="col-xs-12 col-sm-12 col-md-2 col-lg-2 p-0">
+                                <input onchange="IsMaualCostingflex()" type="checkbox" id="IsManualcostflex" name="vehiIsManualcostflexcle1" value="IsManualCosting">
+                                <label style="color: red" for="IsManualcostflex">Want Mannual Costing</label>
+                            </div>
+                            <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 p-0">
+                                <label>Vendor</label>
+                                <div id="Selvendorflex"></div>
+                            </div>
+                            <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4 p-0">
+                                <label>Rate Per Sq. feet</label>
+                                <input type="number" id="MannualUnitRateflex" min="0" class='forTextBox' disabled="disabled" />
+                            </div>
+                        </div>
+
                     </div>
                     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                         <input type="button" name="BtnPlan" id="BtnPlan" value="Estimate" class="btn btn-primary" />
@@ -109,6 +159,7 @@
                         <div class="col-lg-3 col-md-3 col-sm-12 col-sm-12" style='display: flex; flex-direction: row; align-items: center; justify-content: flex-start'>
                             <label>Unit Cost:</label>
                             <input class='text-right forTextBox' type='text' readonly="readOnly" id='FinalUnitCost1' onchange='CalculateUnitCost()' style='width: 72%; text-align: right; display: flex; flex-direction: row; align-items: center; justify-content: space-between' />
+                            <input class="text-right forTextBox hidden" disabled="disabled" type="text" name="VendorUnitCostFlex" title="Final Unit Cost" value="" id="VendorUnitCostFlex" />
                         </div>
                         <div class="col-lg-3 col-md-3 col-sm-12 col-sm-12" style='display: flex; flex-direction: row; align-items: center; justify-content: flex-start'>
                             <label>Net Cost:</label>
@@ -146,7 +197,7 @@
             </div>
             <div class="modal-footer" style="border-top: 1px solid #42909A;">
                 <%--<button type="button" id="BtnLinkToQuote" class="btn btn-secondary waves-effect">Link To Quote</button>--%>
-                <button id="BtnPrint" type="button" class="btn btn-warning">Print</button>
+                <button id="BtnPrint" type="button" class="btn btn-warning hidden">Print</button>
                 <button type="button" id="BtnLoadFromList" class="btn btn-primary waves-effect hidden">Load</button>
                 <button id="BtnDelete" type="button" class="btn btn-danger">Delete</button>
                 <input type="button" data-dismiss="modal" value="Close" class="btn btn-secondary" onclick="setGridDisplay('block', 'none')" />
@@ -163,7 +214,6 @@
                         <div id="GridShowlistLoadFromEnquiry"></div>
                     </div>
                 </div>
-
                 <div class="modal-footer" style="border-top: 1px solid #42909A;">
                     <button type="button" id="BtnLoadFromListt" class="btn btn-primary waves-effect">Load</button>
                     <button type="button" class="btn btn-link waves-effect" data-dismiss="modal">Close</button>
@@ -429,6 +479,32 @@
             </div>
         </div>
     </div>
+
+    <!-- For Select op-->
+    <div class="modal clearfix" id="SelectOperation" tabindex="-1" role="dialog" style="margin-top: 50px">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="DialogBoxCustom" style="float: left; border-top-left-radius: 4px; border-top-right-radius: 4px;">
+                    <a href="javascript:void(0);" class="iconRightDbox btn-danger" data-dismiss="modal">
+                        <span data-dismiss="modal" style="font-weight: 900; margin-right: 8px">X</span>
+                    </a>
+                    <strong id="caption1">Suggest Process</strong>
+                </div>
+                <div class="modal-body" style="position: initial; padding-right: 0px">
+                    <div class="rowcontents clearfix" style="padding: 20px; overflow: auto;">
+                        <div style="padding: 5px">
+                            <b class="font-12">Select Operation</b>
+                            <div id="gridSelOperation"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 modal-footer" style="border-top: 1px solid #42909A; padding: 5px; position: fixed; bottom: -5px; background: #fff">
+                    <button id="BtnApplyOp" type="button" class="btn btn-secondary" data-dismiss="modal">Apply Operation</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <%--for offfset plan window--%>
 
     <div id="BottomTabBar" class="MYBottomsidenav" style="padding-right: 1px">
@@ -464,8 +540,16 @@
                                         </div>
                                     </div>
                                     <div id="planJob_Size" class="col-xs-12 col-sm-7 col-md-7 col-lg-7">
-                                        <b class="font-12" style="width: auto;">Job Size</b><br />
+                                        <b class="font-12" style="width: auto;">Job Size
+                                            <label style="color: red">in MM</label>
+                                        </b>
+                                        <br />
+                                        <label style="color: red; font-size: 10px">
+                                            To convert Inch to MM,<br />
+                                            Use shift + "</label>
+                                        <br />
                                         <div id="SelJobSizeTemplate"></div>
+
                                         <div style="width: auto;">
                                             <input type='text' id='JobFoldedH' oninput="onInputChangeFolds(this);" name="FH" placeholder='Folded H' class='forTextBox' style="float: left; width: 40%; margin: .2em; display: none;" onchange="myvalidation(this)" />
                                             <input type='text' id='JobFoldedL' oninput="onInputChangeFolds(this);" name="FL" placeholder='Folded L' class='forTextBox' style="float: left; width: 40%; margin: .2em; display: none;" onchange="myvalidation(this)" />
@@ -607,8 +691,23 @@
                             <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 padding-0 margin-0" style="padding-right: 2px; padding-left: 2px">
                                 <div id="GridOperationAllocated"></div>
                             </div>
+                            <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 m-t-5" style="float: left;">
+                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 m-t-5" style="float: left;">
+                                    <input onchange="IsMaualCosting()" type="checkbox" id="vehicle1" name="vehicle1" value="IsManualCosting">
+                                    <label style="color: red" for="vehicle1">Want Mannual Costing</label>
+                                </div>
 
+                                <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 m-t-5" style="float: left;">
+                                    <label>Vendor</label>
+                                    <div id="SelvendorOffset"></div>
+                                </div>
+                                <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 m-t-5" style="float: left;">
+                                    <label>Unit Cost</label>
+                                    <input type="number" id="MannualUnitRate" min="0" class='forTextBox' disabled="disabled" />
+                                </div>
+                            </div>
                             <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 m-t-5" style="float: right;">
+
                                 <div class="DialogBoxCustom">
                                     <a id="PlanButton" class="btn myButton" style="float: right; width: auto; cursor: pointer; margin-top: 5px;">Show Cost </a>
                                 </div>
@@ -621,7 +720,7 @@
 
                 <div id="PlanContainer" style="float: left; height: auto; width: 100%; display: none">
 
-                    <div class="col-xs-12 col-sm-10 col-md-10 col-lg-10" style="padding-right: 0px; height: auto; padding-left: 0px;">
+                    <div id="PlanMain1" class="col-xs-12 col-sm-10 col-md-10 col-lg-10" style="padding-right: 0px; height: auto; padding-left: 0px;">
                         <div style="height: auto; margin: 0px 2px 0px 2px;">
                             <div class="col-sm-2 margin-0" id="FilterMachineFolds"></div>
                             <b class="col-sm-4 margin-0 font-12" style="border: 1px dashed;" id="LblPlanContName"></b>
@@ -632,7 +731,7 @@
                         </div>
                     </div>
 
-                    <div class="col-xs-12 col-sm-2 col-md-2 col-lg-2" style="padding-right: 0px; height: auto; padding-left: 0px; padding-top: 1px;">
+                    <div id="PlanMain" class="col-xs-12 col-sm-2 col-md-2 col-lg-2" style="padding-right: 0px; height: auto; padding-left: 0px; padding-top: 1px;">
                         <div class='content_div' style='height: auto; width: auto; text-align: center;'>
                             <b class="col-xs-12 btn btn-sm btn-primary font-12" id="BtnKeyLine">Key Line</b>
                             <div class="col-xs-6 col-sm-12 col-md-12 col-lg-12" style="padding-right: 1px; height: auto; padding-left: 0px;">
@@ -711,6 +810,7 @@
                             <b class="font-12">Unit Cost</b>
                             <b class="font-12" style="color: forestgreen">(Quotated Unit Cost : <b style="color: red" id="QuotedUCostOffset">0</b>)</b>
                             <input class="text-right forTextBox" disabled="disabled" type="text" name="finalUnitCost" title="Final Unit Cost" value="" id="finalUnitCost" />
+                            <input class="text-right forTextBox hidden" disabled="disabled" type="text" name="VendorUnitCostOffset" title="Final Unit Cost" value="" id="VendorUnitCostOffset" />
                         </div>
                         <div class="col-lg-6 col-md-6 col-sm-12 col-sm-12">
                             <b class="font-12">Net Cost</b>
@@ -749,93 +849,103 @@
         </div>
     </div>
 
-    <div class="modal clearfix-sm" id="modalEstimateProductUnit" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document" style="display: flex; justify-content: center; align-items: center; height: 100vh;">
-            <div class="modal-content" style="width: 700px">
+    <div class="modal clearfix" id="modalEstimateProductUnit" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
                 <div class="DialogBoxCustom" style="float: left; border-top-left-radius: 4px; border-top-right-radius: 4px;">
                     <strong>Product Estimation</strong>
                     <a href="javascript:void(0);" class="iconRightDbox btn-danger" data-dismiss="modal">
                         <span data-dismiss="modal" style="font-weight: 900; margin-right: 8px">X</span>
                     </a>
                 </div>
-                <div class="modal-header padding-0">
-                    <div class="col-xs-12 col-sm-12 col-md-8 col-lg-8">
-                        <strong class="font-11">Product Name</strong>
-                        <input type="text" id="TxtProductNameUnit" class="forTextBox disabled" readonly="" />
+
+                <div class="modal-body" style="overflow-y: auto; height: 90vh; padding-bottom: 30px">
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                        <div class="col-xs-12 col-sm-12 col-md-8 col-lg-8">
+                            <strong class="font-11">Product Name</strong>
+                            <input type="text" id="TxtProductNameUnit" class="forTextBox disabled" readonly="" />
+                        </div>
+                        <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
+                            <b class="font-11">Quantity</b>
+                            <input type="text" id="TxtPlanQtyUnit" class="forTextBox disabled" readonly="" />
+                        </div>
+                        <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
+                            <b class="font-11">Rate</b>
+                            <input class='text-right forTextBox' onchange="CalculateUnitCost()" type='text' id='VendorRate' />
+                        </div>
+                        <div class="col-xs-12 col-sm-12 col-md-8 col-lg-8">
+                            <b class="font-11">Vendor Name</b>
+                            <div id="Selvendor" />
+                        </div>
                     </div>
-                    <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
-                        <b class="font-11">Quantity</b>
-                        <input type="text" id="TxtPlanQtyUnit" class="forTextBox disabled" readonly="" />
-                    </div>
-                    <div class="col-xs-12 col-sm-12 col-md-4 col-lg-4">
-                        <b class="font-11">Rate</b>
-                        <input class='text-right forTextBox' onchange="CalculateUnitCost()" type='text' id='VendorRate' />
-                    </div>
-                    <div class="col-xs-12 col-sm-12 col-md-8 col-lg-8">
-                        <b class="font-11">Vendor Name</b>
-                        <div id="Selvendor" />
+                    <div style="width: 100%">
+                        <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
+                            <label>Select Processes :</label>
+                            <div id="UnitProcessSuggestion"></div>
+                        </div>
+                        <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
+                            <label>Processes :</label>
+                            <div id="UnitProcessDefault"></div>
+                        </div>
+                        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 padding-0" style="margin-bottom: 0px; border-top: 1px solid #42909A; padding: 5px">
+                            <div class="col-lg-6 col-md-6 col-sm-12 col-sm-12" style='display: block; flex-direction: row; align-items: center; justify-content: flex-start'>
+                                <label>Misc.Cost(%):&nbsp&nbsp&nbsp </label>
+                                <div style='display: flex; flex-direction: row; align-items: center; justify-content: flex-start'>
+                                    <input class='text-right forTextBox' style="float: left; width: 30%;" type='number' min='0' id='FinalMiscPerUnit' onchange='CalculateUnitCost()' />
+                                    <b>% </b>
+                                    <input class='text-right forTextBox' type='text' id='FinalMiscCostUnit' onchange='CalculateUnitCost(this.id)' style='width: 70%; float: right; text-align: right' />
+                                </div>
+                            </div>
+                            <div class="col-lg-6 col-md-6 col-sm-12 col-sm-12" style='display: block; flex-direction: row; align-items: center; justify-content: flex-start'>
+                                <label>Tax Cost(%):&nbsp&nbsp&nbsp&nbsp&nbsp </label>
+                                <div style='display: flex; flex-direction: row; align-items: center; justify-content: flex-start'>
+                                    <input class='text-right forTextBox' style='float: left; width: 30%;' type='number' min='0' id='FinalTaxPerUnit' onchange='CalculateUnitCost()' /><b>%</b><input class='text-right forTextBox' type='text' id='FinalTaxCostUnit' readonly="readOnly" style='width: 70%; float: right; text-align: right' />
+                                </div>
+                            </div>
+                            <div class="col-lg-6 col-md-6 col-sm-12 col-sm-12" style='display: block; flex-direction: row; align-items: center; justify-content: flex-start'>
+                                <label>Profit(%):&nbsp&nbsp&nbsp</label>
+                                <div style='display: flex; flex-direction: row; align-items: center; justify-content: flex-start'>
+                                    <input class='text-right forTextBox' style='float: left; width: 30%;' type='number' min='0' id='ProfitPerUnit' onchange='CalculateUnitCost()' /><b>%</b><input class='text-right forTextBox' type='text' id='ProfitCostUnit' style='width: 70%; float: right; text-align: right' onchange='CalculateUnitCost(this.id)' />
+                                </div>
+                            </div>
+                            <div class="col-lg-6 col-md-6 col-sm-12 col-sm-12" style='display: block; flex-direction: row; align-items: center; justify-content: flex-start'>
+                                <label>Shipping Cost:&nbsp</label>
+                                <input class='text-right forTextBox' type='text' id='FinalShipperCostUnit' onchange='CalculateUnitCost()' style='width: 100%; text-align: right; display: flex; flex-direction: row; align-items: center; justify-content: space-between' />
+                                <label class="hidden" style="color: blue">
+                                    Shipping Cost with GST(18%) :
+                                <label id="ShippingGSTUnit">0</label></label>
+                            </div>
+                            <div class="col-lg-6 col-md-6 col-sm-12 col-sm-12" style='display: block; flex-direction: row; align-items: center; justify-content: flex-start'>
+                                <label>Unit Cost:&nbsp&nbsp&nbsp&nbsp</label>
+                                <input class='text-right forTextBox' type='text' readonly="readOnly" id='FinalUnitCostUnit' onchange='CalculateUnitCost()' style='text-align: right; display: flex; flex-direction: row; align-items: center; justify-content: space-between' />
+                                <input class='text-right forTextBox hidden' type='text' readonly="readOnly" id='VendorUnitCostUnit' style='text-align: right; display: flex; flex-direction: row; align-items: center; justify-content: space-between' />
+                            </div>
+                            <div class="col-lg-6 col-md-6 col-sm-12 col-sm-12" style='display: block; flex-direction: row; align-items: center; justify-content: flex-start'>
+                                <label>Total:&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp</label>
+                                <input class='text-right forTextBox' type='text' id='FinalTotalUnit' readonly="readOnly" style='float: right; text-align: right' />
+                                <input class='text-right forTextBox hidden' type='text' id='finalCostUnit' readonly="readOnly" style='width: 80%; float: right; text-align: right' />
+                            </div>
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-sm-12">
+                                <b class="font-12">Product Description</b>
+                                <textarea class="forTextBox" id="UnitPrdDisc"></textarea>
+                            </div>
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-sm-12">
+                                <b class="font-12">Packaging Details</b>
+                                <textarea class="forTextBox" id="UnitPkgDtail"></textarea>
+                            </div>
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-sm-12">
+                                <b class="font-12">Description(Other)</b>
+                                <textarea class="forTextBox" id="UnitOtrDisc"></textarea>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="clearfix tab-pane">
-                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 padding-0" style="margin-bottom: 0px; border-top: 1px solid #42909A; padding: 5px">
-                        <div class="col-lg-6 col-md-6 col-sm-12 col-sm-12" style='display: block; flex-direction: row; align-items: center; justify-content: flex-start'>
-                            <label>Misc.Cost(%):&nbsp&nbsp&nbsp </label>
-                            <div style='display: flex; flex-direction: row; align-items: center; justify-content: flex-start'>
-                                <input class='text-right forTextBox' style='float: left; width: 30%;' type='number' min='0' id='FinalMiscPerUnit' onchange='CalculateUnitCost()' />
-                                <b>% </b>
-                                <input class='text-right forTextBox' type='text' id='FinalMiscCostUnit' onchange='CalculateUnitCost(this.id)' style='width: 70%; float: right; text-align: right' />
-                            </div>
-                        </div>
-                        <div class="col-lg-6 col-md-6 col-sm-12 col-sm-12" style='display: block; flex-direction: row; align-items: center; justify-content: flex-start'>
-                            <label>Tax Cost(%):&nbsp&nbsp&nbsp&nbsp&nbsp </label>
-                            <div style='display: flex; flex-direction: row; align-items: center; justify-content: flex-start'>
-                                <input class='text-right forTextBox' style='float: left; width: 30%;' type='number' min='0' id='FinalTaxPerUnit' onchange='CalculateUnitCost()' /><b>%</b><input class='text-right forTextBox' type='text' id='FinalTaxCostUnit' readonly="readOnly" style='width: 70%; float: right; text-align: right' />
-                            </div>
-                        </div>
-                        <div class="col-lg-6 col-md-6 col-sm-12 col-sm-12" style='display: block; flex-direction: row; align-items: center; justify-content: flex-start'>
-                            <label>Profit(%):&nbsp&nbsp&nbsp</label>
-                            <div style='display: flex; flex-direction: row; align-items: center; justify-content: flex-start'>
-                                <input class='text-right forTextBox' style='float: left; width: 30%;' type='number' min='0' id='ProfitPerUnit' onchange='CalculateUnitCost()' /><b>%</b><input class='text-right forTextBox' type='text' id='ProfitCostUnit' style='width: 70%; float: right; text-align: right' onchange='CalculateUnitCost(this.id)' />
-                            </div>
-                        </div>
-                        <div class="col-lg-6 col-md-6 col-sm-12 col-sm-12" style='display: block; flex-direction: row; align-items: center; justify-content: flex-start'>
-                            <label>Shipping Cost:&nbsp</label>
-                            <input class='text-right forTextBox' type='text' id='FinalShipperCostUnit' onchange='CalculateUnitCost()' style='width: 100%; text-align: right; display: flex; flex-direction: row; align-items: center; justify-content: space-between' />
-                            <label class="hidden" style="color: blue">
-                                Shipping Cost with GST(18%) :
-                                <label id="ShippingGSTUnit">0</label></label>
-                        </div>
-                        <div class="col-lg-6 col-md-6 col-sm-12 col-sm-12" style='display: block; flex-direction: row; align-items: center; justify-content: flex-start'>
-                            <label>Unit Cost:&nbsp&nbsp&nbsp&nbsp</label>
-                            <input class='text-right forTextBox' type='text' readonly="readOnly" id='FinalUnitCostUnit' onchange='CalculateUnitCost()' style='text-align: right; display: flex; flex-direction: row; align-items: center; justify-content: space-between' />
-                        </div>
-                        <div class="col-lg-6 col-md-6 col-sm-12 col-sm-12" style='display: block; flex-direction: row; align-items: center; justify-content: flex-start'>
-                            <label>Total:&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp</label>
-                            <input class='text-right forTextBox' type='text' id='FinalTotalUnit' readonly="readOnly" style='float: right; text-align: right' />
-                            <input class='text-right forTextBox hidden' type='text' id='finalCostUnit' readonly="readOnly" style='width: 80%; float: right; text-align: right' />
-                        </div>
-                        <div class="col-lg-12 col-md-12 col-sm-12 col-sm-12">
-                            <b class="font-12">Product Description</b>
-                            <textarea class="forTextBox" id="UnitPrdDisc"></textarea>
-                        </div>
-                        <div class="col-lg-12 col-md-12 col-sm-12 col-sm-12">
-                            <b class="font-12">Packaging Details</b>
-                            <textarea class="forTextBox" id="UnitPkgDtail"></textarea>
-                        </div>
-                        <div class="col-lg-12 col-md-12 col-sm-12 col-sm-12">
-                            <b class="font-12">Description(Other)</b>
-                            <textarea class="forTextBox" id="UnitOtrDisc"></textarea>
-                        </div>
-                    </div>
-                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 modal-footer" style="border-top: 1px solid #42909A; padding: 5px">
-                        <button type="button" id="BtnApplyPlanUnit" class="btn btn-primary waves-effect">Apply Plan</button>
-                    </div>
+                <div class="modal-footer" style="border-top: 1px solid #42909A; padding: 5px; bottom: -5px; background: #fff; position: fixed; width: 100%; left: 0">
+                    <button type="button" id="BtnApplyPlanUnit" class="btn btn-primary waves-effect">Apply Plan</button>
                 </div>
             </div>
         </div>
     </div>
-
-
     <div id="PlanWindowDivZommer" class='PlancontentZoom' style="text-align: center; z-index: 9" onmouseover="PlanhideIN(this);" onmouseout="PlanhideOut(this);"></div>
     <input type="text" id="PlanContentType" style="display: none;" />
     <input type="text" id="Txt_ContentImgSrc" style="display: none" />

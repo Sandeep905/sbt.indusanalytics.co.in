@@ -6,9 +6,10 @@ var AllContents = [];
 var processids = '';
 var suggestedprocessids = '';
 var Defaultprocessids = '';
-var ProjectBookingID = 0;
+var ProjectBookingID = 0, SalesManagerId = 0;
 var EditMode = false;
 var Isprocessed = 0;
+let GBLCategoryIDForProcess = '';
 $("#LoadIndicator").dxLoadPanel({
     shadingColor: "rgba(0,0,0,0.4)",
     indicatorSrc: "images/Indus logo.png",
@@ -20,15 +21,87 @@ $("#LoadIndicator").dxLoadPanel({
     visible: false
 });
 
+$("#SalesCordinator").dxSelectBox({
+    dataSource: [],
+    placeholder: "Select --",
+    valueExpr: "LedgerId",
+    displayExpr: "LedgerName",
+    searchEnabled: true,
+    showClearButton: true,
+    onValueChanged: function (data) {
+
+    }
+}).dxValidator({
+    validationRules: [{ type: 'required', message: 'Client is required' }]
+});
+
+$("#SelSalesPerson").dxSelectBox({
+    dataSource: [],
+    placeholder: "Select --",
+    valueExpr: "LedgerId",
+    displayExpr: "LedgerName",
+    searchEnabled: true,
+    showClearButton: true,
+    onValueChanged: function (data) {
+        if (data.value !== null) {
+
+        }
+    }
+}).dxValidator({
+    validationRules: [{ type: 'required', message: 'Sales person is required' }]
+});
+$("#ClientCordinator").dxSelectBox({
+    dataSource: [],
+    placeholder: "Select --",
+    valueExpr: "ConcernPersonID",
+    displayExpr: "Name",
+    searchEnabled: true,
+    showClearButton: true,
+    onValueChanged: function (data) {
+        if (data.value !== null) {
+            var result = $.grep(data.component._dataSource._store._array, function (ex) { return ex.ConcernPersonID === data.value; });
+            $.ajax({
+                type: 'POST',
+                async: false,
+                url: "WebServiceProductMaster.asmx/GetSalesCordinatorAndSalesExicutive",
+                dataType: 'json',
+                contentType: "application/json; charset=utf-8",
+                data: "{SCID:" + Number(result[0].SalesCordinatorID) + ",SEID:" + Number(result[0].SalesPersonId) + "}",
+                crossDomain: true,
+                success: function (results) {
+                    if (results.d === "500") return;
+                    var res = results.d.replace(/\\/g, '');
+                    res = res.substr(1);
+                    res = res.slice(0, -1);
+                    var RES1 = JSON.parse(res.toString());
+                    $("#SalesCordinator").dxSelectBox({
+                        dataSource: RES1.SalesCordinator,
+                        value: RES1.SalesCordinator[0].LedgerId
+                    });
+                    $("#SelSalesPerson").dxSelectBox({
+                        dataSource: RES1.SalesExcutive
+                    });
+                },
+                error: function errorFunc(jqXHR) {
+                    // alert(jqXHR.message);
+                }
+            });
+        }
+    }
+}).dxValidator({
+    validationRules: [{ type: 'required', message: 'Sales person is required' }]
+});
 $('#RadioEnquiry').dxRadioGroup({
-    items: ["Pending", "Processed"],
+    items: ["Pending", "Processed", "AutoRejected"],
     value: "Pending",
     layout: 'horizontal',
     onValueChanged: function (e) {
         if (e.value == "Processed")
             Isprocessed = 1;
-        else
+        else if (e.value == "Pending")
             Isprocessed = 0;
+        else
+            Isprocessed = -1
 
         LoadEnquiry();
 
@@ -47,28 +120,52 @@ $("#SelClient").dxSelectBox({
             var result = $.grep(data.component._dataSource._store._array, function (ex) { return ex.LedgerID === data.value; });
             if (result.length === 1) {
                 document.getElementById("TxtClientCity").value = result[0].City;
+                //SalesManager
             }
+
+            $.ajax({
+                type: 'POST',
+                async: false,
+                url: "WebServiceProductMaster.asmx/GetSalesManagerAndClientCordinator",
+                dataType: 'json',
+                contentType: "application/json; charset=utf-8",
+                data: "{Id:" + Number(data.value) + "}",
+                crossDomain: true,
+                success: function (results) {
+                    if (results.d === "500") return;
+                    var res = results.d.replace(/\\/g, '');
+                    res = res.substr(1);
+                    res = res.slice(0, -1);
+                    var RES1 = JSON.parse(res.toString());
+                    if (RES1.SalesManager.length > 0) {
+                        document.getElementById("SalesManager").innerText = "Sales Manager -:  " + RES1.SalesManager[0].LedgerName;
+                        SalesManagerId = RES1.SalesManager[0].LedgerId;
+                        $("#ClientCordinator").dxSelectBox({
+                            dataSource: RES1.ClientCordinator,
+                        });
+
+                    }
+                    //SalesManager
+                },
+                error: function errorFunc(jqXHR) {
+                    // alert(jqXHR.message);
+                }
+            });
+        } else {
+            document.getElementById("SalesManager").innerText = "";
+            $("#SalesCordinator").dxSelectBox({
+                dataSource: [],
+            });
+            $("#SelSalesPerson").dxSelectBox({
+                dataSource: [],
+            });
         }
     }
 }).dxValidator({
     validationRules: [{ type: 'required', message: 'Client is required' }]
 });
 
-$("#SelSalesPerson").dxSelectBox({
-    items: [],
-    placeholder: "Select --",
-    valueExpr: "LedgerID",
-    displayExpr: "LedgerName",
-    searchEnabled: true,
-    showClearButton: true,
-    onValueChanged: function (data) {
-        if (data.value !== null) {
 
-        }
-    }
-}).dxValidator({
-    validationRules: [{ type: 'required', message: 'Sales person is required' }]
-});
 
 $("#Selvendor").dxSelectBox({
     items: [],
@@ -106,18 +203,78 @@ $.ajax({
         // alert(jqXHR.message);
     }
 });
+//$("#gridOperation").dxDataGrid({                  //// GridOperation  gridopr
+//    dataSource: [],
+//    allowEditing: true,
+//    allowColumnResizing: true,
+//    columnResizingMode: "widget",
+//    columnAutoWidth: true,
+//    sorting: { mode: 'multiple' },
+//    selection: { mode: "none", allowSelectAll: false },
+//    columns: [{ dataField: "ProcessName", allowEditing: false },
+//    { dataField: "Rate", width: 50, visible: false, allowEditing: false },
+//    {
+//        dataField: "RateFactor", fixedPosition: "right", fixed: true, allowEditing: true,
+//        lookup: {
+//            dataSource: function (options) {
+//                return {
+//                    store: ProcessSlabs,
+//                    filter: options.data ? ["ProcessID", "=", options.data.ProcessID] : null
+//                };
+//            },
+//            displayExpr: "RateFactor",
+//            valueExpr: "RateFactor"
+//        },
+//        width: 120
+//    },
+//    { dataField: "TypeofCharges", allowEditing: false },
+//    { dataField: "SizeToBeConsidered", caption: "Size Cons", width: 80, allowEditing: false },
+//    ],
+//    paging: {
+//        pageSize: 10
+//    },
+//    //selectedRowKeys: [$("#OperId").text()],
+//    showRowLines: true,
+//    showBorders: true,
+//    loadPanel: {
+//        enabled: true
+//    },
+//    editing: {
+//        mode: 'cell',
+//        allowUpdating: true,
+//        allowDeleting: true,
+//    },
+//    columnFixing: { enabled: true },
+//    filterRow: { visible: true },
+//    height: function () {
+//        return window.innerHeight / 3.2;
+//    },
+//    onRowPrepared: function (e) {
+//        setDataGridRowCss(e);
+//    },
+//    onSelectionChanged: function (selectedItems) {
+//        var data = selectedItems.selectedRowsData;
+//        if (data) {
+//            $("OperIdPQ").text(
+//                $.map(data, function (value) {
+//                    return value.ProcessID;
+//                }).join(','));
+//        }
+//    }
+//});
+
 $("#gridOperation").dxDataGrid({                  //// GridOperation  gridopr
     dataSource: [],
-    allowEditing: true,
+    allowEditing: false,
     allowColumnResizing: true,
     columnResizingMode: "widget",
     columnAutoWidth: true,
-    sorting: { mode: 'multiple' },
+    sorting: { mode: 'single' },
     selection: { mode: "none", allowSelectAll: false },
     columns: [{ dataField: "ProcessName", allowEditing: false },
     { dataField: "Rate", width: 50, visible: false, allowEditing: false },
     {
-        dataField: "RateFactor", fixedPosition: "right", fixed: true, allowEditing: true,
+        dataField: "RateFactor", fixedPosition: "right", fixed: true, allowEditing: false,
         lookup: {
             dataSource: function (options) {
                 return {
@@ -132,6 +289,12 @@ $("#gridOperation").dxDataGrid({                  //// GridOperation  gridopr
     },
     { dataField: "TypeofCharges", allowEditing: false },
     { dataField: "SizeToBeConsidered", caption: "Size Cons", width: 80, allowEditing: false },
+    {
+        dataField: "Delete", fixedPosition: "right", fixed: true, width: 50,
+        cellTemplate: function (container, options) {
+            $('<div style="color:red;">').addClass('fa fa-remove customgridbtn').appendTo(container);
+        }
+    },
     ],
     paging: {
         pageSize: 10
@@ -144,12 +307,13 @@ $("#gridOperation").dxDataGrid({                  //// GridOperation  gridopr
     },
     editing: {
         mode: 'cell',
-        allowUpdating: true
+        allowUpdating: false,
+
     },
     columnFixing: { enabled: true },
     filterRow: { visible: true },
     height: function () {
-        return window.innerHeight / 3.2;
+        return window.innerHeight / 3.5;
     },
     onRowPrepared: function (e) {
         setDataGridRowCss(e);
@@ -162,7 +326,131 @@ $("#gridOperation").dxDataGrid({                  //// GridOperation  gridopr
                     return value.ProcessID;
                 }).join(','));
         }
-    }
+    },
+    onCellClick: function (clickedCell) {
+        if (clickedCell.rowType === undefined) return;
+        if (clickedCell.rowType === "header" || clickedCell.rowType === "filter") {
+            return false;
+        }
+        if (clickedCell.column.caption === "Delete") {
+            try {
+                var dataGrid = $('#gridSelOperation').dxDataGrid('instance');
+                var newdata = [];
+                newdata.ProcessID = clickedCell.data.ProcessID;
+                newdata.ProcessName = clickedCell.data.ProcessName;
+                newdata.Rate = Number(clickedCell.data.Rate).toFixed(3);
+                newdata.RateFactor = clickedCell.data.RateFactor;
+                newdata.TypeofCharges = clickedCell.data.TypeofCharges;
+
+                var clonedItem = $.extend({}, newdata);
+                dataGrid._options.dataSource.store.data.splice(dataGrid.totalCount(), 0, clonedItem);
+                dataGrid.refresh(true);
+
+                clickedCell.component._options.editing.texts.confirmDeleteMessage = "";
+                clickedCell.component.deleteRow(clickedCell.rowIndex);
+
+                DevExpress.ui.notify("Process removed..!", "error", 1000);
+
+            } catch (e) {
+                console.log(e);
+            }
+        }
+    },
+});
+
+$("#UnitProcessDefault").dxDataGrid({                  //// GridOperation  gridopr
+    dataSource: [],
+    allowEditing: false,
+    allowColumnResizing: true,
+    columnResizingMode: "widget",
+    columnAutoWidth: true,
+    sorting: { mode: 'single' },
+    selection: { mode: "none", allowSelectAll: false },
+    columns: [{ dataField: "ProcessName", allowEditing: false },
+    { dataField: "Rate", width: 50, visible: false, allowEditing: false },
+    {
+        dataField: "RateFactor", fixedPosition: "right", fixed: true, allowEditing: false,
+        lookup: {
+            dataSource: function (options) {
+                return {
+                    store: ProcessSlabs,
+                    filter: options.data ? ["ProcessID", "=", options.data.ProcessID] : null
+                };
+            },
+            displayExpr: "RateFactor",
+            valueExpr: "RateFactor"
+        },
+        width: 120
+    },
+    { dataField: "TypeofCharges", allowEditing: false },
+    { dataField: "SizeToBeConsidered", caption: "Size Cons", width: 80, allowEditing: false, visible: false },
+    {
+        dataField: "Delete", fixedPosition: "right", fixed: true, width: 50,
+        cellTemplate: function (container, options) {
+            $('<div style="color:red;">').addClass('fa fa-remove customgridbtn').appendTo(container);
+        }
+    },
+    ],
+    paging: {
+        pageSize: 10
+    },
+    //selectedRowKeys: [$("#OperId").text()],
+    showRowLines: true,
+    showBorders: true,
+    loadPanel: {
+        enabled: true
+    },
+    editing: {
+        mode: 'cell',
+        allowUpdating: false,
+
+    },
+    columnFixing: { enabled: true },
+    filterRow: { visible: true },
+    height: function () {
+        return window.innerHeight / 3.5;
+    },
+    onRowPrepared: function (e) {
+        setDataGridRowCss(e);
+    },
+    onSelectionChanged: function (selectedItems) {
+        var data = selectedItems.selectedRowsData;
+        if (data) {
+            $("OperIdPQ").text(
+                $.map(data, function (value) {
+                    return value.ProcessID;
+                }).join(','));
+        }
+    },
+    onCellClick: function (clickedCell) {
+        if (clickedCell.rowType === undefined) return;
+        if (clickedCell.rowType === "header" || clickedCell.rowType === "filter") {
+            return false;
+        }
+        if (clickedCell.column.caption === "Delete") {
+            try {
+                var dataGrid = $('#UnitProcessSuggestion').dxDataGrid('instance');
+                var newdata = [];
+                newdata.ProcessID = clickedCell.data.ProcessID;
+                newdata.ProcessName = clickedCell.data.ProcessName;
+                newdata.Rate = Number(clickedCell.data.Rate).toFixed(3);
+                newdata.RateFactor = clickedCell.data.RateFactor;
+                newdata.TypeofCharges = clickedCell.data.TypeofCharges;
+
+                var clonedItem = $.extend({}, newdata);
+                dataGrid._options.dataSource.store.data.splice(dataGrid.totalCount(), 0, clonedItem);
+                dataGrid.refresh(true);
+
+                clickedCell.component._options.editing.texts.confirmDeleteMessage = "";
+                clickedCell.component.deleteRow(clickedCell.rowIndex);
+
+                DevExpress.ui.notify("Process removed..!", "error", 1000);
+
+            } catch (e) {
+                console.log(e);
+            }
+        }
+    },
 });
 $.ajax({
     type: "POST",
@@ -244,7 +532,7 @@ var grid = $("#gridProductList").dxDataGrid({
             }
         },
         {
-            dataField: "ProductCatalogID", caption: "Product Name",
+            dataField: "ProductCatalogID", caption: "Content Name",
             lookup: {
                 dataSource: function (options) {
                     return {
@@ -258,13 +546,13 @@ var grid = $("#gridProductList").dxDataGrid({
             width: 180, validationRules: [{ type: "required", message: "Product name is required" }],
             setCellValue: function (rowData, value, e) {
                 if (value != null)
-                    if ($.grep($('#gridProductList').dxDataGrid('instance')._options.dataSource, function (ex) { return ex.ProductCatalogID === value; }).length != 0) {
-                        alert("Duplicate product cannot be added");
-                        rowData.ProductCatalogID = null
-                        return;
-                    }
-                //processids = $.grep(p, function (ex) { return ex.ProductHSNID === rowData.ProductHSNID; })
-                rowData.ProductCatalogID = value;
+                    //if ($.grep($('#gridProductList').dxDataGrid('instance')._options.dataSource, function (ex) { return ex.ProductCatalogID === value; }).length != 0) {
+                    //    alert("Duplicate product cannot be added");
+                    //    rowData.ProductCatalogID = null
+                    //    return;
+                    //}
+                    //processids = $.grep(p, function (ex) { return ex.ProductHSNID === rowData.ProductHSNID; })
+                    rowData.ProductCatalogID = value;
                 rowData.Rate = 0;
                 rowData.Amount = 0;
                 rowData.MiscPer = 0;
@@ -274,12 +562,14 @@ var grid = $("#gridProductList").dxDataGrid({
                     rowData.ProductCatalogCode = result[0].ProductCatalogCode;
                     rowData.ProductDescription = result[0].ProductDescription;
                     rowData.ProductName = result[0].ProductName;
+                    rowData.ProductName1 = result[0].ProductName + e.SequenceNo;
                     rowData.CategoryID = result[0].CategoryID;
                     rowData.ProcessIDStr = result[0].ProcessIDStr;
                     rowData.ProductHSNID = result[0].ProductHSNID;
                     rowData.IsOffsetProduct = result[0].IsOffsetProduct;
                     rowData.IsUnitProduct = result[0].IsUnitProduct;
                     rowData.DefaultProcessStr = result[0].DefaultProcessStr;
+                    rowData.OtherDetails = '';
                     var result = $.grep(ObjProductHSNGrp, function (ex) { return ex.ProductHSNID === rowData.ProductHSNID; });
                     if (result.length === 1) {
                         rowData.GSTTaxPercentage = result[0].GSTTaxPercentage;
@@ -299,7 +589,8 @@ var grid = $("#gridProductList").dxDataGrid({
                 }
             }
         },
-
+        // SequenceNo = 2
+        { dataField: "ProductName1", caption: "Product Name", allowEditing: true, width: 100 },
         { dataField: "ProductCatalogCode", caption: "Product Code", allowEditing: false, width: 100 },
         { dataField: "ProductDescription", caption: "Product Description", allowEditing: false },
         { dataField: "Quantity", caption: "Quantity", allowEditing: true, dataType: "number", min: 0, validationRules: [{ type: "required", message: "Quantity is required" }] },
@@ -316,10 +607,17 @@ var grid = $("#gridProductList").dxDataGrid({
                             var result = $.grep(ProductMasterList, function (ex) { return ex.ProductCatalogID === options.data.ProductCatalogID; })
                             options.data.ProductName = result[0].ProductName
                         }
+
+                        GBLCategoryIDForProcess = options.data.ProcessIDStr === undefined ? '' : options.data.ProcessIDStr;
                         document.getElementById("TxtProductName").value = options.data.ProductName;
                         document.getElementById("TxtProductNameUnit").value = options.data.ProductName;
                         document.getElementById("TxtPlanQty").value = options.data.Quantity;
                         document.getElementById("TxtPlanQtyUnit").value = options.data.Quantity;
+
+                        document.getElementById("FlexRemark").value = options.data.OtherDetails;
+                        document.getElementById("OffsetRemark").value = options.data.OtherDetails;
+                        document.getElementById("UnitRemark").value = options.data.OtherDetails;
+
                         document.getElementById("FinalTaxPer").value = options.data.GSTTaxPercentage;
                         document.getElementById("FinalTaxPer1").value = options.data.GSTTaxPercentage;
                         document.getElementById("FinalTaxPerUnit").value = options.data.GSTTaxPercentage;
@@ -331,11 +629,11 @@ var grid = $("#gridProductList").dxDataGrid({
                         document.getElementById("FinalShipperCostUnit").value = Number(options.data.ShippingCost);
                         document.getElementById("FinalTotal").value = Number(options.data.FinalAmount);
                         if (options.data.IsOffsetProduct === true) {
-                            document.getElementById("PlanContName").innerHTML = $.grep(ProductMasterList, function (ex) { return ex.ProductCatalogID === options.data.ProductCatalogID; })[0].ProductName;
+                            document.getElementById("PlanContName").innerHTML = options.data.ProductName1//$.grep(ProductMasterList, function (ex) { return ex.ProductCatalogID === options.data.ProductCatalogID; })[0].ProductName;
                             document.getElementById("PlanContQty").innerHTML = options.data.Quantity;
                             document.getElementById("ContentOrientation").innerHTML = $.grep(AllContents, function (ex) { return ex.ContentID === $.grep(ProductMasterList, function (ex) { return ex.ProductCatalogID === options.data.ProductCatalogID; })[0].ContentID; })[0].ContentName;
                         }
-
+                        document.getElementById('MYbackgroundOverlay').style.display = 'none';
                         const City = document.getElementById("TxtClientCity").value;
                         if (City === "" | City === undefined) {
                             $("#SelClient").dxValidator('instance').validate();
@@ -362,7 +660,8 @@ var grid = $("#gridProductList").dxDataGrid({
 
                         if (options.data.IsOffsetProduct === true) {
 
-                            allQuantity(options.data.Quantity, $.grep(ProductMasterList, function (ex) { return ex.ProductCatalogID === options.data.ProductCatalogID; })[0].ProductName, $.grep(AllContents, function (ex) { return ex.ContentID === $.grep(ProductMasterList, function (ex) { return ex.ProductCatalogID === options.data.ProductCatalogID; })[0].ContentID; })[0].ContentName, $.grep(ProductMasterList, function (ex) { return ex.ProductCatalogID === options.data.ProductCatalogID; })[0].ProductImagePath)
+                            // allQuantity(options.data.Quantity, $.grep(ProductMasterList, function (ex) { return ex.ProductCatalogID === options.data.ProductCatalogID; })[0].ProductName, $.grep(AllContents, function (ex) { return ex.ContentID === $.grep(ProductMasterList, function (ex) { return ex.ProductCatalogID === options.data.ProductCatalogID; })[0].ContentID; })[0].ContentName, $.grep(ProductMasterList, function (ex) { return ex.ProductCatalogID === options.data.ProductCatalogID; })[0].ProductImagePath)
+                            allQuantity(options.data.Quantity, options.data.ProductName1, $.grep(AllContents, function (ex) { return ex.ContentID === $.grep(ProductMasterList, function (ex) { return ex.ProductCatalogID === options.data.ProductCatalogID; })[0].ContentID; })[0].ContentName, $.grep(ProductMasterList, function (ex) { return ex.ProductCatalogID === options.data.ProductCatalogID; })[0].ProductImagePath)
 
                             if (options.data.ProductInputSizes !== undefined) {
                                 $("#GridOperationAllocated").dxDataGrid({ dataSource: [] });
@@ -376,15 +675,18 @@ var grid = $("#gridProductList").dxDataGrid({
                             }
                         } else {
                             if (options.data.IsUnitProduct === true) {
-                                alert('No Information Required');
-                                //this.setAttribute("data-toggle", "modal");
-                                //this.setAttribute("data-target", "#modalEstimateProductUnit");
+                                // alert('No Information Required');
+                                this.setAttribute("data-toggle", "modal");
+                                this.setAttribute("data-target", "#modalEstimateProductUnit");
                                 return;
                             }
                             this.setAttribute("data-toggle", "modal");
                             this.setAttribute("data-target", "#modalEstimateProduct");
 
                         }
+
+                        document.getElementById('MYbackgroundOverlay').style.display = 'none';
+
 
                     })
                     .appendTo(container);
@@ -430,7 +732,8 @@ var grid = $("#gridProductList").dxDataGrid({
         { visible: false, dataField: "ProfitCost", caption: "Profit", allowEditing: false },
         { visible: false, dataField: "ProcessIDStr", allowEditing: false },
         { visible: false, dataField: "BookingID", allowEditing: false },
-        { visible: false, dataField: "DefaultProcessStr", allowEditing: false }
+        { visible: false, dataField: "DefaultProcessStr", allowEditing: false },
+        { visible: false, dataField: "OtherDetails", allowEditing: false }
     ],
     editing: {
         mode: "popup",
@@ -440,14 +743,14 @@ var grid = $("#gridProductList").dxDataGrid({
             title: 'Product Requirement',
             showTitle: true,
             width: 500,
-            height: 300,
+            height: 350,
         },
         form: {
             items: [{
                 itemType: 'group',
                 colCount: 1,
                 colSpan: 2,
-                items: ['CategoryID', 'ProductCatalogID', 'Quantity'],
+                items: ['CategoryID', 'ProductCatalogID', 'ProductName1', 'Quantity'],
             }],
         },
     },
@@ -456,19 +759,6 @@ var grid = $("#gridProductList").dxDataGrid({
     height: function () {
         return window.innerHeight / 2;
     },
-    //onToolbarPreparing: function (e) {
-    //    e.toolbarOptions.items.unshift({
-    //        location: "before",
-    //        template() {
-    //            return $('<div>')
-    //                .append(
-    //                    $('<b>')
-    //                        .addClass("font-13")
-    //                        .text('Add Product'),
-    //                );
-    //        }
-    //    });
-    //},
     onRowPrepared: function (e) {
         setDataGridRowCss(e);
     },
@@ -535,6 +825,7 @@ function Getinputsizess(ID, Type) {
                 res = res.replace(/u0026/g, '&');
                 res = res.substr(1);
                 res = res.slice(23, -4);
+                $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
                 if (res.includes("error code:404")) {
                     $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
                     DevExpress.ui.notify("Data not found", "error", 1000);
@@ -552,16 +843,18 @@ function Getinputsizess(ID, Type) {
                 if (Type === "Offset") {
                     saveContentsSizeValues(GblInputValues);
                     readContentsSizeValues(GblInputValues.PlanContName)
-                    return
+
                 }
                 var gridProductData = $('#gridProductList').dxDataGrid('instance');
                 for (var i = 0; i < gridProductData._options.dataSource.length; i++) {
                     if (gridProductData._options.dataSource[i].EnquiryIDDetail == ID)
-                        gridProductData._options.dataSource[i].ProductInputSizes = JSON.stringify(JSON.parse(res))
+                        if (res != "ul") {
+                            gridProductData._options.dataSource[i].ProductInputSizes = res
+                        }
                 }
 
 
-                $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+
                 $("#gridProductConfig").dxDataGrid({ dataSource: JSON.parse(res) });
 
             },
@@ -604,7 +897,7 @@ $("#gridProductConfig").dxDataGrid({
         { dataField: "ParameterName", caption: "Parameter Name", allowEditing: false, visible: false },
         { dataField: "ParameterDisplayName", caption: "Display Name", visible: true, allowEditing: false },
         { dataField: "ParameterDefaultValue", allowEditing: false, caption: "Default Value" },
-        { dataField: "ParameterValue", caption: "Value", dataType: "number", validationRules: [{ type: "required", message: "Value is required" }] },
+        { dataField: "ParameterValue", caption: "Value (*In Sq. Feet)", dataType: "number", validationRules: [{ type: "required", message: "Value is required" }] },
         { dataField: "ParameterFormula", caption: "Formula", allowEditing: false, visible: false }
     ],
     editing: {
@@ -691,14 +984,17 @@ $("#GridShowlist").dxDataGrid({
         { dataField: "ProjectName", caption: "Project Name", width: 180 },
         { dataField: "LedgerName", caption: "Client" },
         { dataField: "SalesLedgerName", caption: "Sales Person" },
-        { dataField: "ProductName", caption: "Product Name" },
+        { dataField: "ProductName", caption: "Content Name" },
+        { dataField: "ProductName1", caption: "Product Name", width: 180 },
         { dataField: "Quantity", caption: "Quantity" },
+        { dataField: "CreatedBy", caption: "Created By" },
+        { dataField: "CreatedDate", caption: "Created Date" }
 
     ],
     showRowLines: true,
     showBorders: true,
     height: function () {
-        return window.innerHeight / 1.21;
+        return window.innerHeight / 1.6;
     },
     onRowPrepared: function (e) {
         setDataGridRowCss(e);
@@ -810,8 +1106,34 @@ function loadProcess() {
                     }
                 },
             });
+            $("#gridOperation").dxDataGrid({
+                dataSource: ObjDefaultProcess,
+            });
+
+            $("#gridSelOperation").dxDataGrid({
+                dataSource: {
+                    store: {
+                        type: "array",
+                        data: fillarraySuggested,
+                        key: "ProcessID"
+                    }
+                },
+            });
             $("#GridOperationAllocated").dxDataGrid({
                 dataSource: ObjDefaultProcess,
+            });
+
+            $("#UnitProcessDefault").dxDataGrid({
+                dataSource: ObjDefaultProcess,
+            });
+            $("#UnitProcessSuggestion").dxDataGrid({
+                dataSource: {
+                    store: {
+                        type: "array",
+                        data: fillarraySuggested,
+                        key: "ProcessID"
+                    }
+                },
             });
         },
         error: function errorFunc(jqXHR) {
@@ -820,22 +1142,22 @@ function loadProcess() {
     });
 }
 
-$.ajax({
-    type: "POST",
-    url: "WebServiceProductMaster.asmx/GetSalesPerson",
-    data: '{}',
-    contentType: "application/json; charset=utf-8",
-    dataType: "text",
-    success: function (results) {
-        var res = results.replace(/\\/g, '');
-        res = res.replace(/"d":""/g, '');
-        res = res.replace(/""/g, '');
-        res = res.substr(1);
-        res = res.slice(0, -1);
-        let RES1 = JSON.parse(res);
-        $("#SelSalesPerson").dxSelectBox({ dataSource: RES1 });
-    }
-});
+//$.ajax({
+//    type: "POST",
+//    url: "WebServiceProductMaster.asmx/GetSalesPerson",
+//    data: '{}',
+//    contentType: "application/json; charset=utf-8",
+//    dataType: "text",
+//    success: function (results) {
+//        var res = results.replace(/\\/g, '');
+//        res = res.replace(/"d":""/g, '');
+//        res = res.replace(/""/g, '');
+//        res = res.substr(1);
+//        res = res.slice(0, -1);
+//        let RES1 = JSON.parse(res);
+//        $("#SelSalesPerson").dxSelectBox({ dataSource: RES1 });
+//    }
+//});
 function GetProductConfig(productId) {
     $.ajax({
         type: 'POST',
@@ -875,6 +1197,15 @@ $("#BtnEdit").click(function () {
     $("#SelClient").dxSelectBox({
         value: datasource[0].LedgerID
     });
+    $("#ClientCordinator").dxSelectBox({
+        value: datasource[0].ClientCordinatorID
+    });
+
+    $("#SalesCordinator").dxSelectBox({
+        value: datasource[0].SalesCordinatorId
+    });
+    SalesManagerId = datasource[0].SalesManagerId;
+
     $("#SelSalesPerson").dxSelectBox({
         value: datasource[0].SalesPersonID
     });
@@ -883,45 +1214,106 @@ $("#BtnEdit").click(function () {
     document.getElementById('TxtRemark').value = datasource[0].Narration;
     document.getElementById('TxtQuoteNo').value = datasource[0].EnquiryNo
 
+    for (var i = 0; i < datasource.length; i++) {
+        datasource[i].SequenceNo = i + 1;
+    }
     $('#gridProductList').dxDataGrid({
         dataSource: datasource
     })
 
-    datasource.map(val => {
+
+
+    for (let i = 0; i < datasource.length; i++) {
+        const val = datasource[i];
         if (val.IsUnitProduct !== true) {
             if (val.IsOffsetProduct == true) {
-                document.getElementById("PlanContName").innerHTML = val.ProductName
+                document.getElementById("PlanContName").innerHTML = val.ProductName;
                 document.getElementById("PlanContQty").innerHTML = val.Quantity;
-                document.getElementById("ContentOrientation").innerHTML = $.grep(AllContents, function (ex) { return ex.ContentID === $.grep(ProductMasterList, function (ex) { return ex.ProductCatalogID === val.ProductCatalogID; })[0].ContentID; })[0].ContentName;
-
-                Getinputsizess(val.EnquiryIDDetail, "Offset")
+                const contentID = $.grep(ProductMasterList, function (ex) {
+                    return ex.ProductCatalogID === val.ProductCatalogID;
+                })[0].ContentID;
+                const contentName = $.grep(AllContents, function (ex) {
+                    return ex.ContentID === contentID;
+                })[0].ContentName;
+                document.getElementById("ContentOrientation").innerHTML = contentName;
+                Getinputsizess(val.EnquiryIDDetail, "Offset");
             } else {
-                Getinputsizess(val.EnquiryIDDetail, "Flex")
+                Getinputsizess(val.EnquiryIDDetail, "Flex");
             }
         }
-    });
+    }
+
     EditMode = true;
     setGridDisplay('block', 'none')
     //document.getElementById("BtnEdit").setAttribute("data-dismiss", "modal");
 })
 $("#BtnApplyPlan").click(function () {
-
+    var isnotvalid = false;
     var gridProductData = $('#gridProductList').dxDataGrid('instance');
+    var gridProductData1 = $('#gridProductList').dxDataGrid('instance').getSelectedRowsData();
+
     var gridOperation = $('#gridOperation').dxDataGrid('instance')._options.dataSource;
+    var Suggestedoperation = $('#gridSelOperation').dxDataGrid('instance')._options.dataSource.store.data;
     var gridProductConfig = $('#gridProductConfig').dxDataGrid('instance')._options.dataSource;
+
+
     var oprids = '';
     for (var i = 0; i < gridOperation.length; i++) {
-        oprids = gridOperation[i].ProcessID.toString().join(',')
+        oprids = oprids + gridOperation[i].ProcessID + ','
     }
-    $("OperIdPQ").text(oprids);
-    for (var i = 0; i < gridProductData._options.dataSource.length; i++) {
-        if (gridProductData._options.dataSource[i].ProductCatalogID === ProductCatalogID && gridProductData._options.dataSource[i].Quantity === Number(document.getElementById("TxtPlanQty").value)) {
-            gridProductData._options.dataSource[i].ProcessIDStr = $("OperIdPQ").text();
-            gridProductData._options.dataSource[i].ProductInputSizes = JSON.stringify(gridProductConfig);
-            gridProductData.refresh();
-            break;
+
+    if (oprids == "") {
+        alert("No process available, please add process");
+        return;
+    }
+
+    var suggestoprids = '';
+    for (var i = 0; i < Suggestedoperation.length; i++) {
+        suggestoprids = suggestoprids + Suggestedoperation[i].ProcessID + ','
+    }
+
+    for (var i = 0; i < gridProductConfig.length; i++) {
+        if (gridProductConfig[i].ParameterValue == null || gridProductConfig[i].ParameterValue <= 0) {
+            isnotvalid = true;
         }
     }
+
+    if (isnotvalid) {
+        alert("Please entet parameter value");
+        return;
+    }
+    $("OperIdPQ").text(oprids);
+
+    var file = $('#fileflex')[0].files[0];
+
+    if (file) {
+        uploadFile($('#fileflex')[0].files[0])
+            .then(function (response) {
+                for (var i = 0; i < gridProductData1.length; i++) {
+                    gridProductData._options.dataSource[gridProductData1[0].SequenceNo - 1].attachedfile = response;
+                    gridProductData._options.dataSource[gridProductData1[0].SequenceNo - 1].DefaultProcessStr = oprids.slice(0, -1);
+                    gridProductData._options.dataSource[gridProductData1[0].SequenceNo - 1].ProcessIDStr = suggestoprids + oprids.slice(0, -1);
+                    gridProductData._options.dataSource[gridProductData1[0].SequenceNo - 1].ProductInputSizes = JSON.stringify(gridProductConfig);
+                    gridProductData._options.dataSource[gridProductData1[0].SequenceNo - 1].OtherDetails = $.trim($("#FlexRemark").val());
+                    gridProductData.refresh();
+
+                }
+            })
+            .catch(function (error) {
+                alert("File upload error: " + error.message);
+            });
+    } else {
+        for (var i = 0; i < gridProductData1.length; i++) {
+            gridProductData._options.dataSource[gridProductData1[0].SequenceNo - 1].attachedfile = "";
+            gridProductData._options.dataSource[gridProductData1[0].SequenceNo - 1].DefaultProcessStr = oprids.slice(0, -1);
+            gridProductData._options.dataSource[gridProductData1[0].SequenceNo - 1].ProcessIDStr = suggestoprids + oprids.slice(0, -1);
+            gridProductData._options.dataSource[gridProductData1[0].SequenceNo - 1].ProductInputSizes = JSON.stringify(gridProductConfig);
+            gridProductData._options.dataSource[gridProductData1[0].SequenceNo - 1].OtherDetails = $.trim($("#FlexRemark").val());
+            gridProductData.refresh();
+
+        }
+    }
+
     document.getElementById("BtnApplyPlan").setAttribute("data-dismiss", "modal");
 });
 
@@ -943,6 +1335,8 @@ $("#BtnSave").click(function () {
 function FinalSave() {
 
     var SalesPersonID = $('#SelSalesPerson').dxSelectBox('instance').option('value');
+    var SalesCordinatorId = $('#SalesCordinator').dxSelectBox('instance').option('value');
+    var ClientCordinator = $('#ClientCordinator').dxSelectBox('instance').option('value');
     var SelClientID = $('#SelClient').dxSelectBox('instance').option('value');
     var TxtProjectName = document.getElementById("TxtProjectName").value.trim();
     var TxtRemark = document.getElementById("TxtRemark").value.trim();
@@ -965,18 +1359,32 @@ function FinalSave() {
         $("#SelSalesPerson").dxValidator('instance').validate();
         return false;
     }
+    if (ClientCordinator === "" || ClientCordinator === null) {
+        DevExpress.ui.notify("Please select client cordinator..!", "error", 2000);
+        $("#ClientCordinator").dxValidator('instance').validate();
+        return false;
+    }
+    if (SalesCordinatorId === "" || SalesCordinatorId === null) {
+        DevExpress.ui.notify("Please select sales cordinator..!", "error", 2000);
+        $("#SalesCordinator").dxValidator('instance').validate();
+        return false;
+    }
     if (gridProductList._options.dataSource.length <= 0) {
         DevExpress.ui.notify("Please add at least one product ..!", "warning", 1000);
         return;
     }
-
+    var isnotvaliddata = false;
     let ObjMainDetail = {};
     let ObjMain = [];
     let gridProductData = {};
     let objProductConfig = [];
-
+    if (EditMode)
+        ObjMainDetail.EnquiryID = Number(document.getElementById("BookingID").value);
     ObjMainDetail.LedgerID = SelClientID;
     ObjMainDetail.SalesPersonID = SalesPersonID;
+    ObjMainDetail.SalesCordinatorId = SalesCordinatorId;
+    ObjMainDetail.ClientCordinatorID = ClientCordinator;
+    ObjMainDetail.SalesManagerID = SalesManagerId;
     ObjMainDetail.ProjectName = TxtProjectName;
     ObjMainDetail.Narration = TxtRemark;
     ObjMainDetail.FreightAmount = TxtFreightAmount;
@@ -986,18 +1394,41 @@ function FinalSave() {
         gridProductData = {};
         if (Number(gridProductList._options.dataSource[i].Rate) >= 0 && Number(gridProductList._options.dataSource[i].Amount) >= 0) {
             gridProductData.Quantity = gridProductList._options.dataSource[i].Quantity;
+            gridProductData.ProductName = gridProductList._options.dataSource[i].ProductName1;
             gridProductData.CategoryID = gridProductList._options.dataSource[i].CategoryID;
             gridProductData.ProcessIDStr = gridProductList._options.dataSource[i].ProcessIDStr;
             gridProductData.DefaultProcessStr = gridProductList._options.dataSource[i].DefaultProcessStr;
             gridProductData.ProductCatalogID = gridProductList._options.dataSource[i].ProductCatalogID;
             gridProductData.ProductHSNID = gridProductList._options.dataSource[i].ProductHSNID;
-            gridProductData.ProductInputSizes = gridProductList._options.dataSource[i].ProductInputSizes;
+            gridProductData.OtherDetails = gridProductList._options.dataSource[i].OtherDetails;
+            gridProductData.attachedfile = gridProductList._options.dataSource[i].attachedfile;
+            if (!gridProductList._options.dataSource[i].IsUnitProduct) {
+                if (gridProductList._options.dataSource[i].ProductInputSizes !== "" && gridProductList._options.dataSource[i].ProductInputSizes !== undefined)
+                    gridProductData.ProductInputSizes = gridProductList._options.dataSource[i].ProductInputSizes;
+                else {
+                    alert("Please add details of the product , Product Name : " + gridProductList._options.dataSource[i].ProductName1);
+                    isnotvaliddata = true;
+                    break;
+                }
+            } else {
+                gridProductData.ProductInputSizes = '';
+                if (gridProductList._options.dataSource[i].DefaultProcessStr == "") {
+                    alert("Please add processes of the product , Product Name : " + gridProductList._options.dataSource[i].ProductName1);
+                    isnotvaliddata = true;
+                    break;
+                }
+            }
             gridProductData.GSTPercantage = gridProductList._options.dataSource[i].GSTTaxPercentage;
             objProductConfig.push(gridProductData);
         }
     }
+
+
     if (objProductConfig.length <= 0) {
         swal("Please plan the product first..");
+        return;
+    }
+    if (isnotvaliddata) {
         return;
     }
     var BookingNo = document.getElementById("TxtQuoteNo").value;
@@ -1137,7 +1568,6 @@ function checkIfRemoteFileExists(urlp) {
     return urlp;
 };
 
-
 function allQuantity(qty, ContentName, Orientation, ProductImagePath) {
     //alert(qt.id);
     Gbl_RowID = ""; Gbl_QtyID = "";
@@ -1154,7 +1584,6 @@ function allQuantity(qty, ContentName, Orientation, ProductImagePath) {
     Bottompopup.style.display = "block";
     Bottomoverlay.style.display = 'block';
     PlanWindowr(ContentName, Orientation);
-
 }
 
 function PlanWindowr(ContentName, Orientation) {
@@ -1172,10 +1601,7 @@ function PlanWindowr(ContentName, Orientation) {
     }
 }
 
-
-
 $("#btnApplyCostPQ").click(function () {
-
 
     var PlanContentType = document.getElementById("ContentOrientation").innerHTML;
     var InValid = false;
@@ -1425,14 +1851,16 @@ $("#btnApplyCostPQ").click(function () {
     }
 
     if (OperId === null || OperId === "") {
-        var opconf = confirm("Process not selected\nAre you sure to continue..?");
-        if (opconf !== true) {
-            $("#PlanButtonHide").removeClass("fa fa-arrow-circle-down");
-            $("#PlanButtonHide").addClass("fa fa-arrow-circle-up");
-            $("#PlanSizeContainer").slideDown(800);
-            $("#PlanContainer").slideUp(800);
-            return;
-        }
+        alert("Process not selected,Please add process");
+        return;
+        //var opconf = confirm("Process not selected\nAre you sure to continue..?");
+        //if (opconf !== true) {
+        //    $("#PlanButtonHide").removeClass("fa fa-arrow-circle-down");
+        //    $("#PlanButtonHide").addClass("fa fa-arrow-circle-up");
+        //    $("#PlanSizeContainer").slideDown(800);
+        //    $("#PlanContainer").slideUp(800);
+        //    return;
+        //}
     }
 
     $("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
@@ -1529,18 +1957,43 @@ $("#btnApplyCostPQ").click(function () {
         var gridOperation = $('#GridOperationAllocated').dxDataGrid('instance')._options.dataSource;
         saveContentsOprations(gridOperation);
         var gridProductData = $('#gridProductList').dxDataGrid('instance');
+        var gridProductData1 = $('#gridProductList').dxDataGrid('instance').getSelectedRowsData();
         Defaultprocessids = OperId;
-        for (var i = 0; i < gridProductData._options.dataSource.length; i++) {
-            if (gridProductData._options.dataSource[i].ProductCatalogID === ProductCatalogID && gridProductData._options.dataSource[i].Quantity === Number(document.getElementById("TxtPlanQty").value)) {
-                gridProductData._options.dataSource[i].RequiredQuantity = gridProductData._options.dataSource[i].Quantity;
-                gridProductData._options.dataSource[i].ProductInputSizes = ContentSizeValues;
 
-                gridProductData._options.dataSource[i].ProcessIDStr = suggestedprocess == "" ? OperId : OperId + ',' + suggestedprocess;
-                gridProductData._options.dataSource[i].DefaultProcessStr = OperId;
+        var file = $('#fileOffset')[0].files[0];
+
+        if (file) {
+            uploadFile($('#fileOffset')[0].files[0])
+                .then(function (response) {
+                    for (var i = 0; i < gridProductData1.length; i++) {
+                        gridProductData._options.dataSource[gridProductData1[0].SequenceNo - 1].RequiredQuantity = gridProductData._options.dataSource[i].Quantity;
+                        gridProductData._options.dataSource[gridProductData1[0].SequenceNo - 1].ProductInputSizes = ContentSizeValues;
+                        gridProductData._options.dataSource[gridProductData1[0].SequenceNo - 1].ProcessIDStr = suggestedprocess == "" ? OperId : OperId + ',' + suggestedprocess;
+                        gridProductData._options.dataSource[gridProductData1[0].SequenceNo - 1].DefaultProcessStr = OperId;
+                        gridProductData._options.dataSource[gridProductData1[0].SequenceNo - 1].OtherDetails = $.trim($("#OffsetRemark").val());
+                        gridProductData._options.dataSource[gridProductData1[0].SequenceNo - 1].attachedfile = response;
+                        gridProductData.refresh();
+                        break;
+                    }
+                })
+                .catch(function (error) {
+                    alert("File upload error: " + error.message);
+                    return;
+                });
+        } else {
+            for (var i = 0; i < gridProductData1.length; i++) {
+                gridProductData._options.dataSource[gridProductData1[0].SequenceNo - 1].RequiredQuantity = gridProductData._options.dataSource[i].Quantity;
+                gridProductData._options.dataSource[gridProductData1[0].SequenceNo - 1].ProductInputSizes = ContentSizeValues;
+                gridProductData._options.dataSource[gridProductData1[0].SequenceNo - 1].ProcessIDStr = suggestedprocess == "" ? OperId : OperId + ',' + suggestedprocess;
+                gridProductData._options.dataSource[gridProductData1[0].SequenceNo - 1].DefaultProcessStr = OperId;
+                gridProductData._options.dataSource[gridProductData1[0].SequenceNo - 1].OtherDetails = $.trim($("#OffsetRemark").val());
+                gridProductData._options.dataSource[gridProductData1[0].SequenceNo - 1].attachedfile = "";
                 gridProductData.refresh();
                 break;
             }
         }
+
+
         closeBottomTabBar();
         $("#SelJobSizeTemplate").dxSelectBox({
             value: -1
@@ -1555,74 +2008,68 @@ $("#btnApplyCostPQ").click(function () {
 
 $("#BtnApplyPlanUnit").click(function () {
 
-    var VendorID = $('#Selvendor').dxSelectBox('instance').option('value');
-    var VendorName = $('#Selvendor').dxSelectBox('instance').option('text');
-
-
-    if (VendorID === "" || VendorID === null) {
-        DevExpress.ui.notify("Please select Vendor..!", "error", 2000);
-        $("#Selvendor").dxValidator('instance').validate();
-        return false;
-    }
-
-    if (Number(document.getElementById("FinalTotalUnit").value) <= 0 || isNaN(document.getElementById("FinalTotalUnit").value)) {
-        swal({
-            title: "Empty or Invalid Cost?",
-            text: "Please enter rate",
-            type: "warning",
-            showCancelButton: false,
-            confirmButtonColor: "#DD6B55",
-            closeOnConfirm: true
-        }, function () {
-            return;
-        });
-        return;
-    }
-
-
     try {
-        $("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
-
-        var FinalQuotedCost1 = Number(document.getElementById("FinalTotalUnit").value);
-        var FinalAmount = Number(document.getElementById("FinalTotalUnit").value);
-        var FinalMiscPer = Number(document.getElementById("FinalMiscPerUnit").value);
-        var FinalShipperCost = Number(document.getElementById("FinalShipperCostUnit").value);
-        var ProfitPer = Number(document.getElementById("ProfitPerUnit").value);
-        var ProfitCost = Number(document.getElementById("ProfitCostUnit").value);
-
+        
         var gridProductData = $('#gridProductList').dxDataGrid('instance');
+        var gridOperation = $('#UnitProcessDefault').dxDataGrid('instance')._options.dataSource;
+        var Suggestedoperation = $('#UnitProcessSuggestion').dxDataGrid('instance')._options.dataSource.store.data;
 
-        for (var i = 0; i < gridProductData._options.dataSource.length; i++) {
-            if (gridProductData._options.dataSource[i].ProductCatalogID === ProductCatalogID && gridProductData._options.dataSource[i].Quantity === Number(document.getElementById("TxtPlanQtyUnit").value)) {
-                gridProductData._options.dataSource[i].Rate = Number(document.getElementById('FinalUnitCostUnit').value);
-                gridProductData._options.dataSource[i].RateType = "Per Unit";
-                gridProductData._options.dataSource[i].Amount = Number(FinalAmount);
-                gridProductData._options.dataSource[i].MiscPer = Number(FinalMiscPer);
-                gridProductData._options.dataSource[i].ShippingCost = Number(FinalShipperCost);
-                gridProductData._options.dataSource[i].FinalAmount = Number(FinalQuotedCost1);
-                gridProductData._options.dataSource[i].ProfitPer = Number(ProfitPer);
-                gridProductData._options.dataSource[i].ProfitCost = Number(ProfitCost);
-                gridProductData._options.dataSource[i].RequiredQuantity = Number(document.getElementById("TxtPlanQtyUnit").value);
-                gridProductData._options.dataSource[i].VendorRate = Number(document.getElementById('VendorRate').value);
-                gridProductData._options.dataSource[i].UnitCost = Number(document.getElementById('FinalUnitCostUnit').value);
-                gridProductData._options.dataSource[i].VendorID = VendorID;
-                gridProductData._options.dataSource[i].VendorName = VendorName;
-                gridProductData.refresh();
-                break;
+        var oprids = '';
+        for (var i = 0; i < gridOperation.length; i++) {
+            oprids = oprids + gridOperation[i].ProcessID + ','
+        }
+
+        if (oprids == "") {
+            alert("No process available, please add process");
+            return;
+        }
+
+        var suggestoprids = '';
+        for (var i = 0; i < Suggestedoperation.length; i++) {
+            suggestoprids = suggestoprids + Suggestedoperation[i].ProcessID + ','
+        }
+
+        for (var i = 0; i < gridProductConfig.length; i++) {
+            if (gridProductConfig[i].ParameterValue == null || gridProductConfig[i].ParameterValue <= 0) {
+                isnotvalid = true;
+            }
+        }
+        $("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
+        var file = $('#fileUnit')[0].files[0];
+
+        if (file) {
+            uploadFile($('#fileUnit')[0].files[0])
+                .then(function (response) {
+                    for (var i = 0; i < gridProductData._options.dataSource.length; i++) {
+                        if (gridProductData._options.dataSource[i].ProductCatalogID === ProductCatalogID && gridProductData._options.dataSource[i].Quantity === Number(document.getElementById("TxtPlanQtyUnit").value)) {
+                            gridProductData._options.dataSource[i].OtherDetails = $.trim($("#UnitRemark").val());
+                            gridProductData._options.dataSource[i].attachedfile = response;
+                            gridProductData._options.dataSource[i].DefaultProcessStr = oprids.slice(0, -1);
+                            gridProductData._options.dataSource[i].ProcessIDStr = suggestoprids + oprids.slice(0, -1);
+                            gridProductData.refresh();
+                            break;
+                        }
+                    }
+                })
+                .catch(function (error) {
+                    alert("File upload error: " + error.message);
+                });
+        } else {
+            for (var i = 0; i < gridProductData._options.dataSource.length; i++) {
+                if (gridProductData._options.dataSource[i].ProductCatalogID === ProductCatalogID && gridProductData._options.dataSource[i].Quantity === Number(document.getElementById("TxtPlanQtyUnit").value)) {
+                    gridProductData._options.dataSource[i].OtherDetails = $.trim($("#UnitRemark").val());
+                    gridProductData._options.dataSource[i].attachedfile = "";
+                    gridProductData._options.dataSource[i].DefaultProcessStr = oprids.slice(0, -1);
+                    gridProductData._options.dataSource[i].ProcessIDStr = suggestoprids + oprids.slice(0, -1);
+                    gridProductData.refresh();
+                    break;
+                }
             }
         }
 
 
         closeBottomTabBar();
 
-        document.getElementById("FinalTotalUnit").value = 0;
-        document.getElementById("FinalMiscPerUnit").value = 0;
-        document.getElementById("FinalShipperCostUnit").value = 0;
-        document.getElementById("FinalTaxPerUnit").value = 0;
-        document.getElementById("ProfitPerUnit").value = 0;
-        $("#Selvendor").dxSelectBox({
-            value: -1,
-        })
         $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
 
         document.getElementById("BtnApplyPlanUnit").setAttribute("data-dismiss", "modal");
@@ -1632,3 +2079,201 @@ $("#BtnApplyPlanUnit").click(function () {
         $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
     }
 });
+
+
+
+
+
+$("#gridSelOperation").dxDataGrid({
+    keyExpr: "ProcessID",
+    dataSource: [],
+
+    allowColumnResizing: true,
+    columnResizingMode: "widget",
+    columnAutoWidth: true,
+    selection: { mode: "single" },
+    columns: [{ dataField: "ProcessName" },
+    { dataField: "Rate", width: 50, visible: false },
+    { dataField: "RateFactor", fixedPosition: "right" },
+    { dataField: "TypeofCharges" },
+    { dataField: "SizeToBeConsidered", caption: "Size Cons", width: 80, visible: false },
+    {
+        dataField: "AddRow", caption: "Add", visible: true, fixedPosition: "right", fixed: true, width: 40, allowEditing: false,
+        cellTemplate: function (container, options) {
+            $('<div title="' + options.data.ProcessName + '">').addClass('fa fa-plus customgridbtn').appendTo(container);
+        }
+    }
+
+    ],
+    paging: {
+        pageSize: 10
+    },
+    showRowLines: true,
+    showBorders: true,
+    loadPanel: {
+        enabled: true
+    },
+    //editing: {
+    //    mode: 'cell',
+    //    allowUpdating: true
+    //},
+    height: function () {
+        return window.innerHeight / 4.2;
+    },
+    onRowPrepared: function (e) {
+        setDataGridRowCss(e);
+    },
+    onCellClick: function (clickedCell) {
+        if (clickedCell.rowType === undefined) return;
+        if (clickedCell.rowType === "header" || clickedCell.rowType === "filter") {
+            return false;
+        }
+        if (clickedCell.column.caption === "Add") {
+            try {
+
+                var dataGrid = $('#gridOperation').dxDataGrid('instance');
+
+                var result = $.grep(dataGrid._options.dataSource, function (e) { return e.ProcessID === clickedCell.data.ProcessID });
+                if (result.length > 0) {
+                    DevExpress.ui.notify("Duplicate process found..!", "warning", 1000);
+                    return;
+                }
+                var newdata = [];
+                newdata.ProcessID = clickedCell.data.ProcessID;
+                newdata.ProcessName = clickedCell.data.ProcessName;
+                newdata.Rate = Number(clickedCell.data.Rate).toFixed(3);
+                newdata.RateFactor = clickedCell.data.RateFactor;
+                newdata.TypeofCharges = clickedCell.data.TypeofCharges;
+
+                var clonedItem = $.extend({}, newdata);
+                dataGrid._options.dataSource.splice(dataGrid.totalCount(), 0, clonedItem);
+                dataGrid.refresh(true);
+
+                //dataGrid._events.preventDefault();
+                DevExpress.ui.notify("Process added..!", "success", 1000);
+                //clickedCell.component.clearFilter();
+
+                // TO REMOVE FROM THIS GRID
+                clickedCell.component._options.editing.texts.confirmDeleteMessage = "";
+                clickedCell.component.deleteRow(clickedCell.rowIndex);
+
+            } catch (e) {
+                console.log(e);
+            }
+        }
+    },
+});
+$("#UnitProcessSuggestion").dxDataGrid({
+    keyExpr: "ProcessID",
+    dataSource: [],
+    allowEditing: false,
+    allowColumnResizing: true,
+    columnResizingMode: "widget",
+    columnAutoWidth: true,
+    selection: { mode: "single" },
+    columns: [{ dataField: "ProcessName", allowEditing: false },
+    { dataField: "Rate", width: 50, visible: false, allowEditing: false },
+    { dataField: "RateFactor", fixedPosition: "right", allowEditing: false, },
+    { dataField: "TypeofCharges", allowEditing: false },
+    { dataField: "SizeToBeConsidered", caption: "Size Cons", width: 80, allowEditing: false, visible: false },
+    {
+        dataField: "AddRow", caption: "Add", visible: true, fixedPosition: "right", fixed: true, width: 40,
+        cellTemplate: function (container, options) {
+            $('<div title="' + options.data.ProcessName + '">').addClass('fa fa-plus customgridbtn').appendTo(container);
+        }
+    }
+
+    ],
+    paging: {
+        pageSize: 10
+    },
+    showRowLines: true,
+    showBorders: true,
+    loadPanel: {
+        enabled: true
+    },
+    //editing: {
+    //    mode: 'cell',
+    //    allowUpdating: true
+    //},
+    height: function () {
+        return window.innerHeight / 4.2;
+    },
+    onRowPrepared: function (e) {
+        setDataGridRowCss(e);
+    },
+    onCellClick: function (clickedCell) {
+        if (clickedCell.rowType === undefined) return;
+        if (clickedCell.rowType === "header" || clickedCell.rowType === "filter") {
+            return false;
+        }
+        if (clickedCell.column.caption === "Add") {
+            try {
+
+                var dataGrid = $('#UnitProcessDefault').dxDataGrid('instance');
+
+                var result = $.grep(dataGrid._options.dataSource, function (e) { return e.ProcessID === clickedCell.data.ProcessID });
+                if (result.length > 0) {
+                    DevExpress.ui.notify("Duplicate process found..!", "warning", 1000);
+                    return;
+                }
+                var newdata = [];
+                newdata.ProcessID = clickedCell.data.ProcessID;
+                newdata.ProcessName = clickedCell.data.ProcessName;
+                newdata.Rate = Number(clickedCell.data.Rate).toFixed(3);
+                newdata.RateFactor = clickedCell.data.RateFactor;
+                newdata.TypeofCharges = clickedCell.data.TypeofCharges;
+
+                var clonedItem = $.extend({}, newdata);
+                dataGrid._options.dataSource.splice(dataGrid.totalCount(), 0, clonedItem);
+                dataGrid.refresh(true);
+
+                //dataGrid._events.preventDefault();
+                DevExpress.ui.notify("Process added..!", "success", 1000);
+                //clickedCell.component.clearFilter();
+
+                // TO REMOVE FROM THIS GRID
+                clickedCell.component._options.editing.texts.confirmDeleteMessage = "";
+                clickedCell.component.deleteRow(clickedCell.rowIndex);
+
+            } catch (e) {
+                console.log(e);
+            }
+        }
+    },
+});
+
+$("#BtnSelectOperation").click(function () {
+    document.getElementById("BtnSelectOperation").setAttribute("data-toggle", "modal");
+    document.getElementById("BtnSelectOperation").setAttribute("data-target", "#SelectOperation");
+
+});
+
+
+
+
+function uploadFile(file) {
+    return new Promise(function (resolve, reject) {
+        var fd = new FormData();
+        fd.append("file", file);
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "EnquiryFileUpload.ashx", true);
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                var response = xhr.responseText;
+                console.log("File uploaded successfully. File name: " + response);
+                resolve(response); // Resolve the Promise with the response
+            } else {
+                console.error("Error uploading file. Status: " + xhr.status);
+                reject(new Error("File upload failed")); // Reject the Promise with an error
+            }
+        };
+        xhr.onerror = function () {
+            console.error("File upload failed due to network error");
+            reject(new Error("File upload failed")); // Reject the Promise with an error
+        };
+        xhr.send(fd);
+    });
+}
+

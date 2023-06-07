@@ -734,6 +734,8 @@ function LoadContPlans(dataSource) {
             document.getElementById("PlanContQty").innerHTML = JobCont[i].PlanContQty;
             document.getElementById("PlanContName").innerHTML = JobCont[i].PlanContName;
             document.getElementById("ContentOrientation").innerHTML = JobCont[i].PlanContentType;
+            GblContentName =  JobCont[i].PlanContName;;
+            GblContentType = JobCont[i].PlanContentType;
 
             GblInputValues = {};
             var JobValues = JobCont[i].ContentSizeValues.split('AndOr');

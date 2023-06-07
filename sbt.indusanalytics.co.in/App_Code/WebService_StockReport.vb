@@ -60,7 +60,7 @@ Public Class WebService_StockReport
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function PhysicalStockData() As String
         Try
-            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
 
             str = "SELECT 0 AS ParentTransactionID,Isnull(IM.ItemID,0) AS ItemID,Isnull(IM.ItemGroupID,0) AS ItemGroupID,Isnull(ISGM.ItemSubGroupID,0) AS ItemSubGroupID,0 AS WarehouseID,Nullif(IM.ItemCode,'') AS ItemCode,Nullif(IGM.ItemGroupName,'') AS ItemGroupName,Nullif(ISGM.ItemSubGroupName,'') AS ItemSubGroupName,Nullif(IM.ItemName,'') AS ItemName,Nullif(IM.StockUnit,'') AS StockUnit,0 AS BatchStock,Isnull(IM.PhysicalStock,0) AS PhysicalStock,Isnull(IM.BookedStock,0) AS BookedStock,Isnull(IM.AllocatedStock,0) AS AllocatedStock,Isnull(IM.UnapprovedStock,0) AS UnapprovedStock,Isnull(IM.PhysicalStock,0)-Isnull(IM.AllocatedStock,0) AS FreeStock,Isnull(IM.IncomingStock,0) AS IncomingStock,0 AS OutgoingStock,Isnull(IM.FloorStock,0) AS FloorStock,Isnull(IM.PhysicalStock,0)-Isnull(IM.AllocatedStock,0)+Isnull(IM.IncomingStock,0)-Isnull(IM.BookedStock,0) AS TheoriticalStock,Isnull(IM.WtPerPacking,0) AS WtPerPacking,Isnull(IM.UnitPerPacking,1) AS UnitPerPacking,Isnull(IM.ConversionFactor,1) AS ConversionFactor,Isnull(UOM.DecimalPlace,0) AS UnitDecimalPlace  " &
                   " From ItemMaster AS IM INNER JOIN ItemGroupMaster AS IGM ON IGM.ItemGroupID=IM.ItemGroupID AND IGM.CompanyID=IM.CompanyID And Isnull(IM.IsDeletedTransaction,0)=0 LEFT JOIN ItemSubGroupMaster AS ISGM ON ISGM.ItemSubGroupID=IM.ItemSubGroupID AND ISGM.CompanyID=IM.CompanyID LEFT JOIN UnitMaster AS UOM ON UOM.UnitSymbol=IM.StockUnit AND UOM.CompanyID=IM.CompanyID Where IM.CompanyID=" & GBLCompanyID & " Order By Isnull(IM.ItemGroupID,0),Nullif(IM.ItemName,'')"
@@ -80,7 +80,7 @@ Public Class WebService_StockReport
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function GetStockBatchWise(ByVal ItemId As String, ByVal colDataField As String) As String
         Try
-            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("UserCompanyID"))
+            GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
 
             If colDataField = "PhysicalStock" Then
                 str = ""
