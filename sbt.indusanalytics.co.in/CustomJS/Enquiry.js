@@ -599,7 +599,8 @@ var grid = $("#gridProductList").dxDataGrid({
             cellTemplate(container, options) {
                 $('<div>').addClass('btn btn-success')
                     .text("Add Detail")
-                    .on('dxclick', function () {
+                    .on('dxclick', function (e) {
+                        e.preventDefault();
                         if (options.data.Quantity === undefined || Number(options.data.Quantity) <= 0) return;
                         SelectedProductData = options.data;
 
@@ -639,6 +640,25 @@ var grid = $("#gridProductList").dxDataGrid({
                             $("#SelClient").dxValidator('instance').validate();
                             //DevExpress.ui.notify("Please select client for best nearby plan..!", "warning", 1500);
                         }
+
+                        if (options.data.attachedfile != "" && options.data.attachedfile != undefined) {
+                            $("#fileDownloadunit").removeClass("hidden");
+                            $("#fileDownloadunit").attr("href", "Files/Enquiry/"+ options.data.attachedfile);
+                            $("#fileDownloadunit").attr("download", options.data.attachedfile);
+                            $("#fileDownloadflex").removeClass("hidden");
+                            $("#fileDownloadflex").attr("href", "Files/Enquiry/" +options.data.attachedfile);
+                            $("#fileDownloadflex").attr("download", options.data.attachedfile);
+
+                            $("#fileDownloadoffset").removeClass("hidden");
+                            $("#fileDownloadoffset").attr("href", "Files/Enquiry/" +options.data.attachedfile);
+                            $("#fileDownloadoffset").attr("download", options.data.attachedfile);
+
+                        } else {
+                            $("#fileDownloadunit").addClass("hidden");
+                            $("#fileDownloadflex").addClass("hidden");
+                            $("#fileDownloadoffset").addClass("hidden");
+                        }
+
                         ProductCatalogID = options.data.ProductCatalogID;
                         processids = options.data.ProcessIDStr == null ? '' : options.data.ProcessIDStr;
                         Defaultprocessids = options.data.DefaultProcessStr == null ? '' : options.data.DefaultProcessStr;
@@ -988,7 +1008,20 @@ $("#GridShowlist").dxDataGrid({
         { dataField: "ProductName1", caption: "Product Name", width: 180 },
         { dataField: "Quantity", caption: "Quantity" },
         { dataField: "CreatedBy", caption: "Created By" },
-        { dataField: "CreatedDate", caption: "Created Date" }
+        { dataField: "CreatedDate", caption: "Created Date" },
+        {
+            dataField: "attachedfile",
+            caption: "",
+            fixedPosition: "right",
+            fixed: true,
+            cellTemplate: function (container, options) {
+                $('<a title="Download">')
+                    .addClass('fa fa-download dx-link')
+                    .attr('href', "Files/Enquiry/" + options.data.attachedfile)
+                    .attr('download', options.data.attachedfile)
+                    .appendTo(container);
+            }
+        }
 
     ],
     showRowLines: true,
@@ -1247,7 +1280,8 @@ $("#BtnEdit").click(function () {
     setGridDisplay('block', 'none')
     //document.getElementById("BtnEdit").setAttribute("data-dismiss", "modal");
 })
-$("#BtnApplyPlan").click(function () {
+$("#BtnApplyPlan").click(function (e) {
+    e.preventDefault();
     var isnotvalid = false;
     var gridProductData = $('#gridProductList').dxDataGrid('instance');
     var gridProductData1 = $('#gridProductList').dxDataGrid('instance').getSelectedRowsData();
@@ -1601,8 +1635,8 @@ function PlanWindowr(ContentName, Orientation) {
     }
 }
 
-$("#btnApplyCostPQ").click(function () {
-
+$("#btnApplyCostPQ").click(function (e) {
+    e.preventDefault();
     var PlanContentType = document.getElementById("ContentOrientation").innerHTML;
     var InValid = false;
     var JobCloseSize = "";
@@ -2006,8 +2040,8 @@ $("#btnApplyCostPQ").click(function () {
 });
 
 
-$("#BtnApplyPlanUnit").click(function () {
-
+$("#BtnApplyPlanUnit").click(function (e) {
+    e.preventDefault();
     try {
         
         var gridProductData = $('#gridProductList').dxDataGrid('instance');

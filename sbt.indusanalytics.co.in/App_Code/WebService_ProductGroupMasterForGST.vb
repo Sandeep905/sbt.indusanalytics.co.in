@@ -115,7 +115,7 @@ Public Class WebService_ProductGroupMasterForGST
 
         Try
             Dim dtExist As New DataTable
-            str2 = "Select Distinct ProductHSNName From ProductHSNMaster Where IsDeletedTransaction=0 And CompanyID=" & GBLCompanyID & " And DisplayName= '" & TxtGroupName & "'"
+            str2 = "Select Distinct ProductHSNName From ProductHSNMaster Where IsDeletedTransaction=0 And CompanyID=" & GBLCompanyID & " And HSNCode= '" & TxtGroupName & "'"
             db.FillDataTable(dtExist, str2)
             Dim E As Integer = dtExist.Rows.Count
             If E > 0 Then

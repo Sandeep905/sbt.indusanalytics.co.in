@@ -31,11 +31,10 @@
         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding: 0px; margin: 0px;">
             <div class="dialogboxContainerMainMAster">
                 <div class="DialogBoxCustom" style="float: left; background-color: #fff; padding-left: 0px; padding-bottom: 2px">
-
+                    <a class="btn btn-secondary hidden" id="Backup">BackUP</a>
                     <div id="tabs">
                         <div class="tabs-container"></div>
                     </div>
-
                     <h3 id="dashname" class="text-center">Today's dashboard</h3>
                     <div>
                         <div class="row clearfix">
@@ -48,7 +47,7 @@
                                         </div>
 
                                         <div class="col-xs-12 col-sm-12 col-md-7 col-lg-7" style="border: solid #000000 0.1px; border-radius: 10px; padding-bottom: 20px;">
-                                            <label><b>Enquirys</b></label>
+                                            <label><b>Enquiries</b></label>
                                             <div style="padding-top: 10px;">
                                                 <div class="col-lg-3 col-md-3 col-sm-3 col-xs-6" style="height: auto; padding: 2px 3px 1px 6px; width: 50%; margin: 0px; color: white;">
                                                     <div class="customcard">
@@ -87,15 +86,12 @@
                                             </div>
                                         </div>
                                     </div>
-
-
-
                                     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                                         <div class="col-xs-12 col-sm-12 col-md-5 col-lg-5">
                                             <div id="pie2"></div>
                                         </div>
                                         <div class="col-xs-12 col-sm-12 col-md-7 col-lg-7" style="border: solid #000000 0.1px; border-radius: 10px; padding-bottom: 20px;">
-                                            <label><b>Quotation</b></label>
+                                            <label><b>Quotations</b></label>
                                             <div style="padding-top: 10px;">
                                                 <div class="col-lg-2 col-md-2 col-sm-3 col-xs-6" style="height: auto; padding: 2px 3px 1px 6px; width: 25%; margin: 0px; color: white;">
                                                     <div class="customcard">

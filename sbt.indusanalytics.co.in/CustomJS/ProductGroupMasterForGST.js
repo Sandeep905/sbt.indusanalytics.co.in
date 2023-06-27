@@ -379,7 +379,7 @@ $("#BtnSave").click(function () {
                 $.ajax({
                     type: "POST",
                     url: "WebService_ProductGroupMasterForGST.asmx/SavePGHMData",
-                    data: '{jsonObjectsRecordMain:' + JSON.stringify(jsonObjectsRecordMain) + ',TxtGroupName:' + JSON.stringify(TxtDisplayName) + '}',
+                    data: '{jsonObjectsRecordMain:' + JSON.stringify(jsonObjectsRecordMain) + ',TxtGroupName:' + JSON.stringify(TxtHSNCode) + '}',
                     contentType: "application/json; charset=utf-8",
                     dataType: "json",
                     success: function (results) {

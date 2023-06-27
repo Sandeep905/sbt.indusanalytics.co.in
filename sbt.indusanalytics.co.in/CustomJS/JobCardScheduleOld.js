@@ -7,7 +7,6 @@ var ContentsDataArray = [];
 var JobcoordinatorArray = [];
 var GBLProductEstimationContentID = 0;
 var GBLScheduleContents = [];
-var SelectedMaterial = [];
 var GBLJCNO = '';
 var GBLLedgerId = 0;
 // *****  Declare Global varialbe  ****
@@ -43,17 +42,7 @@ $("#LoadIndicator").dxLoadPanel({
     visible: false
 });
 
-//$("#transactionType").dxRadioGroup({
-//    items: [
-//        { text: "Deduct from Stock", value: "deductFromStock" },
-//        { text: "Create Requestion", value: "createRequestion" },
-//        { text: "Both", value: "both" }
-//    ],
-//    valueExpr: "value",
-//    displayExpr: "text",
-//    value: "deductFromStock",
-//    layout: "horizontal" 
-//});
+
 $("#RadioPMPendingProc").dxRadioGroup({
     //items: ["Pending", "Processed"],
     items: ["Pending"],
@@ -178,6 +167,7 @@ function GetJobCardData() {
                                     { dataField: "TotalAmount" },
                                     { dataField: "ExpectedDeliveryDate" },
                                     { dataField: "JobCoordinator" },
+
                                 ],
                                 dataSource: new DevExpress.data.DataSource({
                                     store: new DevExpress.data.ArrayStore({
@@ -293,17 +283,6 @@ $('#SBVendor').dxSelectBox({
         var OPT = $("#Optsplit").dxRadioGroup('instance').option('value');
         if (OPT === "Qty Wise") {
             var result = $('#ScheduleGrid').dxDataGrid('instance')._options.dataSource;
-
-            var filteredResult = result.filter(function (item) {
-                return item.AllocatedVendorID === ee.value;
-            });
-            if (filteredResult.length > 0) {
-                alert('Vendor already has a schedule, please select another vendor');
-                $('#SBVendor').dxSelectBox('option', 'value', -1); // Deselect the ID
-                return;
-            }
-
-
             var remainingQTY = Number(document.getElementById('TxtOrderQuantity').value)
             var Pre = 0, total = 0;
             if (result.length > 0) {
@@ -1026,13 +1005,10 @@ $("#ScheduleGrid").dxDataGrid({
 
     ],
     onRowRemoved: function (e) {
-        if (e.data.AllocatedVendorID > 0) {
+        if (e.component._options.dataSource.length <= 0) {
             $("#Optsplit").dxRadioGroup({
                 disabled: false
             });
-            var vendorID = e.data.AllocatedVendorID
-            var allocatedMaterialGrid = $("#AllocatedMaterial").dxDataGrid("instance");
-            removeRowByKey(allocatedMaterialGrid, vendorID)
 
         }
 
@@ -1214,8 +1190,6 @@ var gridCont = $("#GridProductContentDetails").dxDataGrid({
         buttons: ["delete"
             //, {
             //hint: "Clone",
-
-
             //icon: "repeat",
             ////visible: function (e) {
             ////    return !e.row.isEditing && !isChief(e.row.data.Position);
@@ -1576,46 +1550,6 @@ $('#BtnAdd').click(function () {
         SelectedProductData[0].QTY = Number(document.getElementById('TxtScheduleQTY').value);
         SelectedProductData[0].NetAmount = (Number(document.getElementById('TxtScheduleQTY').value) * Number(TxtRate)).toFixed(2);
 
-
-
-
-        // Get the data from the second grid
-        var newData = $("#AllocatedMaterialTemp").dxDataGrid("instance").option("dataSource");
-
-        // Get the current data from the first grid
-        var currentData = $("#AllocatedMaterial").dxDataGrid("instance").option("dataSource");
-
-        // Iterate over each row in the newData array
-        newData.forEach(function (newRowData) {
-            var updatedRowData = {};
-
-            // Iterate over each property in the new row data
-            for (var prop in newRowData) {
-                if (newRowData.hasOwnProperty(prop)) {
-                    updatedRowData[prop] = newRowData[prop];
-                }
-            }
-
-            // Set additional properties in the updated row data
-            updatedRowData.ScheduleVendorID = SBVendor;
-
-            // Push the updated row data to the current data
-            currentData.push(updatedRowData);
-        });
-
-        // Update the data source of the first grid with the updated data
-        $("#AllocatedMaterial").dxDataGrid("instance").option("dataSource", currentData);
-
-        //var newData = existingData.concat(allocatedMaterialGridt);
-        //allocatedMaterialGrid.option("dataSource", newData);
-
-        $("#AllocatedMaterialTemp").dxDataGrid({
-            dataSource: [],
-        });
-        document.getElementById('remainingtoschedule').value = 0;
-        document.getElementById('RequisitionQty').value = 0;
-        document.getElementById('IssueQty').value = 0;
-
         var IsSameState = false;
         // To get State Of Client 
         var result = $.grep(VendorArray, function (ex) { return ex.VendorID === Number(SBVendor); });
@@ -1663,11 +1597,7 @@ $('#BtnAdd').click(function () {
         document.getElementById('TxtScheduleQTY').value = 0;
         document.getElementById('TxtRemainingQTY').value = 0;
         document.getElementById("TxtCriticalRemark").value = '';
-        document.getElementById("ISSuppliedBySBT").checked = false;
-        $('#SBVendor').dxSelectBox('option', 'value', -1); // Deselect the ID
         ValidateMaxQty()
-        toggleButton()
-
         return;
 
     }
@@ -1876,91 +1806,6 @@ $('#BtnSavejc').click(function () {
             }
             ScheduleArr.push(objSchedule);
         }
-
-
-        var IsRequistionRequired = false;
-        // For Material Details
-        var AllocatedMaterial = $('#AllocatedMaterial').dxDataGrid('instance')._options.dataSource;
-
-        var Materialobj = {}, MaterialArray = [];
-
-        for (var i = 0; i < AllocatedMaterial.length; i++) {
-            Materialobj = {};
-            Materialobj.ScheduleVendorID = AllocatedMaterial[i].ScheduleVendorID;
-            Materialobj.ItemID = AllocatedMaterial[i].ItemID;
-            Materialobj.ItemGroupID = AllocatedMaterial[i].ItemGroupID;
-            Materialobj.RequisitionQty = AllocatedMaterial[i].RequisitionQty;
-            if (AllocatedMaterial[i].RequisitionQty > 0) { IsRequistionRequired = true; }
-            Materialobj.IssueQty = AllocatedMaterial[i].AllocatedStock;
-            Materialobj.TotalQty = parseFloat(AllocatedMaterial[i].RequisitionQty) + parseFloat(AllocatedMaterial[i].AllocatedStock);//AllocatedMaterial[i].PhysicalStock;
-            Materialobj.OrderBookingDetailsID = ProductsGrid[0].OrderBookingDetailsID // convertToISOString(new Date());
-            Materialobj.ProductEstimationContentID = ProductsGrid[0].ProductEstimationContentID;
-
-            MaterialArray.push(Materialobj);
-        }
-
-        // TO Issue Stock
-        var jsonObjectsRecordDetail = [];
-        var jsonObjectsRecordMain = [];
-        var OperationRecordDetail = {};
-        var OperationRecordMain = {};
-        if (AllocatedMaterial.length > 0) {
-            OperationRecordMain = {};
-            OperationRecordMain.VoucherID = -19;
-            OperationRecordMain.VoucherDate = convertToISOString(new Date());
-            OperationRecordMain.TotalQuantity = 0;
-            OperationRecordMain.DepartmentID = 0;
-            OperationRecordMain.Narration = "Auto Created for Sales Order Booking No. =" + document.getElementById('TxtOrderBookingNo').value;
-            jsonObjectsRecordMain.push(OperationRecordMain);
-
-            for (var e = 0; e < AllocatedMaterial.length; e++) {
-                OperationRecordDetail = {};
-
-                OperationRecordDetail.TransID = e + 1;
-                OperationRecordDetail.ItemID = AllocatedMaterial[e].ItemID;
-                OperationRecordDetail.ItemGroupID = AllocatedMaterial[e].ItemGroupID;
-                OperationRecordDetail.WarehouseID = 0//AllotedItemGrid._options.dataSource[e].WarehouseID;
-                OperationRecordDetail.IssueQuantity = AllocatedMaterial[e].AllocatedStock;
-                OperationRecordDetail.BatchNo = ""//AllotedItemGrid._options.dataSource[e].BatchNo;
-                OperationRecordDetail.StockUnit = AllocatedMaterial[e].StockUnit;
-                OperationRecordDetail.FloorWarehouseID = 0// SelBinName;
-                jsonObjectsRecordDetail.push(OperationRecordDetail);
-            }
-            jsonObjectsRecordMain = JSON.stringify(jsonObjectsRecordMain);
-            jsonObjectsRecordDetail = JSON.stringify(jsonObjectsRecordDetail);
-        }
-
-        // To Create Requisition
-        var OperationRecordMainR = {};
-        var OperationRecordDetailR = {};
-        var jsonObjectsRecordMainR = [];
-        var jsonObjectsRecordDetailR = [];
-
-        if (IsRequistionRequired) {
-
-            OperationRecordMainR.VoucherID = -9;
-            OperationRecordMainR.VoucherDate = convertToISOString(new Date());
-            OperationRecordMainR.TotalQuantity = 0;
-            OperationRecordMainR.Narration = "Auto Created for Sales Order Booking No. =" + document.getElementById('TxtOrderBookingNo').value;
-
-            jsonObjectsRecordMainR.push(OperationRecordMainR);
-
-            for (var p = 0; p < AllocatedMaterial.length; p++) {
-                OperationRecordDetailR = {};
-
-                OperationRecordDetailR.ItemID = AllocatedMaterial[p].ItemID;
-                OperationRecordDetailR.TransID = p + 1;
-                OperationRecordDetailR.ItemGroupID = AllocatedMaterial[p].ItemGroupID;
-                OperationRecordDetailR.RequiredQuantity = parseFloat(AllocatedMaterial[p].RequisitionQty);
-                OperationRecordDetailR.StockUnit = AllocatedMaterial[p].StockUnit;
-                OperationRecordDetailR.ItemNarration = "Auto Created for Sales Order Booking No. =" + document.getElementById('TxtOrderBookingNo').value;
-                //OperationRecordDetailR.ExpectedDeliveryDate = AllocatedMaterial[p].ExpectedDeliveryDate;
-                OperationRecordDetailR.CurrentStockInStockUnit = Number(AllocatedMaterial[p].PhysicalStock);
-                OperationRecordDetailR.CurrentStockInPurchaseUnit = Number(AllocatedMaterial[p].StockUnit);
-                //OperationRecordDetailR.IsAuditApproved = 1;
-                jsonObjectsRecordDetailR.push(OperationRecordDetailR);
-            }
-        }
         swal({
             title: "Jobcard Saving...",
             text: 'Are you sure to save?',
@@ -1975,8 +1820,8 @@ $('#BtnSavejc').click(function () {
                 // Calling To Ajax 
                 $.ajax({
                     type: "POST",
-                    url: "WebServiceProductionWorkOrderNew.asmx/SavejobcardSchedule",
-                    data: '{JobCardMain:' + JSON.stringify(JobcardMain) + ',JobcardContents:' + JSON.stringify(JobcardContents) + ',JObCardSchedule:' + JSON.stringify(ScheduleArr) + ',ProcessArr:' + JSON.stringify(ProcessArr) + ',FlagEdit:false,JobcardId:0,AllocatedMaterial:' + JSON.stringify(MaterialArray) + ',jsonObjectsRecordMain:' + jsonObjectsRecordMain + ',jsonObjectsRecordDetail:' + jsonObjectsRecordDetail + ',jsonObjectsRecordMainR:' + JSON.stringify(jsonObjectsRecordMainR) + ',jsonObjectsRecordDetailR:' + JSON.stringify(jsonObjectsRecordDetailR) + '}',
+                    url: "WebServiceProductionWorkOrder.asmx/SavejobcardSchedule",
+                    data: '{JobCardMain:' + JSON.stringify(JobcardMain) + ',JobcardContents:' + JSON.stringify(JobcardContents) + ',JObCardSchedule:' + JSON.stringify(ScheduleArr) + ',ProcessArr:' + JSON.stringify(ProcessArr) + ',FlagEdit:false,JobcardId:0}',
                     contentType: "application/json; charset=utf-8",
                     dataType: "text",
                     success: function (results) {
@@ -2036,17 +1881,6 @@ $('#BtnSavejc').click(function () {
     }
 
 })
-function convertToISOString(dateString) {
-    const date = new Date(dateString);
-
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-
-    const isoString = `${year}-${month}-${day}`;
-
-    return isoString;
-}
 $('#BtnNextSO').click(function () {
     dataProject = $('#SOGRID').dxDataGrid('instance').getSelectedRowsData();
     if (dataProject.length <= 0) {
@@ -2689,48 +2523,46 @@ $("#BtnDelete").click(function () {
             closeOnConfirm: true
         },
             function (e) {
-                if (e) {
-                    $("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
-                    $.ajax({
-                        async: false,
-                        type: "POST",
-                        url: "WebServiceProductionWorkOrderNew.asmx/DeleteJC",
-                        data: '{JCID:' + JCID + '}',
-                        contentType: "application/json; charset=utf-8",
-                        dataType: "json",
-                        success: function (results) {
-                            $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
-                            var Title, Text, Type;
-                            if (results.d.includes("Success")) {
-                                Title = "Success...";
-                                Text = "Your data has been deleted successfully...";
-                                Type = "success";
-                            } else {
-                                Title = "Error..!";
-                                Text = results.d;
-                                Type = "error";
-                            }
-                            swal({
-                                title: Title,
-                                text: Text,
-                                type: Type,
-                                showCancelButton: true,
-                                confirmButtonColor: "#DD6B55",
-                                confirmButtonText: "Ok",
-                                closeOnConfirm: true
-                            });
-                            if (Type === "success") {
-                                window.location.reload();
-                            } else {
-                                alert(Text);
-                            }
-                        },
-                        error: function errorFunc(jqXHR) {
-                            $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
-                            console.log(jqXHR);
+                $("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
+                $.ajax({
+                    async: false,
+                    type: "POST",
+                    url: "WebServiceProductionWorkOrder.asmx/DeleteJC",
+                    data: '{JCID:' + JCID + '}',
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (results) {
+                        $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+                        var Title, Text, Type;
+                        if (results.d.includes("Success")) {
+                            Title = "Success...";
+                            Text = "Your data has been deleted successfully...";
+                            Type = "success";
+                        } else {
+                            Title = "Error..!";
+                            Text = results.d;
+                            Type = "error";
                         }
-                    });
-                }
+                        swal({
+                            title: Title,
+                            text: Text,
+                            type: Type,
+                            showCancelButton: true,
+                            confirmButtonColor: "#DD6B55",
+                            confirmButtonText: "Ok",
+                            closeOnConfirm: true
+                        });
+                        if (Type === "success") {
+                            window.location.reload();
+                        } else {
+                            alert(Text);
+                        }
+                    },
+                    error: function errorFunc(jqXHR) {
+                        $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+                        console.log(jqXHR);
+                    }
+                });
             });
 
     } catch (e) {
@@ -2743,8 +2575,6 @@ $('#SavePO').click(function () {
 
 
     var arr = [];
-
-
     var obj = {};
     var RES1 = $("#POProductsGrid").dxDataGrid("instance");
     var Remark = document.getElementById('Remark').value;
@@ -2925,7 +2755,7 @@ $(function () {
                         document.getElementById('POOrderBookingDate').value = RES1.POMain[0].BookingDate;
                         document.getElementById('Remark').value = RES1.POMain[0].Remark;
                         document.getElementById('Address').value = RES1.POMain[0].DelivaryAddress;
-
+                      
 
                         document.getElementById('TDVendorName').innerHTML = RES1.POMain[0].ScheduleVendorName;
                         document.getElementById('TDPOJobBookingNo').innerHTML = RES1.POMain[0].JobbookingNo;
@@ -3068,404 +2898,10 @@ function GetDelAddress() {
                     document.getElementById("Address").value = e.selectedItem.Address;
                 }
             });
+
         }
     });
 }
 
 
-loadSalesOrder(false);
-
-function toggleButton() {
-    var checkbox = document.getElementById("ISSuppliedBySBT");
-    var button = document.getElementById("AddMaterial");
-
-    if (checkbox.checked) {
-        button.style.display = 'block';
-    } else {
-        button.style.display = 'none';
-    }
-}
-
-$('#AddMaterial').click(function (e) {
-    try {
-        var checkbox = document.getElementById("ISSuppliedBySBT");
-        if (!checkbox.checked) {
-            $('#CloseModalM').click();
-            return;
-        } else {
-            UpdateThePhysicalStock();
-            OpenPopup('AddMaterial', '#ModalMaterial')
-        }
-    } catch (e) {
-        console.log(e);
-    }
-})
-
-
-function UpdateThePhysicalStock() {
-    OverFlowGrid();
-    // Get the instances of the two grids
-    var overflowGrid = $("#OverFlowGrid").dxDataGrid("instance");
-    var allocatedMaterialGrid = $("#AllocatedMaterial").dxDataGrid("instance");
-
-    // Get the data sources of the two grids
-    var overflowData = overflowGrid.option("dataSource");
-    var allocatedMaterialData = allocatedMaterialGrid.option("dataSource");
-    allocatedMaterialGrid.deselectAll();
-    // Calculate the sum of AllocatedStock - RequisitionQty for each ItemID in the allocatedMaterialData
-    var itemSums = {};
-    allocatedMaterialData.forEach(function (row) {
-        var itemId = row.ItemID;
-        var allocatedStock = row.AllocatedStock;
-        var requisitionQty = row.RequisitionQty;
-        var sum = allocatedStock - requisitionQty;
-
-        if (itemSums[itemId]) {
-            itemSums[itemId] += sum;
-        } else {
-            itemSums[itemId] = sum;
-        }
-    });
-
-    // Update the PhysicalStock column in the overflowData based on the itemSums
-    overflowData.forEach(function (row) {
-        var itemId = row.ItemID;
-        if (itemSums[itemId]) {
-            row.PhysicalStock = row.PhysicalStock - itemSums[itemId];
-        }
-    });
-
-    // Refresh the data in the #OverFlowGrid
-    overflowGrid.refresh();
-
-}
-OverFlowGrid();
-function OverFlowGrid() {
-    $("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
-    $.ajax({
-        async: false,
-        type: "POST",
-        url: "WebService_PurchaseRequisition.asmx/GetOverFlowGrid",
-        data: '{ItemGroupID:' + JSON.stringify('') + '}',
-        contentType: "application/json; charset=utf-8",
-        dataType: "text",
-        success: function (results) {
-            var res = results.replace(/\\/g, '');
-            res = res.replace(/"d":""/g, '');
-            res = res.replace(/""/g, '');
-            res = res.replace(/u0026/g, '&');
-            res = res.substr(1);
-            res = res.slice(0, -1);
-            var RES1 = JSON.parse(res);
-            var MasterData = RES1;
-            $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
-            $("#OverFlowGrid").dxDataGrid({
-                dataSource: RES1
-            });
-        }
-    });
-}
-
-$("#OverFlowGrid").dxDataGrid({
-    dataSource: [],
-    columnAutoWidth: true,
-    showBorders: true,
-    showRowLines: true,
-    allowColumnReordering: true,
-    allowColumnResizing: true,
-    scrolling: {
-        mode: 'virtual',
-    },
-    selection: { mode: "single" },
-    grouping: {
-        autoExpandAll: true
-    },
-    height: function () {
-        return window.innerHeight / 2;
-    },
-    //scrolling: { mode: 'infinite' },
-    filterRow: { visible: true, applyFilter: "auto" },
-
-    headerFilter: { visible: true },
-    rowAlternationEnabled: true,
-    loadPanel: {
-        enabled: true,
-        height: 90,
-        width: 200,
-        text: 'Data is loading...'
-    },
-    //export: {
-    //    enabled: true,
-    //    fileName: "Exist Group",
-    //    allowExportSelectedData: true
-    //},
-    onRowPrepared: function (e) {
-        if (e.rowType === "header") {
-            e.rowElement.css('background', '#0a5696');
-            e.rowElement.css('color', 'white');
-            e.rowElement.css('font-weight', 'bold');
-        }
-        e.rowElement.css('fontSize', '11px');
-    },
-    onSelectionChanged: function (clickedCell) {
-        if (clickedCell.selectedRowsData.length >= 0) {
-            document.getElementById('IssueQty').value = 0;
-            document.getElementById('remainingtoschedule').value = clickedCell.selectedRowsData[0].PhysicalStock;
-            document.getElementById("RequisitionQty").value = 0;
-        }
-    },
-    columns: [
-        { dataField: "ItemID", visible: false, caption: "Item ID", width: 100 },
-        { dataField: "ItemGroupID", visible: false, caption: "Item Group ID", width: 100 },
-        { dataField: "ItemGroupNameID", visible: false, caption: "Item Group Name ID", width: 100 },
-        { dataField: "ItemGroupName", visible: true, caption: "Item Group", width: 100 },
-        { dataField: "ItemSubGroupName", visible: true, caption: "Sub Group", width: 150 },
-        { dataField: "ItemCode", visible: true, caption: "Item Code", width: 100 },
-        { dataField: "ItemName", visible: true, caption: "Item Name", width: 400 },
-        { dataField: "ItemDescription", visible: false, caption: "Item Desc.", width: 500 },
-        { dataField: "BookedStock", visible: true, caption: "Total Booked", width: 120 },
-        { dataField: "AllocatedStock", visible: true, caption: "Allocated Stock", width: 120 },
-        { dataField: "PhysicalStock", visible: true, caption: "Current Stock", width: 120 },
-        { dataField: "StockUnit", visible: true, caption: "Stock Unit", width: 100 },
-        { dataField: "UnitDecimalPlace", visible: false, caption: "UnitDecimalPlace", width: 100 },
-        { dataField: "PurchaseUnit", visible: false, caption: "Purchase Unit", width: 100 },
-        { dataField: "LastPurchaseDate", visible: true, caption: "Last P.O.Date", dataType: "date", format: 'dd-MMM-yyyy', width: 100 }
-    ]
-
-});
-$("#AllocatedMaterial").dxDataGrid({
-    dataSource: [],
-    keyExpr: 'ScheduleVendorID',
-    columnAutoWidth: true,
-    showBorders: true,
-    showRowLines: true,
-    allowColumnReordering: true,
-    allowColumnResizing: true,
-    scrolling: {
-        mode: 'virtual',
-    },
-
-    height: function () {
-        return window.innerHeight / 4;
-    },
-
-    loadPanel: {
-        enabled: true,
-        height: 90,
-        width: 200,
-        text: 'Data is loading...'
-    },
-    //export: {
-    //    enabled: true,
-    //    fileName: "Exist Group",
-    //    allowExportSelectedData: true
-    //},
-    onRowPrepared: function (e) {
-        if (e.rowType === "header") {
-            e.rowElement.css('background', '#0a5696');
-            e.rowElement.css('color', 'white');
-            e.rowElement.css('font-weight', 'bold');
-        }
-        e.rowElement.css('fontSize', '11px');
-    },
-    columns: [
-        {
-            dataField: "ScheduleVendorID", resizable: true, visible: true, caption: "Schedule Vendor Name", lookup: {
-                dataSource: VendorArray,
-                displayExpr: "VendorName",
-                valueExpr: "VendorID"
-            }
-        },
-        { dataField: "ItemID", visible: false, caption: "Item ID", width: 100 },
-        { dataField: "ItemGroupID", visible: false, caption: "Item Group ID", width: 100 },
-        { dataField: "ItemGroupNameID", visible: false, caption: "Item Group Name ID", width: 100 },
-        { dataField: "ItemGroupName", visible: true, caption: "Item Group", width: 100 },
-        { dataField: "ItemSubGroupName", visible: true, caption: "Sub Group", width: 150 },
-        { dataField: "ItemCode", visible: true, caption: "Item Code", width: 100 },
-        { dataField: "ItemName", visible: true, caption: "Item Name", width: 400 },
-        { dataField: "ItemDescription", visible: false, caption: "Item Desc.", width: 500 },
-        { dataField: "AllocatedStock", visible: true, caption: "Allocated Stock", width: 120 },
-        { dataField: "RequisitionQty", visible: true, caption: "Requisition Stock", width: 120 },
-        { dataField: "PhysicalStock", visible: true, caption: "Available Stock", width: 120 },
-        { dataField: "StockUnit", visible: true, caption: "Stock Unit", width: 100 },
-        { dataField: "UnitDecimalPlace", visible: false, caption: "UnitDecimalPlace", width: 100 },
-        { dataField: "PurchaseUnit", visible: false, caption: "Purchase Unit", width: 100 },
-        { dataField: "LastPurchaseDate", visible: true, caption: "Last P.O.Date", dataType: "date", format: 'dd-MMM-yyyy', width: 100 }
-    ]
-
-});
-
-$("#AllocatedMaterialTemp").dxDataGrid({
-    dataSource: [],
-    columnAutoWidth: true,
-    showBorders: true,
-    showRowLines: true,
-    allowColumnReordering: true,
-    allowColumnResizing: true,
-    scrolling: {
-        mode: 'virtual',
-    },
-
-    height: function () {
-        return window.innerHeight / 4;
-    },
-    editing: {
-        allowDeleting: true,
-        useIcons: true
-    },
-
-    loadPanel: {
-        enabled: true,
-        height: 90,
-        width: 200,
-        text: 'Data is loading...'
-    },
-    //export: {
-    //    enabled: true,
-    //    fileName: "Exist Group",
-    //    allowExportSelectedData: true
-    //},
-    onRowPrepared: function (e) {
-        if (e.rowType === "header") {
-            e.rowElement.css('background', '#0a5696');
-            e.rowElement.css('color', 'white');
-            e.rowElement.css('font-weight', 'bold');
-        }
-        e.rowElement.css('fontSize', '11px');
-    },
-    columns: [
-        { dataField: "ItemID", visible: false, caption: "Item ID" },
-        { dataField: "ItemGroupID", visible: false, caption: "Item Group ID" },
-        { dataField: "ItemGroupNameID", visible: false, caption: "Item Group Name ID" },
-        { dataField: "ItemGroupName", visible: true, caption: "Item Group" },
-        { dataField: "ItemSubGroupName", visible: true, caption: "Sub Group" },
-        { dataField: "ItemCode", visible: true, caption: "Item Code" },
-        { dataField: "ItemName", visible: true, caption: "Item Name" },
-        { dataField: "ItemDescription", visible: false, caption: "Item Desc." },
-        { dataField: "AllocatedStock", visible: true, caption: "Issue Stock" },
-        { dataField: "RequisitionQty", visible: true, caption: "Requisition Qty" },
-        { dataField: "StockUnit", visible: true, caption: "Stock Unit" },
-        { dataField: "UnitDecimalPlace", visible: false, caption: "UnitDecimalPlace" },
-        { dataField: "PurchaseUnit", visible: false, caption: "Purchase Unit" },
-        { dataField: "LastPurchaseDate", visible: true, caption: "Last P.O.Date", dataType: "date", format: 'dd-MMM-yyyy' }
-    ]
-
-});
-
-
-
-$('#BtnApplyMaterial').click(function (e) {
-    try {
-        var allocatedMaterialGrid = $("#AllocatedMaterialTemp").dxDataGrid("instance");
-        SelectedMaterial = allocatedMaterialGrid.option("dataSource");
-        $('#CloseModalM').click();
-    } catch (e) {
-        console.log(e);
-    }
-})
-//$('#additem').click(function (e) {
-//    try {
-
-//        let IssueQty = Number(document.getElementById('IssueQty').value);
-//        let RequisitionQty = Number(document.getElementById('RequisitionQty').value);
-
-//        if (IssueQty <= 0) {
-//            alert('Issue Qty should be greater then 0');
-//            document.getElementById('IssueQty').focus();
-//            return;
-//        }
-
-//        var overflowGrid = $("#OverFlowGrid").dxDataGrid("instance");
-//        var allocatedMaterialGrid = $("#AllocatedMaterialTemp").dxDataGrid("instance");
-
-//        var selectedRows = overflowGrid.getSelectedRowsData();
-//        if (selectedRows.length <= 0) {
-//            alert('Please select item first');
-//            return;
-//        }
-
-//        var existingData = allocatedMaterialGrid.option("dataSource");
-
-//        selectedRows[0].AllocatedStock = IssueQty;
-//        selectedRows[0].RequisitionQty = RequisitionQty;
-//        selectedRows[0].BookingID = GBLProductEstimationID;
-
-//        var newData = existingData.concat(selectedRows);
-//        allocatedMaterialGrid.option("dataSource", newData);
-
-//    } catch (e) {
-//        console.log(e);
-//    }
-//})
-$('#additem').click(function (e) {
-    try {
-        let IssueQty = Number(document.getElementById('IssueQty').value);
-        let RequisitionQty = Number(document.getElementById('RequisitionQty').value);
-
-        if (IssueQty <= 0) {
-            alert('Issue Qty should be greater than 0');
-            document.getElementById('IssueQty').focus();
-            return;
-        }
-
-        var overflowGrid = $("#OverFlowGrid").dxDataGrid("instance");
-
-
-        var newData = $("#OverFlowGrid").dxDataGrid("instance").getSelectedRowsData();
-
-        // Get the current data from the first grid
-        var existingData = $("#AllocatedMaterialTemp").dxDataGrid("instance").option("dataSource");
-
-        var selectedRows = overflowGrid.getSelectedRowsData();
-        if (selectedRows.length <= 0) {
-            alert('Please select an item first');
-            return;
-        }
-
-        // Iterate over each row in the newData array
-        newData.forEach(function (newRowData) {
-            var updatedRowData = {};
-
-            // Iterate over each property in the new row data
-            for (var prop in newRowData) {
-                if (newRowData.hasOwnProperty(prop)) {
-                    updatedRowData[prop] = newRowData[prop];
-                }
-            }
-            updatedRowData.AllocatedStock = IssueQty;
-            updatedRowData.RequisitionQty = RequisitionQty;
-            updatedRowData.BookingID = GBLProductEstimationID;
-            // Push the updated row data to the current data
-            existingData.push(updatedRowData);
-        });
-        // Update the data source of the first grid with the updated data
-        $("#AllocatedMaterialTemp").dxDataGrid("instance").option("dataSource", existingData);
-
-    } catch (e) {
-        console.log(e);
-    }
-});
-
-document.getElementById("IssueQty").addEventListener("input", function () {
-    var issueQty = parseFloat(this.value);
-    var remainingToSchedule = parseFloat(document.getElementById("remainingtoschedule").value);
-
-    if (issueQty > remainingToSchedule) {
-        var excessQty = issueQty - remainingToSchedule;
-        document.getElementById("RequisitionQty").value = excessQty;
-    } else {
-        document.getElementById("RequisitionQty").value = 0;
-    }
-});
-
-
-function removeRowByKey(gridInstance, key) {
-    var dataSource = gridInstance.option("dataSource");
-    var keyExpr = gridInstance.option("keyExpr");
-
-    var updatedData = dataSource.filter(function (item) {
-        return item[keyExpr] !== key;
-    });
-
-    gridInstance.option("dataSource", updatedData);
-}
+loadSalesOrder(false)

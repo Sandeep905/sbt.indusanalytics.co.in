@@ -1,4 +1,4 @@
-﻿<%@ Page Title="JobCard Schedule" Language="VB" MasterPageFile="~/MasterPage_Main.master" AutoEventWireup="false" CodeFile="JobCardSchedule.aspx.vb" Inherits="JobCardSchedule" %>
+﻿<%@ Page Title="JobCard Schedule" Language="VB" MasterPageFile="~/MasterPage_Main.master" AutoEventWireup="false" CodeFile="JobCardScheduleold.aspx.vb" Inherits="JobCardSchedule" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="Server">
 </asp:Content>
@@ -102,8 +102,11 @@
                                     <div class="font-11">PO Date</div>
                                     <div class="hidden" id="SelPODate"></div>
                                     <input type="text" class="forTextBox disabledbutton" disabled="disabled" id="TxtPODate" readonly="" />
+
                                 </div>
+
                                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12  padding-0 margin-0 " style="border-top: 1px solid #42909A; padding-top: 5px">
+
                                     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                                         <div role="tabpanel" class="row clearfix tab-pane animated fadeInRight active" style="display: block;">
                                             <%--Common Job Details--%>
@@ -168,17 +171,11 @@
                                             <label>Job Coordinator</label>
                                             <div id="JobCoordinator"></div>
                                         </div>
-                                        <div class="col-xs-12 col-sm-12 col-md-6 col-lg-6 ">
+                                        <div class="col-xs-12 col-sm-12 col-md-9 col-lg-9 ">
                                             <label>Special Remark</label>
                                             <textarea rows="3" class="forTextBox" id="TxtCriticalRemark"></textarea>
                                         </div>
-                                        <div class="col-xs-12 col-sm-12 col-md-2 col-lg-2">
-                                            <input type="checkbox" id="ISSuppliedBySBT" name="ISSuppliedBySBT" onclick="toggleButton()">
-                                            <label for="ISSuppliedBySBT">Supplied by SBT</label>
-                                        </div>
-                                        <div class="col-xs-12 col-sm-12 col-md-3 col-lg-3">
-                                            <a id="AddMaterial" class="btn btn-success" style="display: none">Add Material</a>
-                                        </div>
+
                                     </div>
                                 </div>
 
@@ -189,10 +186,6 @@
                             <div role="tabpanel" class="row clearfix tab-pane animated fadeInRight active">
                                 <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 ">
                                     <div id="ScheduleGrid"></div>
-                                </div>
-                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 ">
-                                    <label>Material Grid :</label>
-                                    <div id="AllocatedMaterial"></div>
                                 </div>
                             </div>
                         </div>
@@ -270,6 +263,7 @@
                 </div>
             </div>
         </div>
+
     </div>
 
     <div class="modal clearfix" id="ModalSOList" tabindex="-1" role="dialog">
@@ -303,63 +297,6 @@
             </div>
         </div>
     </div>
-
-    <div class="modal clearfix" id="ModalMaterial" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-            <!-- Modal content-->
-            <div class="modal-content">
-                <div class="DialogBoxCustom" style="float: left; border-top-left-radius: 4px; border-top-right-radius: 4px;">
-                    <strong>Material Requirements</strong>
-                    <a href="javascript:void(0);" class="iconRightDbox btn-danger" data-dismiss="modal">
-                        <span data-dismiss="modal" id="CloseModalM" style="font-weight: 900; margin-right: 8px">X</span>
-                    </a>
-                </div>
-                <div class="modal-body">
-                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 ">
-                        <div role="tabpanel" class="row clearfix tab-pane animated fadeInRight active" style="display: block;">
-                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-0 margin-0">
-                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 ">
-                                    <div id="OverFlowGrid"></div>
-                                </div>
-                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding: 0px">
-                                    <%--   <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
-                                        <div id="transactionType"></div>
-                                    </div>--%>
-
-                                    <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12" style="float: right;">
-                                        <label>
-                                            Issue Qty
-                                            <label style="color: red">*</label></label>
-                                        <div style="display: flex; flex-direction: row">
-                                            <input class="forTextBox" id="IssueQty" value="0" type="number" />
-                                            <input type="button" class="btn btn-success" id="additem" value="Add +" />
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12" style="float: right;">
-                                        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12" style="float: right">
-                                            <label>Can be schedule qty</label>
-                                            <input class="forTextBox " id="remainingtoschedule" value="0" type="number" readonly="readonly" />
-                                        </div>
-                                        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12" style="float: right">
-                                            <label>Requisition qty</label>
-                                            <input class="forTextBox " id="RequisitionQty" value="0" type="number" readonly="readonly" />
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 ">
-                                    <div id="AllocatedMaterialTemp"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer" style="border-top: 1px solid #42909A;">
-                    <input type="button" id="BtnApplyMaterial" value="Apply" class="btn btn-success waves-effect" />
-                </div>
-            </div>
-        </div>
-    </div>
-
     <div class="modal clearfix" id="PrintModal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <!-- Modal content-->
@@ -547,7 +484,7 @@
                             <div class="col-12 col-md-12 col-lg-12 col-xl-12">
                                 <div class="col-12 col-md-12 col-lg-6 col-xl-6">
                                     <b>Vendor Freight</b>
-                                    <input class="form-control form-control-sm" id="Freight" value="0" />
+                                   <input class="form-control form-control-sm" id="Freight" value="0"/>
                                 </div>
                                 <div class="col-12 col-md-12 col-lg-6 col-xl-6">
                                     <b>Remark</b>

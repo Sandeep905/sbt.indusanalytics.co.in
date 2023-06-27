@@ -703,3 +703,25 @@ function OpenPopup(ID, modalId) {
     document.getElementById(ID).setAttribute("data-toggle", "modal");
     document.getElementById(ID).setAttribute("data-target", modalId);
 }
+
+$('#Backup').click(function () {
+    try {
+        // Make the AJAX request using jQuery
+        $.ajax({
+            url: 'WebService_Backup.asmx/GenerateBackup',
+            type: "POST",
+            data: {},
+            dataType: "json",
+            success: function (response) {
+                // Request succeeded, process the response here
+                console.log(response);
+            },
+            error: function (xhr, status, error) {
+                // Request failed
+                console.error("Request failed with status", status, error);
+            }
+        });
+    } catch (e) {
+        console.log(e);
+    }
+})

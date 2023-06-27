@@ -18,6 +18,7 @@ Namespace Connection
         Dim flagID As Boolean
         Dim UniqueId As String
         Dim GblCompanyName As String
+        Public constring As String
 
 #Region "Constructor"
 
@@ -35,7 +36,7 @@ Namespace Connection
 #Region "Method"
         Public Function OpenDataBase() As SqlConnection
             Dim i As Integer = 0
-            Dim constring As String
+
             'constring = "Data Source = 95.217.184.123\MSSQLSERVER2019;Initial Catalog=softber4_indus;Persist Security Info=True;User ID=softber4sql;Password=%9Lb535ze"
             constring = "Data Source = 65.2.64.18,1433;Initial Catalog=IndusEnterprise_SBT;Persist Security Info=True;User ID=Indus_SBT;Password=@5X10&#$313INDUS#!"
             'constring = "Data Source = NISHTHA\INSTANCEV15;Initial Catalog=IndusEnterprise_SBT;Persist Security Info=True;User ID=Indus;Password=Param@99811"

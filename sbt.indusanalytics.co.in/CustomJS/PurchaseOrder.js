@@ -49,7 +49,7 @@ $.ajax({
         if (results.d === "True") {
             FlagEditPurchaseRate = true;
         } else
-            FlagEditPurchaseRate = false;
+            FlagEditPurchaseRate = true;
     }
 });
 

@@ -1286,7 +1286,6 @@ $("#BtnCreateOrder").click(function () {
         dataSource: []
     });
     document.getElementById('SOBTxtPONo').value = "";
-
     document.getElementById("FieldCntainerRow").style.display = 'block';
     document.getElementById("DetailedFieldCntainer").style.display = 'none';
 });
@@ -1348,6 +1347,9 @@ $("#EditButton").click(function () {
                 document.getElementById('SOBDispatchedDetails').value = RES1.OrderBooking[0].DispatchRemark
                 document.getElementById('SOBDeliveryDetails').value = RES1.OrderBooking[0].PODetail
                 
+                $("#fileDownload").removeClass("hidden");
+                $("#fileDownload").attr("href", "Files/SalesOrder/" + RES1.OrderBooking[0].attachedfile);
+                $("#fileDownload").attr("download", RES1.OrderBooking[0].attachedfile);
 
                 ObjSchDelivery = RES1.OrderBookingDelivery;
                 reloadOrderList(RES1.OrderBooking);

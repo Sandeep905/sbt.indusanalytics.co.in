@@ -257,6 +257,11 @@
             width: 100%;
             object-fit: cover
         }
+
+        .DownloadLink {
+            color: blue !important;
+            font-size: 12px !important;
+        }
     </style>
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="Server">
@@ -351,10 +356,10 @@
                         <label>Other Details :</label>
                         <textarea class="forTextBox" rows="5" id="FlexRemark"></textarea>
                     </div>
-                    <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 hidden">
+                    <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 ">
                         <b class="font-11">Artwork/Ref/ doc :</b>
                         <input type="file" id="fileflex" />
-                        <a class="hidden" id="fileDownloadflex">Download file</a>
+                        <a class="DownloadLink hidden" id="fileDownloadflex">Download file</a>
                     </div>
 
                     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 hidden">
@@ -630,10 +635,10 @@
                             <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 padding-0 margin-0" style="padding-right: 2px; padding-left: 2px">
                                 <div id="GridOperationAllocated"></div>
                             </div>
-                            <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 hidden">
+                            <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
                                 <b class="font-11">Artwork/Ref/ doc :</b>
                                 <input type="file" id="fileOffset" />
-                                <a class="hidden" id="fileDownloadoffset">Download file</a>
+                                <a class=" DownloadLink hidden" id="fileDownloadoffset">Download file</a>
                             </div>
                             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                                 <label>Other Details :</label>
@@ -789,10 +794,10 @@
                             <label>Other Details :</label>
                             <textarea class="forTextBox" rows="5" id="UnitRemark"></textarea>
                         </div>
-                        <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 hidden">
+                        <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 ">
                             <b class="font-11">Artwork/Ref/ doc :</b>
                             <input type="file" id="fileUnit" />
-                            <a class="hidden" id="fileDownloadunit">Download file</a>
+                            <a class="DownloadLink hidden" id="fileDownloadunit">Download file</a>
                         </div>
                         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 modal-footer" style="border-top: 1px solid #42909A; padding: 5px">
                             <a id="BtnApplyPlanUnit" class="btn btn-primary waves-effect">Add</a>

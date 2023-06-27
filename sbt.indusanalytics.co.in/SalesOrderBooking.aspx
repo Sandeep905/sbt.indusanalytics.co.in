@@ -1,6 +1,12 @@
 ﻿<%@ Page Title="" Language="VB" MasterPageFile="~/MasterPage_Main.master" AutoEventWireup="false" CodeFile="SalesOrderBooking.aspx.vb" Inherits="SalesOrderBooking" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="Server">
+    <style>
+        .DownloadLink {
+            color: blue !important;
+            font-size: 12px !important;
+        }
+    </style>
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="Server">
     <div class="row clearfix" style="padding: 0px; margin: 0px; margin-right: -15px">
@@ -158,9 +164,10 @@
                                 <b class="font-11">Delivery Details</b>
                                 <input class="forTextBox" type="text" name="SOBDeliveryDetails" id="SOBDeliveryDetails" value="" />
                             </div>
-                             <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 hidden">
+                            <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
                                 <b class="font-11">Reference File</b>
-                                <input class="forTextBox" type="file"   id="fileSO"  />
+                                <input class="forTextBox" type="file" id="fileSO" />
+                                <a class="DownloadLink hidden" id="fileDownload">Download file</a>
                             </div>
                             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                                 <button type="button" id="BtnSave" class="btn btn-success waves-effect">Save</button>

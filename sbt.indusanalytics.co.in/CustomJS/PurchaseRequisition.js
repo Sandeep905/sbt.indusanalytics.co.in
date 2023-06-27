@@ -15,7 +15,7 @@ var SubGridData = [];   //IndentSubGridData
 
 var GetIndentData = "";
 var getRequisitionRow = "";
-var RadioValue = "Indent List";
+var RadioValue = "Created Requisitions";
 var GblJobCardRES = [];
 
 $("#LoadIndicator").dxLoadPanel({
@@ -35,7 +35,7 @@ $("#VoucherDate").dxDateBox({
     value: new Date().toISOString().substr(0, 10)
 });
 
-var priorities = ["Indent List", "Created Requisitions"];
+var priorities = ["Created Requisitions"];//["Indent List", "Created Requisitions"];
 $("#RadioButtonPR").dxRadioGroup({
     items: priorities,
     value: priorities[0],
