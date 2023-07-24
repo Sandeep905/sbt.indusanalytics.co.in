@@ -411,6 +411,25 @@ $("#SalesOrderBookingGrid").dxDataGrid({
         { dataField: "SalesCordinator" },
         { dataField: "ClientCordinator" },
         { dataField: "CreatedBy" },
+        {
+            dataField: "attachedfile",
+            caption: "",
+            fixedPosition: "right",
+            fixed: true,
+
+            cellTemplate(container, options) {
+                $('<a>').addClass('fa fa-download dx-link')
+                    .on('dxclick', function (e) {
+                        e.preventDefault();
+                        displayFilesInGrid(options.data.attachedfile)
+                        this.setAttribute("data-toggle", "modal");
+                        this.setAttribute("data-target", "#ModalDownloadPreview");
+                    })
+                    .appendTo(container);
+            },
+        }
+
+
     ],
     //onContentReady: function (e) {
     //    $("#image-indicator").dxLoadPanel("instance").option("visible", false);
@@ -1347,7 +1366,7 @@ $("#EditButton").click(function () {
                 document.getElementById('SOBDispatchedDetails').value = RES1.OrderBooking[0].DispatchRemark
                 document.getElementById('SOBDeliveryDetails').value = RES1.OrderBooking[0].PODetail
                 
-                $("#fileDownload").removeClass("hidden");
+               // $("#fileDownload").removeClass("hidden");
                 $("#fileDownload").attr("href", "Files/SalesOrder/" + RES1.OrderBooking[0].attachedfile);
                 $("#fileDownload").attr("download", RES1.OrderBooking[0].attachedfile);
 
@@ -1504,7 +1523,7 @@ $("#BtnSave").click(function () {
 
 
         if (file) {
-            uploadFile($('#fileSO')[0].files[0])
+            uploadFile($('#fileSO')[0].files)
                 .then(function (response) {
                     SaveData(response) /// Sending File Name
                 })
@@ -1545,11 +1564,12 @@ function SaveData(refdocname) {
         var NewOrderBook = [], OrderBook = {};
         var BKIDS = "", PMIDS = "";
         if (FlagEdit === true) {
-            SaveOrder.SalesOrderNo = SOBTxtNo;
+            OrderBook.SalesOrderNo = SOBTxtNo;
         }
         OrderBook.BookingPrefix = SOBPrefix;
-        OrderBook.attachedfile = refdocname; // RefDocFileName
         OrderBook.LedgerID = GblClientID;
+        OrderBook.attachedfile = refdocname; // RefDocFileName
+
         OrderBook.TotalAmount = 0;
 
 
@@ -1832,7 +1852,8 @@ function reloadOrderList(data) {
             { dataField: "JobType", visible: true, width: 80, validationRules: [{ type: "required" }], lookup: { dataSource: JobType, valueExpr: 'JobType', displayExpr: 'JobType' }, allowEditing: true },
             { dataField: "JobReference", visible: true, width: 100, validationRules: [{ type: "required" }], lookup: { dataSource: JobReference, valueExpr: 'JobReference', displayExpr: 'JobReference' }, allowEditing: true },
             { dataField: "JobPriority", visible: true, width: 100, validationRules: [{ type: "required" }], lookup: { dataSource: JobPriority, valueExpr: 'JobPriority', displayExpr: 'JobPriority' }, allowEditing: true },
-            { dataField: "PrePressRemark", width: 100 }
+            { dataField: "PrePressRemark", width: 100 },
+          
         ],
         onContentReady: function (e) {
             document.getElementById("TxtTotalOrderQty").value = 0//e.component.getTotalSummaryValue("Quantity");
@@ -2051,28 +2072,82 @@ $(function () {
         });
     });
 });
-
-function uploadFile(file) {
+function uploadFile(files) {
     return new Promise(function (resolve, reject) {
-        var fd = new FormData();
-        fd.append("file", file);
-
         var xhr = new XMLHttpRequest();
+        var fd = new FormData();
+
+        for (var i = 0; i < files.length; i++) {
+            fd.append("files[]", files[i]);
+        }
+
         xhr.open("POST", "FileUploadSalesOrder.ashx", true);
         xhr.onload = function () {
             if (xhr.status === 200) {
                 var response = xhr.responseText;
-                console.log("File uploaded successfully. File name: " + response);
-                resolve(response); // Resolve the Promise with the response
+                console.log("Files uploaded successfully. File names: " + response);
+                resolve(response);
             } else {
-                console.error("Error uploading file. Status: " + xhr.status);
-                reject(new Error("File upload failed")); // Reject the Promise with an error
+                console.error("Error uploading files. Status: " + xhr.status);
+                reject(new Error("File upload failed"));
             }
         };
         xhr.onerror = function () {
             console.error("File upload failed due to network error");
-            reject(new Error("File upload failed")); // Reject the Promise with an error
+            reject(new Error("File upload failed"));
         };
         xhr.send(fd);
     });
+}
+
+function displayFilesInGrid(fileNamesString) {
+    var previewArea = document.getElementById("PreviewArea");
+    previewArea.innerHTML = ""; // Clear the previous content
+
+    if (fileNamesString === "" || fileNamesString.trim() === "") {
+        var h1Element = document.createElement("h1");
+        h1Element.textContent = "There are no files attached";
+        previewArea.appendChild(h1Element);
+        return;
+    }
+
+    var fileNames = fileNamesString.split(",");
+
+    // Create a grid with 2 columns and 2 rows
+    var grid = document.createElement("div");
+    grid.className = "grid";
+
+    for (var i = 0; i < fileNames.length; i++) {
+        // Create a grid item
+        var gridItem = document.createElement("div");
+        //gridItem.className = "grid-item";
+
+        // Create an image element for preview
+        var imageElement = document.createElement("img");
+        imageElement.className = "grid-item"
+        imageElement.src = "Files/SalesOrder/" + fileNames[i]; // Update the image path as per your file structure
+        imageElement.onerror = function () {
+            this.src = "https://upload.wikimedia.org/wikipedia/commons/d/dc/No_Preview_image_2.png"; // Update with the path to your placeholder image or set a suitable alternative text
+        };
+        // Create a file name element
+        var fileNameElement = document.createElement("p");
+        fileNameElement.textContent = fileNames[i];
+
+        // Create a download button
+        var downloadButton = document.createElement("a");
+        downloadButton.href = "Files/SalesOrder/" + fileNames[i];
+        downloadButton.download = fileNames[i];
+        downloadButton.textContent = "Download";
+
+        // Append the image and file name elements to the grid item
+        gridItem.appendChild(imageElement);
+        gridItem.appendChild(fileNameElement);
+        gridItem.appendChild(downloadButton);
+
+        // Append the grid item to the grid
+        grid.appendChild(gridItem);
+    }
+
+    // Append the grid to the preview area
+    previewArea.appendChild(grid);
 }

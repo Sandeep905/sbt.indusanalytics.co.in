@@ -10,6 +10,9 @@ var ProjectBookingID = 0, SalesManagerId = 0;
 var EditMode = false;
 var Isprocessed = 0;
 let GBLCategoryIDForProcess = '';
+let SelectedItemImagesStr = '';
+let GBLEnquiryDetailID = 0;
+let GBLUniqueID = "";
 $("#LoadIndicator").dxLoadPanel({
     shadingColor: "rgba(0,0,0,0.4)",
     indicatorSrc: "images/Indus logo.png",
@@ -203,65 +206,6 @@ $.ajax({
         // alert(jqXHR.message);
     }
 });
-//$("#gridOperation").dxDataGrid({                  //// GridOperation  gridopr
-//    dataSource: [],
-//    allowEditing: true,
-//    allowColumnResizing: true,
-//    columnResizingMode: "widget",
-//    columnAutoWidth: true,
-//    sorting: { mode: 'multiple' },
-//    selection: { mode: "none", allowSelectAll: false },
-//    columns: [{ dataField: "ProcessName", allowEditing: false },
-//    { dataField: "Rate", width: 50, visible: false, allowEditing: false },
-//    {
-//        dataField: "RateFactor", fixedPosition: "right", fixed: true, allowEditing: true,
-//        lookup: {
-//            dataSource: function (options) {
-//                return {
-//                    store: ProcessSlabs,
-//                    filter: options.data ? ["ProcessID", "=", options.data.ProcessID] : null
-//                };
-//            },
-//            displayExpr: "RateFactor",
-//            valueExpr: "RateFactor"
-//        },
-//        width: 120
-//    },
-//    { dataField: "TypeofCharges", allowEditing: false },
-//    { dataField: "SizeToBeConsidered", caption: "Size Cons", width: 80, allowEditing: false },
-//    ],
-//    paging: {
-//        pageSize: 10
-//    },
-//    //selectedRowKeys: [$("#OperId").text()],
-//    showRowLines: true,
-//    showBorders: true,
-//    loadPanel: {
-//        enabled: true
-//    },
-//    editing: {
-//        mode: 'cell',
-//        allowUpdating: true,
-//        allowDeleting: true,
-//    },
-//    columnFixing: { enabled: true },
-//    filterRow: { visible: true },
-//    height: function () {
-//        return window.innerHeight / 3.2;
-//    },
-//    onRowPrepared: function (e) {
-//        setDataGridRowCss(e);
-//    },
-//    onSelectionChanged: function (selectedItems) {
-//        var data = selectedItems.selectedRowsData;
-//        if (data) {
-//            $("OperIdPQ").text(
-//                $.map(data, function (value) {
-//                    return value.ProcessID;
-//                }).join(','));
-//        }
-//    }
-//});
 
 $("#gridOperation").dxDataGrid({                  //// GridOperation  gridopr
     dataSource: [],
@@ -603,7 +547,7 @@ var grid = $("#gridProductList").dxDataGrid({
                         e.preventDefault();
                         if (options.data.Quantity === undefined || Number(options.data.Quantity) <= 0) return;
                         SelectedProductData = options.data;
-
+                        GBLUniqueID = options.data.UniqueID
                         if (options.data.ProductName == "" || options.data.ProductName == undefined) {
                             var result = $.grep(ProductMasterList, function (ex) { return ex.ProductCatalogID === options.data.ProductCatalogID; })
                             options.data.ProductName = result[0].ProductName
@@ -642,16 +586,19 @@ var grid = $("#gridProductList").dxDataGrid({
                         }
 
                         if (options.data.attachedfile != "" && options.data.attachedfile != undefined) {
-                            $("#fileDownloadunit").removeClass("hidden");
-                            $("#fileDownloadunit").attr("href", "Files/Enquiry/"+ options.data.attachedfile);
-                            $("#fileDownloadunit").attr("download", options.data.attachedfile);
-                            $("#fileDownloadflex").removeClass("hidden");
-                            $("#fileDownloadflex").attr("href", "Files/Enquiry/" +options.data.attachedfile);
-                            $("#fileDownloadflex").attr("download", options.data.attachedfile);
+                            //  $("#fileDownloadunit").removeClass("hidden");
+                            //$("#fileDownloadunit").attr("href", "Files/Enquiry/" + options.data.attachedfile);
+                            //   $("#fileDownloadunit").attr("download", options.data.attachedfile);
+                            SelectedItemImagesStr = options.data.attachedfile;
 
-                            $("#fileDownloadoffset").removeClass("hidden");
-                            $("#fileDownloadoffset").attr("href", "Files/Enquiry/" +options.data.attachedfile);
-                            $("#fileDownloadoffset").attr("download", options.data.attachedfile);
+                            GBLEnquiryDetailID = options.data.EnquiryIDDetail;
+                            //  $("#fileDownloadflex").removeClass("hidden");
+                            //$("#fileDownloadflex").attr("href", "Files/Enquiry/" + options.data.attachedfile);
+                            //   $("#fileDownloadflex").attr("download", options.data.attachedfile);
+
+                            //  $("#fileDownloadoffset").removeClass("hidden");
+                            //$("#fileDownloadoffset").attr("href", "Files/Enquiry/" + options.data.attachedfile);
+                            //  $("#fileDownloadoffset").attr("download", options.data.attachedfile);
 
                         } else {
                             $("#fileDownloadunit").addClass("hidden");
@@ -680,6 +627,7 @@ var grid = $("#gridProductList").dxDataGrid({
 
                         if (options.data.IsOffsetProduct === true) {
 
+                            displayFilesInModal(SelectedItemImagesStr, "OffestUploadexFiles");
                             // allQuantity(options.data.Quantity, $.grep(ProductMasterList, function (ex) { return ex.ProductCatalogID === options.data.ProductCatalogID; })[0].ProductName, $.grep(AllContents, function (ex) { return ex.ContentID === $.grep(ProductMasterList, function (ex) { return ex.ProductCatalogID === options.data.ProductCatalogID; })[0].ContentID; })[0].ContentName, $.grep(ProductMasterList, function (ex) { return ex.ProductCatalogID === options.data.ProductCatalogID; })[0].ProductImagePath)
                             allQuantity(options.data.Quantity, options.data.ProductName1, $.grep(AllContents, function (ex) { return ex.ContentID === $.grep(ProductMasterList, function (ex) { return ex.ProductCatalogID === options.data.ProductCatalogID; })[0].ContentID; })[0].ContentName, $.grep(ProductMasterList, function (ex) { return ex.ProductCatalogID === options.data.ProductCatalogID; })[0].ProductImagePath)
 
@@ -696,10 +644,12 @@ var grid = $("#gridProductList").dxDataGrid({
                         } else {
                             if (options.data.IsUnitProduct === true) {
                                 // alert('No Information Required');
+                                displayFilesInModal(SelectedItemImagesStr, "UnitUploadexFiles");
                                 this.setAttribute("data-toggle", "modal");
                                 this.setAttribute("data-target", "#modalEstimateProductUnit");
                                 return;
                             }
+                            displayFilesInModal(SelectedItemImagesStr, "FlexUploadexFiles");
                             this.setAttribute("data-toggle", "modal");
                             this.setAttribute("data-target", "#modalEstimateProduct");
 
@@ -784,6 +734,7 @@ var grid = $("#gridProductList").dxDataGrid({
     },
     onInitNewRow: function (e) {
         e.data.SequenceNo = e.component._options.dataSource.length + 1;
+        e.data.UniqueID = generateUniqueID(); 
     },
     onEditingStart: function (e) {
         if (e.column.dataField == "Quantity" && e.data.Amount > 0) {
@@ -818,6 +769,10 @@ var grid = $("#gridProductList").dxDataGrid({
     }
 }).dxDataGrid('instance');
 
+
+function generateUniqueID() {
+    return Math.random().toString(36).substr(2, 9); // Generates a 9-character alphanumeric ID
+}
 //AddRow();
 function AddRow() {
     $('#gridProductList').dxDataGrid('instance').addRow();
@@ -1014,13 +969,17 @@ $("#GridShowlist").dxDataGrid({
             caption: "",
             fixedPosition: "right",
             fixed: true,
-            cellTemplate: function (container, options) {
-                $('<a title="Download">')
-                    .addClass('fa fa-download dx-link')
-                    .attr('href', "Files/Enquiry/" + options.data.attachedfile)
-                    .attr('download', options.data.attachedfile)
+
+            cellTemplate(container, options) {
+                $('<a>').addClass('fa fa-download dx-link')
+                    .on('dxclick', function (e) {
+                        e.preventDefault();
+                        displayFilesInGrid(options.data.attachedfile)
+                        this.setAttribute("data-toggle", "modal");
+                        this.setAttribute("data-target", "#ModalDownloadPreview");
+                    })
                     .appendTo(container);
-            }
+            },
         }
 
     ],
@@ -1032,6 +991,7 @@ $("#GridShowlist").dxDataGrid({
     onRowPrepared: function (e) {
         setDataGridRowCss(e);
     },
+
     onSelectionChanged: function (selectedItems) {
         var data = selectedItems.selectedRowsData;
         if (data.length > 0) {
@@ -1175,22 +1135,6 @@ function loadProcess() {
     });
 }
 
-//$.ajax({
-//    type: "POST",
-//    url: "WebServiceProductMaster.asmx/GetSalesPerson",
-//    data: '{}',
-//    contentType: "application/json; charset=utf-8",
-//    dataType: "text",
-//    success: function (results) {
-//        var res = results.replace(/\\/g, '');
-//        res = res.replace(/"d":""/g, '');
-//        res = res.replace(/""/g, '');
-//        res = res.substr(1);
-//        res = res.slice(0, -1);
-//        let RES1 = JSON.parse(res);
-//        $("#SelSalesPerson").dxSelectBox({ dataSource: RES1 });
-//    }
-//});
 function GetProductConfig(productId) {
     $.ajax({
         type: 'POST',
@@ -1321,9 +1265,12 @@ $("#BtnApplyPlan").click(function (e) {
     var file = $('#fileflex')[0].files[0];
 
     if (file) {
-        uploadFile($('#fileflex')[0].files[0])
+        uploadFile($('#fileflex')[0].files)
             .then(function (response) {
                 for (var i = 0; i < gridProductData1.length; i++) {
+                    if (SelectedItemImagesStr != "") {
+                        response = SelectedItemImagesStr + "," + response
+                    }
                     gridProductData._options.dataSource[gridProductData1[0].SequenceNo - 1].attachedfile = response;
                     gridProductData._options.dataSource[gridProductData1[0].SequenceNo - 1].DefaultProcessStr = oprids.slice(0, -1);
                     gridProductData._options.dataSource[gridProductData1[0].SequenceNo - 1].ProcessIDStr = suggestoprids + oprids.slice(0, -1);
@@ -1997,9 +1944,12 @@ $("#btnApplyCostPQ").click(function (e) {
         var file = $('#fileOffset')[0].files[0];
 
         if (file) {
-            uploadFile($('#fileOffset')[0].files[0])
+            uploadFile($('#fileOffset')[0].files)
                 .then(function (response) {
                     for (var i = 0; i < gridProductData1.length; i++) {
+                        if (SelectedItemImagesStr != "") {
+                            response = SelectedItemImagesStr + "," + response
+                        }
                         gridProductData._options.dataSource[gridProductData1[0].SequenceNo - 1].RequiredQuantity = gridProductData._options.dataSource[i].Quantity;
                         gridProductData._options.dataSource[gridProductData1[0].SequenceNo - 1].ProductInputSizes = ContentSizeValues;
                         gridProductData._options.dataSource[gridProductData1[0].SequenceNo - 1].ProcessIDStr = suggestedprocess == "" ? OperId : OperId + ',' + suggestedprocess;
@@ -2043,7 +1993,7 @@ $("#btnApplyCostPQ").click(function (e) {
 $("#BtnApplyPlanUnit").click(function (e) {
     e.preventDefault();
     try {
-        
+
         var gridProductData = $('#gridProductList').dxDataGrid('instance');
         var gridOperation = $('#UnitProcessDefault').dxDataGrid('instance')._options.dataSource;
         var Suggestedoperation = $('#UnitProcessSuggestion').dxDataGrid('instance')._options.dataSource.store.data;
@@ -2072,11 +2022,14 @@ $("#BtnApplyPlanUnit").click(function (e) {
         var file = $('#fileUnit')[0].files[0];
 
         if (file) {
-            uploadFile($('#fileUnit')[0].files[0])
+            uploadFile($('#fileUnit')[0].files)
                 .then(function (response) {
                     for (var i = 0; i < gridProductData._options.dataSource.length; i++) {
-                        if (gridProductData._options.dataSource[i].ProductCatalogID === ProductCatalogID && gridProductData._options.dataSource[i].Quantity === Number(document.getElementById("TxtPlanQtyUnit").value)) {
+                        if (gridProductData._options.dataSource[i].ProductCatalogID === ProductCatalogID && gridProductData._options.dataSource[i].UniqueID === GBLUniqueID  && gridProductData._options.dataSource[i].Quantity === Number(document.getElementById("TxtPlanQtyUnit").value)) {
                             gridProductData._options.dataSource[i].OtherDetails = $.trim($("#UnitRemark").val());
+                            if (SelectedItemImagesStr != "") {
+                                response = SelectedItemImagesStr + "," + response
+                            }
                             gridProductData._options.dataSource[i].attachedfile = response;
                             gridProductData._options.dataSource[i].DefaultProcessStr = oprids.slice(0, -1);
                             gridProductData._options.dataSource[i].ProcessIDStr = suggestoprids + oprids.slice(0, -1);
@@ -2090,7 +2043,7 @@ $("#BtnApplyPlanUnit").click(function (e) {
                 });
         } else {
             for (var i = 0; i < gridProductData._options.dataSource.length; i++) {
-                if (gridProductData._options.dataSource[i].ProductCatalogID === ProductCatalogID && gridProductData._options.dataSource[i].Quantity === Number(document.getElementById("TxtPlanQtyUnit").value)) {
+                if (gridProductData._options.dataSource[i].ProductCatalogID === ProductCatalogID && gridProductData._options.dataSource[i].UniqueID === GBLUniqueID && gridProductData._options.dataSource[i].Quantity === Number(document.getElementById("TxtPlanQtyUnit").value)) {
                     gridProductData._options.dataSource[i].OtherDetails = $.trim($("#UnitRemark").val());
                     gridProductData._options.dataSource[i].attachedfile = "";
                     gridProductData._options.dataSource[i].DefaultProcessStr = oprids.slice(0, -1);
@@ -2113,11 +2066,6 @@ $("#BtnApplyPlanUnit").click(function (e) {
         $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
     }
 });
-
-
-
-
-
 $("#gridSelOperation").dxDataGrid({
     keyExpr: "ProcessID",
     dataSource: [],
@@ -2285,29 +2233,188 @@ $("#BtnSelectOperation").click(function () {
 
 
 
-
-function uploadFile(file) {
+function uploadFile(files) {
     return new Promise(function (resolve, reject) {
-        var fd = new FormData();
-        fd.append("file", file);
-
         var xhr = new XMLHttpRequest();
+        var fd = new FormData();
+
+        for (var i = 0; i < files.length; i++) {
+            fd.append("files[]", files[i]);
+        }
+
         xhr.open("POST", "EnquiryFileUpload.ashx", true);
         xhr.onload = function () {
             if (xhr.status === 200) {
                 var response = xhr.responseText;
-                console.log("File uploaded successfully. File name: " + response);
-                resolve(response); // Resolve the Promise with the response
+                console.log("Files uploaded successfully. File names: " + response);
+                resolve(response);
             } else {
-                console.error("Error uploading file. Status: " + xhr.status);
-                reject(new Error("File upload failed")); // Reject the Promise with an error
+                console.error("Error uploading files. Status: " + xhr.status);
+                reject(new Error("File upload failed"));
             }
         };
         xhr.onerror = function () {
             console.error("File upload failed due to network error");
-            reject(new Error("File upload failed")); // Reject the Promise with an error
+            reject(new Error("File upload failed"));
         };
         xhr.send(fd);
     });
 }
 
+
+function displayFilesInGrid(fileNamesString) {
+    var previewArea = document.getElementById("PreviewArea");
+    previewArea.innerHTML = ""; // Clear the previous content
+
+    if (fileNamesString === "" || fileNamesString.trim() === "") {
+        var h1Element = document.createElement("h1");
+        h1Element.textContent = "There are no files attached";
+        previewArea.appendChild(h1Element);
+        return;
+    }
+
+    var fileNames = fileNamesString.split(",");
+
+    // Create a grid with 2 columns and 2 rows
+    var grid = document.createElement("div");
+    grid.className = "grid";
+
+    for (var i = 0; i < fileNames.length; i++) {
+        // Create a grid item
+        var gridItem = document.createElement("div");
+        //gridItem.className = "grid-item";
+
+        // Create an image element for preview
+        var imageElement = document.createElement("img");
+        imageElement.className = "grid-item"
+        imageElement.src = "Files/Enquiry/" + fileNames[i]; // Update the image path as per your file structure
+        imageElement.onerror = function () {
+            this.src = "https://upload.wikimedia.org/wikipedia/commons/d/dc/No_Preview_image_2.png"; // Update with the path to your placeholder image or set a suitable alternative text
+        };
+        // Create a file name element
+        var fileNameElement = document.createElement("p");
+        fileNameElement.textContent = fileNames[i];
+
+        // Create a download button
+        var downloadButton = document.createElement("a");
+        downloadButton.href = "Files/Enquiry/" + fileNames[i];
+        downloadButton.download = fileNames[i];
+        downloadButton.textContent = "Download";
+
+        // Append the image and file name elements to the grid item
+        gridItem.appendChild(imageElement);
+        gridItem.appendChild(fileNameElement);
+        gridItem.appendChild(downloadButton);
+
+        // Append the grid item to the grid
+        grid.appendChild(gridItem);
+    }
+
+    // Append the grid to the preview area
+    previewArea.appendChild(grid);
+}
+
+
+function displayFilesInModal(fileNamesString, FlexUploadexFiles) {
+    var previewArea = document.getElementById(FlexUploadexFiles);
+    previewArea.innerHTML = ""; // Clear the previous content
+
+    if (fileNamesString === "" || fileNamesString.trim() === "") {
+        var h1Element = document.createElement("h1");
+        h1Element.textContent = "There are no files attached";
+        previewArea.appendChild(h1Element);
+        return;
+    }
+
+    var fileNames = fileNamesString.split(",");
+
+    // Create a grid with 2 columns and 2 rows
+    var grid = document.createElement("div");
+    grid.style.display = "Flex";
+    grid.style.flexDirection = "row";
+
+    for (var i = 0; i < fileNames.length; i++) {
+        // Create a grid item
+        var gridItem = document.createElement("div");
+        gridItem.style.width = '200px';
+        gridItem.id = fileNames[i];
+        // Create an image element for preview
+        //var imageElement = document.createElement("img");
+        //imageElement.className = ""
+        //imageElement.src = "Files/Enquiry/" + fileNames[i]; // Update the image path as per your file structure
+        //imageElement.onerror = function () {
+        //    this.src = "https://upload.wikimedia.org/wikipedia/commons/d/dc/No_Preview_image_2.png"; // Update with the path to your placeholder image or set a suitable alternative text
+        //};
+        // Create a file name element
+        var fileNameElement = document.createElement("p");
+        fileNameElement.textContent = fileNames[i];
+
+        // Create a download button
+        var downloadButton = document.createElement("a");
+        downloadButton.href = "Files/Enquiry/" + fileNames[i];
+        downloadButton.download = fileNames[i];
+        downloadButton.className = "DownloadLink";
+        downloadButton.textContent = "Download";
+
+        // Create a remove button
+        var removeButton = document.createElement("a");
+        removeButton.textContent = "Remove";
+        removeButton.className = "RemoveLink";
+        removeButton.href = "Files/Enquiry/" + fileNames[i];
+        removeButton.setAttribute("data-file-name", fileNames[i]);
+        removeButton.addEventListener("click", function (event) {
+            var fileName = event.target.getAttribute("data-file-name");
+            removeFromServer(fileName, GBLEnquiryDetailID);
+            event.preventDefault();
+        });
+
+        //  gridItem.appendChild(imageElement);
+        gridItem.appendChild(fileNameElement);
+        gridItem.appendChild(downloadButton);
+        gridItem.appendChild(removeButton);
+
+        // Append the grid item to the grid
+        grid.appendChild(gridItem);
+    }
+
+    // Append the grid to the preview area
+    previewArea.appendChild(grid);
+}
+
+function removeFromServer(FileName, EnquiryDetailID) {
+
+    swal({
+        title: "Are you sure to delete selected file..?",
+        text: 'You will not be able to recover!',
+        type: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#DD6B55",
+        confirmButtonText: "Yes, delete it!",
+        closeOnConfirm: true
+    },
+        function () {
+            $("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
+
+            $.ajax({
+                type: "POST",
+                url: "WebServiceProductMaster.asmx/DeleteFileFromFolder",
+                data: '{fileName:' + JSON.stringify(FileName) + ',EnquiryDetailID:' + Number(EnquiryDetailID) + '}',
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (results) {
+                    $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+                    if (results.d.includes("Success")) {
+                        var divElement = document.getElementById(FileName);
+                        if (divElement) {
+                            divElement.parentNode.removeChild(divElement);
+                        }
+                    }
+                },
+                error: function errorFunc(jqXHR) {
+                    $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+                    console.log(jqXHR);
+                }
+            });
+        });
+
+}

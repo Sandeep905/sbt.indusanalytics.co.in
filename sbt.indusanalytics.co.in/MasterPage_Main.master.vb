@@ -42,7 +42,7 @@ Partial Class MasterPage_Main
 
                 Dim DT As New DataTable
                 Dim ModuleID As Integer
-                If currentPageName <> "Home.aspx" And Request.Url.ToString().Contains("localhost") = False Then
+                If currentPageName <> "Home.aspx" And currentPageName <> "VendorMachineAllocation.aspx" And Request.Url.ToString().Contains("localhost") = False Then
                     str = "Select Isnull(CanView,'False') As Action,MM.ModuleID,MM.ModuleDisplayName From UserModuleAuthentication As A Inner Join ModuleMaster As MM On MM.ModuleID=A.ModuleID And MM.CompanyID=A.CompanyID Where Isnull(A.IsDeletedTransaction,0)=0 And A.UserID=" & UserId & " And MM.ModuleName='" & currentPageName & "' And A.CompanyID=" & CompanyId
                     db.FillDataTable(DT, str)
 

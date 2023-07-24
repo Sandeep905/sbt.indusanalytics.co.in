@@ -15,6 +15,7 @@ var Isprocessed = 0;
 var GBLClientData = [];
 var GBLContents = [];
 let GBLCategoryIDForProcess = '';
+let GBLSelectedEnquiryIDDetail = 0;
 
 
 $("#SalesCordinator").dxSelectBox({
@@ -756,6 +757,7 @@ $("#BtnLoadFromListt").click(function () {
 })
 var grid = $("#gridProductList").dxDataGrid({
     dataSource: [],
+    keyExpr: "EnquiryIDDetail",
     columnAutoWidth: true,
     allowColumnResizing: true,
     columnResizingMode: "widget",
@@ -819,8 +821,8 @@ var grid = $("#gridProductList").dxDataGrid({
                     rowData.ProductName = "";
                     rowData.ProcessIDStr = "";
                     rowData.ProductHSNID = 0;
-                    rowData.IsOffsetProduct = 0;
-                    rowData.IsUnitProduct = 0;
+                    rowData.IsOffsetProduct = false;
+                    rowData.IsUnitProduct = false;
 
                 }
             }
@@ -838,7 +840,7 @@ var grid = $("#gridProductList").dxDataGrid({
                     .on('dxclick', function () {
                         if (options.data.Quantity === undefined || Number(options.data.Quantity) <= 0) return;
                         SelectedProductData = options.data;
-
+                        GBLSelectedEnquiryIDDetail = options.data.EnquiryIDDetail;
                         if (options.data.ProductName == "" || options.data.ProductName == undefined) {
                             var result = $.grep(ProductMasterList, function (ex) { return ex.ProductCatalogID === options.data.ProductCatalogID; })
                             options.data.ProductName = result[0].ProductName
@@ -929,18 +931,19 @@ var grid = $("#gridProductList").dxDataGrid({
 
                         $("OperIdPQ").text(options.data.ProcessIDStr);
                         loadProcess();
-                        //reload already created plan for the selected product
+                        //reload already created plan for the selected product Flex
                         if ((options.data.VendorID > 0 && options.data.IsOffsetProduct !== true && options.data.IsUnitProduct !== true) || (options.data.ProductInputSizes !== "" && options.data.ProductInputSizes !== undefined && options.data.IsOffsetProduct !== true && options.data.IsUnitProduct !== true)) {
                             if (options.data.VendorID > 0) {
-                                IsMaualCostingflex();
-
+                                $("#gridContentPlansList").dxDataGrid({ dataSource: JSON.parse(options.data.SelectedPlan) });
                                 if (options.data.IsManualCosting == true) {
+                                    IsMaualCostingflex();
                                     $("#Selvendorflex").dxSelectBox({
                                         value: options.data.VendorID
                                     });
                                     document.getElementById('MannualUnitRateflex').value = options.data.VendorRate
                                     document.getElementById('IsManualcostflex').checked = options.data.IsManualCosting
                                     document.getElementById('gridContentPlansList').style.display = "none"; // for flex
+
                                 } else {
                                     $("#Selvendorflex").dxSelectBox({
                                         value: -1
@@ -950,7 +953,6 @@ var grid = $("#gridProductList").dxDataGrid({
                                     document.getElementById('gridContentPlansList').style.display = "block"; // for flex
                                 }
 
-                                $("#gridContentPlansList").dxDataGrid({ dataSource: JSON.parse(options.data.SelectedPlan) });
                             }
 
                             $("#gridProductConfig").dxDataGrid({ dataSource: JSON.parse(options.data.ProductInputSizes) });
@@ -976,9 +978,12 @@ var grid = $("#gridProductList").dxDataGrid({
                                 CalculateUnitCost();
                                 return;
                             }
+                            document.getElementById("PlanContName").innerHTML = options.data.ProductName1
+                           
+                            onChangeCalcAmountFlex();
                             this.setAttribute("data-toggle", "modal");
                             this.setAttribute("data-target", "#modalEstimateProduct");
-                            onChangeCalcAmountFlex();
+
                         }
 
                     })
@@ -993,7 +998,7 @@ var grid = $("#gridProductList").dxDataGrid({
                 dataSource: [{ RateType: "Per Unit" }, { RateType: "Per 1000 Unit" }, { RateType: "Per Square Feet" }],
                 displayExpr: "RateType",
                 valueExpr: "RateType"
-            },// validationRules: [{ type: "required", message: "Rate type is required" }]
+            },
         },
         {
             dataField: "ProductHSNID", caption: "HSN Code", allowEditing: true,
@@ -1014,14 +1019,12 @@ var grid = $("#gridProductList").dxDataGrid({
         },
         { dataField: "GSTTaxPercentage", caption: "GST Tax", allowEditing: false, dataType: "number", visible: false },
         { dataField: "GSTAmount", caption: "GST Amt", allowEditing: false, dataType: "number", visible: false },
-
         { dataField: "SGSTPercantage", caption: "SGST %", allowEditing: false, dataType: "number" },
         { dataField: "SGSTAmount", caption: "SGST Amt", allowEditing: false, dataType: "number" },
         { dataField: "CGSTPercantage", caption: "CGST %", allowEditing: false, dataType: "number" },
         { dataField: "CGSTAmount", caption: "CGST Amt", allowEditing: false, dataType: "number" },
         { dataField: "IGSTPercantage", caption: "IGST %", allowEditing: false, dataType: "number" },
         { dataField: "IGSTAmount", caption: "IGST Amt", allowEditing: false, dataType: "number" },
-
         { dataField: "MiscPer", caption: "Misc.cost%", allowEditing: false, dataType: "number" },
         { dataField: "ShippingCost", caption: "Shipping Cost", allowEditing: false, dataType: "number" },
         { dataField: "Amount", caption: "Amount", allowEditing: false, dataType: "number" },
@@ -1229,8 +1232,14 @@ $("#gridContentPlansList").dxDataGrid({
     },
     onSelectionChanged: function (data) {
         if (data) {
-            document.getElementById('finalCost1').value = data.selectedRowsData[0].FinalAmount;
-            document.getElementById('VendorUnitCostFlex').value = data.selectedRowsData[0].UnitCost.toFixed(2).toString();
+            if (data.selectedRowsData.length > 0) {
+                document.getElementById('finalCost1').value = data.selectedRowsData[0].FinalAmount;
+                document.getElementById('VendorUnitCostFlex').value = data.selectedRowsData[0].UnitCost.toFixed(2).toString();
+            } else {
+                document.getElementById('finalCost1').value = 0;
+                document.getElementById('VendorUnitCostFlex').value = 0;
+            }
+            $('#BtnPlan').click();
             onChangeCalcAmountFlex();
         }
     }
@@ -1678,7 +1687,7 @@ $("#BtnApplyPlan").click(function () {
     }
 
     for (var i = 0; i < gridProductData._options.dataSource.length; i++) {
-        if (gridProductData._options.dataSource[i].ProductCatalogID === ProductCatalogID && gridProductData._options.dataSource[i].Quantity === parseFloat(document.getElementById("TxtPlanQty").value)) {
+        if (gridProductData._options.dataSource[i].ProductCatalogID === ProductCatalogID && gridProductData._options.dataSource[i].Quantity === parseFloat(document.getElementById("TxtPlanQty").value) && gridProductData._options.dataSource[i].EnquiryIDDetail === GBLSelectedEnquiryIDDetail) {
             gridProductData._options.dataSource[i].Rate = SelectedPlanData[0].UnitCost;
             gridProductData._options.dataSource[i].RateType = "Per Unit";
             gridProductData._options.dataSource[i].Amount = NetAmt;
@@ -1731,6 +1740,14 @@ $("#BtnApplyPlan").click(function () {
     document.getElementById("FinalShipperCost1").value = 0
     document.getElementById("ProfitPer1").value = 0
     document.getElementById("FinalTaxPer1").value = 0
+    document.getElementById("MannualUnitRateflex").value = 0;
+    document.getElementById('finalCost1').value = 0;
+    document.getElementById('VendorUnitCostFlex').value = 0;
+    document.getElementById('IsManualcostflex').checked = false;
+    $("#Selvendorflex").dxSelectBox({
+        value: -1
+    })
+    IsMaualCostingflex();
     document.getElementById("BtnApplyPlan").setAttribute("data-dismiss", "modal");
 });
 
@@ -2213,7 +2230,7 @@ $("#btnApplyCostPQ").click(function () {
             //if (gridProductData._options.dataSource[row].ProductCatalogID === ProductCatalogID && gridProductData._options.dataSource[i].ProductName1 === parseFloat(document.getElementById("TxtPlanQty").value)) {
             gridProductData._options.dataSource[row].Rate = VendorUnitCostOffset;
             gridProductData._options.dataSource[row].UnitCostVendor = VendorUnitCostOffset;
-            gridProductData._options.dataSource[row].IsOffsetProduct = 1;
+            gridProductData._options.dataSource[row].IsOffsetProduct = true;
 
             gridProductData._options.dataSource[row].VendorRate = parseFloat(document.getElementById('finalUnitCost').value);
             gridProductData._options.dataSource[row].RateType = "Per Unit";
@@ -2737,7 +2754,7 @@ $("#BtnApplyPlanUnit").click(function () {
         }
 
         for (var i = 0; i < gridProductData._options.dataSource.length; i++) {
-            if (gridProductData._options.dataSource[i].ProductCatalogID === ProductCatalogID && gridProductData._options.dataSource[i].Quantity === Number(document.getElementById("TxtPlanQtyUnit").value)) {
+            if (gridProductData._options.dataSource[i].ProductCatalogID === ProductCatalogID && gridProductData._options.dataSource[i].Quantity === Number(document.getElementById("TxtPlanQtyUnit").value && gridProductData._options.dataSource[i].EnquiryIDDetail === GBLSelectedEnquiryIDDetail)) {
                 gridProductData._options.dataSource[i].Rate = document.getElementById('VendorRate').value;
                 gridProductData._options.dataSource[i].UnitCostVendor = VendorUnitCostUnit.toFixed(2).toString();
                 gridProductData._options.dataSource[i].RateType = "Per Unit";
@@ -2966,5 +2983,10 @@ $("#BtnSelectOperation").click(function () {
     document.getElementById("BtnSelectOperation").setAttribute("data-target", "#SelectOperation");
 
 });
-
+ 
+$(document).ready(function () {
+    $('#IsManualcostflex').on('change', function () {
+        IsMaualCostingflex();
+    });
+});
 

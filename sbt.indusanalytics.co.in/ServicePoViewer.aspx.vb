@@ -17,7 +17,7 @@ Partial Class ServicePoViewer
             ReportViewer1.Reset()
             ReportViewer1.LocalReport.ReportPath = Server.MapPath("~/ServicePO.rdlc")
 
-            Dim DTMain As DataTable = GetDataTable("Select Distinct JCS.JobBookingNo as JCNO,  JC.LedgerName + ',' + JC.Email +',' + JC.TelephoneNo as SalesPerson,SPM.DelivaryAddress , SPM.ProductEstimateID,SPM.JobBookingID,SPM.QuotationNo as EstimateNo,SPM.EnquiryNo,SPM.PONumber,Replace(Convert(Nvarchar(30),SPM.PoDate,106),'','-') as PODate,SPM.VersionNo as RevisionNo,LMV.LedgerName,'GST No. - ' + LMV.GSTNo as GSTIN,LMV.Address1+ CHAR(13)+CHAR(10)+LMV.City +', '+ LMV.State +', '+ LMV.Country as ClientAddress from ServicePOMain As SPM Inner Join ServicePODetails as SPD On SPM.POID = SPD.POID Inner Join LedgerMaster As LM On SPM.LedgerId = Lm.LedgerID Inner Join LedgerMaster as LMV on LMV.LedgerID = SPD.ScheduleVendorId inner join JobCardSchedule as JBJC on JBJC.JobCardID = SPM.JobBookingID and JBJC.JobContentsID = SPD.ProductEstimationContentID inner join LedgerMaster as JC on JC.LedgerID = JBJC.JobCoordinatorID inner join Jobbookingjobcard as JCS on JCS.JobbookingID= JBJC.JObcardID Where SPM.POID = " & ID & " AND SPM.CompanyID = " & GBLCompanyID)
+            Dim DTMain As DataTable = GetDataTable("Select Distinct Isnull(SPM.Freight,0) Freight, JCS.JobBookingNo as JCNO,  JC.LedgerName + ',' + JC.Email +',' + JC.TelephoneNo as SalesPerson,SPM.DelivaryAddress , SPM.ProductEstimateID,SPM.JobBookingID,SPM.QuotationNo as EstimateNo,SPM.EnquiryNo,SPM.PONumber,Replace(Convert(Nvarchar(30),SPM.PoDate,106),'','-') as PODate,SPM.VersionNo as RevisionNo,LMV.LedgerName,'GST No. - ' + LMV.GSTNo as GSTIN,LMV.Address1+ CHAR(13)+CHAR(10)+LMV.City +', '+ LMV.State +', '+ LMV.Country as ClientAddress from ServicePOMain As SPM Inner Join ServicePODetails as SPD On SPM.POID = SPD.POID Inner Join LedgerMaster As LM On SPM.LedgerId = Lm.LedgerID Inner Join LedgerMaster as LMV on LMV.LedgerID = SPD.ScheduleVendorId inner join JobCardSchedule as JBJC on JBJC.JobCardID = SPM.JobBookingID and JBJC.JobContentsID = SPD.ProductEstimationContentID inner join LedgerMaster as JC on JC.LedgerID = JBJC.JobCoordinatorID inner join Jobbookingjobcard as JCS on JCS.JobbookingID= JBJC.JObcardID Where SPM.POID = " & ID & " AND SPM.CompanyID = " & GBLCompanyID)
             Dim dsMain As ReportDataSource = New ReportDataSource("ServicePOMain", DTMain)
             ReportViewer1.LocalReport.DataSources.Add(dsMain)
 
@@ -31,8 +31,8 @@ Partial Class ServicePoViewer
                 ApprovedByAndPrintBy.Rows(i)("PrintedBy") = UserName
             Next
 
-            Dim sum = New ReportParameter("TOTALINWORD", db.ReadNumber(DTDetail.Compute("SUM(TotalAmount)", ""), "Rupees", "Paise", "INRs")) '
-            Dim GST = New ReportParameter("GSTINWORD", db.ReadNumber(DTDetail.Rows(0)("CGSTAmount") + DTDetail.Rows(0)("IGSTAmount") + DTDetail.Rows(0)("SGSTAmount"), "Rupees", "Paise", "INRs"))
+            Dim sum = New ReportParameter("TOTALINWORD", db.ReadNumber(DTDetail.Compute("SUM(TotalAmount)", "") + DTMain.Compute("SUM(Freight)", "") + DTMain.Compute("SUM(Freight)", "") * 0.18, "Rupees", "Paise", "INRs")) '
+            Dim GST = New ReportParameter("GSTINWORD", db.ReadNumber(Math.Round(DTDetail.Rows(0)("CGSTAmount") + DTDetail.Rows(0)("IGSTAmount") + DTDetail.Rows(0)("SGSTAmount"), 0), "Rupees", "Paise", "INRs"))
             Dim IMG = New Uri(Server.MapPath("~/images/AuthorisedSignatory.jpeg")).AbsoluteUri
             Dim AuthorisedSignatory = New ReportParameter("ImageAuthoritys", IMG)
             Dim dsDetail As ReportDataSource = New ReportDataSource("ServicePODetails", DTDetail)

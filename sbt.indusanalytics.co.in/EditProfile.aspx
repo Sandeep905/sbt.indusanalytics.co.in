@@ -177,58 +177,64 @@
                                         <div id="SelectBoxVendor"></div>
                                         <strong id="ValStrSelectBoxVendor" style="color: red; font-size: 12px; display: none"></strong>
                                     </div>
-                                      <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+                                    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
                                         <label class="font-11">Employee</label>
                                         <div id="SelectEmployeeUser"></div>
-                                     </div>
+                                    </div>
 
-                                    <%--<div class="col-lg-3 col-md-3 col-sm-3 col-xs-12" >
-                                                <div style="float: left; width: 100%; height: auto">
-                                                    <input type="checkbox" id="CHKCreateuser" class="filled-in chk-col-red" style="height: 20px" />
-                                                    <label for="CHKCreateuser" style="height: 20px">Is eligible to Create User</label>
-                                                    <div style="min-height: 20px; float: left; width: 100%"><strong id="ValStrCHKCreateuser" style="color: red; font-size: 10px"></strong></div>
-                                                </div>
-                                                <div style="float: left; width: 100%; height: auto; margin-top: 10px">
-                                                    <input type="checkbox" id="CHKAdministrativeRights" class="filled-in chk-col-red" style="height: 20px" />
-                                                    <label for="CHKAdministrativeRights" style="height: 20px">Is have Administrative Rights</label>
-                                                    <div style="min-height: 20px; float: left; width: 100%"><strong id="ValStrCHKAdministrativeRights" style="color: red; font-size: 10px"></strong></div>
-                                                </div>
-                                            </div>
+                                    <%--   <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+                                        <div style="float: left; width: 100%; height: auto">
+                                            <input type="checkbox" id="CHKCreateuser" class="filled-in chk-col-red" style="height: 20px" />
+                                            <label for="CHKCreateuser" style="height: 20px">Is eligible to Create User</label>
+                                            <div style="min-height: 20px; float: left; width: 100%"><strong id="ValStrCHKCreateuser" style="color: red; font-size: 10px"></strong></div>
+                                        </div>
+                                        <div style="float: left; width: 100%; height: auto; margin-top: 10px">
+                                            <input type="checkbox" id="CHKAdministrativeRights" class="filled-in chk-col-red" style="height: 20px" />
+                                            <label for="CHKAdministrativeRights" style="height: 20px">Is have Administrative Rights</label>
+                                            <div style="min-height: 20px; float: left; width: 100%"><strong id="ValStrCHKAdministrativeRights" style="color: red; font-size: 10px"></strong></div>
+                                        </div>
+                                    </div>
 
-                                            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12" >
-                                                <div style="float: left; width: 100%; height: auto">
-                                                    <input type="checkbox" id="CHKPaperIssue" class="filled-in chk-col-red" style="height: 20px" />
-                                                    <label for="CHKPaperIssue" style="height: 20px">Is eligible extra Paper Issue</label>
-                                                    <div style="min-height: 20px; float: left; width: 100%"><strong id="ValStrCHKPaperIssue" style="color: red; font-size: 10px"></strong></div>
-                                                </div>
-                                                <div style="float: left; width: 100%; height: auto; margin-top: 10px">
-                                                    <input type="checkbox" id="CHKAnotherPaper" class="filled-in chk-col-red" style="height: 20px" />
-                                                    <label for="CHKAnotherPaper" style="height: 20px">Is choose Another Paper</label>
-                                                    <div style="min-height: 20px; float: left; width: 100%"><strong id="ValStrCHKAnotherPaper" style="color: red; font-size: 10px"></strong></div>
-                                                </div>
-                                            </div>
+                                    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+                                        <div style="float: left; width: 100%; height: auto">
+                                            <input type="checkbox" id="CHKPaperIssue" class="filled-in chk-col-red" style="height: 20px" />
+                                            <label for="CHKPaperIssue" style="height: 20px">Is eligible extra Paper Issue</label>
+                                            <div style="min-height: 20px; float: left; width: 100%"><strong id="ValStrCHKPaperIssue" style="color: red; font-size: 10px"></strong></div>
+                                        </div>
+                                        <div style="float: left; width: 100%; height: auto; margin-top: 10px">
+                                            <input type="checkbox" id="CHKAnotherPaper" class="filled-in chk-col-red" style="height: 20px" />
+                                            <label for="CHKAnotherPaper" style="height: 20px">Is choose Another Paper</label>
+                                            <div style="min-height: 20px; float: left; width: 100%"><strong id="ValStrCHKAnotherPaper" style="color: red; font-size: 10px"></strong></div>
+                                        </div>
+                                    </div>
 
-                                            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12" >
-                                                <div style="float: left; width: 100%; height: auto">
-                                                    <input type="checkbox" id="CHKSeeCost" class="filled-in chk-col-red" style="height: 20px" />
-                                                    <label for="CHKSeeCost" style="height: 20px">Is user can't See Cost</label>
-                                                    <div style="min-height: 20px; float: left; width: 100%"><strong id="ValStrCHKSeeCost" style="color: red; font-size: 10px"></strong></div>
-                                                </div>
-                                                <div style="float: left; width: 100%; height: auto; margin-top: 10px">
-                                                    <input type="checkbox" id="CHKProductionDate" class="filled-in chk-col-red" style="height: 20px" />
-                                                    <label for="CHKProductionDate" style="height: 20px">Is editable Production Date</label>
-                                                    <div style="min-height: 20px; float: left; width: 100%"><strong id="ValStrCHKProductionDate" style="color: red; font-size: 10px"></strong></div>
-                                                </div>
-                                            </div>
-
-                                            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12" >
-                                                <div style="float: left; width: 100%; height: auto">
-                                                    <input type="checkbox" id="CHKHidden" class="filled-in chk-col-red" style="height: 20px" />
-                                                    <label for="CHKHidden" style="height: 20px">Is Hidden</label>
-                                                    <div style="min-height: 20px; float: left; width: 100%"><strong id="ValStrCHKHidden" style="color: red; font-size: 10px"></strong></div>
-                                                </div>
-                                            </div>--%>
-                                    <div class="modal-footer" style="border-top: 1px solid #42909A;">
+                                    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+                                        <div style="float: left; width: 100%; height: auto">
+                                            <input type="checkbox" id="CHKSeeCost" class="filled-in chk-col-red" style="height: 20px" />
+                                            <label for="CHKSeeCost" style="height: 20px">Is user can't See Cost</label>
+                                            <div style="min-height: 20px; float: left; width: 100%"><strong id="ValStrCHKSeeCost" style="color: red; font-size: 10px"></strong></div>
+                                        </div>
+                                        <div style="float: left; width: 100%; height: auto; margin-top: 10px">
+                                            <input type="checkbox" id="CHKProductionDate" class="filled-in chk-col-red" style="height: 20px" />
+                                            <label for="CHKProductionDate" style="height: 20px">Is editable Production Date</label>
+                                            <div style="min-height: 20px; float: left; width: 100%"><strong id="ValStrCHKProductionDate" style="color: red; font-size: 10px"></strong></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+                                        <div style="float: left; width: 100%; height: auto">
+                                            <input type="checkbox" id="CHKHidden" class="filled-in chk-col-red" style="height: 20px" />
+                                            <label for="CHKHidden" style="height: 20px">Is Hidden</label>
+                                            <div style="min-height: 20px; float: left; width: 100%"><strong id="ValStrCHKHidden" style="color: red; font-size: 10px"></strong></div>
+                                        </div>
+                                    </div>--%>
+                                    <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+                                        <div style="float: left; width: 100%; height: auto">
+                                            <input type="checkbox" id="CHKBlocked" class="filled-in chk-col-red" style="height: 20px" />
+                                            <label for="CHKBlocked" style="height: 20px">Is Blocked</label>
+                                            <div style="min-height: 20px; float: left; width: 100%"><strong id="ValStrCHKHidden" style="color: red; font-size: 10px"></strong></div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer" style="border-top: 1px solid #42909A">
                                         <button type="button" id="BtnNew" class="btn btn-primary waves-effect" style="color: none">New</button>
                                         <button type="button" id="BtnDeletePopUp" class="btn btn-danger waves-effect" style="">Delete</button>
                                         <button type="button" id="BtnSave" class="btn btn-success waves-effect" style="">Save</button>

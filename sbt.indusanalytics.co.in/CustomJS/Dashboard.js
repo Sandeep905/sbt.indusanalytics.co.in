@@ -421,7 +421,49 @@ function Lastchart() {
     });
 }
 
- 
+
+
+//Calendar chart
+
+// Sample data for the month box chart
+const data = [
+    { month: 'January', min: 10, max: 30 },
+    { month: 'February', min: 20, max: 40 },
+    { month: 'March', min: 15, max: 35 },
+    // Add more data for other months
+];
+
+// Function to create the month box chart
+function createMonthBoxChart() {
+    const chart = new Chart('#boxChart', {
+        type: 'boxplot',
+        data: {
+            labels: data.map(item => item.month),
+            datasets: [{
+                data: data.map(item => [item.min, item.max]),
+            }],
+        },
+        options: {
+            responsive: true,
+            title: {
+                display: true,
+                text: 'Month Box Chart',
+            },
+            //scales: {
+            //    yAxes: [{
+            //        scaleLabel: {
+            //            display: true,
+            //            labelString: 'Temperature',
+            //        },
+            //    }],
+            //},
+        },
+    });
+}
+
+// Call the function to create the month box chart
+createMonthBoxChart();
+
 
 
 $('#Year').dxSelectBox({
@@ -429,7 +471,6 @@ $('#Year').dxSelectBox({
     placeholder: 'Select Year',
 
 });
-
 
 
 

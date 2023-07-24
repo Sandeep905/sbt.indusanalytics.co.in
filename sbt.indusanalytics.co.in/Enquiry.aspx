@@ -262,6 +262,24 @@
             color: blue !important;
             font-size: 12px !important;
         }
+        .RemoveLink {
+            color: red !important;
+            font-size: 12px !important;
+            margin-left:5px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-gap: 10px;
+        }
+
+        .grid-item {
+            border: 1px solid #ccc;
+            padding: 10px;
+            height: 200px;
+            width: 200px;
+        }
     </style>
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="Server">
@@ -321,6 +339,23 @@
             </div>
         </div>
     </div>
+    <div class="modal clearfix" id="ModalDownloadPreview" tabindex="-1" role="dialog" style="top: 10%">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="DialogBoxCustom" style="float: left; border-top-left-radius: 4px; border-top-right-radius: 4px;">
+                    <strong>Download Preview</strong>
+                    <a href="javascript:void(0);" class="iconRightDbox btn-danger" data-dismiss="modal">
+                        <span data-dismiss="modal" style="font-weight: 900; margin-right: 8px">X</span>
+                    </a>
+                </div>
+                <div class="modal-header padding-0" style="overflow-y: auto">
+                    <div id="PreviewArea">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <div class="modal clearfix" id="modalEstimateProduct" tabindex="-1" role="dialog" style="margin-top: 50px">
         <div class="modal-dialog" role="document">
@@ -356,12 +391,14 @@
                         <label>Other Details :</label>
                         <textarea class="forTextBox" rows="5" id="FlexRemark"></textarea>
                     </div>
-                    <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 ">
+                    <div class="col-xs-12 col-sm-4 col-md-4 col-lg-4 ">
                         <b class="font-11">Artwork/Ref/ doc :</b>
-                        <input type="file" id="fileflex" />
-                        <a class="DownloadLink hidden" id="fileDownloadflex">Download file</a>
+                        <input type="file" id="fileflex" multiple />
+                        <a class="DownloadLink hidden" onclick="seeallimages(this.id)" id="fileDownloadflex">Download file</a>
                     </div>
-
+                    <div class="col-xs-12 col-sm-8 col-md-8 col-lg-8 " style="display: flex; flex-direction: row">
+                        <div id="FlexUploadexFiles"></div>
+                    </div>
                     <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 hidden">
                         <input type="button" name="BtnPlan" id="BtnPlan" value="Estimate" class="btn btn-primary" />
                         <div id="gridContentPlansList"></div>
@@ -635,10 +672,13 @@
                             <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 padding-0 margin-0" style="padding-right: 2px; padding-left: 2px">
                                 <div id="GridOperationAllocated"></div>
                             </div>
-                            <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
+                            <div class="col-xs-12 col-sm-4 col-md-4 col-lg-4">
                                 <b class="font-11">Artwork/Ref/ doc :</b>
-                                <input type="file" id="fileOffset" />
-                                <a class=" DownloadLink hidden" id="fileDownloadoffset">Download file</a>
+                                <input type="file" id="fileOffset" multiple />
+                                <a class=" DownloadLink hidden" onclick="seeallimages(this.id)" id="fileDownloadoffset">Download file</a>
+                            </div>
+                            <div class="col-xs-12 col-sm-8 col-md-8 col-lg-8 " style="display: flex; flex-direction: row">
+                                <div id="OffestUploadexFiles"></div>
                             </div>
                             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                                 <label>Other Details :</label>
@@ -794,10 +834,13 @@
                             <label>Other Details :</label>
                             <textarea class="forTextBox" rows="5" id="UnitRemark"></textarea>
                         </div>
-                        <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6 ">
+                        <div class="col-xs-12 col-sm-4 col-md-4 col-lg-4 ">
                             <b class="font-11">Artwork/Ref/ doc :</b>
-                            <input type="file" id="fileUnit" />
-                            <a class="DownloadLink hidden" id="fileDownloadunit">Download file</a>
+                            <input type="file" id="fileUnit" multiple />
+                            <a class="DownloadLink hidden" onclick="seeallimages(this.id)" id="fileDownloadunit">Download file</a>
+                        </div>
+                        <div class="col-xs-12 col-sm-8 col-md-8 col-lg-8 " style="display: flex; flex-direction: row">
+                            <div id="UnitUploadexFiles"></div>
                         </div>
                         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 modal-footer" style="border-top: 1px solid #42909A; padding: 5px">
                             <a id="BtnApplyPlanUnit" class="btn btn-primary waves-effect">Add</a>
@@ -985,7 +1028,6 @@
             </div>
         </div>
     </div>
-
 
     <!-- The Modal Shipper calculation-->
     <div class="modal fade" id="largeModalShipperPlan" tabindex="-1" role="dialog">

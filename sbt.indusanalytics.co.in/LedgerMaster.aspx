@@ -154,6 +154,10 @@
                             <label>Machine Name</label>
                             <div id="selMachine"></div>
                         </div>
+                        
+                        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                            <input type="button" id="VendorMachineList" value ="Show All Machine" class="btn btn-success" />
+                        </div>
 
                         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                             <div id="GridMachineSlab"></div>

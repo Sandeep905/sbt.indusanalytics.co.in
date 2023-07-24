@@ -1491,7 +1491,10 @@ m:
         '    End Try
         'End Function
 
-        Public Function SendEmail(ByVal subject As String, ByVal body As String, ByVal toUser As String, Optional ByVal attachmentPath As String = Nothing) As String
+        Public Function SendEmails(ByVal subject As String, ByVal body As String, ByVal toUser As String, Optional ByVal attachmentPath As String = Nothing) As String
+
+            'SendApprovalEmail()
+            'Exit Function
             Dim companyId As Integer = Convert.ToInt32(HttpContext.Current.Session("CompanyId"))
             Dim userId As Integer = Convert.ToInt32(HttpContext.Current.Session("UserId"))
 
@@ -1505,7 +1508,7 @@ m:
                 Return "Invalid sender mail id, Please update mail id in user master"
             End If
 
-            Dim emailTo As String = toUser.Trim()
+            Dim emailTo As String = "sandeeppatidar14306@gmail.com" 'toUser.Trim()
             Dim emailAddresses() As String = emailTo.Split(",")
             Dim validEmailRegex As New Regex("^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$")
 
@@ -1551,7 +1554,7 @@ m:
                 Return ex.ToString()
             End Try
         End Function
-        Public Function SendEmails(ByVal TxtMailTo As String, ByVal Username As String) As String
+        Public Function SendEmail(ByVal TxtMailTo As String, ByVal Username As String) As String
             Dim TxtEmailBody, TxtSubject As String
             Dim random As New Random
             Dim rndomNum As String = "3434"
@@ -1573,12 +1576,10 @@ m:
 
                 mm.IsBodyHtml = True
                 mm.Priority = MailPriority.High
-                mm.Bcc.Add("admin@indusanalytics.in")
-                mm.CC.Add("bhupendra.indusanalytics@gmail.com")
 
                 Dim credential As NetworkCredential = New NetworkCredential With {
-                .UserName = "info@indusanalytics.in",
-                .Password = "acxutzrqyxukybgb"
+                .UserName = "info@mail.in",
+                .Password = "passwo"
             }
 
                 Dim smtp As SmtpClient = New SmtpClient With {
@@ -1603,15 +1604,15 @@ m:
                 Dim message As New MailMessage()
                 Dim smtp As New SmtpClient()
                 message.From = New MailAddress("sandeep.indusanalytics@gmail.com")
-                message.To.Add(New MailAddress("sandeep.indusanalytics@gmail.com"))
+                message.To.Add(New MailAddress("sandeeppatidar14306@gmail.com"))
                 'message.CC.Add(New MailAddress("registration@mpcbma.in"))
                 message.Subject = "Test Subjerc"
                 message.IsBodyHtml = True 'to make message body as html  
                 message.Body = "Test Body"
                 message.Priority = MailPriority.High
                 smtp.Port = 25
-                smtp.Host = "smtp.gmail.com" ' "smtp.emailsrvr.com" ; for gmail host  
-                smtp.EnableSsl = True
+                smtp.Host = "relay-hosting.secureserver.net" ''"smtp.gmail.com" ' "smtp.emailsrvr.com" ; for gmail host  
+                smtp.EnableSsl = False
                 smtp.UseDefaultCredentials = False
                 smtp.Credentials = New NetworkCredential("sandeep.indusanalytics@gmail.com", "xzprzrtdmizmmnxl")
                 smtp.DeliveryMethod = SmtpDeliveryMethod.Network

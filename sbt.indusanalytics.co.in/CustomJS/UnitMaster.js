@@ -335,3 +335,33 @@ function SaveBtnFun() {
             }
         });
 }
+
+
+
+
+
+$("#Sendmail").click(function () {
+
+
+    $("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
+    $.ajax({
+        type: "POST",
+        url: "WebServicePlanWindow.asmx/Sendmail",
+        data: '{}',
+        contentType: "application/json; charset=utf-8",
+        dataType: 'text',
+        success: function (results) {
+            var res = results.replace(/"/g, '');
+            res = res.replace(/d:/g, '');
+            res = res.replace(/{/g, '');
+            res = res.replace(/}/g, '');
+            $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+            alert(res);
+        },
+        error: function errorFunc(jqXHR) {
+            //$("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
+            alert(jqXHR.message);
+        }
+    });
+
+});

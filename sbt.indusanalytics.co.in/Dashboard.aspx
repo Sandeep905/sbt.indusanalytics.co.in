@@ -1,9 +1,9 @@
 ﻿<%@ Page Title="" Language="VB" MasterPageFile="~/MasterPage_Main.master" AutoEventWireup="false" CodeFile="Dashboard.aspx.vb" Inherits="Dashboard" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="Server">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+<%--    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>--%>
+ 
   <%--  <style>
         #chart {
             height: 270px;
@@ -123,7 +123,7 @@
                        
                         <div class="col-lg-4 col-md-4 col-sm-12 col-xs-12 demo-container" style="border: solid #000000 0.1px;margin-left:-3PX; border-radius: 4px;">
                             <div id="chartContainer">
-                                <canvas id="salesChart"></canvas>
+                                <div id="salesChart"></div>
                             </div>
                         </div>
                         <div class="col-lg-8 col-md-7 col-sm-12 col-xs-12 demo-container" style="border: solid #000000 0.1px;margin-left:3px;padding-right:-4PX; border-radius: 5px;">

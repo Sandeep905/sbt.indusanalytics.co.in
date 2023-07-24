@@ -1614,11 +1614,14 @@ function ShowShirinReport(gridData) {
 
                     var finalcost = Number(rowData.OpAmt) + Number(rowData.TotalAmount);
                     value.GrantAmount = finalcost.toFixed(3);
+                    NetcostOffset = finalcost.toFixed(3);
                     document.getElementById("finalCost").value = finalcost.toFixed(3);
-                    //document.getElementById("finalUnitCost").value = finalcost.toFixed(3) / Number(document.getElementById("PlanContQty").innerHTML);
-                    //document.getElementById("finalUnitCost").value = Number(document.getElementById("finalUnitCost").value).toFixed(3);
-
+                    document.getElementById("finalUnitCost").value = finalcost.toFixed(3) / Number(document.getElementById("PlanContQty").innerHTML);
+                    document.getElementById("finalUnitCost").value = Number(document.getElementById("finalUnitCost").value).toFixed(3);
                     drawChartCost(e.component._controllers.data._dataSource._items);
+                    onChangeCalcAmountp(0);
+                   
+
                 },
                 summary: {
                     totalItems: [{
@@ -2023,9 +2026,11 @@ function ShowShirinReport(gridData) {
 
                     var finalcost = Number(value.OpAmt) + Number(value.TotalAmount);
                     value.GrantAmount = finalcost.toFixed(3);
+                    NetcostOffset = finalcost.toFixed(3);
                     document.getElementById("finalCost").value = finalcost.toFixed(3);
-                    //document.getElementById("finalUnitCost").value = finalcost.toFixed(3) / Number(document.getElementById("PlanContQty").innerHTML);
-                    //document.getElementById("finalUnitCost").value = Number(document.getElementById("finalUnitCost").value).toFixed(3);
+                    document.getElementById("finalUnitCost").value = finalcost.toFixed(3) / Number(document.getElementById("PlanContQty").innerHTML);
+                    document.getElementById("finalUnitCost").value = Number(document.getElementById("finalUnitCost").value).toFixed(3);
+                    onChangeCalcAmountp(0);
                 },
                 summary: {
                     totalItems: [{

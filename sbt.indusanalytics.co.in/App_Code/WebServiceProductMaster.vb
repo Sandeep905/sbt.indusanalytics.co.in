@@ -85,7 +85,7 @@ Public Class WebServiceProductMaster
         Try
             Dim GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
             If Isprocessed <> -1 Then
-                str = "SELECT UM.UserName as CreatedBy, PQC.OtherDetails as DescriptionOther, PQ.SalesManagerId,PQ.SalesCordinatorId,PQ.ClientCordinatorID, Isnull(PQC.ProductName,'') as ProductName1, PQC.ProductHSNID,PQC.GSTPercantage as GSTTaxPercentage, PCM.IsOffsetProduct,PCM.IsUnitProduct,PQC.CategoryID, PQ.EnquiryID,isnull(PQ.BookingID,0) as BookingID, PQC.EnquiryIDDetail, PQ.LedgerID, LM.LedgerName,SLM.LedgerName AS SalesLedgerName ,PQ.SalesPersonID, PQ.Narration, PQ.EnquiryNo, PQ.ProjectName,Convert(nvarchar(26), PQ.CreatedDate, 106) as CreatedDate,PQ.ApprovedBy, PQC.Quantity, PQC.ProductCatalogID,PCM.ProductCatalogCode,PCM.ProductDescription, PCM.ProductName,PQC.VendorID,VLM.LedgerName AS VednorName, PQC.Rate, PQC.Amount, PQC.ProcessCost, PQC.FinalAmount, PQC.UnitCost, PQC.RateType, PQC.ProcessIDStr,PQC.DefaultProcessStr,PQ.FreightAmount/*, PQC.ProductInputSizes*/ " &
+                str = "SELECT UM.UserName as CreatedBy, PQC.OtherDetails as DescriptionOther, PQ.SalesManagerId,PQ.SalesCordinatorId,PQ.ClientCordinatorID, Isnull(PQC.ProductName,'') as ProductName1, PQC.ProductHSNID,PQC.GSTPercantage as GSTTaxPercentage, PCM.IsOffsetProduct,PCM.IsUnitProduct,PQC.CategoryID, PQ.EnquiryID,isnull(PQ.BookingID,0) as BookingID, PQC.EnquiryIDDetail, PQ.LedgerID, LM.LedgerName,SLM.LedgerName AS SalesLedgerName ,PQ.SalesPersonID, PQ.Narration, PQ.EnquiryNo, PQ.ProjectName,Convert(nvarchar(26), PQ.CreatedDate, 109) as CreatedDate,PQ.ApprovedBy, PQC.Quantity, PQC.ProductCatalogID,PCM.ProductCatalogCode,PCM.ProductDescription, PCM.ProductName,PQC.VendorID,VLM.LedgerName AS VednorName, PQC.Rate, PQC.Amount, PQC.ProcessCost, PQC.FinalAmount, PQC.UnitCost, PQC.RateType, PQC.ProcessIDStr,PQC.DefaultProcessStr,PQ.FreightAmount/*, PQC.ProductInputSizes*/ " &
                                     "FROM  dbo.EnquiryMain AS PQ " &
                                     "LEFT JOIN dbo.EnquiryDetails AS PQC ON PQ.EnquiryID = PQC.EnquiryID AND PQ.CompanyID = PQC.CompanyID " &
                                     "LEFT JOIN dbo.ProductCatalogMaster AS PCM ON PCM.ProductCatalogID = PQC.ProductCatalogID AND PQ.CompanyID = PQC.CompanyID " &
@@ -94,7 +94,7 @@ Public Class WebServiceProductMaster
                                     "INNER JOIN LedgerMaster As SLM On SLM.LedgerID=PQ.SalesPersonID And SLM.CompanyID = PQ.CompanyID " &
                                     "LEFT JOIN LedgerMaster As VLM On VLM.LedgerID=PQC.VendorID And VLM.CompanyID = PQC.CompanyID Where PQ.IsDeletedTransaction=0 And PQ.CompanyID= " & GBLCompanyID & " and isnull(PQ.Isprocessed,0) = " & Isprocessed & FilterSTR & "  order by PQ.EnquiryID desc"
             Else
-                str = "SELECT UM.UserName as CreatedBy, PQC.OtherDetails as DescriptionOther, PQ.SalesManagerId,PQ.SalesCordinatorId,PQ.ClientCordinatorID, Isnull(PQC.ProductName,'') as ProductName1, PQC.ProductHSNID,PQC.GSTPercantage as GSTTaxPercentage, PCM.IsOffsetProduct,PCM.IsUnitProduct,PQC.CategoryID, PQ.EnquiryID,isnull(PQ.BookingID,0) as BookingID, PQC.EnquiryIDDetail, PQ.LedgerID, LM.LedgerName,SLM.LedgerName AS SalesLedgerName ,PQ.SalesPersonID, PQ.Narration, PQ.EnquiryNo, PQ.ProjectName,Convert(nvarchar(26), PQ.CreatedDate, 106) as CreatedDate,PQ.ApprovedBy, PQC.Quantity, PQC.ProductCatalogID,PCM.ProductCatalogCode,PCM.ProductDescription, PCM.ProductName,PQC.VendorID,VLM.LedgerName AS VednorName, PQC.Rate, PQC.Amount, PQC.ProcessCost, PQC.FinalAmount, PQC.UnitCost, PQC.RateType, PQC.ProcessIDStr,PQC.DefaultProcessStr,PQ.FreightAmount/*, PQC.ProductInputSizes*/ " &
+                str = "SELECT UM.UserName as CreatedBy, PQC.OtherDetails as DescriptionOther, PQ.SalesManagerId,PQ.SalesCordinatorId,PQ.ClientCordinatorID, Isnull(PQC.ProductName,'') as ProductName1, PQC.ProductHSNID,PQC.GSTPercantage as GSTTaxPercentage, PCM.IsOffsetProduct,PCM.IsUnitProduct,PQC.CategoryID, PQ.EnquiryID,isnull(PQ.BookingID,0) as BookingID, PQC.EnquiryIDDetail, PQ.LedgerID, LM.LedgerName,SLM.LedgerName AS SalesLedgerName ,PQ.SalesPersonID, PQ.Narration, PQ.EnquiryNo, PQ.ProjectName,Convert(nvarchar(26), PQ.CreatedDate, 109) as CreatedDate,PQ.ApprovedBy, PQC.Quantity, PQC.ProductCatalogID,PCM.ProductCatalogCode,PCM.ProductDescription, PCM.ProductName,PQC.VendorID,VLM.LedgerName AS VednorName, PQC.Rate, PQC.Amount, PQC.ProcessCost, PQC.FinalAmount, PQC.UnitCost, PQC.RateType, PQC.ProcessIDStr,PQC.DefaultProcessStr,PQ.FreightAmount/*, PQC.ProductInputSizes*/ " &
                                     "FROM  dbo.EnquiryMain AS PQ " &
                                     "LEFT JOIN dbo.EnquiryDetails AS PQC ON PQ.EnquiryID = PQC.EnquiryID AND PQ.CompanyID = PQC.CompanyID " &
                                     "LEFT JOIN dbo.ProductCatalogMaster AS PCM ON PCM.ProductCatalogID = PQC.ProductCatalogID AND PQ.CompanyID = PQC.CompanyID " &
@@ -706,7 +706,7 @@ Public Class WebServiceProductMaster
 
 
             If Isprocessed <> -1 Then
-                str = "SELECT Distinct PQC.attachedfile,LMD.ParentFieldValue as CreditDays, UM.UserName as CreatedBy,PQC.OtherDetails, PQC.OtherDetails as DescriptionOther, PQ.SalesManagerId,PQ.SalesCordinatorId,PQ.ClientCordinatorID, Isnull(PQC.ProductName,'') as ProductName1, PQC.ProductHSNID,PQC.GSTPercantage as GSTTaxPercentage, PCM.IsOffsetProduct,PCM.IsUnitProduct,PQC.CategoryID, PQ.EnquiryID,isnull(PQ.BookingID,0) as BookingID, PQC.EnquiryIDDetail, PQ.LedgerID, LM.LedgerName,SLM.LedgerName AS SalesLedgerName ,PQ.SalesPersonID, PQ.Narration, PQ.EnquiryNo, PQ.ProjectName,Convert(nvarchar(26), PQ.CreatedDate, 106) as CreatedDate,PQ.ApprovedBy, PQC.Quantity, PQC.ProductCatalogID,PCM.ProductCatalogCode,PCM.ProductDescription, PCM.ProductName,PQC.VendorID,VLM.LedgerName AS VednorName, PQC.Rate, PQC.Amount, PQC.ProcessCost, PQC.FinalAmount, PQC.UnitCost, PQC.RateType, PQC.ProcessIDStr,PQC.DefaultProcessStr,PQ.FreightAmount/*, PQC.ProductInputSizes*/ " &
+                str = "SELECT Distinct PQC.attachedfile,LMD.ParentFieldValue as CreditDays, UM.UserName as CreatedBy,PQC.OtherDetails, PQC.OtherDetails as DescriptionOther, PQ.SalesManagerId,PQ.SalesCordinatorId,PQ.ClientCordinatorID, Isnull(PQC.ProductName,'') as ProductName1, PQC.ProductHSNID,PQC.GSTPercantage as GSTTaxPercentage, PCM.IsOffsetProduct,PCM.IsUnitProduct,PQC.CategoryID, PQ.EnquiryID,isnull(PQ.BookingID,0) as BookingID, PQC.EnquiryIDDetail, PQ.LedgerID, LM.LedgerName,SLM.LedgerName AS SalesLedgerName ,PQ.SalesPersonID, PQ.Narration, PQ.EnquiryNo, PQ.ProjectName,Convert(nvarchar(26), PQ.CreatedDate, 106) + ' ' + RIGHT(CONVERT(varchar, PQ.CreatedDate, 100), 7) as CreatedDate,PQ.ApprovedBy, PQC.Quantity, PQC.ProductCatalogID,PCM.ProductCatalogCode,PCM.ProductDescription, PCM.ProductName,PQC.VendorID,VLM.LedgerName AS VednorName, PQC.Rate, PQC.Amount, PQC.ProcessCost, PQC.FinalAmount, PQC.UnitCost, PQC.RateType, PQC.ProcessIDStr,PQC.DefaultProcessStr,PQ.FreightAmount/*, PQC.ProductInputSizes*/ " &
                                     "FROM  dbo.EnquiryMain AS PQ " &
                                     "LEFT JOIN dbo.EnquiryDetails AS PQC ON PQ.EnquiryID = PQC.EnquiryID AND PQ.CompanyID = PQC.CompanyID " &
                                     "LEFT JOIN dbo.ProductCatalogMaster AS PCM ON PCM.ProductCatalogID = PQC.ProductCatalogID AND PQ.CompanyID = PQC.CompanyID " &
@@ -716,7 +716,7 @@ Public Class WebServiceProductMaster
                                     "Inner Join LedgerMasterDetails as LMD on LMD.LedgerID = PQ.LedgerId and LMD.ParentFieldName = 'CreditDays'" &
                                     "LEFT JOIN LedgerMaster As VLM On VLM.LedgerID=PQC.VendorID And VLM.CompanyID = PQC.CompanyID Where PQ.IsDeletedTransaction=0 And PQ.CompanyID= " & GBLCompanyID & " and isnull(PQ.Isprocessed,0) = " & Isprocessed & ConStr & "   order by PQ.EnquiryID desc"
             Else
-                str = "SELECT Distinct PQC.attachedfile,LMD.ParentFieldValue as CreditDays, UM.UserName as CreatedBy,PQC.OtherDetails, PQC.OtherDetails as DescriptionOther, PQ.SalesManagerId,PQ.SalesCordinatorId,PQ.ClientCordinatorID, Isnull(PQC.ProductName,'') as ProductName1, PQC.ProductHSNID,PQC.GSTPercantage as GSTTaxPercentage, PCM.IsOffsetProduct,PCM.IsUnitProduct,PQC.CategoryID, PQ.EnquiryID,isnull(PQ.BookingID,0) as BookingID, PQC.EnquiryIDDetail, PQ.LedgerID, LM.LedgerName,SLM.LedgerName AS SalesLedgerName ,PQ.SalesPersonID, PQ.Narration, PQ.EnquiryNo, PQ.ProjectName,Convert(nvarchar(26), PQ.CreatedDate, 106) as CreatedDate,PQ.ApprovedBy, PQC.Quantity, PQC.ProductCatalogID,PCM.ProductCatalogCode,PCM.ProductDescription, PCM.ProductName,PQC.VendorID,VLM.LedgerName AS VednorName, PQC.Rate, PQC.Amount, PQC.ProcessCost, PQC.FinalAmount, PQC.UnitCost, PQC.RateType, PQC.ProcessIDStr,PQC.DefaultProcessStr,PQ.FreightAmount/*, PQC.ProductInputSizes*/ " &
+                str = "SELECT Distinct PQC.attachedfile,LMD.ParentFieldValue as CreditDays, UM.UserName as CreatedBy,PQC.OtherDetails, PQC.OtherDetails as DescriptionOther, PQ.SalesManagerId,PQ.SalesCordinatorId,PQ.ClientCordinatorID, Isnull(PQC.ProductName,'') as ProductName1, PQC.ProductHSNID,PQC.GSTPercantage as GSTTaxPercentage, PCM.IsOffsetProduct,PCM.IsUnitProduct,PQC.CategoryID, PQ.EnquiryID,isnull(PQ.BookingID,0) as BookingID, PQC.EnquiryIDDetail, PQ.LedgerID, LM.LedgerName,SLM.LedgerName AS SalesLedgerName ,PQ.SalesPersonID, PQ.Narration, PQ.EnquiryNo, PQ.ProjectName,Convert(nvarchar(26), PQ.CreatedDate, 106) + ' ' + RIGHT(CONVERT(varchar, PQ.CreatedDate, 100), 7) as CreatedDate,PQ.ApprovedBy, PQC.Quantity, PQC.ProductCatalogID,PCM.ProductCatalogCode,PCM.ProductDescription, PCM.ProductName,PQC.VendorID,VLM.LedgerName AS VednorName, PQC.Rate, PQC.Amount, PQC.ProcessCost, PQC.FinalAmount, PQC.UnitCost, PQC.RateType, PQC.ProcessIDStr,PQC.DefaultProcessStr,PQ.FreightAmount/*, PQC.ProductInputSizes*/ " &
                                     "FROM  dbo.EnquiryMain AS PQ " &
                                     "LEFT JOIN dbo.EnquiryDetails AS PQC ON PQ.EnquiryID = PQC.EnquiryID AND PQ.CompanyID = PQC.CompanyID " &
                                     "LEFT JOIN dbo.ProductCatalogMaster AS PCM ON PCM.ProductCatalogID = PQC.ProductCatalogID AND PQ.CompanyID = PQC.CompanyID " &
@@ -735,6 +735,30 @@ Public Class WebServiceProductMaster
         End Try
     End Function
 
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function DeleteFileFromFolder(ByVal fileName As String, ByVal EnquiryDetailID As Int16) As String
+        Try
+
+            Dim filePath = Path.Combine(Context.Server.MapPath("Files/Enquiry/"), fileName)
+
+            ' Check if the file exists
+            If File.Exists(filePath) Then
+                ' Delete the file
+                File.Delete(filePath)
+                Dim csvfilename = db.GetColumnValue("attachedfile", "EnquiryDetails", " Isnull(IsDeletedTransaction,0)<> 1   And EnquiryIDDetail =" & EnquiryDetailID)
+                ' Remove the fileName from csvfilename
+                csvfilename = csvfilename.Replace(fileName & ",", "").Replace("," & fileName, "").Replace(fileName, "")
+                db.ExecuteNonSQLQuery("Update EnquiryDetails set attachedfile='" + csvfilename + "' where EnquiryIDDetail = " & EnquiryDetailID)
+                Return "Success"
+            Else
+                ' File does not exist
+                Return "The file does not exist."
+            End If
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
     <WebMethod(EnableSession:=True)>
     <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
     Public Function DeleteProjectQuotation(ByVal TxtPOID As Integer, ByVal TxtBKID As Integer) As String

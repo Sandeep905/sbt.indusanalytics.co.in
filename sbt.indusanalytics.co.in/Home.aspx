@@ -157,6 +157,22 @@
                                                         </div>
                                                     </div>
                                                 </div>
+                                                <%--<div class="col-lg-2 col-md-2 col-sm-3 col-xs-6" style="height: auto; padding: 2px 3px 1px 6px; width: 25%; margin: 0px; color: white;">
+                                                    <div class="customcard">
+                                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                            <label style="width: 100%; white-space: pre; font-family: 'Segoe UI Light', 'Helvetica Neue Light', 'Segoe UI', 'Helvetica Neue', 'Trebuchet MS', Verdana, sans-serif; font-weight: bolder; fill: #232323; cursor: default; margin-bottom: 0px; font-size: 15px; text-align: center; color: black">Sales Order</label>
+                                                            <label style="color: blue; text-decoration: underline; width: 100%; white-space: pre; font-family: 'Segoe UI Light', 'Helvetica Neue Light', 'Segoe UI', 'Helvetica Neue', 'Trebuchet MS', Verdana, sans-serif; font-weight: bolder; fill: #232323; cursor: default; margin-bottom: 0px; font-size: 25px; text-align: center; color: blue; cursor: pointer" id="SalesOrder" onclick="AllDetails(this.id)">0</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-2 col-md-2 col-sm-3 col-xs-6" style="height: auto; padding: 2px 3px 1px 6px; width: 25%; margin: 0px; color: white;">
+                                                    <div class="customcard">
+                                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                            <label style="width: 100%; white-space: pre; font-family: 'Segoe UI Light', 'Helvetica Neue Light', 'Segoe UI', 'Helvetica Neue', 'Trebuchet MS', Verdana, sans-serif; font-weight: bolder; fill: #232323; cursor: default; margin-bottom: 0px; font-size: 15px; text-align: center; color: black">Job Card</label>
+                                                            <label style="color: blue; text-decoration: underline; width: 100%; white-space: pre; font-family: 'Segoe UI Light', 'Helvetica Neue Light', 'Segoe UI', 'Helvetica Neue', 'Trebuchet MS', Verdana, sans-serif; font-weight: bolder; fill: #232323; cursor: default; margin-bottom: 0px; font-size: 25px; text-align: center; color: blue; cursor: pointer" id="JobCard" onclick="AllDetails(this.id)">0</label>
+                                                        </div>
+                                                    </div>
+                                                </div>--%>
                                             </div>
 
                                         </div>

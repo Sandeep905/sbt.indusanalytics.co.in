@@ -917,7 +917,7 @@ function tagbox() {
                             searchEnabled: true,
                             showClearButton: true,
                             showSelectionControls: true,
-                                //applyValueMode: 'useButtons',
+                            //applyValueMode: 'useButtons',
                         });
                     }
                 }
@@ -3435,3 +3435,9 @@ $('#BtnItmeApply').click(function () {
     $('#clodeItmeModal').click();
     $('#ListIfItemsGrid').dxDataGrid('instance').clearSelection();
 });
+
+
+$('#VendorMachineList').click(function () {
+
+    window.open("/VendorMachineAllocation.aspx?id=" + Number(document.getElementById("txtGetGridRow").value),"_blank_");
+})

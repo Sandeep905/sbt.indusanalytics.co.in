@@ -171,6 +171,7 @@ $("#UserGrid").dxDataGrid({
         { dataField: "IsExtraPaperIssue", visible: true, caption: "Is Extra Paper Issue" },
         { dataField: "IsUserCannotViewCostingDetail", visible: true, caption: "Is User Can't View CostingDetail" },
         { dataField: "IsHidden", visible: true, caption: "Is Hidden" },
+        { dataField: "IsBlocked", visible: true, caption: "IsBlocked" },
         { dataField: "IsAdmin", visible: true, caption: "Is Admin" },
         { dataField: "ISChooseAnotherPaper", visible: true, caption: "Is Choose Another Paper" },
         { dataField: "IsEditableProductionDate", visible: true, caption: "Is Editable Production Date" }
@@ -581,6 +582,7 @@ $("#EditButton").click(function () {
     $("#SelectBoxCity").dxSelectBox({ value: selectedUserRows[0].City });
 
     document.getElementById("EmailID").value = selectedUserRows[0].EmailID;
+    document.getElementById("CHKBlocked").checked = selectedUserRows[0].IsBlocked;
     document.getElementById("SMTPUserName").value = selectedUserRows[0].smtpUserName;
     document.getElementById("SMTPPassword").value = selectedUserRows[0].smtpUserPassword;
     document.getElementById("RESMTPPassword").value = selectedUserRows[0].smtpUserPassword;
@@ -1184,6 +1186,7 @@ function ProfileParameter() {
     //var CHKSeeCost = document.getElementById("CHKSeeCost").checked;
     //var CHKProductionDate = document.getElementById("CHKProductionDate").checked;
     //var CHKHidden = document.getElementById("CHKHidden").checked;
+    var CHKBlocked = document.getElementById("CHKBlocked").checked;
     //var UserProfilePic = document.getElementById("imgpathstring").value;
 
     var jsonObjectsUserMasterRecord = [];
@@ -1198,6 +1201,7 @@ function ProfileParameter() {
     OperationUserMasterRecord.Country = SelectBoxCountry;
     OperationUserMasterRecord.State = SelectBoxState;
     OperationUserMasterRecord.City = SelectBoxCity;
+    OperationUserMasterRecord.Isblocked = CHKBlocked;
 
     OperationUserMasterRecord.smtpUserName = SMTPUserName;
     OperationUserMasterRecord.smtpUserPassword = SMTPPassword;

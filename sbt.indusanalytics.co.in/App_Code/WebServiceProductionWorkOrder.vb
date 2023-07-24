@@ -2331,6 +2331,101 @@ Public Class WebServiceProductionWorkOrder
         Return js.Serialize(data.Message)
     End Function
 
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function State(ByVal LedgerGroupID As Integer) As String
+        Try
+            CompanyId = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+            str = "select distinct State from LedgerMaster where LedgerGroupID = 2 and isnull(IsDeletedTransaction,0) <> 1"
+            db.FillDataTable(dataTable, str)
+            data.Message = db.ConvertDataTableTojSonString(dataTable)
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function AllData(ByVal condt As String) As String
+        Try
+            CompanyId = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+            str = "SELECT DISTINCT ISNULL(EM.EnquiryID, 0) AS EnquiryID, EM.EnquiryNo FROM EnquiryMain AS EM INNER JOIN  LedgerMaster AS LM ON LM.LedgerID = EM.LedgerId LEFT OUTER JOIN     ProductQuotation AS PQ ON PQ.EnquiryID = EM.EnquiryID LEFT OUTER JOIN ProductQuotationContents AS PQC ON PQC.ProductEstimateID = PQ.ProductEstimateID INNER JOIN LedgerMaster AS LMA ON LMA.LedgerID = PQC.VendorID LEFT OUTER JOIN JobOrderBooking AS JOB ON JOB.ProductEstimateID = PQ.ProductEstimateID WHERE  (ISNULL(EM.IsDeletedTransaction, 0) <> 1) AND (ISNULL(PQC.IsDeletedTransaction, 0) <> 1) AND (ISNULL(PQ.IsDeletedTransaction, 0) <> 1)  AND (ISNULL(LM.IsDeletedTransaction,0) <> 1) AND (ISNULL(JOB.IsDeletedTransaction, 0) <> 1) AND (EM.CompanyID = " & CompanyId & ") " & condt & " ORDER BY EnquiryID"
+            db.FillDataTable(dataTable, str)
+            data.Message = db.ConvertDataTableTojSonString(dataTable)
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function GetQuotation(ByVal QUONO As String) As String
+        Try
+            CompanyId = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+            str = "SELECT  DISTINCT PQ.EstimateNo AS QuotationNo,ISNULL(PQ.ProductEstimateID, 0) AS ProductEstimateID FROM ProductQuotation AS PQ INNER JOIN LedgerMaster AS LM ON LM.LedgerID = PQ.LedgerId INNER JOIN EnquiryMain AS EM ON EM. LedgerId = LM.LedgerID LEFT OUTER JOIN ProductQuotationContents AS PQC ON PQC.ProductEstimateID = PQ.ProductEstimateID INNER JOIN LedgerMaster AS LMA ON LMA.LedgerID = PQC. VendorID LEFT JOIN JobOrderBooking AS JOB ON JOB.ProductEstimateID = PQ.ProductEstimateID WHERE ISNULL(EM.IsDeletedTransaction, 0) <> 1 AND ISNULL(PQC.IsDeletedTransaction, 0) <> 1 AND ISNULL(PQ.IsDeletedTransaction, 0) <> 1 AND ISNULL(LM.IsDeletedTransaction, 0) <> 1 AND ISNULL(JOB.IsDeletedTransaction, 0) <> 1 AND (PQ.CompanyID = " & CompanyId & ")" & QUONO & " ORDER BY ProductEstimateID"
+            db.FillDataTable(dataTable, str)
+            data.Message = db.ConvertDataTableTojSonString(dataTable)
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function GetSalesOrder(ByVal GSONO As String) As String
+        Try
+            CompanyId = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+            str = "select distinct  JOB.SalesOrderNo,ISNULL(JOB.OrderBookingID, 0) AS OrderBookingID from JobOrderBooking AS JOB INNER JOIN ProductQuotation AS  PQ ON PQ.ProductEstimateID = JOB.ProductEstimateID INNER JOIN EnquiryMain AS EM ON EM.EnquiryID = PQ.EnquiryID INNER JOIN LedgerMaster AS LM ON LM.LedgerID = EM.LedgerId INNER JOIN ProductQuotationContents AS PQC ON  PQC.ProductEstimateID = PQ.ProductEstimateID INNER JOIN LedgerMaster as LMA ON LMA.LedgerID = PQC.VendorID WHERE  ISNULL(JOB.IsDeletedTransaction, 0) <> 1 AND ISNULL(EM.IsDeletedTransaction, 0) <> 1 AND ISNULL(LMA.IsDeletedTransaction, 0) <> 1 AND ISNULL(EM.IsDeletedTransaction, 0) <> 1 AND ISNULL(PQ.IsDeletedTransaction, 0) <> 1 AND ISNULL(PQC.IsDeletedTransaction, 0) <> 1 AND (JOB.CompanyID = " & CompanyId & ")" & GSONO & "  ORDER BY OrderBookingID"
+            db.FillDataTable(dataTable, str)
+            data.Message = db.ConvertDataTableTojSonString(dataTable)
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function GetLedgerName(ByVal LNAME As String) As String
+        Try
+            CompanyId = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+            str = "SELECT DISTINCT LM.LedgerName AS ClientName,ISNULL(LM.LedgerID, 0) AS LedgerID FROM LedgerMaster AS LM INNER JOIN LedgerMaster AS LMA ON LMA.LedgerID = LM.LedgerId LEFT JOIN EnquiryMain AS EM ON EM.LedgerId = LM.LedgerID LEFT JOIN ProductQuotation AS PQ ON PQ.EnquiryID = EM.EnquiryID LEFT JOIN ProductQuotationContents AS PQC ON PQC.ProductHSNID = EM.ProductHSNID AND PQC.VendorID = LM.VendorID LEFT JOIN JobOrderBooking AS JOB ON JOB.ProductEstimateID = PQ.ProductEstimateID where LM.LedgerGroupID = 1 AND isnull(LM.IsDeletedTransaction,0) <> 1 AND isnull(PQ.IsDeletedTransaction,0) <> 1 AND isnull(EM.IsDeletedTransaction,0) <> 1 and (LM.CompanyID = " & CompanyId & ")" & LNAME & " and  isnull(JOB.IsDeletedTransaction,0) <> 1 order by LedgerID"
+            db.FillDataTable(dataTable, str)
+            data.Message = db.ConvertDataTableTojSonString(dataTable)
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function GetedVendor(ByVal VNAME As String) As String
+        Try
+            CompanyId = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+            str = "Select distinct LMA.LedgerName as VendorName,isnull(LMA.LedgerID,0) LedgerID  from  ProductQuotation AS PQ inner join  ProductQuotationContents as PQC on PQC.ProductEstimateID = PQ.ProductEstimateID LEFT JOIN EnquiryMain AS EM ON EM.enquiryid = PQ.enquiryid LEFT join JobOrderBooking as JOB on JOB.ProductEstimateID = PQ.ProductEstimateID inner join LedgerMaster as LM on LM.LedgerID = PQ.LedgerID inner join LedgerMaster as LMA on LMA.LedgerID = PQC.VendorID WHERE ISNULL(LM.IsDeletedTransaction, 0) <> 1  AND ISNULL(PQ.IsDeletedTransaction, 0) <> 1 AND (LM.CompanyID = " & CompanyId & ")" & VNAME & " AND ISNULL(LM.IsDeletedTransaction, 0) <> 1 ORDER BY  LedgerID"
+            db.FillDataTable(dataTable, str)
+            data.Message = db.ConvertDataTableTojSonString(dataTable)
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function GetGRIDDATA(ByVal ALLDATA As String, ByVal From As String, ByVal ToDate As String, ByVal isApplied As String) As String
+        Try
+            CompanyId = Convert.ToString(HttpContext.Current.Session("CompanyID"))
+            Dim datefil = ""
+            If isApplied = "True" Then
+                datefil = " And Cast(Floor(Cast(EM.CreatedDate As Float)) AS datetime) >='" & From & "' and Cast(Floor(Cast(EM.CreatedDate As Float)) AS datetime) <='" & ToDate & "'"
+            End If
+            str = "SELECT DISTINCT ED.ProductName,ED.Quantity, LM.LedgerName as ClientName,EM.EnquiryNo,ISNULL(EM.EnquiryID,0)EnquiryID,PQ.EstimateNo AS QuotationNo,ISNULL(PQ.ProductEstimateID,0)ProductEstimateID,JOB.SalesOrderNo,ISNULL(JOB.OrderBookingID,0)OrderBookingID,LMA.LedgerName as VendorName,isnull(LMA.LedgerID,0) LedgerID from  ProductQuotation AS PQ LEFT JOIN EnquiryMain AS EM ON EM.enquiryid = PQ.enquiryid left join EnquiryDetails as ED ON ED.EnquiryID = EM.EnquiryID inner join LedgerMaster as LM on LM.LedgerID = PQ.LedgerID LEFT JOIN ProductQuotationContents AS PQC ON PQC.ProductEstimateID = PQ.ProductEstimateID inner join LedgerMaster as LMA on LMA.LedgerID = PQC.VendorID LEFT JOIN JobOrderBooking AS JOB ON JOB.ProductEstimateID = PQ.ProductEstimateID WHERE ISNULL(LMA.IsDeletedTransaction, 0) <> 1 AND ISNULL(PQ.IsDeletedTransaction, 0) <> 1 AND ISNULL(EM.IsDeletedTransaction, 0) <> 1 AND ISNULL(ED.IsDeletedTransaction,0) <>1  AND (EM.CompanyID = " & CompanyId & " ) " & ALLDATA & datefil
+            db.FillDataTable(dataTable, str)
+            data.Message = db.ConvertDataTableTojSonString(dataTable)
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
     Private Function RoundUP(value As Double, decimals As Integer) As Double
         Return Math.Ceiling(value * (10 ^ decimals)) / (10 ^ decimals)
     End Function

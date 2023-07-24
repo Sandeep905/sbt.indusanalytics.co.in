@@ -6,9 +6,24 @@
             color: blue !important;
             font-size: 12px !important;
         }
+         .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-gap: 10px;
+        }
+
+        .grid-item {
+            border: 1px solid #ccc;
+            padding: 10px;
+            height:200px;
+            width:200px;
+            
+        }
     </style>
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="Server">
+     
+
     <div class="row clearfix" style="padding: 0px; margin: 0px; margin-right: -15px">
         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding: 0px; margin: 0px;">
             <div class="dialogboxContainerMainMAster">
@@ -166,7 +181,7 @@
                             </div>
                             <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
                                 <b class="font-11">Reference File</b>
-                                <input class="forTextBox" type="file" id="fileSO" />
+                                <input class="forTextBox" type="file" id="fileSO" multiple/>
                                 <a class="DownloadLink hidden" id="fileDownload">Download file</a>
                             </div>
                             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
@@ -182,8 +197,7 @@
         </div>
         <div id="image-indicator"></div>
     </div>
-
-
+    
     <%-- Model PopUp (Edit update delete) --%>
     <div class="modal fade" id="largeModal" tabindex="-1" role="dialog" style="padding: 0px; margin-top: 0px; margin-left: -7px">
         <div class="modal-dialog modal-lg" role="document" style="">
@@ -275,6 +289,23 @@
         </div>
     </div>
 
+
+    <div class="modal clearfix" id="ModalDownloadPreview" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="DialogBoxCustom" style="float: left; border-top-left-radius: 4px; border-top-right-radius: 4px;">
+                    <strong>Download Preview</strong>
+                    <a href="javascript:void(0);" class="iconRightDbox btn-danger" data-dismiss="modal">
+                        <span data-dismiss="modal" style="font-weight: 900; margin-right: 8px">X</span>
+                    </a>
+                </div>
+                <div class="modal-header padding-0" style="overflow-y: auto">
+                    <div id="PreviewArea">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <script src="CustomJS/SalesOrderBooking.js"></script>
 </asp:Content>
 

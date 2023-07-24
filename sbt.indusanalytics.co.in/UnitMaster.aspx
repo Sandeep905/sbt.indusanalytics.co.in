@@ -22,6 +22,7 @@
                             &nbsp Delete
                         </a>
                     </div>
+                    <input type="button" class="btn btn-secondary" value="mail" id="Sendmail" />
                     <b id="CategoryID" style="display: none"></b><b id="CategoryDisName" style="display: none"></b>
                     <strong id="CategoryMasterDisplayName" class="MasterDisplayName" style="float: right; color: #42909A">Unit Master</strong>
                 </div>
