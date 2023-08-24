@@ -33,12 +33,13 @@ Namespace Connection
 
 #End Region
 
+
+
 #Region "Method"
         Public Function OpenDataBase() As SqlConnection
             Dim i As Integer = 0
 
-            'constring = "Data Source = 95.217.184.123\MSSQLSERVER2019;Initial Catalog=softber4_indus;Persist Security Info=True;User ID=softber4sql;Password=%9Lb535ze"
-            constring = "Data Source = 65.2.64.18,1433;Initial Catalog=IndusEnterprise_SBT;Persist Security Info=True;User ID=Indus_SBT;Password=@5X10&#$313INDUS#!"
+            constring = "Data Source = 65.2.64.18,1433;Initial Catalog=IndusEnterprise_SBT;Persist Security Info=True;User ID=Indus;Password=Param@99811"
             'constring = "Data Source = NISHTHA\INSTANCEV15;Initial Catalog=IndusEnterprise_SBT;Persist Security Info=True;User ID=Indus;Password=Param@99811"
             Try
                 Db = New SqlConnection
@@ -1435,66 +1436,8 @@ m:
             Return ReadDigit2
         End Function
 
-        'Public Function SendEmail(ByVal TxtSubject As String, ByVal TxtEmailBody As String, ByVal ToUser As String, Optional ByVal attachmentpath As String = Nothing) As String
-        '    Dim GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyId"))
-        '    Dim GBLUserID = Convert.ToString(HttpContext.Current.Session("UserId"))
-
-        '    Dim DtUser As New DataTable
-        '    Dim DtUserTo As New DataTable
-
-        '    FillDataTable(DtUser, "SELECT Distinct IsnuLL(Nullif(EmailID,''),smtpUserName) As smtpUserID,  Isnull(smtpUserPassword,'') As smtpUserPassword,  Isnull(smtpServer,'smtp.gmail.com') As smtpServer,  Isnull(smtpServerPort,'587') As smtpServerPort,  Isnull(smtpAuthenticate,'True') As smtpAuthenticate,  Isnull(smtpUseSSL,'True') As smtpUseSSL FROM UserMaster Where Isnull(IsBlocked,0)=0 And IsnuLL(IsHidden,0)=0  And CompanyID= " & GBLCompanyID & "  And UserID= " & GBLUserID & "")
-        '    If DtUser.Rows.Count <= 0 Then Return "Invalid user details"
-
-        '    If DtUser.Rows(0)("smtpUserID") = "" Or DtUser.Rows(0)("smtpUserID").contains("@") = False Then
-        '        Return "Invalid sender mail id, Please update mail id in user master"
-        '    End If
-
-        '    Try
-        '        Dim TxtEmailTo As String
-        '        Dim TxtEmailCC As Array
-        '        TxtEmailTo = ToUser.ToString()
-        '        TxtEmailCC = TxtEmailTo.Split(",")
-
-        '        Dim mm As MailMessage = New MailMessage(DtUser.Rows(0)("smtpUserID").ToString(), TxtEmailTo.Split(",")(0)) With {
-        '        .Subject = TxtSubject.ToString(),
-        '        .Body = TxtEmailBody.ToString()
-        '    }
-        '        mm.IsBodyHtml = True
-        '        mm.Priority = MailPriority.High
-        '        Dim i As Integer = 1
-        '        For i = 1 To TxtEmailCC.Length - 1
-        '            If TxtEmailCC(i).ToString() <> "" And TxtEmailCC(i).Contains("@") = True Then
-        '                mm.CC.Add(TxtEmailCC(i).ToString())
-        '            End If
-        '        Next
-        '        If attachmentpath <> "" Then
-        '            mm.Attachments.Add(New Attachment(attachmentpath))
-        '        End If
-        '        Dim credential As NetworkCredential = New NetworkCredential With {
-        '        .UserName = DtUser.Rows(0)("smtpUserID").ToString(),
-        '        .Password = DtUser.Rows(0)("smtpUserPassword").ToString()
-        '    }
-
-        '        Dim smtp As SmtpClient = New SmtpClient With {
-        '        .Host = DtUser.Rows(0)("smtpServer").ToString(),
-        '        .Credentials = credential,
-        '        .Port = DtUser.Rows(0)("smtpServerPort").ToString(),
-        '        .EnableSsl = DtUser.Rows(0)("smtpUseSSL").ToString(),
-        '        .UseDefaultCredentials = False,
-        '        .DeliveryMethod = SmtpDeliveryMethod.Network
-        '        }
-        '        smtp.Send(mm)
-        '        smtp.Dispose()
-        '        Return "Email Send Successfully"
-        '    Catch ex As Exception
-        '        Return ex.ToString()
-        '    End Try
-        'End Function
-
         Public Function SendEmails(ByVal subject As String, ByVal body As String, ByVal toUser As String, Optional ByVal attachmentPath As String = Nothing) As String
 
-            'SendApprovalEmail()
-            'Exit Function
             Dim companyId As Integer = Convert.ToInt32(HttpContext.Current.Session("CompanyId"))
             Dim userId As Integer = Convert.ToInt32(HttpContext.Current.Session("UserId"))
 
@@ -1508,7 +1451,7 @@ m:
                 Return "Invalid sender mail id, Please update mail id in user master"
             End If
 
-            Dim emailTo As String = "sandeeppatidar14306@gmail.com" 'toUser.Trim()
+            Dim emailTo As String = toUser.Trim()
             Dim emailAddresses() As String = emailTo.Split(",")
             Dim validEmailRegex As New Regex("^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$")
 
@@ -1538,12 +1481,13 @@ m:
                 message.Attachments.Add(New Attachment(attachmentPath))
             End If
 
+
             Dim smtp As SmtpClient = New SmtpClient() With {
                 .Host = DtUser.Rows(0)("smtpServer").ToString(),
-                .Port = Convert.ToInt32(DtUser.Rows(0)("smtpServerPort")),
-                .EnableSsl = Convert.ToBoolean(DtUser.Rows(0)("smtpUseSSL")),
+                .Port = 25,
+                .EnableSsl = False,
                 .DeliveryMethod = SmtpDeliveryMethod.Network,
-                .UseDefaultCredentials = False,
+                .UseDefaultCredentials = True,
                 .Credentials = New NetworkCredential(DtUser.Rows(0)("smtpUserID").ToString(), DtUser.Rows(0)("smtpUserPassword").ToString())
             }
 
@@ -1554,74 +1498,7 @@ m:
                 Return ex.ToString()
             End Try
         End Function
-        Public Function SendEmail(ByVal TxtMailTo As String, ByVal Username As String) As String
-            Dim TxtEmailBody, TxtSubject As String
-            Dim random As New Random
-            Dim rndomNum As String = "3434"
-            Dim varifyUrl = "http://inprint.indusanalytics.co.in/activateaccount.aspx?mailid=" & TxtMailTo & "&hash=" & rndomNum
-            If TxtMailTo.ToString() = "" Or TxtMailTo.Contains("@") = False Then
-                Return "Invalid mail id"
-            End If
 
-            TxtSubject = "New account verification"
-            TxtEmailBody = "Hello " & Username & ",<br/><br/><b>Please verify your account</b><br/><br/>Hi! You've registered as new customer account at inPrint." &
-          " Verify your account now and enjoy inPrint application." &
-          " <br/><br/><a href='" + varifyUrl + "'>Verify Your Account</a>"
-
-            Try
-                Dim mm As MailMessage = New MailMessage("info@indusanalytics.in", TxtMailTo) With {
-                .Subject = TxtSubject,
-                .Body = TxtEmailBody
-            }
-
-                mm.IsBodyHtml = True
-                mm.Priority = MailPriority.High
-
-                Dim credential As NetworkCredential = New NetworkCredential With {
-                .UserName = "info@mail.in",
-                .Password = "passwo"
-            }
-
-                Dim smtp As SmtpClient = New SmtpClient With {
-                .Host = "smtp.gmail.com",
-                .Credentials = credential,
-                .Port = 25,
-                .EnableSsl = True
-                }
-                smtp.Send(mm)
-                'Db.ExecuteNonSQLQuery("Update CompanyMaster Set HashCode='" & rndomNum & "' Where Email='" & TxtMailTo & "'")
-
-                Return "Success"
-            Catch ex As Exception
-                Return ex.Message
-            End Try
-        End Function
-        Public Function SendApprovalEmail() As String
-            Try
-                Dim Dtamin As New DataTable()
-                Dim ee As String = ""
-
-                Dim message As New MailMessage()
-                Dim smtp As New SmtpClient()
-                message.From = New MailAddress("sandeep.indusanalytics@gmail.com")
-                message.To.Add(New MailAddress("sandeeppatidar14306@gmail.com"))
-                'message.CC.Add(New MailAddress("registration@mpcbma.in"))
-                message.Subject = "Test Subjerc"
-                message.IsBodyHtml = True 'to make message body as html  
-                message.Body = "Test Body"
-                message.Priority = MailPriority.High
-                smtp.Port = 25
-                smtp.Host = "relay-hosting.secureserver.net" ''"smtp.gmail.com" ' "smtp.emailsrvr.com" ; for gmail host  
-                smtp.EnableSsl = False
-                smtp.UseDefaultCredentials = False
-                smtp.Credentials = New NetworkCredential("sandeep.indusanalytics@gmail.com", "xzprzrtdmizmmnxl")
-                smtp.DeliveryMethod = SmtpDeliveryMethod.Network
-                smtp.Send(message)
-                Return "Mail Sent Successfully"
-            Catch ex As Exception
-                Return ex.Message
-            End Try
-        End Function
 #Region "Code For Visual studio 2010 or 2012"
 
 

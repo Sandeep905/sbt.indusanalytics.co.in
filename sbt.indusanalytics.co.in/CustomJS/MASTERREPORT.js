@@ -3,6 +3,19 @@ var GBLID = 0;
 var IsEdit = false;
 var str = ""
 const now1 = new Date();
+
+
+$("#LoadIndicator").dxLoadPanel({
+    shadingColor: "rgba(0,0,0,0.4)",
+    indicatorSrc: "images/Indus logo.png",
+    message: 'Please Wait...',
+    width: 310,
+    showPane: true,
+    shading: true,
+    closeOnOutsideClick: false,
+    visible: false
+});
+
 $('#From').dxDateBox({
     type: 'date',
     //disabled: true,
@@ -29,8 +42,12 @@ $('#EnquiryNo').dxSelectBox({
             GetSalesOrder(" AND PQ.EnquiryID =" + e.value)
             GetLedgerName(" AND PQ.EnquiryID =" + e.value)
             GetedVendor(" AND PQ.EnquiryID =" + e.value)
-            //GetGRIDDATA("AND PQ.ENQUIRYID =" + e.value)
-            str = " AND PQ.EnquiryID =" + e.value
+
+        } else {
+            GetQuotation("")
+            GetSalesOrder("")
+            GetLedgerName("")
+            GetedVendor("")
         }
     }
 });
@@ -47,8 +64,11 @@ $('#QuotationNo').dxSelectBox({
             GetSalesOrder("and PQ.ProductEstimateID =" + e.value)
             GetLedgerName("and PQ.ProductEstimateID =" + e.value)
             GetedVendor("and PQ.ProductEstimateID =" + e.value)
-            //GetGRIDDATA("and PQ.ProductEstimateID =" + e.value)
-            str = str + " AND PQ.ProductEstimateID =" + e.value
+             } else {
+            GetQuotation("")
+            GetSalesOrder("")
+            GetLedgerName("")
+            GetedVendor("")
         }
     }
 });
@@ -65,8 +85,11 @@ $('#SalesOrderNo').dxSelectBox({
             GetQuotation(" AND JOB.orderbookingID =" + e.value)
             GetLedgerName(" and JOB.orderbookingID =" + e.value)
             GetedVendor(" and JOB.orderbookingID =" + e.value)
-            //GetGRIDDATA(" and JOB.orderbookingID =" + e.value);
-            str = str + " AND JOB.orderbookingID =" + e.value
+        } else {
+            GetQuotation("")
+            GetSalesOrder("")
+            GetLedgerName("")
+            GetedVendor("")
         }
     }
 });
@@ -83,8 +106,11 @@ $('#ClientName').dxSelectBox({
             GetQuotation(" AND LM.LedgerID =" + e.value)
             GetSalesOrder("AND LM.LedgerID =" + e.value)
             GetedVendor("AND LM.LedgerID =" + e.value)
-            //GetGRIDDATA("AND LM.LedgerID =" + e.value)
-            str = str + " AND LM.LedgerID =" + e.value
+        } else {
+            GetQuotation("")
+            GetSalesOrder("")
+            GetLedgerName("")
+            GetedVendor("")
         }
     }
 });
@@ -100,8 +126,11 @@ $('#VendorName').dxSelectBox({
             ALLDATA(" And LMA.LedgerID =" + e.value)
             GetQuotation(" AND LMA.LedgerID =" + e.value)
             GetSalesOrder("AND LMA.LedgerID =" + e.value)
-            //GetGRIDDATA("AND LM.LedgerID =" + e.value)
-            str = str + " AND LMA.LedgerID =" + e.value
+        } else {
+            GetQuotation("")
+            GetSalesOrder("")
+            GetLedgerName("")
+            GetedVendor("")
         }
     }
 });
@@ -259,9 +288,33 @@ function GetedVendor(VN) {
 
 }
 $('#BtnReload').click(function () {
+
     var From = $('#From').dxDateBox('instance').option('value');
     var ToDate = $('#ToDate').dxDateBox('instance').option('value');
     var isApplied = $('#myCheckbox').is(':checked'); // Get the checkbox value
+
+    var EnquiryNo = $('#EnquiryNo').dxSelectBox('instance').option('value');
+    var QuotationNo = $('#QuotationNo').dxSelectBox('instance').option('value');
+    var SalesOrderNo = $('#SalesOrderNo').dxSelectBox('instance').option('value');
+    var VendorName = $('#VendorName').dxSelectBox('instance').option('value');
+    var ClientName = $('#ClientName').dxSelectBox('instance').option('value');
+    str = "";
+    if (EnquiryNo != null) {
+        str += " AND PQ.EnquiryID =" + EnquiryNo
+    }
+
+    if (QuotationNo != null) {
+        str += " AND PQ.ProductEstimateID =" + QuotationNo
+    }
+    if (SalesOrderNo != null) {
+        str += " AND JOB.orderbookingID =" + SalesOrderNo
+    }
+    if (ClientName != null) {
+        str += " AND LM.LedgerID =" + ClientName
+    }
+    if (VendorName != null) {
+        str += " AND LMA.LedgerID =" + VendorName
+    }
 
     From = From.toISOString();
 
@@ -310,6 +363,7 @@ $("#GridJocardData").dxDataGrid({
 });
 
 function GetGRIDDATA(ALLD, From, ToDate, isApplied) {
+    $("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
     $.ajax({
         type: 'post',
         url: 'WebServiceProductionWorkOrder.asmx/GetGRIDDATA',
@@ -325,12 +379,14 @@ function GetGRIDDATA(ALLD, From, ToDate, isApplied) {
             res = res.substr(1);
             res = res.slice(0, -1);
             //alert(res);
+            $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
             var RES1 = JSON.parse(res);
             $('#GridJocardData').dxDataGrid({
                 dataSource: RES1
             });
         },
         error: function errorFunc(jqXHR) {
+            $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
             // alert("not show");
         }
     });

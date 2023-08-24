@@ -7,6 +7,18 @@ var SupportSystemGridData = [];
 var SectionCount = 0;
 var text = "";
 
+$("#image-indicator").dxLoadPanel({
+    shadingColor: "rgba(0,0,0,0.4)",
+    indicatorSrc: "images/Indus Logo.png",
+    message: 'Loading...',
+    width: 320,
+    showPane: true,
+    showIndicator: true,
+    shading: true,
+    closeOnOutsideClick: false,
+    visible: false
+});
+
 $("#SelectBoxCountry").dxSelectBox({
     items: [],
     placeholder: "Select--",
@@ -1510,7 +1522,7 @@ $("#btn-save").click(function () {
             jsonObjectsRecordDetail.push(OperationRecordDetail);
         }
         var RecordDetail = JSON.stringify(jsonObjectsRecordDetail);
-
+        $("#image-indicator").dxLoadPanel("instance").option("visible", true);
         $.ajax({
             type: "POST",
             url: "UserAuthentication.asmx/InsertFun",
@@ -1523,6 +1535,7 @@ $("#btn-save").click(function () {
                 res = res.replace(/""/g, '');
                 res = res.substr(1);
                 res = res.slice(0, -1);
+                $("#image-indicator").dxLoadPanel("instance").option("visible", false);
                 var RES1 = JSON.parse(res);
                 if (RES1 === "Success") {
                     swal(RES1, "Data successfully saved...", "success");
@@ -1535,6 +1548,7 @@ $("#btn-save").click(function () {
         });
     }
     else {
+        $("#image-indicator").dxLoadPanel("instance").option("visible", false);
         alert("Please Choose any record..!");
         return false;
     }

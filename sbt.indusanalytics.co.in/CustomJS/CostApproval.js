@@ -731,6 +731,7 @@ $("#BtnSaveCostApp").click(function () {
     ////        res = res.replace(/{/g, '');
     ////        res = res.replace(/}/g, '');
     ////        if (res === true || res === "true") {
+    $("#image-indicator").dxLoadPanel("instance").option("visible", true);
     $.ajax({
         type: "POST",
         url: "WebServiceOthers.asmx/SaveCostApprovalData",
@@ -755,9 +756,11 @@ $("#BtnSaveCostApp").click(function () {
             }
             else {
                 alert("Something went wrong!");
+                $("#image-indicator").dxLoadPanel("instance").option("visible", false);
             }
         },
         error: function errorFunc(jqXHR) {
+            $("#image-indicator").dxLoadPanel("instance").option("visible", false);
             // alert(jqXHR.message);
             alert("Error Occured!");
         }

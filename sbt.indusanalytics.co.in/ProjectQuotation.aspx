@@ -509,7 +509,8 @@
 
     <div id="BottomTabBar" class="MYBottomsidenav" style="padding-right: 1px">
         <div class="DialogBoxCustom" style="float: left">
-            <strong>Plan Window</strong>&nbsp;                            
+            <strong>Plan Window</strong>&nbsp;  
+            <strong style="border: 1px dashed;" id="PlanContNameD">0</strong>
             <strong style="border: 1px dashed;" id="PlanContQty">0</strong>
             <a href="javascript:void(0);" class="iconRightDbox btn-danger" data-dismiss="BottomTabBar" onclick="closeBottomTabBar()">
                 <span data-dismiss="BottomTabBar" onclick="closeBottomTabBar()" style="font-weight: 900; margin-right: 8px">X</span>

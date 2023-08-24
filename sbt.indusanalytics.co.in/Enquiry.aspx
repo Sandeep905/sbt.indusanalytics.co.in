@@ -262,10 +262,11 @@
             color: blue !important;
             font-size: 12px !important;
         }
+
         .RemoveLink {
             color: red !important;
             font-size: 12px !important;
-            margin-left:5px;
+            margin-left: 5px;
         }
 
         .grid {
@@ -280,7 +281,45 @@
             height: 200px;
             width: 200px;
         }
+
+        /* Style for the file list */
+        #PreviewArea ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        /* Style for list items */
+        #PreviewArea li {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            box-shadow: gray 0px 0px 5px 1px;
+            padding: 5px;
+        }
+
+        /* Style for file name */
+        #PreviewArea span {
+            flex-grow: 1;
+            margin-right: 10px;
+        }
+
+        /* Style for download button */
+        #PreviewArea a {
+            padding: 5px 10px;
+            background-color: #007BFF;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+            /* Hover effect for download button */
+            #PreviewArea a:hover {
+                background-color: #0056b3;
+            }
     </style>
+    <script src="js/jszip.js"></script>
+
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="Server">
     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-0 margin-0">
@@ -495,7 +534,10 @@
 
     <div id="BottomTabBar" class="MYBottomsidenav" style="padding-right: 1px">
         <div class="DialogBoxCustom" style="float: left">
-            <strong>Product Requirments</strong>&nbsp;                            
+            <strong>Product Requirments</strong>&nbsp;  
+              <%--<b id="PlanContName" style='border: 1px dashed; background-color: azure'></b>;Qty:---%>
+            
+            <strong style="border: 1px dashed;" id="PlanContNameD">0</strong>
             <strong style="border: 1px dashed;" id="PlanContQty">0</strong>
             <a href="javascript:void(0);" class="iconRightDbox btn-danger" data-dismiss="BottomTabBar" onclick="closeBottomTabBar()">
                 <span data-dismiss="BottomTabBar" onclick="closeBottomTabBar()" style="font-weight: 900; margin-right: 8px">X</span>
@@ -516,20 +558,20 @@
                                     <div class="col-xs-12 col-sm-5 col-md-5 col-lg-5">
                                         <div class='content_div' style='height: auto; text-align: center'>
                                             <img src="#" id="PlanContImg" style='height: 8em; width: 8em; left: 0' onmouseover='Planshow(this);' onmouseout='Planhide(this);' />
-                                            <b id="PlanContName" style='display: none; border: 1px dashed; background-color: azure'></b>
-                                            <input type="text" class="forTextBox" id="TxtPlanContName" />
+                                           <strong style="border: 1px dashed;display:none" id="PlanContName">0</strong>
+                                            <input type="text" class="forTextBox hidden" id="TxtPlanContName" />
                                             <b id="ContentOrientation" style='display: none'></b>
                                         </div>
                                     </div>
                                     <div id="planJob_Size" class="col-xs-12 col-sm-7 col-md-7 col-lg-7">
+                                        <label style="color: red; font-size: 10px">
+                                            If size in inch then enter inch value in text box and press <b>Shift + "</b></label>
+                                        <br />
                                         <b class="font-12" style="width: auto;">Job Size
                                             <label style="color: red">in MM</label>
                                         </b>
                                         <br />
-                                        <label style="color: red; font-size: 10px">
-                                            To convert Inch to MM,<br />
-                                            Use shift + "</label>
-                                        <br />
+
                                         <div id="SelJobSizeTemplate"></div>
                                         <div style="width: auto;">
                                             <input type='text' id='JobFoldedH' oninput="onInputChangeFolds(this);" name="FH" placeholder='Folded H' class='forTextBox' style="float: left; width: 40%; margin: .2em; display: none;" onchange="myvalidation(this)" />

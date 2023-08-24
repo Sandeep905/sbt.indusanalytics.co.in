@@ -3,7 +3,7 @@
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="Server">
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="Server">
-
+    <div id="image-indicator"></div>
     <div class="row clearfix padding-0 margin-0">
         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-0 margin-0">
             <div class="dialogboxContainerMainMAster">

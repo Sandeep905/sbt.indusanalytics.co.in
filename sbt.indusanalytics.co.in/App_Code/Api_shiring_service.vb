@@ -7632,7 +7632,6 @@ NextReel:
                 Total_Amount = Math.Round(Plate_Amount + Paper_Amount + Printing_Amount + Make_Ready_Amount + Coating_Amount, 2)
                 F_Total_Amount = Op_Amt + Total_Amount
                 Die_Cut_size = Gbl_Die_Size_H & "x" & Gbl_Die_Size_L
-
                 .NewRow()
                 .Rows.Add(Gbl_Machine_ID, Gbl_Machine_Name, Gbl_Machine_Gripper, Gbl_GripperSide, Machine_Colors, Gbl_Paper_ID, Paper_Size, Cut_size, Cut_L, Cut_H, Gbl_UPS_L, Gbl_UPS_H, Total_Ups, Bal_Piece, Bal_Side, Waste, Waste_In_Percent, Wastage_Paper_In_KG, Gbl_Grain_Direction, Plate_Qty, Plate_Rate, Plate_Amount, Make_Ready_Sheets_Total, Actual_Sheets, Wastage_Sheets, Total_Paper_In_KG, Full_Sheets, Gbl_Paper_Rate, Paper_Amount, (Printing_Impressions * Make_Readies), Impression_To_Be_Charged, Printing_Charges, Printing_Amount, Make_Readies, Make_Ready_Rate, Make_Ready_Amount, Final_Quantity, Total_Colors, Total_Amount, Cut_L_H, Cut_H_L, Gbl_Printing_Style, Printing_Charges_Type, Expected_Execution_Time, Total_Completion_Time, Gbl_Paper_Detail, Gbl_Plan_Type, Gbl_Paper_Rate_Type, Die_Cut_size, Gbl_InterLock_Style, No_Of_Sets, Math.Round(F_Total_Amount, 3), Gbl_Packing, Gbl_Unit_Per_Packing, Roundof_Impressions_With, Special_Color_Front_Charges, Special_Color_Back_Charges, Special_Color_Front_Amount, Special_Color_Back_Amount, Op_Amt, .Rows.Count + 1, Coating_Charges, Coating_Amount, GblMainPaperGroup, GblVendorID, GblVendorName)
 

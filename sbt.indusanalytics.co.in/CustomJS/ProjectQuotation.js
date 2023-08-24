@@ -891,6 +891,7 @@ var grid = $("#gridProductList").dxDataGrid({
                         document.getElementById("UnitOtrDisc").value = options.data.DescriptionOther === undefined ? '' : options.data.DescriptionOther;
 
                         if (options.data.IsOffsetProduct === true) {
+                            document.getElementById("PlanContNameD").innerHTML = options.data.ProductName  ///$.grep(ProductMasterList, function (ex) { return ex.ProductCatalogID === options.data.ProductCatalogID; })[0].ProductName;
                             document.getElementById("PlanContName").innerHTML = options.data.ProductName1  ///$.grep(ProductMasterList, function (ex) { return ex.ProductCatalogID === options.data.ProductCatalogID; })[0].ProductName;
                             document.getElementById("PlanContQty").innerHTML = options.data.Quantity;
                             document.getElementById("ContentOrientation").innerHTML = $.grep(AllContents, function (ex) { return ex.ContentID === $.grep(ProductMasterList, function (ex) { return ex.ProductCatalogID === options.data.ProductCatalogID; })[0].ContentID; })[0].ContentName;
@@ -1239,7 +1240,7 @@ $("#gridContentPlansList").dxDataGrid({
                 document.getElementById('finalCost1').value = 0;
                 document.getElementById('VendorUnitCostFlex').value = 0;
             }
-            $('#BtnPlan').click();
+          //  $('#BtnPlan').click();
             onChangeCalcAmountFlex();
         }
     }
@@ -2754,7 +2755,7 @@ $("#BtnApplyPlanUnit").click(function () {
         }
 
         for (var i = 0; i < gridProductData._options.dataSource.length; i++) {
-            if (gridProductData._options.dataSource[i].ProductCatalogID === ProductCatalogID && gridProductData._options.dataSource[i].Quantity === Number(document.getElementById("TxtPlanQtyUnit").value && gridProductData._options.dataSource[i].EnquiryIDDetail === GBLSelectedEnquiryIDDetail)) {
+            if (gridProductData._options.dataSource[i].ProductCatalogID === ProductCatalogID && gridProductData._options.dataSource[i].Quantity === Number(document.getElementById("TxtPlanQtyUnit").value) && gridProductData._options.dataSource[i].EnquiryIDDetail === GBLSelectedEnquiryIDDetail) {
                 gridProductData._options.dataSource[i].Rate = document.getElementById('VendorRate').value;
                 gridProductData._options.dataSource[i].UnitCostVendor = VendorUnitCostUnit.toFixed(2).toString();
                 gridProductData._options.dataSource[i].RateType = "Per Unit";

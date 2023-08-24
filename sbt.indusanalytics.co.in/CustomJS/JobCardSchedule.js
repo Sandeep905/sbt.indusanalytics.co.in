@@ -10,6 +10,9 @@ var GBLScheduleContents = [];
 var SelectedMaterial = [];
 var GBLJCNO = '';
 var GBLLedgerId = 0;
+var updatedRows = {};
+
+
 // *****  Declare Global varialbe  ****
 var check = "Pending", GblContentName, GblGenCode, GblProdMasCode = "", GblContentType, GblFlagFormName, GblCommandName, GblJobCardNo = "";
 var GblProductContID = 0, GblContentId = 0, GblProdMasID = 0, GblBookingID = 0, GblJobBookingID = 0, GblOrderQuantity = 0, GblPaperId = 0, ProductEstimateID = 0;
@@ -43,6 +46,24 @@ $("#LoadIndicator").dxLoadPanel({
     visible: false
 });
 
+$('#ReasonForChange').dxSelectBox({
+    items: ["Vendor is not available", "Rates have changed", "Both", "Others"],
+    inputAttr: { 'aria-label': 'Reason for change' },
+    placeholder: 'Reason for change',
+    showClearButton: true,
+    onValueChanged: function (e) {
+        var reasonDiv = document.getElementById('ReasonForOtherdiv');
+
+        if (e.value == "Others") {
+            reasonDiv.classList.remove('hidden');
+        } else {
+            reasonDiv.classList.add('hidden');
+        }
+    }
+});
+
+
+
 //$("#transactionType").dxRadioGroup({
 //    items: [
 //        { text: "Deduct from Stock", value: "deductFromStock" },
@@ -73,7 +94,6 @@ $("#RadioPMPendingProc").dxRadioGroup({
         GetJobCardData();
     }
 });
-
 
 $("#RadioSalesorder").dxRadioGroup({
     items: ["Pending", "Processed"],
@@ -145,6 +165,34 @@ function GetJobCardData() {
             $("#GridJocardData").dxDataGrid({
                 keyExpr: 'JobBookingID',
                 dataSource: RES1.JobcardMain,
+                onRowPrepared: function (e) {
+                    setDataGridRowCss(e);
+                    if (e.rowType === "data") {
+                        // Get the current row data
+                        const rowData = e.data;
+
+                        // Check if there are child rows
+                        if (rowData.JobBookingID) {
+                            // Get the child rows data
+                            const childRows = RES1.JobcardSchedule.filter(schedule => schedule.JobBookingID === rowData.JobBookingID);
+
+                            // Check if any child row's VendorID is not equal to AllocatedVendorID
+                            const hasVendorChanged = childRows.some(child => child.VendorID !== child.AllocatedVendorID);
+
+                            // Check if any child row's QuotatedRate is not equal to ScheduleRate
+                            const hasRateChanged = childRows.some(child => parseFloat(child.QuotatedRate) !== parseFloat(child.ScheduleRate));
+
+                            // Check if both Vendor and Rate have changed, then set red background color
+                            if (hasVendorChanged && hasRateChanged) {
+                                e.rowElement.css("background-color", "red");
+                            } else if (hasVendorChanged) {
+                                e.rowElement.css("background-color", "yellow");
+                            } else if (hasRateChanged) {
+                                e.rowElement.css("background-color", "orange");
+                            }
+                        }
+                    }
+                },
                 masterDetail: {
                     enabled: true,
                     template(container, options) {
@@ -167,7 +215,8 @@ function GetJobCardData() {
                                     { dataField: "ScheduleVendorName" },
                                     { dataField: "QTY", caption: "Schedule Qty" },
                                     { dataField: "RateType" },
-                                    { dataField: "Rate" },
+                                    { dataField: "QuotatedRate" },
+                                    { dataField: "ScheduleRate" },
                                     { dataField: "NetAmount" },
                                     { dataField: "CGSTTaxPercentage" },
                                     { dataField: "CGSTTaxAmount" },
@@ -317,6 +366,7 @@ $('#SBVendor').dxSelectBox({
             }
             document.getElementById('TxtTotalQTY').value = Number(document.getElementById('TxtOrderQuantity').value);
             document.getElementById('TxtRemainingQTY').value = remainingQTY;
+            checkVendorRateChange(ee.value, "Vendor");
         }
     }
 }).dxValidator({
@@ -664,9 +714,7 @@ $("#GridJocardData").dxDataGrid({
     height: function () {
         return window.innerHeight / 1.4;
     },
-    onRowPrepared: function (e) {
-        setDataGridRowCss(e);
-    },
+
     pager: {
         showPageSizeSelector: true,
         allowedPageSizes: [100, 200, 500, 1000]
@@ -1010,6 +1058,8 @@ $("#ScheduleGrid").dxDataGrid({
         { dataField: "SGSTTaxAmount" },
         { dataField: "IGSTTaxAmount" },
         { dataField: "FinalCost" },
+        { dataField: "ReasonForChange" },
+        { dataField: "RemakForReason" },
         { dataField: "JobType" },
         { dataField: "JobReference" },
         { dataField: "JobPriority" },
@@ -1533,11 +1583,13 @@ $('#BtnAdd').click(function () {
     var dataGrid = $('#ScheduleGrid').dxDataGrid('instance');
     var SBVendor = $('#SBVendor').dxSelectBox('instance').option('value');
     var JobCoordinator = $('#JobCoordinator').dxSelectBox('instance').option('value');
+    var ReasonForChange = $('#ReasonForChange').dxSelectBox('instance').option('value');
     var OPT = $("#Optsplit").dxRadioGroup('instance').option('value');
     //var SBProcess = $('#SBProcess').dxSelectBox('instance').option('value');
     //var IsallProcess = document.getElementById('allprocess').checked;
     var TxtCriticalRemark = document.getElementById('TxtCriticalRemark').value;
     var TxtRate = Number(document.getElementById('TxtRate').value);
+    var ReasonForOther = document.getElementById('ReasonForOther').value;
 
     if (SBVendor === null || SBVendor <= 0) {
         DevExpress.ui.notify("Please select vendor..!", "error", 2000);
@@ -1575,10 +1627,8 @@ $('#BtnAdd').click(function () {
         SelectedProductData[0].ProductEstimationContentID = GBLProductEstimationContentID;
         SelectedProductData[0].QTY = Number(document.getElementById('TxtScheduleQTY').value);
         SelectedProductData[0].NetAmount = (Number(document.getElementById('TxtScheduleQTY').value) * Number(TxtRate)).toFixed(2);
-
-
-
-
+        SelectedProductData[0].ReasonForChange = ReasonForChange;
+        SelectedProductData[0].RemakForReason = ReasonForOther;
         // Get the data from the second grid
         var newData = $("#AllocatedMaterialTemp").dxDataGrid("instance").option("dataSource");
 
@@ -1660,11 +1710,16 @@ $('#BtnAdd').click(function () {
         var clonedItem = $.extend({}, SelectedProductData[0]);
         dataGrid._options.dataSource.splice(dataGrid.totalCount(), 0, clonedItem);
         dataGrid.refresh(true);
+
+
         document.getElementById('TxtScheduleQTY').value = 0;
         document.getElementById('TxtRemainingQTY').value = 0;
         document.getElementById("TxtCriticalRemark").value = '';
+        document.getElementById("ReasonForOther").value = '';
         document.getElementById("ISSuppliedBySBT").checked = false;
-        $('#SBVendor').dxSelectBox('option', 'value', -1); // Deselect the ID
+        $('#ReasonForChange').dxSelectBox('option', 'value', -1); // Deselect the ID
+        //     $('#SBVendor').dxSelectBox('option', 'value', -1); // Deselect the ID
+
         ValidateMaxQty()
         toggleButton()
 
@@ -1674,10 +1729,9 @@ $('#BtnAdd').click(function () {
 
 
 });
-$('#BtnCreate').click(function () {
-    NewJC();
-    document.getElementById('TxtSalesOrderNo').value = '';
-    document.getElementById("BtnCreate").setAttribute("data-target", "#ModalCreate");
+
+$('#BtnShowlist').click(function () {
+    document.getElementById("BtnShowlist").setAttribute("data-target", "#ModalShowList");
 });
 $('#BtnSavejc').click(function () {
     try {
@@ -1858,6 +1912,8 @@ $('#BtnSavejc').click(function () {
             objSchedule.JobReference = ScheduleGridData[i].JobReference;
             objSchedule.JobPriority = ScheduleGridData[i].JobPriority;
             objSchedule.ExpectedDeliveryDate = ScheduleGridData[i].ExpectedDeliveryDate;
+            objSchedule.ReasonForChange = ScheduleGridData[i].ReasonForChange;
+            objSchedule.RemakForReason = ScheduleGridData[i].RemakForReason;
 
             objSchedule.ProductDescription = ScheduleGridData[i].ProductDescription;
             objSchedule.PackagingDetails = ScheduleGridData[i].PackagingDetails;
@@ -1926,8 +1982,8 @@ $('#BtnSavejc').click(function () {
                 OperationRecordDetail.FloorWarehouseID = 0// SelBinName;
                 jsonObjectsRecordDetail.push(OperationRecordDetail);
             }
-            jsonObjectsRecordMain = JSON.stringify(jsonObjectsRecordMain);
-            jsonObjectsRecordDetail = JSON.stringify(jsonObjectsRecordDetail);
+            jsonObjectsRecordMain = jsonObjectsRecordMain;
+            jsonObjectsRecordDetail = jsonObjectsRecordDetail;
         }
 
         // To Create Requisition
@@ -1976,7 +2032,7 @@ $('#BtnSavejc').click(function () {
                 $.ajax({
                     type: "POST",
                     url: "WebServiceProductionWorkOrderNew.asmx/SavejobcardSchedule",
-                    data: '{JobCardMain:' + JSON.stringify(JobcardMain) + ',JobcardContents:' + JSON.stringify(JobcardContents) + ',JObCardSchedule:' + JSON.stringify(ScheduleArr) + ',ProcessArr:' + JSON.stringify(ProcessArr) + ',FlagEdit:false,JobcardId:0,AllocatedMaterial:' + JSON.stringify(MaterialArray) + ',jsonObjectsRecordMain:' + jsonObjectsRecordMain + ',jsonObjectsRecordDetail:' + jsonObjectsRecordDetail + ',jsonObjectsRecordMainR:' + JSON.stringify(jsonObjectsRecordMainR) + ',jsonObjectsRecordDetailR:' + JSON.stringify(jsonObjectsRecordDetailR) + '}',
+                    data: '{JobCardMain:' + JSON.stringify(JobcardMain) + ',JobcardContents:' + JSON.stringify(JobcardContents) + ',JObCardSchedule:' + JSON.stringify(ScheduleArr) + ',ProcessArr:' + JSON.stringify(ProcessArr) + ',FlagEdit:false,JobcardId:0,AllocatedMaterial:' + JSON.stringify(MaterialArray) + ',jsonObjectsRecordMain:' + JSON.stringify(jsonObjectsRecordMain) + ',jsonObjectsRecordDetail:' + JSON.stringify(jsonObjectsRecordDetail) + ',jsonObjectsRecordMainR:' + JSON.stringify(jsonObjectsRecordMainR) + ',jsonObjectsRecordDetailR:' + JSON.stringify(jsonObjectsRecordDetailR) + '}',
                     contentType: "application/json; charset=utf-8",
                     dataType: "text",
                     success: function (results) {
@@ -2048,17 +2104,26 @@ function convertToISOString(dateString) {
     return isoString;
 }
 $('#BtnNextSO').click(function () {
+
     dataProject = $('#SOGRID').dxDataGrid('instance').getSelectedRowsData();
     if (dataProject.length <= 0) {
         alert('Please select a sales order form the grid to continue.');
         return
     }
+
+    let len = $('#ScheduleGrid').dxDataGrid('instance')._options.dataSource;
+    if (len.length > 0) {
+        if (!confirm("A schedule is already in place. Are you certain you want to proceed? Keep in mind that proceeding might result in the loss of the existing schedule.")) {
+            return false;
+        }
+    }
+
     var TablePendingData = $.grep(ContentsDataArray, function (ex) { return ex.OrderBookingDetailsID === dataProject[0].OrderBookingDetailsID; })
     GenerateJobCardNo();
     $('#TxtOrderBookingDate').val(dataProject[0].OrderBookingDate);
     $('#TxtOrderBookingNo').val(dataProject[0].SalesOrderNo);
-    $('#TxtPONo').val(dataProject[0].PONo);
-    $('#TxtPODate').val(dataProject[0].POdate);
+    $('#TxtQuotationNo').val(dataProject[0].EstimateNo);
+    $('#TxtEnquiryNo').val(dataProject[0].EnquiryNo);
     $("#SelPODate").dxDateBox({ value: dataProject[0].POdate });
 
 
@@ -2087,6 +2152,13 @@ $('#BtnNextSO').click(function () {
 
     });
 
+
+    $("#AllocatedMaterial").dxDataGrid({
+        dataSource: [],
+    });
+    $("#ScheduleGrid").dxDataGrid({
+        dataSource: [],
+    });
     $('#CloseModaly').click();
     return;
     //---------------------------
@@ -2141,6 +2213,36 @@ $('#BtnChooseFromSO').click(function () {
 
     document.getElementById("BtnChooseFromSO").setAttribute("data-target", "#ModalSOList");
 })
+
+
+function checkVendorRateChange(data, Type) {
+    if ($("#ProductsGrid").dxDataGrid("instance").getSelectedRowsData().length <= 0) return;
+    // Get the selected row data from the DataGrid
+    var selectedRowData = $("#ProductsGrid").dxDataGrid("instance").getSelectedRowsData()[0];
+
+    // Extract VendorId and Rate from the selected row data
+    var selectedVendorId = selectedRowData.VendorID;
+    var selectedRate = selectedRowData.UnitCostVendor;
+    var reasonDiv = document.getElementById('ReasonForChangediv');
+
+    if (Type == "Vendor") {
+        if (Number(selectedVendorId) == Number(data)) {
+            reasonDiv.classList.add('hidden');
+        } else {
+            reasonDiv.classList.remove('hidden');
+        }
+        return;
+    }
+    if (Type == "Rate") {
+        if (parseFloat(selectedRate) == parseFloat(data)) {
+            reasonDiv.classList.add('hidden');
+        } else {
+            reasonDiv.classList.remove('hidden');
+        }
+        return;
+    }
+}
+
 function loadSalesOrder(IsJCCreated) {
     $.ajax({
         type: 'post',
@@ -2497,7 +2599,6 @@ $("#POProductsGrid").dxDataGrid({
         { dataField: "ProductName", allowEditing: false },
         { dataField: "OrderQuantity", allowEditing: false },
         { dataField: "Rate", caption: "Planned Rate", allowEditing: false, visible: false },
-
         { dataField: "RateType", allowEditing: false },
         { dataField: "ScheduleVendorName", allowEditing: false },
         { dataField: "ScheduleQty", resizable: true, visible: true, allowEditing: true },
@@ -2531,35 +2632,47 @@ $("#POProductsGrid").dxDataGrid({
             }
 
             e.data.NetAmount = Number(e.data.ScheduleRate) * Number(e.data.ScheduleQty)
-            var IsSameState = false;
-            // To get State Of Client 
-            var result = $.grep(VendorArray, function (ex) { return ex.LedgerID === e.data.ScheduleVendorId; });
-            if (result.length === 1) {
-                if (GBLLoginCompanyState == result[0].state)
-                    IsSameState = true;
-                else
-                    IsSameState = false;
-            }
-            if (IsSameState) {
-                e.data.CGSTTaxAmount = ((e.data.NetAmount * e.data.GSTPercantage / 2) / 100).toFixed(2);
-                e.data.CGSTTaxPercentage = e.data.GSTPercantage;
 
-                e.data.SGSTTaxAmount = ((e.data.NetAmount * e.data.GSTPercantage / 2) / 100).toFixed(2);
-                e.data.SGSTTaxPercentage = e.data.GSTPercantage;
+            if (e.data.GSTApplicable) {
 
+                e.data.NetAmount = Number(e.data.ScheduleRate) * Number(e.data.ScheduleQty)
+                var IsSameState = false;
+                // To get State Of Client 
+                var result = $.grep(VendorArray, function (ex) { return ex.LedgerID === e.data.ScheduleVendorId; });
+                if (result.length === 1) {
+                    if (GBLLoginCompanyState == result[0].state)
+                        IsSameState = true;
+                    else
+                        IsSameState = false;
+                }
+                if (IsSameState) {
+                    e.data.CGSTTaxAmount = ((e.data.NetAmount * e.data.GSTPercantage / 2) / 100).toFixed(2);
+                    e.data.CGSTTaxPercentage = e.data.GSTPercantage;
+
+                    e.data.SGSTTaxAmount = ((e.data.NetAmount * e.data.GSTPercantage / 2) / 100).toFixed(2);
+                    e.data.SGSTTaxPercentage = e.data.GSTPercantage;
+
+                    e.data.IGSTTaxAmount = 0;
+                    e.data.IGSTTaxPercentage = 0;
+
+                } else {
+                    e.data.IGSTTaxAmount = ((e.data.NetAmount * e.data.GSTPercantage) / 100).toFixed(2);
+                    e.data.IGSTTaxPercentage = e.data.GSTPercantage;
+                    e.data.CGSTTaxAmount = 0;
+                    e.data.SGSTTaxAmount = 0;
+                    e.data.CGSTTaxPercentage = 0;
+                    e.data.SGSTTaxPercentage = 0;
+
+                }
+            } else {
                 e.data.IGSTTaxAmount = 0;
                 e.data.IGSTTaxPercentage = 0;
-
-            } else {
-                e.data.IGSTTaxAmount = ((e.data.NetAmount * e.data.GSTPercantage) / 100).toFixed(2);
-                e.data.IGSTTaxPercentage = e.data.GSTPercantage;
                 e.data.CGSTTaxAmount = 0;
                 e.data.SGSTTaxAmount = 0;
                 e.data.CGSTTaxPercentage = 0;
                 e.data.SGSTTaxPercentage = 0;
 
             }
-
             e.data.TotalAmount = (Number(e.data.IGSTTaxAmount) + Number(e.data.SGSTTaxAmount) + Number(e.data.CGSTTaxAmount) + Number(e.data.NetAmount)).toFixed(2);
             e.data.ToTalGSTAmount = (Number(e.data.IGSTTaxAmount) + Number(e.data.SGSTTaxAmount) + Number(e.data.CGSTTaxAmount)).toFixed(2);
 
@@ -2602,8 +2715,6 @@ $("#POProductsGrid").dxDataGrid({
 
         ]
     },
-
-
     columnAutoWidth: true,
     showBorders: true,
     showRowLines: true,
@@ -2626,9 +2737,37 @@ $("#POProductsGrid").dxDataGrid({
             e.rowElement.css('font-weight', 'bold');
         }
         e.rowElement.css('fontSize', '11px');
+        if (e.rowType === "data") {
+            const rowData = e.data;
+
+            if (rowData.GSTApplicable) {
+                // Check if the row has been updated
+                if (!updatedRows[rowData.key]) {
+                    const GSTPercentage = rowData.GSTPercantage; // Example GST percentage
+                    const companyState = GBLLoginCompanyState; // Example company state
+                    const supplierState = rowData.VendorState; // Assuming VendorState is a property in your row data
+
+                    const gstValues = calculateGST(GSTPercentage, companyState, supplierState);
+
+                    // Update tax amount columns
+                    rowData.CGSTTaxAmount = (rowData.ScheduleRate * rowData.ScheduleQty * gstValues.CGST) / 100;
+                    rowData.SGSTTaxAmount = (rowData.ScheduleRate * rowData.ScheduleQty * gstValues.SGST) / 100;
+                    rowData.IGSTTaxAmount = (rowData.ScheduleRate * rowData.ScheduleQty * gstValues.IGST) / 100;
+
+                    // Update TotalAmount column
+                    rowData.TotalAmount = rowData.NetAmount + rowData.CGSTTaxAmount + rowData.SGSTTaxAmount + rowData.IGSTTaxAmount;
+
+                    // Mark the row as updated
+                    updatedRows[rowData.key] = true;
+
+                    e.component.refresh();
+                }
+            }
+        }
     },
     onContentReady: function (e) {
         CalculateAmount();
+        // e.component.refresh();
     }
 
 });
@@ -2995,7 +3134,7 @@ function OpenPopup(ID, modalId) {
 // TO Revise The PO ------------------######################################## END  #####################################################
 
 
-
+NewJC();
 function NewJC() {
     try {
 
@@ -3094,7 +3233,8 @@ $('#AddMaterial').click(function (e) {
             return;
         } else {
             UpdateThePhysicalStock();
-            OpenPopup('AddMaterial', '#ModalMaterial')
+            OpenPo
+            pup('AddMaterial', '#ModalMaterial')
         }
     } catch (e) {
         console.log(e);
@@ -3466,6 +3606,18 @@ function removeRowByKey(gridInstance, key) {
     var updatedData = dataSource.filter(function (item) {
         return item[keyExpr] !== key;
     });
-
     gridInstance.option("dataSource", updatedData);
+}
+
+function calculateGST(GSTPercentage, companyState, supplierState) {
+    const isSameState = companyState.toUpperCase() === supplierState.toUpperCase();
+    const CGST = isSameState ? (GSTPercentage / 2) : 0;
+    const SGST = isSameState ? (GSTPercentage / 2) : 0;
+    const IGST = isSameState ? 0 : GSTPercentage;
+
+    return {
+        CGST: CGST,
+        SGST: SGST,
+        IGST: IGST
+    };
 }

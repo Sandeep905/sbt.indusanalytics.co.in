@@ -133,11 +133,12 @@ $("#MasterGrid").dxDataGrid({
 
         document.getElementById("txtGetGridRow").value = data[0].LedgerID; /// grid.cellValue(Row, 0);        
         UnderGroupID = data[0].LedgerGroupID; ///grid.cellValue(Row, 1);
+        let repid = data[0].RefSalesRepresentativeID == undefined ? 0 : data[0].RefSalesRepresentativeID;
         $.ajax({
             async: false,
             type: "POST",
             url: "WebService_LedgerMaster.asmx/GetSalesCordnators",
-            data: '{ID:' + JSON.stringify(data[0].RefSalesRepresentativeID) + '}',
+            data: '{ID:' + JSON.stringify(repid) + '}',
             contentType: "application/json; charset=utf-8",
             dataType: "text",
             success: function (results) {
@@ -155,7 +156,8 @@ $("#MasterGrid").dxDataGrid({
             async: false,
             type: "POST",
             url: "WebService_LedgerMaster.asmx/GetSalesPerson",
-            data: '{ID:' + JSON.stringify(data[0].RefSalesRepresentativeID) + '}',
+            //data: '{ID:' + JSON.stringify(repid) + '}',
+            data: '{}',
             contentType: "application/json; charset=utf-8",
             dataType: "text",
             success: function (results) {

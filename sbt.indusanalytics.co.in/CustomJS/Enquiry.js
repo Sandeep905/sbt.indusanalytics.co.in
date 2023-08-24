@@ -476,7 +476,7 @@ var grid = $("#gridProductList").dxDataGrid({
             }
         },
         {
-            dataField: "ProductCatalogID", caption: "Content Name",
+            dataField: "ProductCatalogID", caption: "Product Name",
             lookup: {
                 dataSource: function (options) {
                     return {
@@ -534,7 +534,7 @@ var grid = $("#gridProductList").dxDataGrid({
             }
         },
         // SequenceNo = 2
-        { dataField: "ProductName1", caption: "Product Name", allowEditing: true, width: 100 },
+        { dataField: "ProductName1", caption: "Product Name", allowEditing: true, width: 100, visible: false },
         { dataField: "ProductCatalogCode", caption: "Product Code", allowEditing: false, width: 100 },
         { dataField: "ProductDescription", caption: "Product Description", allowEditing: false },
         { dataField: "Quantity", caption: "Quantity", allowEditing: true, dataType: "number", min: 0, validationRules: [{ type: "required", message: "Quantity is required" }] },
@@ -545,6 +545,7 @@ var grid = $("#gridProductList").dxDataGrid({
                     .text("Add Detail")
                     .on('dxclick', function (e) {
                         e.preventDefault();
+                        SelectedItemImagesStr = "";
                         if (options.data.Quantity === undefined || Number(options.data.Quantity) <= 0) return;
                         SelectedProductData = options.data;
                         GBLUniqueID = options.data.UniqueID
@@ -574,6 +575,7 @@ var grid = $("#gridProductList").dxDataGrid({
                         document.getElementById("FinalShipperCostUnit").value = Number(options.data.ShippingCost);
                         document.getElementById("FinalTotal").value = Number(options.data.FinalAmount);
                         if (options.data.IsOffsetProduct === true) {
+                            document.getElementById("PlanContNameD").innerHTML = options.data.ProductName//$.grep(ProductMasterList, function (ex) { return ex.ProductCatalogID === options.data.ProductCatalogID; })[0].ProductName;
                             document.getElementById("PlanContName").innerHTML = options.data.ProductName1//$.grep(ProductMasterList, function (ex) { return ex.ProductCatalogID === options.data.ProductCatalogID; })[0].ProductName;
                             document.getElementById("PlanContQty").innerHTML = options.data.Quantity;
                             document.getElementById("ContentOrientation").innerHTML = $.grep(AllContents, function (ex) { return ex.ContentID === $.grep(ProductMasterList, function (ex) { return ex.ProductCatalogID === options.data.ProductCatalogID; })[0].ContentID; })[0].ContentName;
@@ -586,20 +588,8 @@ var grid = $("#gridProductList").dxDataGrid({
                         }
 
                         if (options.data.attachedfile != "" && options.data.attachedfile != undefined) {
-                            //  $("#fileDownloadunit").removeClass("hidden");
-                            //$("#fileDownloadunit").attr("href", "Files/Enquiry/" + options.data.attachedfile);
-                            //   $("#fileDownloadunit").attr("download", options.data.attachedfile);
                             SelectedItemImagesStr = options.data.attachedfile;
-
                             GBLEnquiryDetailID = options.data.EnquiryIDDetail;
-                            //  $("#fileDownloadflex").removeClass("hidden");
-                            //$("#fileDownloadflex").attr("href", "Files/Enquiry/" + options.data.attachedfile);
-                            //   $("#fileDownloadflex").attr("download", options.data.attachedfile);
-
-                            //  $("#fileDownloadoffset").removeClass("hidden");
-                            //$("#fileDownloadoffset").attr("href", "Files/Enquiry/" + options.data.attachedfile);
-                            //  $("#fileDownloadoffset").attr("download", options.data.attachedfile);
-
                         } else {
                             $("#fileDownloadunit").addClass("hidden");
                             $("#fileDownloadflex").addClass("hidden");
@@ -720,7 +710,7 @@ var grid = $("#gridProductList").dxDataGrid({
                 itemType: 'group',
                 colCount: 1,
                 colSpan: 2,
-                items: ['CategoryID', 'ProductCatalogID', 'ProductName1', 'Quantity'],
+                items: ['CategoryID', 'ProductCatalogID', 'Quantity'],
             }],
         },
     },
@@ -734,7 +724,7 @@ var grid = $("#gridProductList").dxDataGrid({
     },
     onInitNewRow: function (e) {
         e.data.SequenceNo = e.component._options.dataSource.length + 1;
-        e.data.UniqueID = generateUniqueID(); 
+        e.data.UniqueID = generateUniqueID();
     },
     onEditingStart: function (e) {
         if (e.column.dataField == "Quantity" && e.data.Amount > 0) {
@@ -955,7 +945,8 @@ $("#GridShowlist").dxDataGrid({
     selection: { mode: "single" },
     filterRow: { visible: true },
     columns: [
-        { dataField: "EnquiryNo", caption: "Enquiry No", width: 180 },
+        //{ dataField: "SequenceNo",  width: 40,caption:"S.No." },
+        { dataField: "EnquiryNo", caption: "Enquiry No", width: 80 },
         { dataField: "ProjectName", caption: "Project Name", width: 180 },
         { dataField: "LedgerName", caption: "Client" },
         { dataField: "SalesLedgerName", caption: "Sales Person" },
@@ -974,7 +965,7 @@ $("#GridShowlist").dxDataGrid({
                 $('<a>').addClass('fa fa-download dx-link')
                     .on('dxclick', function (e) {
                         e.preventDefault();
-                        displayFilesInGrid(options.data.attachedfile)
+                        displayFilesInList(options.data.attachedfile)
                         this.setAttribute("data-toggle", "modal");
                         this.setAttribute("data-target", "#ModalDownloadPreview");
                     })
@@ -986,7 +977,7 @@ $("#GridShowlist").dxDataGrid({
     showRowLines: true,
     showBorders: true,
     height: function () {
-        return window.innerHeight / 1.6;
+        return window.innerHeight / 1.3;
     },
     onRowPrepared: function (e) {
         setDataGridRowCss(e);
@@ -1277,7 +1268,7 @@ $("#BtnApplyPlan").click(function (e) {
                     gridProductData._options.dataSource[gridProductData1[0].SequenceNo - 1].ProductInputSizes = JSON.stringify(gridProductConfig);
                     gridProductData._options.dataSource[gridProductData1[0].SequenceNo - 1].OtherDetails = $.trim($("#FlexRemark").val());
                     gridProductData.refresh();
-
+                    $('#fileflex').val('');
                 }
             })
             .catch(function (error) {
@@ -1465,17 +1456,17 @@ function LoadEnquiry() {
                 res = res.replace(/u0026/g, '&');
                 res = res.substr(1);
                 res = res.slice(0, -1);
+                $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
                 var RES1 = JSON.parse(res.toString());
                 $("#GridShowlist").dxDataGrid({ dataSource: RES1 });
             },
             error: function errorFunc(jqXHR) {
+                $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
                 console.log(jqXHR);
             }
         });
     } catch (e) {
         console.log(e);
-    } finally {
-        $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
     }
 }
 $("#BtnShowList").click(function () {
@@ -1957,6 +1948,7 @@ $("#btnApplyCostPQ").click(function (e) {
                         gridProductData._options.dataSource[gridProductData1[0].SequenceNo - 1].OtherDetails = $.trim($("#OffsetRemark").val());
                         gridProductData._options.dataSource[gridProductData1[0].SequenceNo - 1].attachedfile = response;
                         gridProductData.refresh();
+                        $('#fileOffset').val('');
                         break;
                     }
                 })
@@ -1991,7 +1983,7 @@ $("#btnApplyCostPQ").click(function (e) {
 
 
 $("#BtnApplyPlanUnit").click(function (e) {
-    e.preventDefault();
+    // e.preventDefault();
     try {
 
         var gridProductData = $('#gridProductList').dxDataGrid('instance');
@@ -2025,7 +2017,7 @@ $("#BtnApplyPlanUnit").click(function (e) {
             uploadFile($('#fileUnit')[0].files)
                 .then(function (response) {
                     for (var i = 0; i < gridProductData._options.dataSource.length; i++) {
-                        if (gridProductData._options.dataSource[i].ProductCatalogID === ProductCatalogID && gridProductData._options.dataSource[i].UniqueID === GBLUniqueID  && gridProductData._options.dataSource[i].Quantity === Number(document.getElementById("TxtPlanQtyUnit").value)) {
+                        if (gridProductData._options.dataSource[i].ProductCatalogID === ProductCatalogID && gridProductData._options.dataSource[i].UniqueID === GBLUniqueID && gridProductData._options.dataSource[i].Quantity === Number(document.getElementById("TxtPlanQtyUnit").value)) {
                             gridProductData._options.dataSource[i].OtherDetails = $.trim($("#UnitRemark").val());
                             if (SelectedItemImagesStr != "") {
                                 response = SelectedItemImagesStr + "," + response
@@ -2034,6 +2026,7 @@ $("#BtnApplyPlanUnit").click(function (e) {
                             gridProductData._options.dataSource[i].DefaultProcessStr = oprids.slice(0, -1);
                             gridProductData._options.dataSource[i].ProcessIDStr = suggestoprids + oprids.slice(0, -1);
                             gridProductData.refresh();
+                            $('#fileUnit').val('')
                             break;
                         }
                     }
@@ -2045,7 +2038,7 @@ $("#BtnApplyPlanUnit").click(function (e) {
             for (var i = 0; i < gridProductData._options.dataSource.length; i++) {
                 if (gridProductData._options.dataSource[i].ProductCatalogID === ProductCatalogID && gridProductData._options.dataSource[i].UniqueID === GBLUniqueID && gridProductData._options.dataSource[i].Quantity === Number(document.getElementById("TxtPlanQtyUnit").value)) {
                     gridProductData._options.dataSource[i].OtherDetails = $.trim($("#UnitRemark").val());
-                    gridProductData._options.dataSource[i].attachedfile = "";
+                    ////gridProductData._options.dataSource[i].attachedfile = "";
                     gridProductData._options.dataSource[i].DefaultProcessStr = oprids.slice(0, -1);
                     gridProductData._options.dataSource[i].ProcessIDStr = suggestoprids + oprids.slice(0, -1);
                     gridProductData.refresh();
@@ -2233,36 +2226,61 @@ $("#BtnSelectOperation").click(function () {
 
 
 
+//function uploadFile(files) {
+//    return new Promise(function (resolve, reject) {
+//        var xhr = new XMLHttpRequest();
+//        var fd = new FormData();
+
+//        for (var i = 0; i < files.length; i++) {
+//            fd.append("files[]", files[i]);
+//        }
+
+//        xhr.open("POST", "EnquiryFileUpload.ashx", true);
+//        xhr.onload = function () {
+//            if (xhr.status === 200) {
+//                var response = xhr.responseText;
+//                console.log("Files uploaded successfully. File names: " + response);
+//                resolve(response);
+//            } else {
+//                console.error("Error uploading files. Status: " + xhr.status);
+//                reject(new Error("File upload failed"));
+//            }
+//        };
+//        xhr.onerror = function () {
+//            console.error("File upload failed due to network error");
+//            reject(new Error("File upload failed"));
+//        };
+//        xhr.send(fd);
+//    });
+//}
 function uploadFile(files) {
     return new Promise(function (resolve, reject) {
-        var xhr = new XMLHttpRequest();
         var fd = new FormData();
 
         for (var i = 0; i < files.length; i++) {
             fd.append("files[]", files[i]);
         }
 
-        xhr.open("POST", "EnquiryFileUpload.ashx", true);
-        xhr.onload = function () {
-            if (xhr.status === 200) {
-                var response = xhr.responseText;
+        $.ajax({
+            url: "EnquiryFileUpload.ashx",
+            type: "POST",
+            data: fd,
+            processData: false,
+            contentType: false,
+            success: function (response) {
                 console.log("Files uploaded successfully. File names: " + response);
                 resolve(response);
-            } else {
+            },
+            error: function (xhr, status, error) {
                 console.error("Error uploading files. Status: " + xhr.status);
                 reject(new Error("File upload failed"));
             }
-        };
-        xhr.onerror = function () {
-            console.error("File upload failed due to network error");
-            reject(new Error("File upload failed"));
-        };
-        xhr.send(fd);
+        });
     });
 }
 
 
-function displayFilesInGrid(fileNamesString) {
+function displayFilesInList(fileNamesString) {
     var previewArea = document.getElementById("PreviewArea");
     previewArea.innerHTML = ""; // Clear the previous content
 
@@ -2275,24 +2293,15 @@ function displayFilesInGrid(fileNamesString) {
 
     var fileNames = fileNamesString.split(",");
 
-    // Create a grid with 2 columns and 2 rows
-    var grid = document.createElement("div");
-    grid.className = "grid";
+    // Create a list
+    var fileList = document.createElement("ul");
 
     for (var i = 0; i < fileNames.length; i++) {
-        // Create a grid item
-        var gridItem = document.createElement("div");
-        //gridItem.className = "grid-item";
+        // Create a list item
+        var listItem = document.createElement("li");
 
-        // Create an image element for preview
-        var imageElement = document.createElement("img");
-        imageElement.className = "grid-item"
-        imageElement.src = "Files/Enquiry/" + fileNames[i]; // Update the image path as per your file structure
-        imageElement.onerror = function () {
-            this.src = "https://upload.wikimedia.org/wikipedia/commons/d/dc/No_Preview_image_2.png"; // Update with the path to your placeholder image or set a suitable alternative text
-        };
         // Create a file name element
-        var fileNameElement = document.createElement("p");
+        var fileNameElement = document.createElement("span");
         fileNameElement.textContent = fileNames[i];
 
         // Create a download button
@@ -2301,19 +2310,113 @@ function displayFilesInGrid(fileNamesString) {
         downloadButton.download = fileNames[i];
         downloadButton.textContent = "Download";
 
-        // Append the image and file name elements to the grid item
-        gridItem.appendChild(imageElement);
-        gridItem.appendChild(fileNameElement);
-        gridItem.appendChild(downloadButton);
+        // Append the file name and download elements to the list item
+        listItem.appendChild(fileNameElement);
+        listItem.appendChild(downloadButton);
 
-        // Append the grid item to the grid
-        grid.appendChild(gridItem);
+        // Handle zip files
+        var isZipFile = fileNames[i].toLowerCase().endsWith(".zip");
+        if (isZipFile) {
+            handleZipDownload(fileNames[i], downloadButton);
+        }
+
+        // Append the list item to the list
+        fileList.appendChild(listItem);
     }
 
-    // Append the grid to the preview area
-    previewArea.appendChild(grid);
+    // Append the list to the preview area
+    previewArea.appendChild(fileList);
 }
 
+function handleZipDownload(zipFileName, downloadButton) {
+
+    downloadButton.addEventListener("click", function (event) {
+        event.preventDefault();
+        unzipAndDownload("Files/Enquiry/" + zipFileName)
+    });
+}
+
+
+function downloadFile(data, filename) {
+    const blob = new Blob([data], { type: 'application/octet-stream' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(url);
+}
+
+// Function to unzip and download files from a URL
+//async function unzipAndDownload(url) {
+//    try {
+//        const response = await fetch(url);
+//        if (!response.ok) {
+//            throw new Error(`Failed to fetch the ZIP file: ${response.status} ${response.statusText}`);
+//        }
+
+//        const zipData = await response.blob();
+//        const zip = new JSZip();
+//        await zip.loadAsync(zipData);
+
+//        const extractedFiles = [];
+//        await Promise.all(
+//            Object.keys(zip.files).map(async (filename) => {
+//                const file = zip.files[filename];
+//                const extractedData = await file.async('arraybuffer');
+//                extractedFiles.push({ filename, data: extractedData });
+//            })
+//        );
+
+//        extractedFiles.forEach((file) => {
+//            downloadFile(file.data, file.filename);
+//        });
+//    } catch (error) {
+//        console.error('Error:', error);
+//    }
+//}
+
+async function unzipAndDownload(url) {
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch the file: ${response.status} ${response.statusText}`);
+        }
+
+        const contentType = response.headers.get('content-type');
+        const isZip = contentType === "application/x-zip-compressed";
+
+        if (isZip) {
+            const zipData = await response.blob();
+            const zip = new JSZip();
+            await zip.loadAsync(zipData);
+
+            const extractedFiles = [];
+            await Promise.all(
+                Object.keys(zip.files).map(async (filename) => {
+                    const file = zip.files[filename];
+                    const extractedData = await file.async('arraybuffer');
+                    extractedFiles.push({ filename, data: extractedData });
+                })
+            );
+
+            extractedFiles.forEach((file) => {
+                downloadFile(file.data, file.filename);
+            });
+        } else {
+            const fileData = await response.blob();
+            const filename = getFilenameFromURL(url);
+            downloadFile(fileData, filename);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+function getFilenameFromURL(url) {
+    const parts = url.split('/');
+    return parts[parts.length - 1];
+}
 
 function displayFilesInModal(fileNamesString, FlexUploadexFiles) {
     var previewArea = document.getElementById(FlexUploadexFiles);

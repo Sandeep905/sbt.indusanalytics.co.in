@@ -4,7 +4,7 @@ var AprNo = "0", MaxProductCode;
 var GblClientID = 0, FlagEdit = false, GblSalesOrderNo = "";
 var ObjSchDelivery = [];
 let GBLProductEstimateID = 0;
-var SalesManagerId = 0, ClientCordinatorID = 0, SalesCordinatorId = 0,SalesExecutiveID =0;
+var SalesManagerId = 0, ClientCordinatorID = 0, SalesCordinatorId = 0, SalesExecutiveID = 0;
 var QuotationNo = '';
 $('.disabledbutton').prop('disabled', true);
 $("#image-indicator").dxLoadPanel({
@@ -39,33 +39,6 @@ $("#PendingProcess").dxRadioGroup({
     }
 });
 $(function () {
-    //$.ajax({
-    //    type: "POST",
-    //    url: "WebserviceOthers.asmx/SelctboxPrefix",
-    //    data: '{}',
-    //    contentType: "application/json; charset=utf-8",
-    //    dataType: "json",
-    //    success: function (results) {
-    //        var res = results.d.replace(/\\/g, '');
-    //        res = res.replace(/"d":/g, '');
-    //        res = res.replace(/""/g, '');
-    //        res = res.replace(/JobPrefix/g, '');
-    //        res = res.replace(/"":/g, '');
-    //        res = res.replace(/{/g, '');
-    //        res = res.replace(/}/g, '');
-    //        res = res.replace(/"nul/g, '');
-    //        res = res.substr(1);
-    //        res = res.slice(0, -1);
-    //        var RES1 = JSON.parse(res);
-
-    //        $("#SOBPrefix").dxSelectBox({
-    //            items: RES1
-    //        });
-    //    },
-    //    error: function errorFunc(jqXHR) {
-    //        //alert("not show");
-    //    }
-    //});
 
     $.ajax({
         type: "POST",
@@ -405,6 +378,8 @@ $("#SalesOrderBookingGrid").dxDataGrid({
         { dataField: "OrderBookingDate" },
         { dataField: "PONo" },
         { dataField: "POdate" },
+        { dataField: "POMailAddress" },
+        { dataField: "POMailDate" },
         { dataField: "ClientName" },
         { dataField: "SalesManager" },
         { dataField: "SalesPerson" },
@@ -416,7 +391,6 @@ $("#SalesOrderBookingGrid").dxDataGrid({
             caption: "",
             fixedPosition: "right",
             fixed: true,
-
             cellTemplate(container, options) {
                 $('<a>').addClass('fa fa-download dx-link')
                     .on('dxclick', function (e) {
@@ -1357,6 +1331,7 @@ $("#EditButton").click(function () {
                 $("#SOBProductAddedData").dxDataGrid({
                     dataSource: RES1.OrderBooking
                 });
+
                 GBLProductEstimateID = RES1.OrderBooking[0].ProductEstimateID
                 SalesManagerId = RES1.OrderBooking[0].SalesManagerId;
                 ClientCordinatorID = RES1.OrderBooking[0].ClientCordinatorID;
@@ -1365,22 +1340,22 @@ $("#EditButton").click(function () {
                 document.getElementById('SOBRemark').value = RES1.OrderBooking[0].Remark
                 document.getElementById('SOBDispatchedDetails').value = RES1.OrderBooking[0].DispatchRemark
                 document.getElementById('SOBDeliveryDetails').value = RES1.OrderBooking[0].PODetail
-                
-               // $("#fileDownload").removeClass("hidden");
+
+                // $("#fileDownload").removeClass("hidden");
                 $("#fileDownload").attr("href", "Files/SalesOrder/" + RES1.OrderBooking[0].attachedfile);
                 $("#fileDownload").attr("download", RES1.OrderBooking[0].attachedfile);
 
                 ObjSchDelivery = RES1.OrderBookingDelivery;
                 reloadOrderList(RES1.OrderBooking);
                 ObjSchData = RES1.OrderBooking[0];
+
+                
                 $("#SOBScheduleGrid").dxDataGrid({ dataSource: ObjSchDelivery });
 
                 $("#SOBDate").dxDateBox({
                     value: RES1.OrderBooking[0].OrderBookingDate
                 });
-                $("#SOBPODate").dxDateBox({
-                    value: RES1.OrderBooking[0].PODate
-                });
+
                 //alert(ObjSchData.SalesEmployeeID);
                 $("#SOBSalesRep").dxSelectBox({
                     value: ObjSchData.SalesEmployeeID
@@ -1389,7 +1364,20 @@ $("#EditButton").click(function () {
                     value: ObjSchData.BookingPrefix,
                     disabled: true
                 });
-                document.getElementById('SOBTxtPONo').value = ObjSchData.PONo;
+
+                if (ObjSchData.POMailAddress != "") {
+                    $('#POContainer').addClass('hidden')
+                    $('#mailContainer').removeClass('hidden')
+                    document.getElementById('SOBTxtPOMail').value = ObjSchData.POMailAddress;
+                    $("#SOBPOMailDate").dxDateBox({
+                        value: RES1.OrderBooking[0].POMailDate
+                    });
+                } else {
+                    document.getElementById('SOBTxtPONo').value = ObjSchData.PONo;
+                    $("#SOBPODate").dxDateBox({
+                        value: RES1.OrderBooking[0].PODate
+                    });
+                }
                 $("#LoadIndicator").dxLoadPanel("instance").option("visible", false);
             },
             error: function errorFunc(jqXHR) {
@@ -1627,7 +1615,7 @@ function SaveData(refdocname) {
             SaveOrder.VendorID = grid._options.dataSource[i].VendorID;
             SaveOrder.Rate = grid._options.dataSource[i].Rate.toString();
             SaveOrder.UnitCost = grid._options.dataSource[i].UnitCost.toString();
-           // SaveOrder.ChangeCost = grid._options.dataSource[i].ApprovedCost.toString();
+            // SaveOrder.ChangeCost = grid._options.dataSource[i].ApprovedCost.toString();
             SaveOrder.RateType = grid._options.dataSource[i].RateType;
             SaveOrder.PONo = txtPONo;
             SaveOrder.PODate = convertToISOString(PODate);
@@ -1720,7 +1708,7 @@ function SaveData(refdocname) {
         }
         var ScheduleGridData = JSON.stringify(ObjSchOrder);
         $("#LoadIndicator").dxLoadPanel("instance").option("visible", true);
-        
+
         if (FlagEdit === false) {
             ///check valid or not PO no with product code
             $.ajax({
@@ -1853,7 +1841,7 @@ function reloadOrderList(data) {
             { dataField: "JobReference", visible: true, width: 100, validationRules: [{ type: "required" }], lookup: { dataSource: JobReference, valueExpr: 'JobReference', displayExpr: 'JobReference' }, allowEditing: true },
             { dataField: "JobPriority", visible: true, width: 100, validationRules: [{ type: "required" }], lookup: { dataSource: JobPriority, valueExpr: 'JobPriority', displayExpr: 'JobPriority' }, allowEditing: true },
             { dataField: "PrePressRemark", width: 100 },
-          
+
         ],
         onContentReady: function (e) {
             document.getElementById("TxtTotalOrderQty").value = 0//e.component.getTotalSummaryValue("Quantity");

@@ -85,7 +85,8 @@ Public Class WebService_LedgerMaster
         GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
         GBLBranchID = Convert.ToString(HttpContext.Current.Session("BranchId"))
 
-        str = "SELECT LedgerGroupID,LedgerGroupName,LedgerGroupNameDisplay ,LedgerGroupNameID FROM LedgerGroupMaster Where CompanyID = " & GBLCompanyID & " And IsDeletedTransaction=0 Order By LedgerGroupID "
+        ' str = "SELECT LedgerGroupID,LedgerGroupName,LedgerGroupNameDisplay ,LedgerGroupNameID FROM LedgerGroupMaster Where CompanyID = " & GBLCompanyID & " And IsDeletedTransaction=0 Order By LedgerGroupID "
+        str = "SELECT LedgerGroupID,LedgerGroupName,LedgerGroupNameDisplay ,LedgerGroupNameID FROM LedgerGroupMaster Where CompanyID = " & GBLCompanyID & " And IsDeletedTransaction=0 Order By CASE LedgerGroupNameDisplay WHEN 'CLIENTS' THEN 1 WHEN 'CONSIGNEE' THEN 2 WHEN 'ASSOCIATE PARTNER' THEN 3 WHEN 'SUPPLIERS' THEN 4 WHEN 'TRANSPORTERS' THEN 5 WHEN 'EMPLOYEES' THEN 6 WHEN 'SALES A/C' THEN 7 WHEN 'PURCHASE A/C' THEN 8 WHEN 'TAX LEDGER MASTER' THEN 9 ELSE 10 END; "
         db.FillDataTable(dataTable, str)
         data.Message = ConvertDataTableTojSonString(dataTable)
         Return js.Serialize(data.Message)
@@ -155,8 +156,11 @@ Public Class WebService_LedgerMaster
     Public Function GetSalesCordnators(ByVal ID As String) As String
 
         GBLCompanyID = Convert.ToString(HttpContext.Current.Session("CompanyID"))
-        str = "Select LedgerID as SalesCordinatorID,LedgerName from LedgerMaster Where LedgerGroupID= 3 and Designation ='SALES CORDINATOR' and " & ID & " in (SELECT value FROM STRING_SPLIT(UnderUserID, ','))  and CompanyId =" & GBLCompanyID
-
+        If IsNumeric(ID) And Val(ID) > 0 Then
+            str = "Select LedgerID as SalesCordinatorID,LedgerName from LedgerMaster Where LedgerGroupID= 3 and Designation ='SALES CORDINATOR' and " & ID & " in (SELECT value FROM STRING_SPLIT(UnderUserID, ','))  and CompanyId =" & GBLCompanyID
+        Else
+            str = "Select LedgerID as SalesCordinatorID,LedgerName from LedgerMaster Where LedgerGroupID= 3 and Designation ='SALES CORDINATOR'  and CompanyId =" & GBLCompanyID
+        End If
         db.FillDataTable(dataTable, str)
         data.Message = ConvertDataTableTojSonString(dataTable)
         Return js.Serialize(data.Message)

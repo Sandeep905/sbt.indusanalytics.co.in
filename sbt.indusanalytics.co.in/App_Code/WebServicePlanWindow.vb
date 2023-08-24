@@ -951,46 +951,59 @@ Public Class WebServicePlanWindow
             db.ExecuteNonSQLQuery(str)
 
 
-            If flag = 1 Then
+            'If flag = 1 Then
 
 
-                '' get Quotation Details
-                'str = "Select  Isnull(EQ.EnquiryNo,'') as EnquiryNo,convert(varchar, EQ.CreatedDate, 103) As EnquiryCreationDate,convert(varchar, EQ.CreatedDate, 8) As EnquiryTime, PQ.EstimateNo as QuotationNo,convert(varchar, PQ.CreatedDate, 103) As QuoteCreatedDate,PQ.ProjectName, LM.LedgerName as ClientName,LMS.LedgerName as SalesPerson,LMSM.LedgerName as SalesManager,LMSC.LedgerName as SalesCordinator,UM.UserName as EstimateBy, PQ.ProductEstimateID,UME.UserName as EnquiryBy   from ProductQuotation as PQ inner Join LedgerMaster as LM on LM.CompanyID = PQ.CompanyID and LM.LedgerID = PQ.LedgerID and LM.LedgerGroupID = 1 inner Join LedgerMaster as LMS on LMS.CompanyID = PQ.CompanyID and LMS.LedgerID = PQ.SalesPersonID  and LMS.LedgerGroupID =3 inner Join LedgerMaster as LMSC on LMSC.CompanyID = PQ.CompanyID and LMSC.LedgerID = PQ.SalesCordinatorId and LMSC.LedgerGroupID =3 inner Join LedgerMaster as LMSM on LMSM.CompanyID = PQ.CompanyID and LMSM.LedgerID = PQ.SalesManagerId  and LMSM.LedgerGroupID = 3 inner Join UserMaster as UM on UM.CompanyID = PQ.CompanyID and UM.UserID = PQ.CreatedBy inner join EnquiryMain as EQ on EQ.EnquiryID = PQ.EnquiryID and EQ.CompanyID = PQ.CompanyID inner Join UserMaster as UME on UME.CompanyID = PQ.CompanyID and UME.UserID = EQ.CreatedBy inner JOIN (Select Max(RevisionNo) as RevisionNo, EnquiryID,CompanyID From ProductQuotation Group By EnquiryID,CompanyID) as Q ON Q.EnquiryID = PQ.EnquiryID AND Q.RevisionNo = PQ.RevisionNo AND Q.CompanyID = EQ.CompanyID  where PQ.CompanyID =1 and PQ.ProductEstimateID = " & BKID & " and PQ.IsDeletedTransaction = 0 order by PQ.CreatedDate desc"
-                'Dim Dt As New DataTable
-                'db.FillDataTable(Dt, str)
+            '    '' get Quotation Details
+            '    str = "Select  Isnull(EQ.EnquiryNo,'') as EnquiryNo,convert(varchar, EQ.CreatedDate, 103) As EnquiryCreationDate,convert(varchar, EQ.CreatedDate, 8) As EnquiryTime, PQ.EstimateNo as QuotationNo,convert(varchar, PQ.CreatedDate, 103) As QuoteCreatedDate,PQ.ProjectName, LM.LedgerName as ClientName,LMS.LedgerName as SalesPerson,LMSM.LedgerName as SalesManager,LMSC.LedgerName as SalesCordinator,UM.UserName as EstimateBy, PQ.ProductEstimateID,UME.UserName as EnquiryBy   from ProductQuotation as PQ inner Join LedgerMaster as LM on LM.CompanyID = PQ.CompanyID and LM.LedgerID = PQ.LedgerID and LM.LedgerGroupID = 1 inner Join LedgerMaster as LMS on LMS.CompanyID = PQ.CompanyID and LMS.LedgerID = PQ.SalesPersonID  and LMS.LedgerGroupID =3 inner Join LedgerMaster as LMSC on LMSC.CompanyID = PQ.CompanyID and LMSC.LedgerID = PQ.SalesCordinatorId and LMSC.LedgerGroupID =3 inner Join LedgerMaster as LMSM on LMSM.CompanyID = PQ.CompanyID and LMSM.LedgerID = PQ.SalesManagerId  and LMSM.LedgerGroupID = 3 inner Join UserMaster as UM on UM.CompanyID = PQ.CompanyID and UM.UserID = PQ.CreatedBy inner join EnquiryMain as EQ on EQ.EnquiryID = PQ.EnquiryID and EQ.CompanyID = PQ.CompanyID inner Join UserMaster as UME on UME.CompanyID = PQ.CompanyID and UME.UserID = EQ.CreatedBy inner JOIN (Select Max(RevisionNo) as RevisionNo, EnquiryID,CompanyID From ProductQuotation Group By EnquiryID,CompanyID) as Q ON Q.EnquiryID = PQ.EnquiryID AND Q.RevisionNo = PQ.RevisionNo AND Q.CompanyID = EQ.CompanyID  where PQ.CompanyID =1 and PQ.ProductEstimateID = " & BKID & " and PQ.IsDeletedTransaction = 0 order by PQ.CreatedDate desc"
+            '    Dim Dt As New DataTable
+            '    db.FillDataTable(Dt, str)
 
-                'If Dt.Rows.Count > 0 Then
+            '    If Dt.Rows.Count > 0 Then
 
-                '    Dim ToMail = db.GetColumnValue("EmailID", "UserMaster", "  companyID=" & GBLCompanyID & " and UserId=" & SendTo)
-                '    db.FillDataTable(Dt, str)
-                '    '' Sending Notification Bty Mail To User(SendTo)
-                '    Dim Subject = "Need Internal Approval on Quotation No. " + Dt.Rows(0)("QuotationNo").ToString
 
-                '    If ToMail = "" Then
-                '        Return "Save"
-                '    End If
-                '    Dim Body = "Dear Sir/ mam,<br/><br/>" &
-                '               " Greetings For the day!<br/><br/>" &
-                '               " Need internal approval on Quotation No. <b>" + Dt.Rows(0)("QuotationNo").ToString + "</b><br/>" &
-                '               " <b>Job detail mention below :- </b><br/><br/>" &
-                '               "<b> Enquiry no.:</b> " + Dt.Rows(0)("EnquiryNo").ToString + "<br/>" &
-                '               "<b> punched by:</b> " + Dt.Rows(0)("EnquiryBy").ToString + " , on dated " + Dt.Rows(0)("EnquiryCreationDate").ToString + " , time " + Dt.Rows(0)("EnquiryTime").ToString + " <br/>" &
-                '               "<b> Sales executive:</b> " + Dt.Rows(0)("SalesPerson").ToString + "  <br/>" &
-                '               "<b> Sales Manager:</b> " + Dt.Rows(0)("SalesManager").ToString + " <br/>" &
-                '               "<b> Client Name:</b> " + Dt.Rows(0)("ClientName").ToString + " <br/>" &
-                '               " Quotation <b>" + Dt.Rows(0)("QuotationNo").ToString + " </b> has been generated by <b>" + Dt.Rows(0)("EstimateBy").ToString + "</b> .<br/><br/>" &
-                '               " Please review the quotation and provide internal approval. <br/>" &
-                '               " I am available to answer any questions and provide any clarification you may need. <br/>" &
-                '               " If there are likely to be any delays or holdups, let me know. I'll do everything I can to help " &
-                '               " accelerate the process.<br/>" &
-                '               " Thank You <br/>" &
-                '               " " + GBLUserName + ""
+            '        GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
+            '        Dim ToMail = db.GetColumnValue("EmailID", "UserMaster", "  companyID=" & GBLCompanyID & " and UserId=" & GBLUserID)
 
-                '    db.SendEmail(Subject, Body, ToMail)
+            '        '' Sending Notification By Mail To User(SendTo)
+            '        Dim Subject = "Need Internal Approval on Quotation No. " + Dt.Rows(0)("QuotationNo").ToString
 
-                'End If
+            '        If ToMail = "" Then
+            '            Return "Save"
+            '        End If
 
-            End If
+            '        Dim EnquiryNo As String = Dt.Rows(0)("EnquiryNo").ToString
+            '        Dim PunchedBy As String = Dt.Rows(0)("EnquiryBy").ToString
+            '        Dim PunchedDate As String = Dt.Rows(0)("EnquiryCreationDate").ToString
+            '        Dim PunchedTime As String = Dt.Rows(0)("EnquiryTime").ToString
+            '        Dim SalesExecutive As String = Dt.Rows(0)("SalesPerson").ToString
+            '        Dim SalesManager As String = Dt.Rows(0)("SalesManager").ToString
+            '        Dim ClientName As String = Dt.Rows(0)("ClientName").ToString
+            '        Dim QuotationNo As String = Dt.Rows(0)("QuotationNo").ToString
+            '        Dim GeneratedBy As String = Dt.Rows(0)("EstimateBy").ToString
+            '        Dim UserName As String = GBLUserName ' You need to set the actual user's name here
+
+            '        Dim Body = "Dear Sir/ mam,<br/><br/>" &
+            '                   "Greetings for the day!<br/><br/>" &
+            '                   "<b>Need internal approval on Quotation No. " & QuotationNo & "</b><br/><br/>" &
+            '                   "<b>Job detail mention below:</b><br/><br/>" &
+            '                   "<b>Enquiry no.:</b> " & EnquiryNo & "<br/>" &
+            '                   "<b>Punched by:</b> " & PunchedBy & ", on dated <b>" & PunchedDate & "</b>, time <b>" & PunchedTime & "</b><br/>" &
+            '                   "<b>Sales executive:</b> " & SalesExecutive & "<br/>" &
+            '                   "<b>Sales Manager:</b> " & SalesManager & "<br/>" &
+            '                   "<b>Client Name:</b> " & ClientName & "<br/>" &
+            '                   "Quotation <b>" & QuotationNo & "</b> has been generated by <b>" & GeneratedBy & "</b>.<br/>" &
+            '                   "Please review the quotation and provide internal approval.<br/><br/>" &
+            '                   "I am available to answer any questions and provide any clarification you may need.<br/>" &
+            '                   "If there are likely to be any delays or holdups, let me know. I'll do everything I can to help accelerate the process.<br/><br/>" &
+            '                   "Thank You<br/>" & UserName
+
+            '        Dim rs = db.SendEmails(Subject, Body, ToMail)
+            '        ''If rs = "Email sent successfully" Then
+            '        Return "Save"
+            '        ''End If
+            '    End If
+            'End If
 
             Return "Save"
         Catch ex As Exception
@@ -1018,7 +1031,7 @@ Public Class WebServicePlanWindow
         GBLUserID = Convert.ToString(HttpContext.Current.Session("UserID"))
         Dim ToMail = "sandeep.indusanalytics@gmail.com" 'db.GetColumnValue("EmailID", "UserMaster", "  companyID=" & GBLCompanyID & " and UserId=" & GBLUserID)
 
-        '' Sending Notification Bty Mail To User(SendTo)
+        '' Sending Notification By Mail To User(SendTo)
         Dim Subject = "Need Internal Approval on Quotation No"
 
         If ToMail = "" Then

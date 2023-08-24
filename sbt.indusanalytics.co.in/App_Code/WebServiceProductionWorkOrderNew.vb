@@ -905,57 +905,61 @@ Public Class WebServiceProductionWorkOrderNew
                     '    Return "Success," + JobBookingNo
                 End If
 
-                AddColName = "JobbookingID,CreatedDate,CompanyId,CreatedBy"
-                AddColValue = "'" & JobcardId & "',Getdate(),'" & CompanyId & "'," & UserId
 
-                TableName = "JobbookingJobcardMaterialRequirments"
-                str = db.InsertDatatableToDatabase(AllocatedMaterial, TableName, AddColName, AddColValue)
-                If Val(str) <= 0 Then
-                    updateTransaction.Dispose()
-                    Return "Error:500," & str
-                    'Else
-                    '    Return "Success," + JobBookingNo
+                If AllocatedMaterial IsNot Nothing AndAlso AllocatedMaterial.Length > 0 Then
+
+                    AddColName = "JobbookingID,CreatedDate,CompanyId,CreatedBy"
+                    AddColValue = "'" & JobcardId & "',Getdate(),'" & CompanyId & "'," & UserId
+
+                    TableName = "JobbookingJobcardMaterialRequirments"
+                    str = db.InsertDatatableToDatabase(AllocatedMaterial, TableName, AddColName, AddColValue)
+                    If Val(str) <= 0 Then
+                        updateTransaction.Dispose()
+                        Return "Error:500," & str
+                        'Else
+                        '    Return "Success," + JobBookingNo
+                    End If
+
+
+
+
+                    PONo = db.GeneratePrefixedNo("ItemTransactionMain", "IS", "MaxVoucherNo", MaxPONo, FYear, " Where VoucherPrefix='IS' And  CompanyID=" & CompanyId & " And FYear='" & FYear & "' ")
+
+                    TableName = "ItemTransactionMain"
+                    AddColName = "ModifiedDate,CreatedDate,UserID,CompanyID,FYear,CreatedBy,ModifiedBy,VoucherPrefix,MaxVoucherNo,VoucherNo,JobBookingID"
+                    AddColValue = "'" & DateTime.Now & "',Getdate(),'" & UserId & "','" & CompanyId & "','" & FYear & "','" & UserId & "','" & UserId & "','IS','" & MaxPONo & "','" & PONo & "'," & JobcardId
+                    Dim TransactionID = db.InsertDatatableToDatabase(jsonObjectsRecordMain, TableName, AddColName, AddColValue)
+                    If IsNumeric(TransactionID) = False Then
+                        Return "Error in transaction main: " & TransactionID
+                    End If
+
+                    TableName = "ItemTransactionDetail"
+                    AddColName = "ModifiedDate,CreatedDate,UserID,CompanyID,FYear,CreatedBy,ModifiedBy,TransactionID,JobBookingID"
+                    AddColValue = "'" & DateTime.Now & "',Getdate(),'" & UserId & "','" & CompanyId & "','" & FYear & "','" & UserId & "','" & UserId & "','" & TransactionID & "'," & JobcardId
+                    str = db.InsertDatatableToDatabase(jsonObjectsRecordDetail, TableName, AddColName, AddColValue)
+                    If IsNumeric(str) = False Then
+                        db.ExecuteNonSQLQuery("Delete From ItemTransactionMain Where CompanyID=" & CompanyId & " And TransactionID=" & TransactionID)
+                        Return "Error in transaction details: " & str
+                    End If
+                    db.ExecuteNonSQLQuery("EXEC UPDATE_ITEM_STOCK_VALUES " & CompanyId & "," & TransactionID & ",0")
+
+
+
+                    Dim VoucherNo = db.GeneratePrefixedNo("ItemTransactionMain", "PREQ", "MaxVoucherNo", MaxVoucherNo, FYear, " Where VoucherPrefix='PREQ' And  CompanyID=" & CompanyId & " And FYear='" & FYear & "' AND Isnull(IsDeletedTransaction,0)=0")
+
+                    TableName = "ItemTransactionMain"
+                    AddColName = "ModifiedDate,CreatedDate,UserID,CompanyID,FYear,CreatedBy,ModifiedBy,VoucherPrefix,MaxVoucherNo,VoucherNo,JobbookingID"
+                    AddColValue = "'" & DateTime.Now & "','" & DateTime.Now & "','" & UserId & "','" & CompanyId & "','" & FYear & "','" & UserId & "','" & UserId & "','PREQ','" & MaxVoucherNo & "','" & VoucherNo & "'," & JobcardId
+                    TransactionID = db.InsertDatatableToDatabase(jsonObjectsRecordMainR, TableName, AddColName, AddColValue)
+
+                    TableName = "ItemTransactionDetail"
+                    AddColName = "ModifiedDate,CreatedDate,UserID,CompanyID,FYear,CreatedBy,ModifiedBy,TransactionID,IsVoucherItemApproved,VoucherItemApprovedBy,VoucherItemApprovedDate,JobbookingID,IsAuditApproved,AuditApprovedBy,AuditApprovedDate"
+                    AddColValue = "'" & DateTime.Now & "','" & DateTime.Now & "','" & UserId & "','" & CompanyId & "','" & FYear & "','" & UserId & "','" & UserId & "','" & TransactionID & "',1," & UserId & ",'" & DateTime.Now & "'," & JobcardId & ",1," & UserId & ",GetDate()"
+                    db.InsertDatatableToDatabase(jsonObjectsRecordDetailR, TableName, AddColName, AddColValue)
+
+                    db.ExecuteNonSQLQuery("EXEC UPDATE_ITEM_STOCK_VALUES " & CompanyId & "," & TransactionID & ",0")
+
                 End If
-
-
-
-
-                PONo = db.GeneratePrefixedNo("ItemTransactionMain", "IS", "MaxVoucherNo", MaxPONo, FYear, " Where VoucherPrefix='IS' And  CompanyID=" & CompanyId & " And FYear='" & FYear & "' ")
-
-                TableName = "ItemTransactionMain"
-                AddColName = "ModifiedDate,CreatedDate,UserID,CompanyID,FYear,CreatedBy,ModifiedBy,VoucherPrefix,MaxVoucherNo,VoucherNo,JobBookingID"
-                AddColValue = "'" & DateTime.Now & "',Getdate(),'" & UserId & "','" & CompanyId & "','" & FYear & "','" & UserId & "','" & UserId & "','IS','" & MaxPONo & "','" & PONo & "'," & JobcardId
-                Dim TransactionID = db.InsertDatatableToDatabase(jsonObjectsRecordMain, TableName, AddColName, AddColValue)
-                If IsNumeric(TransactionID) = False Then
-                    Return "Error in transaction main: " & TransactionID
-                End If
-
-                TableName = "ItemTransactionDetail"
-                AddColName = "ModifiedDate,CreatedDate,UserID,CompanyID,FYear,CreatedBy,ModifiedBy,TransactionID,JobBookingID"
-                AddColValue = "'" & DateTime.Now & "',Getdate(),'" & UserId & "','" & CompanyId & "','" & FYear & "','" & UserId & "','" & UserId & "','" & TransactionID & "'," & JobcardId
-                str = db.InsertDatatableToDatabase(jsonObjectsRecordDetail, TableName, AddColName, AddColValue)
-                If IsNumeric(str) = False Then
-                    db.ExecuteNonSQLQuery("Delete From ItemTransactionMain Where CompanyID=" & CompanyId & " And TransactionID=" & TransactionID)
-                    Return "Error in transaction details: " & str
-                End If
-                db.ExecuteNonSQLQuery("EXEC UPDATE_ITEM_STOCK_VALUES " & CompanyId & "," & TransactionID & ",0")
-
-
-
-                Dim VoucherNo = db.GeneratePrefixedNo("ItemTransactionMain", "PREQ", "MaxVoucherNo", MaxVoucherNo, FYear, " Where VoucherPrefix='PREQ' And  CompanyID=" & CompanyId & " And FYear='" & FYear & "' AND Isnull(IsDeletedTransaction,0)=0")
-
-                TableName = "ItemTransactionMain"
-                AddColName = "ModifiedDate,CreatedDate,UserID,CompanyID,FYear,CreatedBy,ModifiedBy,VoucherPrefix,MaxVoucherNo,VoucherNo,JobbookingID"
-                AddColValue = "'" & DateTime.Now & "','" & DateTime.Now & "','" & UserId & "','" & CompanyId & "','" & FYear & "','" & UserId & "','" & UserId & "','PREQ','" & MaxVoucherNo & "','" & VoucherNo & "'," & JobcardId
-                TransactionID = db.InsertDatatableToDatabase(jsonObjectsRecordMainR, TableName, AddColName, AddColValue)
-
-                TableName = "ItemTransactionDetail"
-                AddColName = "ModifiedDate,CreatedDate,UserID,CompanyID,FYear,CreatedBy,ModifiedBy,TransactionID,IsVoucherItemApproved,VoucherItemApprovedBy,VoucherItemApprovedDate,JobbookingID,IsAuditApproved,AuditApprovedBy,AuditApprovedDate"
-                AddColValue = "'" & DateTime.Now & "','" & DateTime.Now & "','" & UserId & "','" & CompanyId & "','" & FYear & "','" & UserId & "','" & UserId & "','" & TransactionID & "',1," & UserId & ",'" & DateTime.Now & "'," & JobcardId & ",1," & UserId & ",GetDate()"
-                db.InsertDatatableToDatabase(jsonObjectsRecordDetailR, TableName, AddColName, AddColValue)
-
-                db.ExecuteNonSQLQuery("EXEC UPDATE_ITEM_STOCK_VALUES " & CompanyId & "," & TransactionID & ",0")
-
 
                 updateTransaction.Complete()
             End Using

@@ -180,6 +180,8 @@ function Homequery(selectedTabId) {
             document.getElementById("PenndingForPA").innerHTML = RES1[0].PenndingForPA;
             document.getElementById("Rework").innerHTML = RES1[0].Rework;
             document.getElementById("CostApproved").innerHTML = RES1[0].CostApproved;
+            document.getElementById("SalesOrder").innerHTML = RES1[0].SalesOrder;
+            document.getElementById("JobCard").innerHTML = RES1[0].JobCard;
 
             const dataSource1 = [
                 //{ data: 'TotalEnquiry', value: RES1[0].TotalEnquiry },
@@ -319,11 +321,7 @@ const tabsInstance = $('#tabs > .tabs-container').dxTabs({
 
         Homequery(selectedTabId)
     }
-
-
-
-
-
+     
 }).dxTabs('instance');
 
 
@@ -581,14 +579,7 @@ function OpenPopup(ID, modalId) {
     document.getElementById(ID).setAttribute("data-toggle", "modal");
     document.getElementById(ID).setAttribute("data-target", modalId);
 }
-
-
-
-
 //EnqueryData
-
-
-
 $("#Enquerydatagrid").dxDataGrid({
     dataSource: [],
     keyExpr: 'EnquiryID',
@@ -608,7 +599,6 @@ $("#Enquerydatagrid").dxDataGrid({
         { dataField: "Quantity", caption: "Quantity" },
         { dataField: "CreatedBy", caption: "Created By" },
         { dataField: "CreatedDate", caption: "Created Date" }
-
     ],
     showRowLines: true,
     showBorders: true,
@@ -629,8 +619,6 @@ $("#Enquerydatagrid").dxDataGrid({
 
 
 function EnquiryDetails(id) {
-
-
     alert("Under Development")
     return;
     var Isprocessed = ''
@@ -639,8 +627,6 @@ function EnquiryDetails(id) {
 
     var timecon = `And PQ.CreatedDate >= DateAdd(Day, -${selectedTabId}, GETDATE())`
 
-    
-  
     if (selectedTabId == 0) timecon = "";
     if (id === "TotalEnquiry") {
         //dataGrid.clearFilter();
@@ -703,25 +689,3 @@ function OpenPopup(ID, modalId) {
     document.getElementById(ID).setAttribute("data-toggle", "modal");
     document.getElementById(ID).setAttribute("data-target", modalId);
 }
-
-$('#Backup').click(function () {
-    try {
-        // Make the AJAX request using jQuery
-        $.ajax({
-            url: 'WebService_Backup.asmx/GenerateBackup',
-            type: "POST",
-            data: {},
-            dataType: "json",
-            success: function (response) {
-                // Request succeeded, process the response here
-                console.log(response);
-            },
-            error: function (xhr, status, error) {
-                // Request failed
-                console.error("Request failed with status", status, error);
-            }
-        });
-    } catch (e) {
-        console.log(e);
-    }
-})

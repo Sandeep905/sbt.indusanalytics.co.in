@@ -404,7 +404,7 @@ Public Class WebServiceOthers
                 ConStr = " And PQ.SalesManagerId = " & LId
             End If
 
-            Str = "Select DISTINCT  Case When (Select Count(ProductEstimateID)  from JobOrderBooking where ProductEstimateID = PQ.ProductEstimateID and Isnull(IsdeletedTransaction,0) <> 1) > 0  then 1 else 0  end as IsOrderBooked, EM.EnquiryNo, PQ.SalesCordinatorId,PQ.SalesManagerId,PQ.SalesPersonID,PQ.ClientCordinatorID ,Replace(Convert(Nvarchar(30),PQc.CreatedDate,106),'','-')   as BookingDate ,JAC.ApprovalNo,  PQ.EstimateNo as QuotationNo,PQ.ProjectName, LM.LedgerName as ClientName,LMS.LedgerName as SalesPerson,LMCC.Name AS ClientCordinator,LMSM.LedgerName as SalesManager,LMSC.LedgerName as SalesCordinator,PQ.FreightAmount,UM.UserName as EstimateBy,PQ.Narration as Remark,PQ.ProductEstimateID,LM.Address1,LM.TelephoneNo as PhoneNo,'-' as ProductCode,Replace(Convert(Nvarchar(30),PQ.CreatedDate,106),'','-') as JobDate,PQ.Narration,LM.LedgerID,LME.UserName as ApprovedBy from ProductQuotation as PQ inner join ProductQuotationContents as PQC on PQ.ProductEstimateID = PQC.ProductEstimateID and PQ.CompanyID = PQC.CompanyID inner Join LedgerMaster as LM on LM.CompanyID = PQ.CompanyID and LM.LedgerID = PQ.LedgerID and LM.LedgerGroupID = 1 LEFT Join LedgerMaster as LMS on LMS.CompanyID = PQ.CompanyID and LMS.LedgerID = PQ.SalesPersonID LEFT Join LedgerMaster as LMSM on LMSM.CompanyID = PQ.CompanyID and LMSM.LedgerID = PQ.SalesManagerId LEFT Join LedgerMaster as LMSC on LMSC.CompanyID = PQ.CompanyID and LMSC.LedgerID = PQ.SalesCordinatorId inner join EnquiryMain as EM on EM.EnquiryID = PQ.EnquiryID left Join ConcernpersonMaster as LMCC on LMCC.CompanyID = PQ.CompanyID and LMCC.ConcernPersonID = PQ.ClientCordinatorID inner join ProductHSNMaster as PHM on PQC.ProductHSNID = PHM.ProductHSNID and PQc.CompanyID = PHM.CompanyID inner join JobApprovedCost as JAC on JAC.CompanyID = PQ.CompanyID and JAC.BookingID = PQ.ProductEstimateID inner Join UserMaster as LME on LME.CompanyID = JAC.CompanyID and LME.UserID = JAC.UserID inner Join UserMaster as UM on UM.CompanyID = PQ.CompanyID and UM.UserID = PQ.CreatedBy  where PQ.CompanyID =" & CompanyId & " and PQ.IsDeletedTransaction = 0 AND ISNULL(PQ.ISAPPROVED,0) =1 " & ConStr & " /*and PQ.LedgerID= " & LedgerID & " */ order by ApprovalNo  desc"
+            Str = "Select DISTINCT  Case When (Select Count(ProductEstimateID)  from JobOrderBooking where ProductEstimateID = PQ.ProductEstimateID and Isnull(IsdeletedTransaction,0) <> 1) > 0  then 1 else 0  end as IsOrderBooked, EM.EnquiryNo, PQ.SalesCordinatorId,PQ.SalesManagerId,PQ.SalesPersonID,PQ.ClientCordinatorID ,Replace(Convert(Nvarchar(30),PQc.CreatedDate,106),'','-')   as BookingDate ,JAC.ApprovalNo,  PQ.EstimateNo as QuotationNo,PQ.ProjectName, LM.LedgerName as ClientName,LMS.LedgerName as SalesPerson,LMCC.Name AS ClientCordinator,LMSM.LedgerName as SalesManager,LMSC.LedgerName as SalesCordinator,PQ.FreightAmount,UM.UserName as EstimateBy,PQ.Narration as Remark,PQ.ProductEstimateID,LM.Address1,LM.TelephoneNo as PhoneNo,'-' as ProductCode,Replace(Convert(Nvarchar(30),PQ.CreatedDate,106),'','-') as JobDate,PQ.Narration,LM.LedgerID,LME.UserName as ApprovedBy from ProductQuotation as PQ inner join ProductQuotationContents as PQC on PQ.ProductEstimateID = PQC.ProductEstimateID and PQ.CompanyID = PQC.CompanyID inner Join LedgerMaster as LM on LM.CompanyID = PQ.CompanyID and LM.LedgerID = PQ.LedgerID and LM.LedgerGroupID = 1 LEFT Join LedgerMaster as LMS on LMS.CompanyID = PQ.CompanyID and LMS.LedgerID = PQ.SalesPersonID LEFT Join LedgerMaster as LMSM on LMSM.CompanyID = PQ.CompanyID and LMSM.LedgerID = PQ.SalesManagerId LEFT Join LedgerMaster as LMSC on LMSC.CompanyID = PQ.CompanyID and LMSC.LedgerID = PQ.SalesCordinatorId inner join EnquiryMain as EM on EM.EnquiryID = PQ.EnquiryID left Join ConcernpersonMaster as LMCC on LMCC.CompanyID = PQ.CompanyID and LMCC.ConcernPersonID = PQ.ClientCordinatorID inner join ProductHSNMaster as PHM on PQC.ProductHSNID = PHM.ProductHSNID and PQc.CompanyID = PHM.CompanyID inner join JobApprovedCost as JAC on JAC.CompanyID = PQ.CompanyID and JAC.BookingID = PQ.ProductEstimateID inner Join UserMaster as LME on LME.CompanyID = JAC.CompanyID and LME.UserID = JAC.UserID inner Join UserMaster as UM on UM.CompanyID = PQ.CompanyID and UM.UserID = PQ.CreatedBy  where PQ.CompanyID =" & CompanyId & " and PQ.IsDeletedTransaction = 0 AND (JAC.IsDeletedTransaction = 0 ) AND ISNULL(PQ.ISAPPROVED,0) =1 " & ConStr & " /*and PQ.LedgerID= " & LedgerID & " */ order by ApprovalNo  desc"
 
             db.FillDataTable(Dt, Str)
             data.Message = db.ConvertDataTableTojSonString(Dt)
@@ -689,7 +689,7 @@ Public Class WebServiceOthers
             Dim DtOBD As New DataTable
             Dim DtOBDSch As New DataTable
 
-            Str = "SELECT distinct  JB.attachedfile,JOB.ProductEstimationContentID,JOB.BookingID as ProductEstimateID,  LM.LedgerName as VendorName,JOB.OrderBookingDetailsID, JB.OrderBookingID, JB.SalesOrderNo, JOB.BookingID,Replace(Convert(Nvarchar(30),JOB.OrderBookingDate,106),'','-') As OrderBookingDate, JB.LedgerID, JOB.JobName as ProductName, JOB.CategoryID, JOB.OrderQuantity as Quantity, JB.PONo,Replace(Convert(Nvarchar(30),JB.PODate,106),'','-') As PODate,Replace(Convert(Nvarchar(30),JOB.DeliveryDate,106),'','-') As FinalDeliveryDate, JOB.TransporterID, JOB.TransporterName, JB.Remark, JOB.ProductionUnitID, JOB.NewJob, JOB.ProductCode, JOB.OldProductCode,Replace(Convert(Nvarchar(30),JOB.BookingDate,106),'','-') As BookingDate, JOB.IsBooked, JOB.JobType, JOB.ApprovalBy, JOB.JobReference, JOB.JobCoordinatorID, JOB.JobPriority, JB.BookingPrefix, JOB.ConsigneeID, JOB.BookingNo, Isnull(JOB.ProductMasterCode,'') As ProductMasterCode, JOB.ApprovalNo, JOB.Transport, JOB.Rate,JOB.UnitCost,JOB.Total,Replace(Convert(Nvarchar(30),JOB.ExpectedDeliveryDate,106),'','-') As ExpectedDeliveryDate, JB.PODetail, JOB.JobReferenceName, JOB.NewBookingID, JOB.NewBookingNo, JOB.IsApproveCost, JOB.FinalCost as FinalAmount, JOB.ApproveQuantity, JOB.ApproveCostRemark, JOB.ChangeCost As ApprovedRate, JOB.DispatchRemark, JOB.PrePressRemark, JOB.Tolerance, JOB.JobArtworkCode, JOB.JobMarketedBy, PGM.ProductHSNID, JB.SalesEmployeeID, JOB.OrderApproved, JOB.CustomerOrderRate, JOB.ProductMasterID, JOB.BasicAmount, JOB.DiscountPercentage, JB.TotalAmount, JOB.CGSTTaxPercentage as CGSTPercantage, JOB.CGSTTaxAmount CGSTAmount, JOB.SGSTTaxPercentage SGSTPercantage, JOB.SGSTTaxAmount SGSTAmount, JOB.IGSTTaxPercentage IGSTPercantage, JOB.IGSTTaxAmount IGSTAmount, JOB.NetAmount as Amount,JOB.GSTAmount,JOB.GSTPercantage,JOB.ProfitCost,JOB.ProfitPer,JOb.ShippingCost,JOB.MiscAmount,JOB.MiscPercantage, JOB.IsJobWorkOrder, JOB.IsDirectOrder, JOB.RateType ,PGM.ProductHSNName,CM.CategoryName,Isnull(JAC.CurrencySymbol,'INR') AS CurrencySymbol,JB.SalesEmployeeID,JB.SalesManagerId ,JB.SalesCordinatorId ,JB.ClientCordinatorID  FROM JobOrderBooking AS JB INNER JOIN JobOrderBookingDetails AS JOB ON JOB.OrderBookingID = JB.OrderBookingID AND Isnull(JB.IsDeletedTransaction,0) = 0 LEFT JOIN LedgerMaster AS LM ON LM.LedgerId = JOB.VendorID AND LM.CompanyID = JOB.CompanyID Inner Join CategoryMaster As CM On CM.CategoryID=JOB.CategoryID AND CM.CompanyID=JOB.CompanyID LEFT JOIN ProductHSNMaster AS PGM ON PGM.ProductHSNID = JOB.ProductHSNID AND PGM.CompanyID = JOB.CompanyID LEFT JOIN JobApprovedCost As JAC On JOB.BookingID=JAC.BookingID AND JOB.CompanyID=JAC.CompanyID AND Isnull(JAC.IsDeletedTransaction,0)=0 Where JB.SalesOrderNo='" & BKNo & "' And JB.CompanyID=" & CompanyId
+            Str = "SELECT distinct  JB.attachedfile,JOB.ProductEstimationContentID,JOB.BookingID as ProductEstimateID,  LM.LedgerName as VendorName,JOB.OrderBookingDetailsID, JB.OrderBookingID, JB.SalesOrderNo, JOB.BookingID,Replace(Convert(Nvarchar(30),JOB.OrderBookingDate,106),'','-') As OrderBookingDate, JB.LedgerID, JOB.JobName as ProductName, JOB.CategoryID, JOB.OrderQuantity as Quantity, JB.PONo,Replace(Convert(Nvarchar(30),JB.PODate,106),'','-') As PODate,Replace(Convert(Nvarchar(30),JB.POMailDate,106),'','-') As POMailDate,JB.POMailAddress,Replace(Convert(Nvarchar(30),JOB.DeliveryDate,106),'','-') As FinalDeliveryDate, JOB.TransporterID, JOB.TransporterName, JB.Remark, JOB.ProductionUnitID, JOB.NewJob, JOB.ProductCode, JOB.OldProductCode,Replace(Convert(Nvarchar(30),JOB.BookingDate,106),'','-') As BookingDate, JOB.IsBooked, JOB.JobType, JOB.ApprovalBy, JOB.JobReference, JOB.JobCoordinatorID, JOB.JobPriority, JB.BookingPrefix, JOB.ConsigneeID, JOB.BookingNo, Isnull(JOB.ProductMasterCode,'') As ProductMasterCode, JOB.ApprovalNo, JOB.Transport, JOB.Rate,JOB.UnitCost,JOB.Total,Replace(Convert(Nvarchar(30),JOB.ExpectedDeliveryDate,106),'','-') As ExpectedDeliveryDate, JB.PODetail, JOB.JobReferenceName, JOB.NewBookingID, JOB.NewBookingNo, JOB.IsApproveCost, JOB.FinalCost as FinalAmount, JOB.ApproveQuantity, JOB.ApproveCostRemark, JOB.ChangeCost As ApprovedRate, JOB.DispatchRemark, JOB.PrePressRemark, JOB.Tolerance, JOB.JobArtworkCode, JOB.JobMarketedBy, PGM.ProductHSNID, JB.SalesEmployeeID, JOB.OrderApproved, JOB.CustomerOrderRate, JOB.ProductMasterID, JOB.BasicAmount, JOB.DiscountPercentage, JB.TotalAmount, JOB.CGSTTaxPercentage as CGSTPercantage, JOB.CGSTTaxAmount CGSTAmount, JOB.SGSTTaxPercentage SGSTPercantage, JOB.SGSTTaxAmount SGSTAmount, JOB.IGSTTaxPercentage IGSTPercantage, JOB.IGSTTaxAmount IGSTAmount, JOB.NetAmount as Amount,JOB.GSTAmount,JOB.GSTPercantage,JOB.ProfitCost,JOB.ProfitPer,JOb.ShippingCost,JOB.MiscAmount,JOB.MiscPercantage, JOB.IsJobWorkOrder, JOB.IsDirectOrder, JOB.RateType ,PGM.ProductHSNName,CM.CategoryName,Isnull(JAC.CurrencySymbol,'INR') AS CurrencySymbol,JB.SalesEmployeeID,JB.SalesManagerId ,JB.SalesCordinatorId ,JB.ClientCordinatorID  FROM JobOrderBooking AS JB INNER JOIN JobOrderBookingDetails AS JOB ON JOB.OrderBookingID = JB.OrderBookingID AND Isnull(JB.IsDeletedTransaction,0) = 0 LEFT JOIN LedgerMaster AS LM ON LM.LedgerId = JOB.VendorID AND LM.CompanyID = JOB.CompanyID Inner Join CategoryMaster As CM On CM.CategoryID=JOB.CategoryID AND CM.CompanyID=JOB.CompanyID LEFT JOIN ProductHSNMaster AS PGM ON PGM.ProductHSNID = JOB.ProductHSNID AND PGM.CompanyID = JOB.CompanyID LEFT JOIN JobApprovedCost As JAC On JOB.BookingID=JAC.BookingID AND JOB.CompanyID=JAC.CompanyID AND Isnull(JAC.IsDeletedTransaction,0)=0 Where JB.SalesOrderNo='" & BKNo & "' And JB.CompanyID=" & CompanyId
             db.FillDataTable(DtOBD, Str)
 
             Str = "SELECT  JBDD.ProductEstimationContentID,JBDD.OrderBookingDeliveryID,Isnull(JBDD.JobName,'') As JobName ,JBDD.ProductEstimationContentID, JBDD.SalesOrderNo, JBDD.MaxSalesOrderNo, JBDD.OrderBookingID, Isnull(JBDD.ProductMasterCode,'') As ProductMasterCode, JBDD.ApprovalNo, JBDD.BookingID,Replace(Convert(Nvarchar(30),JBDD.DeliveryDate,106),'','-') As DeliveryDate, JBDD.ScheduleQuantity , JBDD.ConsigneeID,(Select Distinct LedgerName From LedgerMaster Where LedgerID=JBDD.ConsigneeID) As ConsigneeName, JBDD.TransporterID, JBDD.TransporterName as Transporter FROM JobOrderBookingDeliveryDetails AS JBDD INNER JOIN JobOrderBooking AS JB ON JB.OrderBookingID = JBDD.OrderBookingID And Isnull(JB.IsDeletedTransaction,0)=0 Where JB.SalesOrderNo='" & BKNo & "' And JB.CompanyID=" & CompanyId
@@ -1200,7 +1200,7 @@ Public Class WebServiceOthers
 
                 Str = "SELECT distinct JOBD.OrderBookingDetailsID,PQC.UnitCostVendor, PQC.ProductDescription, PQC.PackagingDetails, PQC.DescriptionOther, JOBD.ProductEstimationContentID, " &
                   " ISNULL(PQC.DefaultProcessStr, '') AS DefaultProcessStr,ISNULL(PQC.ProcessIDStr, '') AS ProcessIDStr, PQC.ProductEstimateID, JOBD.CGSTTaxPercentage, " &
-                  " JOBD.CGSTTaxAmount, JOBD.SGSTTaxAmount,  JOBD.SGSTTaxPercentage, JOBD.IGSTTaxAmount, JOBD.IGSTTaxPercentage, LM.LedgerName AS VendorName, JOBD.ConsigneeID, " &
+                  " JOBD.CGSTTaxAmount, JOBD.SGSTTaxAmount,  JOBD.SGSTTaxPercentage, JOBD.IGSTTaxAmount, JOBD.IGSTTaxPercentage, LMV.LedgerName AS VendorName, JOBD.ConsigneeID, " &
                   " JOBD.SalesEmployeeID, JOBD.ProductHSNID, JOBD.VendorID, JOBD.BookingNo, JOBD.OrderBookingId, JOBD.CategoryID, JOBD.ProductHSNID, JOBD.ProductCode,  " &
                   " JOBD.JobCoordinatorID, JOBD.JobName AS ProductName, JOBD.OrderQuantity, JOBD.UnitCost Rate, JOBD.RateType, JOBD.JobType, JOBD.JobReference, JOBD.JobPriority," &
                   " CONVERT(varchar, JOBD.ExpectedDeliveryDate, 106) AS ExpectedDeliveryDate, JOBD.NetAmount, JOBD.FinalCost, JOBD.DispatchRemark," &
@@ -1209,7 +1209,8 @@ Public Class WebServiceOthers
                   " CONVERT(varchar, JOB.POdate, 106) AS POdate, LM.LedgerName AS ClientName, LMSC.LedgerName AS SalesCoordinator," &
                   " LMSE.LedgerName AS SalesPerson, LMSM.LedgerName AS SalesManager, CPM.Name AS ClientCoordinator, UM.UserName AS CreatedBy, " &
                   " CONVERT(varchar, JOB.OrderBookingDate, 22) AS CreatedDate  FROM JobOrderBookingDetails AS JOBD " &
-                  " INNER JOIN LedgerMaster AS LM ON LM.LedgerID = JOBD.LedgerID " &
+                  " INNER JOIN LedgerMaster AS LM ON LM.LedgerID = JOBD.LedgerId  " &
+                  " INNER JOIN LedgerMaster AS LMV ON LMV.LedgerID = JOBD.VendorID " &
                   " INNER JOIN ProductQuotationContents AS PQC ON PQC.ProductEstimationContentID = JOBD.ProductEstimationContentID " &
                   " INNER JOIN JobOrderBooking AS JOB ON JOB.OrderBookingID = JOBD.OrderBookingID " &
                   " INNER JOIN ProductQuotation AS PQ ON JOB.ProductEstimateID = PQ.ProductEstimateID " &
@@ -1224,7 +1225,7 @@ Public Class WebServiceOthers
             Else
                 Str = "SELECT distinct JOBD.OrderBookingDetailsID, PQC.UnitCostVendor,PQC.ProductDescription, PQC.PackagingDetails, PQC.DescriptionOther, JOBD.ProductEstimationContentID, " &
                   " ISNULL(PQC.DefaultProcessStr, '') AS DefaultProcessStr,ISNULL(PQC.ProcessIDStr, '') AS ProcessIDStr, PQC.ProductEstimateID, JOBD.CGSTTaxPercentage, " &
-                  " JOBD.CGSTTaxAmount, JOBD.SGSTTaxAmount,  JOBD.SGSTTaxPercentage, JOBD.IGSTTaxAmount, JOBD.IGSTTaxPercentage, LM.LedgerName AS VendorName, JOBD.ConsigneeID, " &
+                  " JOBD.CGSTTaxAmount, JOBD.SGSTTaxAmount,  JOBD.SGSTTaxPercentage, JOBD.IGSTTaxAmount, JOBD.IGSTTaxPercentage, LMV.LedgerName AS VendorName, JOBD.ConsigneeID, " &
                   " JOBD.SalesEmployeeID, JOBD.ProductHSNID, JOBD.VendorID, JOBD.BookingNo, JOBD.OrderBookingId, JOBD.CategoryID, JOBD.ProductHSNID, JOBD.ProductCode,  " &
                   " JOBD.JobCoordinatorID, JOBD.JobName AS ProductName, JOBD.OrderQuantity, JOBD.UnitCost Rate, JOBD.RateType, JOBD.JobType, JOBD.JobReference, JOBD.JobPriority," &
                   " CONVERT(varchar, JOBD.ExpectedDeliveryDate, 106) AS ExpectedDeliveryDate, JOBD.NetAmount, JOBD.FinalCost, JOBD.DispatchRemark," &
@@ -1234,6 +1235,7 @@ Public Class WebServiceOthers
                   " LMSE.LedgerName AS SalesPerson, LMSM.LedgerName AS SalesManager, CPM.Name AS ClientCoordinator, UM.UserName AS CreatedBy, " &
                   " CONVERT(varchar, JOB.OrderBookingDate, 22) AS CreatedDate  FROM JobOrderBookingDetails AS JOBD " &
                   " INNER JOIN LedgerMaster AS LM ON LM.LedgerID = JOBD.LedgerID " &
+                  " Inner Join LedgerMaster AS LMV ON LMV.LedgerID = JOBD.VendorID " &
                   " INNER JOIN ProductQuotationContents AS PQC ON PQC.ProductEstimationContentID = JOBD.ProductEstimationContentID " &
                   " INNER JOIN JobOrderBooking AS JOB ON JOB.OrderBookingID = JOBD.OrderBookingID " &
                   " INNER JOIN ProductQuotation AS PQ ON JOB.ProductEstimateID = PQ.ProductEstimateID " &
@@ -1269,7 +1271,7 @@ Public Class WebServiceOthers
         Try
             Dim Dt As New DataTable
             CompanyId = Convert.ToString(HttpContext.Current.Session("CompanyId"))
-            Str = "Select distinct  Isnull(JOB.attachedfile,'') attachedfile,PQ.ProductEstimateID,PQ.EstimateNo,PQ.ProjectName,PQ.BookingID,EM.EnquiryNo,LM.LedgerID, JOB.OrderBookingId, JOB.SalesOrderNo,convert(varchar,JOB.OrderBookingDate,106) as OrderBookingDate,JOb.PONo,convert(varchar,JOB.POdate,106) as POdate,LM.LedgerName ClientName,LMSC.LedgerName as SalesCordinator,LMSE.LedgerName as SalesPerson,LMSM.LedgerName as SalesManager, CPM.Name as ClientCordinator,Um.UserName as CreatedBy from JobOrderBooking as JOB inner join JobOrderBookingDetails as JOBD on JOB.OrderBookingID = JOBD.OrderBookingID inner join ProductQuotation as PQ on JOB.ProductEstimateID = PQ.ProductEstimateID inner join EnquiryMain as EM on EM.EnquiryID = PQ.EnquiryID inner join LedgerMaster as LM on LM.LedgerID = JOB.LedgerID inner join LedgerMaster as LMSE on LMSE.LedgerID = JOB.SalesEmployeeID inner join LedgerMaster as LMSM on LMSM.LedgerID = JOB.SalesManagerId inner join LedgerMaster as LMSC on LMSC.LedgerID = JOB.SalesCordinatorId inner join ConcernpersonMaster as CPM on CPM.ConcernPersonID = JOB.ClientCordinatorID inner Join UserMaster as Um on UM.UserID = JOB.UserID where isnull(JOB.IsdeletedTransaction,0) <>1 and JOB.CompanyId =" & CompanyId & " Order By OrderBookingId desc"
+            Str = "Select distinct  Isnull(JOB.attachedfile,'') attachedfile,PQ.ProductEstimateID,PQ.EstimateNo,PQ.ProjectName,PQ.BookingID,EM.EnquiryNo,LM.LedgerID, JOB.OrderBookingId, JOB.SalesOrderNo, ,Convert(nvarchar(26), JOB.OrderBookingDate, 106) + ' ' + RIGHT(CONVERT(varchar, JOB.OrderBookingDate, 100), 7) as  OrderBookingDate,JOb.PONo,convert(varchar,JOB.POdate,106) as POdate,Replace(Convert(Nvarchar(30),JOB.POMailDate,106),'','-') As POMailDate,JOB.POMailAddress,LM.LedgerName ClientName,LMSC.LedgerName as SalesCordinator,LMSE.LedgerName as SalesPerson,LMSM.LedgerName as SalesManager, CPM.Name as ClientCordinator,Um.UserName as CreatedBy from JobOrderBooking as JOB inner join JobOrderBookingDetails as JOBD on JOB.OrderBookingID = JOBD.OrderBookingID inner join ProductQuotation as PQ on JOB.ProductEstimateID = PQ.ProductEstimateID inner join EnquiryMain as EM on EM.EnquiryID = PQ.EnquiryID inner join LedgerMaster as LM on LM.LedgerID = JOB.LedgerID inner join LedgerMaster as LMSE on LMSE.LedgerID = JOB.SalesEmployeeID inner join LedgerMaster as LMSM on LMSM.LedgerID = JOB.SalesManagerId inner join LedgerMaster as LMSC on LMSC.LedgerID = JOB.SalesCordinatorId inner join ConcernpersonMaster as CPM on CPM.ConcernPersonID = JOB.ClientCordinatorID inner Join UserMaster as Um on UM.UserID = JOB.UserID where isnull(JOB.IsdeletedTransaction,0) <>1 and JOB.CompanyId =" & CompanyId & " Order By OrderBookingId desc"
             db.FillDataTable(dataTable, Str)
             Str = "Select JOBD.ProductEstimationContentID,JOBD.OrderBookingDetailsID,PQC.ProductDescription,PQC.PackagingDetails,PQC.DescriptionOther, JOBD.ProductEstimationContentID, Isnull(PQC.ProcessIDStr,'') as ProcessIDStr ,PQC.ProductEstimateID, JOBD.CGSTTaxPercentage,JOBD.CGSTTaxAmount,JOBD.SGSTTaxAmount,JOBD.SGSTTaxPercentage,JOBD.IGSTTaxAmount,JOBD.IGSTTaxPercentage,LM.LedgerName as VendorName ,JOBD.ConsigneeID ,JOBD.SalesEmployeeID,JOBD.ProductHSNID,JOBD.VendorID,JOBD.BookingNo,JOBD.OrderBookingId, JOBD.CategoryID,JOBD.ProductHSNID,JOBD.ProductCode,JOBD.JobCoordinatorID, JOBD.JobName as ProductName,OrderQuantity,JOBD.Rate,JOBD.RateType,JobType,JobReference,JobPriority,convert(varchar,JOBD.ExpectedDeliveryDate,106) as ExpectedDeliveryDate,JOBD.NetAmount,JOBD.FinalCost,JOBD.DispatchRemark,JOBD.MiscAmount,JOBD.GSTAmount from JobOrderBookingDetails as JOBD inner join LedgerMaster as LM on LM.LedgerID = JOBD.VendorID INNER join ProductQuotationContents as PQC on PQC.ProductEstimationContentID = JOBD.ProductEstimationContentID where isnull(JOBD.IsDeletedTransaction,0) <> 1 and JOBD.CompanyID =" & CompanyId
             db.FillDataTable(Dt, Str)
@@ -1402,9 +1404,11 @@ Public Class WebServiceOthers
         Try
             CompanyId = Convert.ToString(HttpContext.Current.Session("CompanyID"))
             Dim con As String = ""
+            Dim conSO As String = ""
 
             If TabID <> "0" Then
                 con = " AND CreatedDate >= DATEADD(day, -" & TabID & " , GETDATE())"
+                conSO = " AND OrderBookingDate >= DATEADD(day, -" & TabID & " , GETDATE())"
             End If
 
             Str = "SELECT (SELECT COUNT(EnquiryNo) FROM EnquiryMain  WHERE ISNULL(IsDeletedTransaction, 0) <> 1 AND CompanyID = " & CompanyId & con & ") AS TotalEnquiry," &
@@ -1418,8 +1422,9 @@ Public Class WebServiceOthers
                         "(SELECT COUNT(EstimateNo) FROM ProductQuotation AS PQ INNER JOIN (SELECT Max(RevisionNo) AS RevisionNo, EnquiryID, CompanyID FROM ProductQuotation GROUP BY EnquiryID, CompanyID) AS Q ON Q.EnquiryID = PQ.EnquiryID AND Q.RevisionNo = PQ.RevisionNo AND Q.CompanyID = PQ.CompanyID WHERE ISNULL(IsDeletedTransaction, 0) <> 1 AND ISNULL(IsInternalApproved, 0) = 1 AND ISNULL(IsSendForPriceApproval, 0) = 1 AND ISNULL(IsCancelled, 0) = 0 AND ISNULL(IsApproved, 0) <> 1 AND PQ.CompanyID = " & CompanyId & con & ") AS PenndingForPA," &
                         "(SELECT COUNT(EstimateNo) FROM ProductQuotation AS PQ INNER JOIN (SELECT Max(RevisionNo) AS RevisionNo, EnquiryID, CompanyID FROM ProductQuotation GROUP BY EnquiryID, CompanyID) AS Q ON Q.EnquiryID = PQ.EnquiryID AND Q.RevisionNo = PQ.RevisionNo AND Q.CompanyID = PQ.CompanyID WHERE ISNULL(IsDeletedTransaction, 0) <> 1 AND ISNULL(IsRework, 0) = 1 AND PQ.CompanyID = " & CompanyId & con & " and ISNULL(IsApproved, 0) =0) AS Rework," &
                         "(SELECT COUNT(EstimateNo) FROM ProductQuotation AS PQ INNER JOIN (SELECT Max(RevisionNo) AS RevisionNo, EnquiryID, CompanyID FROM ProductQuotation GROUP BY EnquiryID, CompanyID) AS Q ON Q.EnquiryID = PQ.EnquiryID AND Q.RevisionNo = PQ.RevisionNo AND Q.CompanyID = PQ.CompanyID WHERE ISNULL(IsDeletedTransaction, 0) <> 1 AND PQ.CompanyID = " & CompanyId & con & " AND ISNULL(IsCancelled, 0) = 1) AS Rejected," &
-                        "(SELECT COUNT(EstimateNo) FROM ProductQuotation AS PQ INNER JOIN (SELECT Max(RevisionNo) AS RevisionNo, EnquiryID, CompanyID FROM ProductQuotation GROUP BY EnquiryID, CompanyID)  AS Q ON Q.EnquiryID = PQ.EnquiryID And Q.RevisionNo = PQ.RevisionNo And Q.CompanyID = PQ.CompanyID WHERE ISNULL(IsDeletedTransaction, 0) <> 1 And PQ.CompanyID = 1 And  ISNULL(IsApproved, 0) = 1 AND PQ.CompanyID = " & CompanyId & con & ") As CostApproved;"
-
+                        "(SELECT COUNT(EstimateNo) FROM ProductQuotation AS PQ INNER JOIN (SELECT Max(RevisionNo) AS RevisionNo, EnquiryID, CompanyID FROM ProductQuotation GROUP BY EnquiryID, CompanyID)  AS Q ON Q.EnquiryID = PQ.EnquiryID And Q.RevisionNo = PQ.RevisionNo And Q.CompanyID = PQ.CompanyID WHERE ISNULL(IsDeletedTransaction, 0) <> 1  And  ISNULL(IsApproved, 0) = 1 AND PQ.CompanyID = " & CompanyId & con & ") As CostApproved," &
+                        "(SELECT COUNT(SalesOrderNo) AS Expr1 FROM JobOrderBooking WHERE (ISNULL(IsDeletedTransaction, 0) <> 1) AND (CompanyID = " & CompanyId & conSO & ") ) AS SalesOrder," &
+                        "(SELECT COUNT(JobBookingNo) AS Expr1 FROM JobBookingJobCard WHERE (ISNULL(IsDeletedTransaction, 0) <> 1) AND (CompanyID = " & CompanyId & con & ") ) AS JobCard"
             db.FillDataTable(dataTable, Str)
             data.Message = db.ConvertDataTableTojSonString(dataTable)
             Return js.Serialize(data.Message)
@@ -1428,6 +1433,75 @@ Public Class WebServiceOthers
         End Try
     End Function
 
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function LoadPapers() As String
+        Try
+            CompanyId = Convert.ToString(HttpContext.Current.Session("CompanyId"))
+            Dim Dt As New DataTable
+
+            Str = "Select ItemId,ItemName,PurchaseUnit,PurchaseRate from ItemMaster where  ItemGroupID =1 and isnull(IsDeletedTransaction,0) <> 1 and CompanyID=" & CompanyId
+            db.FillDataTable(Dt, Str)
+            data.Message = db.ConvertDataTableTojSonString(Dt)
+            js.MaxJsonLength = 2147483647
+            Return js.Serialize(data.Message)
+        Catch ex As Exception
+            Return ex.Message
+        End Try
+    End Function
+
+    'Public Function SaveBulkRate(ByVal datas As Object) As String
+    '    Try
+    '        CompanyId = Convert.ToString(HttpContext.Current.Session("CompanyId"))
+    '        Dim Dt As New DataTable
+    '        Dim key As String
+    '        db.ConvertObjectToDatatable(datas, Dt)
+    '        Using updateTransaction As New Transactions.TransactionScope
+    '            Str = ""
+    '            For i = 0 To Dt.Rows.Count - 1
+    '                Str += "Update Itemmaster set  PurchaseRate='" & Dt.Rows(i)("PurchaseRate") & "' where ItemID=" & Dt.Rows(i)("ItemId") & ";"
+    '            Next
+    '            key = db.ExecuteNonSQLQuery(Str)
+    '            updateTransaction.Complete()
+    '        End Using
+    '        Return key
+    '    Catch ex As Exception
+    '        Return ex.Message
+    '    End Try
+    'End Function
+    <WebMethod(EnableSession:=True)>
+    <ScriptMethod(ResponseFormat:=ResponseFormat.Json)>
+    Public Function SaveBulkRate(ByVal datas As Object) As String
+        Try
+            Dim companyId As String = Convert.ToString(HttpContext.Current.Session("CompanyId"))
+            Dim key As String = ""
+            Dim dt As New DataTable
+            db.ConvertObjectToDatatable(datas, dt)
+
+            Dim queryBuilder As New StringBuilder()
+
+            For i As Integer = 0 To dt.Rows.Count - 1
+                Dim purchaseRate As Decimal = Convert.ToDecimal(dt.Rows(i)("PurchaseRate"))
+                Dim itemId As Integer = Convert.ToInt32(dt.Rows(i)("ItemId"))
+
+                ' Use parameterized queries to prevent SQL injection
+                queryBuilder.AppendLine("UPDATE Itemmaster SET PurchaseRate = '" & purchaseRate & "' WHERE ItemID = " & itemId & ";")
+
+            Next
+
+            Using updateTransaction As New Transactions.TransactionScope
+                ' Execute the parameterized query
+                key = db.ExecuteNonSQLQuery(queryBuilder.ToString())
+
+                ' Commit the transaction
+                updateTransaction.Complete()
+            End Using
+
+            Return key
+        Catch ex As Exception
+            Return "Error: " & ex.Message
+        End Try
+    End Function
 
     Public Class HelloWorldData
         Public Message As [String]
